@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 /**
  * Определяет экраны приложения для навигации
  */
+@Suppress("DEPRECATION")
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Events : Screen("events", "События", Icons.Filled.List)
 

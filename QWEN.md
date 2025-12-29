@@ -17,7 +17,6 @@
 - **Room**: Для локальных операций с базой данных
 - **DataStore**: Для простого хранения данных
 - **Coroutines**: Для асинхронных операций
-- **Hilt**: Для внедрения зависимостей
 - **JUnit 5**: Для модульного тестирования
 - **MockK**: Для мокирования в тестах
 - **Espresso**: Для UI тестирования
@@ -30,11 +29,11 @@
 ### Обновленная информация о проекте
 
 - **AGP (Android Gradle Plugin)**: 8.13.2
-- **Kotlin**: 2.1.20
+- **Kotlin**: 2.0.21
 - **Compile SDK**: 35
 - **Target SDK**: 35
 - **Min SDK**: 26
-- **KSP (Kotlin Symbol Processing)**: 2.1.20-1.0.28
+- **KSP (Kotlin Symbol Processing)**: 2.0.21-1.0.25
 
 ## Architecture
 

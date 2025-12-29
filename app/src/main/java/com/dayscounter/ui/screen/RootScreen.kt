@@ -133,14 +133,17 @@ private fun eventsScreenContent() {
     // Заглушка для экрана событий
     Log.d("RootScreen", "Экран событий не реализован")
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize(),
         color = MaterialTheme.colorScheme.surface,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Экран событий не реализован",
@@ -154,14 +157,17 @@ private fun moreScreenContent() {
     // Заглушка для экрана "Ещё"
     Log.d("RootScreen", "Экран 'Ещё' не реализован")
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize(),
         color = MaterialTheme.colorScheme.surface,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Экран 'Ещё' не реализован",
