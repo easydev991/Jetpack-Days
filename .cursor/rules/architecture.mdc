@@ -1,0 +1,35 @@
+---
+alwaysApply: true
+---
+
+# Архитектура
+
+## MVVM
+
+- **Model**: Data layer (Room, repositories)
+- **View**: Compose UI
+- **ViewModel**: UI state management
+
+## Clean Architecture
+
+```
+Presentation (UI, ViewModel)
+├── Domain (Use Cases, entities)
+└── Data (Repositories, только локальные источники)
+```
+
+**ВАЖНО:** Нет сетевых источников данных.
+
+## Слои
+
+### Data
+- Room: сущности, DAO, миграции, индексы
+- Repository: абстракция источников, только локальные данные
+
+### Domain
+- Use Cases: бизнес-логика, один use case - одна ответственность
+- Entities: data классы, неизменяемые
+
+### Presentation
+- ViewModel: состояние UI, `viewModelScope` для корутин
+- UI State: data классы, sealed классы для состояний (Loading/Success/Error)

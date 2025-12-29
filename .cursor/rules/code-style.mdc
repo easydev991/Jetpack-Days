@@ -1,0 +1,63 @@
+---
+alwaysApply: true
+---
+
+# Стиль кода
+
+## Kotlin
+
+- Data классы для моделей
+- Без `!!`, безопасное разворачивание опционалов
+- Sealed классы для состояний/результатов
+- Extension functions для читаемости
+
+## Compose
+
+- `State`/`MutableState` для UI состояния
+- Однонаправленный поток данных
+- `ViewModel` для состояния UI
+- `CompositionLocal` только для темы/глобальной конфигурации
+
+```kotlin
+@Preview
+@Composable
+fun ComponentPreview() {
+    MyAppTheme {
+        Component()
+    }
+}
+```
+
+## Обработка ошибок
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+```
+
+## Навигация
+
+```kotlin
+sealed class Screen(val route: String) {
+    object Main : Screen("main")
+    object ItemDetails : Screen("item_details/{itemId}") {
+        fun createRoute(itemId: Long) = "item_details/$itemId"
+    }
+}
+```
+
+## Именование
+
+- Классы: `PascalCase`
+- Функции/переменные: `camelCase`
+- Константы: `UPPER_SNAKE_CASE`
+- Пакеты: `lowercase.with.dots`
+
+## Комментарии
+
+- KDoc для публичных API
+- Объяснять "почему", не "что"
+- Логи на русском

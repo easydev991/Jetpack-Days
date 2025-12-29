@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+
+# Структура проекта
+
+```
+app/src/main/java/com/dayscounter/
+├── data/
+│   ├── database/      # Room entities, DAO, DB
+│   ├── repository/    # Repository implementations
+│   └── local/         # Local data sources
+├── domain/
+│   ├── model/         # Domain entities
+│   ├── repository/    # Repository interfaces
+│   └── usecase/       # Use cases
+├── presentation/
+│   ├── ui/            # Compose screens
+│   ├── theme/         # App theme
+│   ├── navigation/    # Navigation routes
+│   └── viewmodel/     # ViewModels
+└── MainActivity.kt
+```
+
+## Правила
+
+- Экран → папка в `presentation/ui/screen/`
+- ViewModel → рядом с экраном или в `presentation/viewmodel/`
+- Тесты → `test/` (unit) и `androidTest/` (integration/UI)
+- Структура тестов зеркалит структуру кода

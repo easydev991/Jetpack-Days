@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+---
+
+# Правила TDD (Test-Driven Development)
+
+## Порядок разработки
+
+**КРИТИЧЕСКИ ВАЖНО:** Строго соблюдать порядок:
+
+1. Тесты → 2. Логика → 3. UI
+
+1. Писать модульные тесты для бизнес-логики перед реализацией
+2. Реализовывать функциональность слоя домена и данных перед UI
+3. Проверять бизнес-логику тестами перед разработкой UI
+4. Создавать Compose UI только после тестирования логики
+
+## Пирамида тестирования
+
+- Модульные тесты (70%)
+- Интеграционные тесты (20%)
+- UI тесты (10%)
+
+## Именование тестов
+
+```kotlin
+@Test
+fun `functionName_whenCondition_thenExpectedResult`() {
+    // Given
+    // When
+    // Then
+}
+```
+
+## Пример
+
+```kotlin
+class DaysCalculatorTest {
+    @Test
+    fun `calculateDaysDifference_whenSameDay_thenReturnsZero`() {
+        // Given
+        val date = LocalDate.now()
+
+        // When
+        val result = DaysCalculator.calculateDaysDifference(date, date)
+
+        // Then
+        assertEquals(0, result)
+    }
+}
+```
+
+## Цикл TDD
+
+1. **Red**: Написать падающий тест
+2. **Green**: Написать минимальный код для прохождения теста
+3. **Refactor**: Улучшить код, сохраняя тесты зелеными
+
+## Принципы
+
+- Тесты пишутся первыми
+- Один тест - одна проверка
+- Тесты независимы друг от друга
+- Тесты быстрые и читаемые

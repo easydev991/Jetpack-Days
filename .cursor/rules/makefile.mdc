@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+# Makefile команды
+
+- `make build` - сборка
+- `make clean` - очистка кэша
+- `make test` - unit-тесты
+- `make lint` - ktlint + detekt
+- `make format` - форматирование
+- `make check` - сборка + тесты + линтер
+- `make install` - установка на устройство
+- `make all` - все проверки + установка
