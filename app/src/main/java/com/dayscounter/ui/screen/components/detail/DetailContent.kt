@@ -1,7 +1,6 @@
-package com.dayscounter.ui.screen.components
+package com.dayscounter.ui.screen.components.detail
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,18 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,66 +29,6 @@ import com.dayscounter.viewmodel.DetailScreenState
 import java.time.LocalDate
 
 /**
- * TopAppBar для экрана деталей.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun detailTopAppBar(
-    uiState: DetailScreenState,
-    onBackClick: () -> Unit,
-    onEditClick: (Long) -> Unit,
-    itemId: Long,
-) {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.details),
-                style = MaterialTheme.typography.titleLarge,
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.close),
-                )
-            }
-        },
-        actions = {
-            if (uiState is DetailScreenState.Success) {
-                DetailActionButtons(onEditClick = onEditClick, itemId = itemId)
-            }
-        },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-    )
-}
-
-/**
- * Кнопки действий в TopAppBar.
- */
-@Composable
-internal fun DetailActionButtons(
-    onEditClick: (Long) -> Unit,
-    itemId: Long,
-) {
-    IconButton(onClick = { onEditClick(itemId) }) {
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = stringResource(R.string.edit),
-        )
-    }
-    IconButton(onClick = { }) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = stringResource(R.string.delete),
-        )
-    }
-}
-
-/**
  * Контент по состоянию.
  */
 @Composable
@@ -111,7 +41,7 @@ fun detailContentByState(
             loadingContent(modifier = modifier)
         }
         is DetailScreenState.Success -> {
-            DetailContentInner(
+            detailContentInner(
                 item = state.item,
                 modifier = modifier,
             )
@@ -132,7 +62,7 @@ fun detailContentByState(
  * Внутренний компонент контента деталей.
  */
 @Composable
-internal fun DetailContentInner(
+internal fun detailContentInner(
     item: com.dayscounter.domain.model.Item,
     modifier: Modifier = Modifier,
 ) {
@@ -161,7 +91,7 @@ internal fun DetailContentInner(
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
 
         // Дата события
-        DateSection(item.timestamp, formatter)
+        dateSection(item.timestamp, formatter)
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_massive)))
 
@@ -211,7 +141,7 @@ fun titleSection(title: String) {
  * Секция с датой.
  */
 @Composable
-internal fun DateSection(
+internal fun dateSection(
     timestamp: Long,
     formatter: java.time.format.DateTimeFormatter,
 ) {
@@ -340,86 +270,3 @@ fun displayOptionInfoSection(displayOption: com.dayscounter.domain.model.Display
         }
     }
 }
-
-/**
- * Контент при загрузке.
- */
-@Composable
-internal fun loadingContent(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Загрузка...",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-/**
- * Контент при ошибке.
- */
-@Composable
-internal fun errorContent(
-    message: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-/**
- * Контент после удаления.
- */
-@Composable
-internal fun deletedContent(modifier: Modifier = Modifier) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = "Событие удалено",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
-
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.primary,
-            onClick = modifier,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(dimensionResource(R.dimen.spacing_extra_large)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Назад",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-        }
-    }
-}
-

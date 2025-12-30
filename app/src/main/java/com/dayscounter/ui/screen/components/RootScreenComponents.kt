@@ -2,7 +2,8 @@ package com.dayscounter.ui.screen.components
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +12,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -43,12 +45,12 @@ internal fun navigationBarContent(
             NavigationBarItem(
                 icon = {
                     Icon(
-                        imageVector = screen.icon,
-                        contentDescription = stringResource(id = screen.titleResId),
+                        imageVector = screen.icon!!,
+                        contentDescription = stringResource(id = screen.titleResId!!),
                     )
                 },
                 label = {
-                    Text(text = stringResource(id = screen.titleResId))
+                    Text(text = stringResource(id = screen.titleResId!!))
                 },
                 selected = currentTab == screen,
                 onClick = {
@@ -75,102 +77,61 @@ internal fun navigationBarContent(
  * NavHost с маршрутами.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 internal fun navHostContent(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Events.route,
-        modifier =
-            Modifier
-                .weight(1f),
+        startDestination = Screen.Events.route
     ) {
-        EventsRoute(navController = navController)
-        MoreRoute()
-        ItemDetailRoute(navController = navController)
-        CreateItemRoute(navController = navController)
-        EditItemRoute(navController = navController)
-    }
-}
-
-/**
- * Маршрут для экрана событий.
- */
-@Composable
-internal fun eventsRoute(navController: NavHostController) {
-    composable(Screen.Events.route) {
-        eventsScreenContent(navController)
-    }
-}
-
-/**
- * Маршрут для экрана настроек.
- */
-@Composable
-internal fun moreRoute() {
-    composable(Screen.More.route) {
-        moreScreenContent()
-    }
-}
-
-/**
- * Маршрут для экрана деталей.
- */
-@Composable
-internal fun itemDetailRoute(navController: NavHostController) {
-    composable(
-        route = Screen.ItemDetail.route,
-        arguments =
-            listOf(
-                navArgument("itemId") {
-                    type = NavType.LongType
+        composable(Screen.Events.route) {
+            eventsScreenContent(navController)
+        }
+        composable(Screen.More.route) {
+            moreScreenContent()
+        }
+        composable(
+            route = Screen.ItemDetail.route,
+            arguments =
+                listOf(
+                    navArgument("itemId") {
+                        type = NavType.LongType
+                    },
+                ),
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+            com.dayscounter.ui.screen.detailScreen(
+                itemId = itemId,
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { id ->
+                    navController.navigate(Screen.EditItem.createRoute(id))
                 },
-            ),
-    ) { backStackEntry ->
-        val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-        com.dayscounter.ui.screen.detailScreen(
-            itemId = itemId,
-            onBackClick = { navController.popBackStack() },
-            onEditClick = { id ->
-                navController.navigate(Screen.EditItem.createRoute(id))
-            },
-        )
+            )
+        }
+        composable(Screen.CreateItem.route) {
+            com.dayscounter.ui.screen.createEditScreen(
+                itemId = null,
+                onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Screen.EditItem.route,
+            arguments =
+                listOf(
+                    navArgument("itemId") {
+                        type = NavType.LongType
+                    },
+                ),
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+            com.dayscounter.ui.screen.createEditScreen(
+                itemId = itemId,
+                onBackClick = { navController.popBackStack() },
+            )
+        }
     }
 }
 
-/**
- * Маршрут для создания нового элемента.
- */
-@Composable
-internal fun createItemRoute(navController: NavHostController) {
-    composable(Screen.CreateItem.route) {
-        com.dayscounter.ui.screen.createEditScreen(
-            itemId = null,
-            onBackClick = { navController.popBackStack() },
-        )
-    }
-}
-
-/**
- * Маршрут для редактирования элемента.
- */
-@Composable
-internal fun editItemRoute(navController: NavHostController) {
-    composable(
-        route = Screen.EditItem.route,
-        arguments =
-            listOf(
-                navArgument("itemId") {
-                    type = NavType.LongType
-                },
-            ),
-    ) { backStackEntry ->
-        val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-        com.dayscounter.ui.screen.createEditScreen(
-            itemId = itemId,
-            onBackClick = { navController.popBackStack() },
-        )
-    }
-}
 
 /**
  * Контент для экрана событий.
@@ -239,4 +200,3 @@ internal fun updateTabBasedOnRoute(
         }
     }
 }
-

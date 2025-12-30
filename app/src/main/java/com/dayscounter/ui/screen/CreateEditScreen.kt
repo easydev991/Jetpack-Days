@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screen
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -8,13 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.fillMaxSize
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dayscounter.ui.screen.components.createEditFormContent
-import com.dayscounter.ui.screen.components.createEditTopAppBar
-import com.dayscounter.ui.screen.components.datePickerDialogSection
-import com.dayscounter.ui.screen.components.rememberCreateEditUiStates
-import com.dayscounter.viewmodel.CreateEditScreenState
+import com.dayscounter.ui.screen.components.createedit.CreateEditFormParams
+import com.dayscounter.ui.screen.components.createedit.createEditFormContent
+import com.dayscounter.ui.screen.components.createedit.createEditTopAppBar
+import com.dayscounter.ui.screen.components.createedit.datePickerDialogSection
+import com.dayscounter.ui.screen.components.createedit.loadItemData
+import com.dayscounter.ui.screen.components.createedit.rememberCreateEditUiStates
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 
 /**
@@ -59,7 +60,7 @@ private fun createEditScreenContent(
     val showDatePicker = remember { mutableStateOf(false) }
 
     // Загружаем данные при редактировании
-    com.dayscounter.ui.screen.components.loadItemData(itemId, uiState, uiStates)
+    loadItemData(itemId, uiState, uiStates)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -68,12 +69,15 @@ private fun createEditScreenContent(
         },
     ) { paddingValues ->
         createEditFormContent(
-            itemId = itemId,
-            paddingValues = paddingValues,
-            uiStates = uiStates,
-            showDatePicker = showDatePicker,
-            viewModel = viewModel,
-            onBackClick = onBackClick,
+            params =
+                CreateEditFormParams(
+                    itemId = itemId,
+                    paddingValues = paddingValues,
+                    uiStates = uiStates,
+                    showDatePicker = showDatePicker,
+                    viewModel = viewModel,
+                    onBackClick = onBackClick,
+                ),
         )
     }
 

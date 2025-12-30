@@ -1,0 +1,220 @@
+package com.dayscounter.ui.screen.components.createedit
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import com.dayscounter.R
+import com.dayscounter.ui.screen.CreateEditUiState as ScreenCreateEditUiState
+
+/**
+ * TopAppBar для экрана создания/редактирования.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun createEditTopAppBar(
+    itemId: Long?,
+    onBackClick: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text =
+                    if (itemId != null) {
+                        stringResource(R.string.new_item)
+                    } else {
+                        stringResource(R.string.edit_item)
+                    },
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cancel),
+                )
+            }
+        },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+    )
+}
+
+/**
+ * Контент формы создания/редактирования.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun createEditFormContent(params: CreateEditFormParams) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(params.paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.spacing_extra_large)),
+    ) {
+        titleSection(title = params.uiStates.title)
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        detailsSection(details = params.uiStates.details)
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        dateSection(selectedDate = params.uiStates.selectedDate, showDatePicker = params.showDatePicker)
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+
+        // Предпросмотр дней
+        if (params.uiStates.selectedDate.value != null) {
+            previewDaysContentInner(selectedDate = params.uiStates.selectedDate.value!!)
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        }
+
+        // Выбор цвета
+        colorSelector(
+            selectedColor = params.uiStates.selectedColor,
+        )
+
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+
+        // Опция отображения
+        displayOptionSelector(selectedDisplayOption = params.uiStates.selectedDisplayOption)
+
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
+
+        // Кнопки
+        buttonsSection(
+            uiStates = params.uiStates,
+            itemId = params.itemId,
+            viewModel = params.viewModel,
+            onBackClick = params.onBackClick,
+        )
+
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    }
+}
+
+/**
+ * Секция с заголовком.
+ */
+@Composable
+internal fun titleSection(title: MutableState<String>) {
+    OutlinedTextField(
+        value = title.value,
+        onValueChange = { title.value = it },
+        label = { Text(stringResource(R.string.title)) },
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/**
+ * Секция с деталями.
+ */
+@Composable
+internal fun detailsSection(details: MutableState<String>) {
+    OutlinedTextField(
+        value = details.value,
+        onValueChange = { details.value = it },
+        label = { Text(stringResource(R.string.details)) },
+        modifier = Modifier.fillMaxWidth(),
+        minLines = 3,
+    )
+}
+
+/**
+ * Секция с датой.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun dateSection(
+    selectedDate: MutableState<java.time.LocalDate?>,
+    showDatePicker: MutableState<Boolean>,
+) {
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+    // Выбор даты
+    OutlinedTextField(
+        value =
+            selectedDate.value?.format(formatter) ?: "",
+        onValueChange = { },
+        label = { Text(stringResource(R.string.date)) },
+        readOnly = true,
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            IconButton(onClick = { showDatePicker.value = true }) {
+                Icon(
+                    imageVector = Icons.Filled.DateRange,
+                    contentDescription = "Выбрать дату",
+                )
+            }
+        },
+    )
+}
+
+/**
+ * Создает состояния UI.
+ */
+@Composable
+internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState {
+    return ScreenCreateEditUiState(
+        title = rememberSaveable { mutableStateOf("") },
+        details = rememberSaveable { mutableStateOf("") },
+        selectedDate = remember { mutableStateOf<java.time.LocalDate?>(null) },
+        showDatePicker = remember { mutableStateOf(false) },
+        selectedColor = remember { mutableStateOf<Color?>(null) },
+        selectedDisplayOption =
+            remember {
+                mutableStateOf(
+                    com.dayscounter.domain.model.DisplayOption.DAY,
+                )
+            },
+    )
+}
+
+/**
+ * Загружает данные при редактировании.
+ */
+fun loadItemData(
+    itemId: Long?,
+    uiState: com.dayscounter.viewmodel.CreateEditScreenState,
+    uiStates: ScreenCreateEditUiState,
+) {
+    val isEditingExistingItem = itemId != null
+    val isStateSuccess = uiState is com.dayscounter.viewmodel.CreateEditScreenState.Success
+    val isTitleEmpty = uiStates.title.value.isEmpty()
+
+    if (isEditingExistingItem && isStateSuccess && isTitleEmpty) {
+        val item = (uiState as com.dayscounter.viewmodel.CreateEditScreenState.Success).item
+        uiStates.title.value = item.title
+        uiStates.details.value = item.details
+        uiStates.selectedDate.value =
+            java.time.Instant.ofEpochMilli(item.timestamp)
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDate()
+        uiStates.selectedColor.value = item.colorTag?.let { Color(it) }
+        uiStates.selectedDisplayOption.value = item.displayOption
+    }
+}

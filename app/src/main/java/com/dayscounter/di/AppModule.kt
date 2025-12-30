@@ -1,10 +1,8 @@
 package com.dayscounter.di
 
 import com.dayscounter.data.database.DaysDatabase
-import com.dayscounter.data.formatter.ResourceProviderImpl
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
-import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.MainScreenViewModel
 
@@ -44,8 +42,13 @@ object AppModule {
      */
     fun createDetailScreenViewModelFactory(
         repository: ItemRepository,
-    ): (androidx.lifecycle.SavedStateHandle) ->
-        DetailScreenViewModel(repository, savedStateHandle)
+    ): (
+        androidx.lifecycle.SavedStateHandle,
+    ) -> DetailScreenViewModel {
+        return { savedStateHandle ->
+            DetailScreenViewModel(repository, savedStateHandle)
+        }
+    }
 
     /**
      * Создает ViewModel для экрана создания/редактирования.
@@ -55,21 +58,21 @@ object AppModule {
      */
     fun createCreateEditScreenViewModelFactory(
         repository: ItemRepository,
-    ): (androidx.lifecycle.SavedStateHandle) -> CreateEditScreenViewModel {
+    ): (androidx.lifecycle.SavedStateHandle) -> com.dayscounter.viewmodel.CreateEditScreenViewModel {
         return { savedStateHandle ->
-            CreateEditScreenViewModel(repository, savedStateHandle)
+            com.dayscounter.viewmodel.CreateEditScreenViewModel(
+                repository,
+                savedStateHandle,
+            )
         }
     }
 
     /**
-     * Создает FormatterModule для форматирования дней.
+     * Возвращает FormatterModule для форматирования дней.
      *
-     * @param context Контекст приложения
-     * @return Экземпляр FormatterModule
+     * @return Объект FormatterModule
      */
-    fun createFormatterModule(context: android.content.Context): FormatterModule {
-        return FormatterModule(
-            resourceProvider = ResourceProviderImpl(context),
-        )
+    fun getFormatterModule(): FormatterModule {
+        return FormatterModule
     }
 }

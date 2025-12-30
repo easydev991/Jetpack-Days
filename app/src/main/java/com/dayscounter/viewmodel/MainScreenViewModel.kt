@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -34,17 +35,6 @@ class MainScreenViewModel(
      * Список всех событий.
      * Обновляется автоматически при изменениях в базе данных.
      */
-    companion object {
-        private const val SUBSCRIPTION_TIMEOUT_MS = 5000L
-    }
-
-    val items: StateFlow<List<Item>> =
-        repository.getAllItems()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-                initialValue = emptyList(),
-            )
 
     /**
      * Выбранная опция отображения дней по умолчанию.
@@ -57,6 +47,14 @@ class MainScreenViewModel(
      */
     init {
         loadItems()
+        // Observe items and update UI state accordingly
+        viewModelScope.launch {
+            repository.getAllItems().collect { items ->
+                if (_uiState.value !is MainScreenState.Error) {
+                    _uiState.value = MainScreenState.Success(items)
+                }
+            }
+        }
     }
 
     /**
@@ -66,9 +64,8 @@ class MainScreenViewModel(
         viewModelScope.launch {
             try {
                 _uiState.value = MainScreenState.Loading
-                // Данные загружаются автоматически через items StateFlow
-                // Просто переключаем состояние на Success
-                _uiState.value = MainScreenState.Success
+                val loadedItems = repository.getAllItems().first()
+                _uiState.value = MainScreenState.Success(loadedItems)
             } catch (e: ItemException.LoadFailed) {
                 val message = "Ошибка загрузки списка событий: ${e.message}"
                 android.util.Log.e("MainScreenViewModel", message, e)
@@ -128,7 +125,10 @@ class MainScreenViewModel(
      */
     fun clearError() {
         if (_uiState.value is MainScreenState.Error) {
-            _uiState.value = MainScreenState.Success
+            viewModelScope.launch {
+                val loadedItems = repository.getAllItems().first()
+                _uiState.value = MainScreenState.Success(loadedItems)
+            }
         }
     }
 
@@ -148,7 +148,7 @@ sealed class MainScreenState {
     data object Loading : MainScreenState()
 
     /** Успешная загрузка */
-    data object Success : MainScreenState()
+    data class Success(val items: List<com.dayscounter.domain.model.Item>) : MainScreenState()
 
     /** Ошибка загрузки */
     data class Error(val message: String) : MainScreenState()

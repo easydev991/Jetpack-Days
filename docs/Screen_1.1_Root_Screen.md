@@ -66,7 +66,7 @@ sealed class Screen(
         icon = Icons.Filled.List,
         titleResId = R.string.events,
     )
-    
+
     object More : Screen(
         route = "more",
         icon = Icons.Filled.MoreVert,

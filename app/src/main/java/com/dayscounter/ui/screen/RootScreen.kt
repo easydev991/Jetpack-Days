@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.dayscounter.navigation.Screen
-import com.dayscounter.ui.screen.components.eventsRoute
-import com.dayscounter.ui.screen.components.itemDetailRoute
-import com.dayscounter.ui.screen.components.moreRoute
-import com.dayscounter.ui.screen.components.navBarContent
+import com.dayscounter.ui.screen.components.navigationBarContent
 import com.dayscounter.ui.screen.components.navHostContent
 import com.dayscounter.ui.screen.components.updateTabBasedOnRoute
 import com.dayscounter.viewmodel.RootScreenViewModel
@@ -66,7 +64,7 @@ private fun rootScreenContent(
         )
 
         // Навигационная панель
-        navBarContent(
+        navigationBarContent(
             items = items,
             viewModel = viewModel,
             navController = navController,

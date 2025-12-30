@@ -63,7 +63,7 @@ fun listItemView(
                     Modifier
                         .size(12.dp)
                         .clip(CircleShape)
-                        .background(Color(item.colorTag)),
+                        .background(color = Color(item.colorTag)),
             )
             Spacer(modifier = Modifier.width(12.dp))
         }
@@ -103,7 +103,7 @@ fun listItemViewPreview() {
                     title = "День рождения",
                     details = "Праздничный день",
                     timestamp = System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L),
-                    colorTag = colorResource(R.color.color_primary_red),
+                    colorTag = R.color.color_primary_red,
                     displayOption = DisplayOption.DAY,
                 ),
             formattedDaysText = "5 дней",
@@ -141,7 +141,7 @@ fun listItemViewTodayPreview() {
                     title = "Сегодняшнее событие",
                     details = "Произошло сегодня",
                     timestamp = System.currentTimeMillis(),
-                    colorTag = colorResource(R.color.color_primary_teal),
+                    colorTag = R.color.color_primary_teal,
                     displayOption = DisplayOption.MONTH_DAY,
                 ),
             formattedDaysText = "Сегодня",
@@ -160,7 +160,7 @@ fun listItemViewLongTitlePreview() {
                     title = "Очень длинное название события, которое должно переноситься на новую строку",
                     details = "Детали события",
                     timestamp = System.currentTimeMillis() - (100 * 24 * 60 * 60 * 1000L),
-                    colorTag = colorResource(R.color.color_primary_blue),
+                    colorTag = R.color.color_primary_blue,
                     displayOption = DisplayOption.DAY,
                 ),
             formattedDaysText = "100 дней",
