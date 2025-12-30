@@ -7,6 +7,9 @@ import com.dayscounter.domain.model.DisplayOption
  * Конвертер для преобразования DisplayOption в строку и обратно для Room.
  */
 class DisplayOptionConverter {
+    companion object {
+        private const val TAG = "DisplayOptionConverter"
+    }
 
     /**
      * Преобразует DisplayOption в строку для хранения в базе данных.
@@ -30,8 +33,12 @@ class DisplayOptionConverter {
         return try {
             DisplayOption.valueOf(value)
         } catch (e: IllegalArgumentException) {
+            android.util.Log.w(
+                TAG,
+                "Неизвестное значение DisplayOption: '$value', используется DEFAULT",
+                e,
+            )
             DisplayOption.DEFAULT
         }
     }
 }
-

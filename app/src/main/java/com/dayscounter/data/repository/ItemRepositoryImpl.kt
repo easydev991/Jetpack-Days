@@ -14,9 +14,8 @@ import kotlinx.coroutines.flow.map
  * @property itemDao DAO для доступа к данным
  */
 class ItemRepositoryImpl(
-    private val itemDao: ItemDao
+    private val itemDao: ItemDao,
 ) : ItemRepository {
-
     override fun getAllItems(): Flow<List<Item>> {
         return itemDao.getAllItems()
             .map { entities -> entities.map { it.toDomain() } }
@@ -51,4 +50,3 @@ class ItemRepositoryImpl(
         return itemDao.getItemsCount()
     }
 }
-

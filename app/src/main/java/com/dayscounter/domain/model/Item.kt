@@ -16,19 +16,25 @@ data class Item(
     val details: String = "",
     val timestamp: Long,
     val colorTag: Int? = null,
-    val displayOption: DisplayOption = DisplayOption.DEFAULT
+    val displayOption: DisplayOption = DisplayOption.DEFAULT,
 ) {
     /**
      * Вычисляет и форматирует количество дней с момента события до текущей даты.
      *
-     * **Примечание**: Это заглушка. Полная реализация будет в Этапе 6 (Форматирование дней).
+     * **Примечание**: Этот метод устарел. Используйте расширение [makeDaysCount]
+     * из [ItemExtensions] с [GetFormattedDaysForItemUseCase].
      *
-     * @param currentDate Текущая дата в миллисекундах
-     * @return Отформатированная строка с количеством дней
+     * @param currentDate Текущая дата в миллисекундах (не используется)
+     * @return Отформатированная строка с количеством дней (заглушка)
+     * @deprecated Используйте Item.makeDaysCount(useCase, currentDate) вместо этого метода
      */
+    @Deprecated(
+        message = "Используйте Item.makeDaysCount(useCase, currentDate) вместо этого метода",
+        replaceWith = ReplaceWith("makeDaysCount(useCase, currentDate)"),
+    )
+    @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
     fun makeDaysCount(currentDate: Long): String {
-        // Заглушка, полная реализация в Этапе 6
+        // Заглушка для обратной совместимости
         return "0 дней"
     }
 }
-

@@ -24,7 +24,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.dayscounter.R
 import com.dayscounter.navigation.Screen
 import com.dayscounter.viewmodel.RootScreenViewModel
 

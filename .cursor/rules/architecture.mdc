@@ -20,6 +20,60 @@ Presentation (UI, ViewModel)
 
 **ВАЖНО:** Нет сетевых источников данных.
 
+---
+
+## Dependency Injection (DI)
+
+### Подход к DI
+
+**Ручной DI через factory методы** - проект не использует Hilt или другие DI-фреймворки.
+
+**Почему ручной DI:**
+- Проект небольшой, простой граф зависимостей
+- Factory методы в `FormatterModule` решают все задачи
+- Быстрее компиляция (нет KSP обработки аннотаций)
+- Меньше зависимостей (уменьшение размера APK)
+- Тесты работают без сложной настройки
+
+### Структура DI
+
+**DI модуль:** `app/src/main/java/com/dayscounter/di/FormatterModule.kt`
+
+Содержит factory методы для создания зависимостей:
+- `createResourceProvider(context: Context)`
+- `createDaysFormatter()`
+- `createCalculateDaysDifferenceUseCase()`
+- `createFormatDaysTextUseCase(daysFormatter: DaysFormatter)`
+- `createGetFormattedDaysForItemUseCase(...)`
+
+### Использование
+
+**В ViewModel:**
+```kotlin
+class MyViewModel : ViewModel() {
+    private val useCase = FormatterModule.createCalculateDaysDifferenceUseCase()
+    // ...
+}
+```
+
+**В тестах:**
+```kotlin
+@Before
+fun setUp() {
+    val useCase = FormatterModule.createCalculateDaysDifferenceUseCase()
+    viewModel = MyViewModel(useCase)
+}
+```
+
+### Когда стоит рассмотреть Hilt
+
+- Когда проект вырастет до 10+ ViewModel
+- Когда появятся сложные графы зависимостей
+- Когда потребуется интеграционное тестирование с DI
+- Когда команда разработчиков вырастет и нужна стандартизация
+
+Подробнее см. `docs/Hilt_Setup_Plan.md`
+
 ## Слои
 
 ### Data

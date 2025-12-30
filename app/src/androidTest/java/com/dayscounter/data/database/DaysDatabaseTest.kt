@@ -12,15 +12,15 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class DaysDatabaseTest {
-
     private lateinit var database: DaysDatabase
 
     @Before
     fun setup() {
-        database = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            DaysDatabase::class.java
-        ).allowMainThreadQueries().build()
+        database =
+            Room.inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                DaysDatabase::class.java,
+            ).allowMainThreadQueries().build()
     }
 
     @After
@@ -43,4 +43,3 @@ class DaysDatabaseTest {
         assertNotNull(dao)
     }
 }
-

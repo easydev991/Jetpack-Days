@@ -90,6 +90,10 @@ detekt {
     buildUponDefaultConfig = true
 }
 
+ktlint {
+    disabledRules.set(setOf("property-naming"))
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }

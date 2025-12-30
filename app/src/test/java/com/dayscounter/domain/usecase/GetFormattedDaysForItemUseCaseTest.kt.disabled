@@ -1,0 +1,260 @@
+package com.dayscounter.domain.usecase
+
+import com.dayscounter.domain.model.DaysDifference
+import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.TimePeriod
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.time.LocalDate
+import kotlin.test.assertEquals
+
+/**
+ * Unit-тесты для [GetFormattedDaysForItemUseCase].
+ *
+ * Проверяют корректность получения форматированного текста для Item.
+ */
+@ExtendWith(MockitoExtension::class)
+class GetFormattedDaysForItemUseCaseTest {
+    private lateinit var useCase: GetFormattedDaysForItemUseCase
+
+    @Mock
+    private lateinit var calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase
+
+    @Mock
+    private lateinit var formatDaysTextUseCase: FormatDaysTextUseCase
+
+    @BeforeEach
+    fun setUp() {
+        useCase =
+            GetFormattedDaysForItemUseCase(
+                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                formatDaysTextUseCase = formatDaysTextUseCase,
+            )
+    }
+
+    @Test
+    fun `invoke when item has DAY displayOption then uses item displayOption`() {
+        // Given
+        val item =
+            Item(
+                id = 1L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.DAY,
+            )
+        val timePeriod = TimePeriod(years = 0, months = 0, days = 5)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 5,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "5 дней"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item)
+
+        // Then
+        verify(calculateDaysDifferenceUseCase).calculate(item.timestamp, null)
+        verify(formatDaysTextUseCase).format(difference, DisplayOption.DAY)
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when item has MONTH_DAY displayOption then uses item displayOption`() {
+        // Given
+        val item =
+            Item(
+                id = 2L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.MONTH_DAY,
+            )
+        val timePeriod = TimePeriod(years = 0, months = 1, days = 5)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 35,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "1 мес. 5 дн."
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.MONTH_DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item)
+
+        // Then
+        verify(formatDaysTextUseCase).format(difference, DisplayOption.MONTH_DAY)
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when item has YEAR_MONTH_DAY displayOption then uses item displayOption`() {
+        // Given
+        val item =
+            Item(
+                id = 3L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.YEAR_MONTH_DAY,
+            )
+        val timePeriod = TimePeriod(years = 1, months = 0, days = 0)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 365,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "1 год"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.YEAR_MONTH_DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item)
+
+        // Then
+        verify(formatDaysTextUseCase).format(difference, DisplayOption.YEAR_MONTH_DAY)
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when item has DEFAULT displayOption then uses default option`() {
+        // Given
+        val item =
+            Item(
+                id = 4L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.DEFAULT,
+            )
+        val timePeriod = TimePeriod(years = 0, months = 0, days = 10)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 10,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "10 дней"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item, defaultDisplayOption = DisplayOption.DAY)
+
+        // Then
+        verify(formatDaysTextUseCase).format(difference, DisplayOption.DAY)
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when custom default option then uses custom option`() {
+        // Given
+        val item =
+            Item(
+                id = 5L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.DEFAULT,
+            )
+        val timePeriod = TimePeriod(years = 0, months = 1, days = 0)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 30,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "1 месяц"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.MONTH_DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item, defaultDisplayOption = DisplayOption.MONTH_DAY)
+
+        // Then
+        verify(formatDaysTextUseCase).format(difference, DisplayOption.MONTH_DAY)
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when Today then returns Today text`() {
+        // Given
+        val item =
+            Item(
+                id = 6L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.DAY,
+            )
+        val difference = DaysDifference.Today(item.timestamp)
+        val formattedText = "Сегодня"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, null))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, any()))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item)
+
+        // Then
+        assertEquals(formattedText, result)
+    }
+
+    @Test
+    fun `invoke when custom date provided then uses custom date`() {
+        // Given
+        val item =
+            Item(
+                id = 7L,
+                title = "Тестовое событие",
+                timestamp = 1704067200000L,
+                displayOption = DisplayOption.DAY,
+            )
+        val customDate = LocalDate.of(2024, 1, 10)
+        val timePeriod = TimePeriod(years = 0, months = 0, days = 9)
+        val difference =
+            DaysDifference.Calculated(
+                period = timePeriod,
+                totalDays = 9,
+                timestamp = item.timestamp,
+            )
+        val formattedText = "9 дней"
+
+        whenever(calculateDaysDifferenceUseCase.calculate(item.timestamp, customDate))
+            .thenReturn(difference)
+        whenever(formatDaysTextUseCase.format(difference, DisplayOption.DAY))
+            .thenReturn(formattedText)
+
+        // When
+        val result = useCase(item, currentDate = customDate)
+
+        // Then
+        verify(calculateDaysDifferenceUseCase).calculate(item.timestamp, customDate)
+        assertEquals(formattedText, result)
+    }
+}

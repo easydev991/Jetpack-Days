@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class DisplayOptionConverterTest {
-
     private val converter = DisplayOptionConverter()
 
     @Test
@@ -84,4 +83,3 @@ class DisplayOptionConverterTest {
         assertEquals(original, converted)
     }
 }
-

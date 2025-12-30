@@ -1,7 +1,7 @@
 package com.dayscounter.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dayscounter.R
@@ -16,7 +16,7 @@ sealed class Screen(
 ) {
     object Events : Screen(
         route = "events",
-        icon = Icons.Filled.List,
+        icon = Icons.AutoMirrored.Filled.List,
         titleResId = R.string.events,
     )
 

@@ -10,6 +10,12 @@ import androidx.compose.ui.Modifier
 import com.dayscounter.ui.screen.rootScreen
 import com.dayscounter.ui.theme.jetpackDaysTheme
 
+/**
+ * Главная Activity приложения.
+ *
+ * Проект использует ручной подход к внедрению зависимостей через factory методы.
+ * Hilt не используется, так как ручной DI полностью удовлетворяет потребности проекта.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

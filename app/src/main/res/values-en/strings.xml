@@ -84,28 +84,23 @@
     <string name="error">Error</string>
 
     <!-- Days formatting -->
-    <string name="days_abbreviated">дн.</string>
-    <string name="months_abbreviated">мес.</string>
-    <string name="years_abbreviated">г.</string>
+    <string name="days_abbreviated">days</string>
+    <string name="months_abbreviated">months</string>
+    <string name="years_abbreviated">years</string>
 
     <plurals name="days_count">
-        <item quantity="one">%d день</item>
-        <item quantity="few">%d дня</item>
-        <item quantity="many">%d дней</item>
-        <item quantity="other">%d дней</item>
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
     </plurals>
 
     <plurals name="months_count">
-        <item quantity="one">%d месяц</item>
-        <item quantity="few">%d месяца</item>
-        <item quantity="many">%d месяцев</item>
-        <item quantity="other">%d месяцев</item>
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
     </plurals>
 
     <plurals name="years_count">
-        <item quantity="one">%d год</item>
-        <item quantity="few">%d года</item>
-        <item quantity="many">%d лет</item>
-        <item quantity="other">%d лет</item>
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
     </plurals>
 </resources>
+

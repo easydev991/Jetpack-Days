@@ -1,0 +1,91 @@
+package com.dayscounter.domain.model
+
+import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+/**
+ * Тесты для [DaysDifference].
+ */
+class DaysDifferenceTest {
+    @Test
+    fun `Today корректно хранит timestamp`() {
+        // Given
+        val timestamp = System.currentTimeMillis()
+
+        // When
+        val difference = DaysDifference.Today(timestamp)
+
+        // Then
+        assertEquals(timestamp, difference.timestamp, "Timestamp должен совпадать")
+    }
+
+    @Test
+    fun `Calculated корректно хранит период`() {
+        // Given
+        val period = TimePeriod(years = 1, months = 2, days = 3)
+        val totalDays = 400
+        val timestamp = System.currentTimeMillis()
+
+        // When
+        val difference = DaysDifference.Calculated(period, totalDays, timestamp)
+
+        // Then
+        assertEquals(period, difference.period, "Период должен совпадать")
+        assertEquals(totalDays, difference.totalDays, "Общее количество дней должно совпадать")
+        assertEquals(timestamp, difference.timestamp, "Timestamp должен совпадать")
+    }
+
+    @Test
+    fun `DaysDifference поддерживает when выражение`() {
+        // Given
+        val todayDiff = DaysDifference.Today(System.currentTimeMillis())
+        val calculatedDiff = DaysDifference.Calculated(TimePeriod(), 100, System.currentTimeMillis())
+
+        // When
+        val todayResult =
+            when (todayDiff) {
+                is DaysDifference.Today -> "today"
+                is DaysDifference.Calculated -> "calculated"
+            }
+
+        val calculatedResult =
+            when (calculatedDiff) {
+                is DaysDifference.Today -> "today"
+                is DaysDifference.Calculated -> "calculated"
+            }
+
+        // Then
+        assertEquals("today", todayResult, "Today должен правильно определяться в when")
+        assertEquals("calculated", calculatedResult, "Calculated должен правильно определяться в when")
+    }
+
+    @Test
+    fun `Calculated с нулевым периодом сохраняется корректно`() {
+        // Given
+        val period = TimePeriod(years = 0, months = 0, days = 0)
+        val totalDays = 0
+        val timestamp = System.currentTimeMillis()
+
+        // When
+        val difference = DaysDifference.Calculated(period, totalDays, timestamp)
+
+        // Then
+        assertTrue(difference.period.isEmpty(), "Период должен быть пустым")
+        assertEquals(0, difference.totalDays, "Общее количество дней должно быть 0")
+    }
+
+    @Test
+    fun `Calculated с периодом из одних лет сохраняется корректно`() {
+        // Given
+        val period = TimePeriod(years = 5, months = 0, days = 0)
+
+        // When
+        val difference = DaysDifference.Calculated(period, 1826, System.currentTimeMillis())
+
+        // Then
+        assertEquals(5, difference.period.years, "Количество лет должно быть 5")
+        assertEquals(0, difference.period.months, "Количество месяцев должно быть 0")
+        assertEquals(0, difference.period.days, "Количество дней должно быть 0")
+    }
+}

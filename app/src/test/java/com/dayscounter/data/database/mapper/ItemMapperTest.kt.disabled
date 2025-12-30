@@ -8,18 +8,18 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class ItemMapperTest {
-
     @Test
     fun `toDomain_whenEntityWithAllFields_thenConvertsCorrectly`() {
         // Given
-        val entity = ItemEntity(
-            id = 1L,
-            title = "Тестовое событие",
-            details = "Описание",
-            timestamp = 1234567890000L,
-            colorTag = 0xFFFF0000.toInt(),
-            displayOption = DisplayOption.MONTH_DAY.name
-        )
+        val entity =
+            ItemEntity(
+                id = 1L,
+                title = "Тестовое событие",
+                details = "Описание",
+                timestamp = 1234567890000L,
+                colorTag = 0xFFFF0000.toInt(),
+                displayOption = DisplayOption.MONTH_DAY.name,
+            )
 
         // When
         val domain = entity.toDomain()
@@ -36,13 +36,14 @@ class ItemMapperTest {
     @Test
     fun `toDomain_whenEntityWithNullColorTag_thenConvertsCorrectly`() {
         // Given
-        val entity = ItemEntity(
-            id = 2L,
-            title = "Событие",
-            timestamp = 1234567890000L,
-            colorTag = null,
-            displayOption = DisplayOption.DAY.name
-        )
+        val entity =
+            ItemEntity(
+                id = 2L,
+                title = "Событие",
+                timestamp = 1234567890000L,
+                colorTag = null,
+                displayOption = DisplayOption.DAY.name,
+            )
 
         // When
         val domain = entity.toDomain()
@@ -57,10 +58,11 @@ class ItemMapperTest {
     @Test
     fun `toDomain_whenEntityWithDefaultValues_thenConvertsCorrectly`() {
         // Given
-        val entity = ItemEntity(
-            title = "Событие",
-            timestamp = 1234567890000L
-        )
+        val entity =
+            ItemEntity(
+                title = "Событие",
+                timestamp = 1234567890000L,
+            )
 
         // When
         val domain = entity.toDomain()
@@ -75,14 +77,15 @@ class ItemMapperTest {
     @Test
     fun `toEntity_whenDomainWithAllFields_thenConvertsCorrectly`() {
         // Given
-        val domain = Item(
-            id = 1L,
-            title = "Тестовое событие",
-            details = "Описание",
-            timestamp = 1234567890000L,
-            colorTag = 0xFFFF0000.toInt(),
-            displayOption = DisplayOption.MONTH_DAY
-        )
+        val domain =
+            Item(
+                id = 1L,
+                title = "Тестовое событие",
+                details = "Описание",
+                timestamp = 1234567890000L,
+                colorTag = 0xFFFF0000.toInt(),
+                displayOption = DisplayOption.MONTH_DAY,
+            )
 
         // When
         val entity = domain.toEntity()
@@ -99,13 +102,14 @@ class ItemMapperTest {
     @Test
     fun `toEntity_whenDomainWithNullColorTag_thenConvertsCorrectly`() {
         // Given
-        val domain = Item(
-            id = 2L,
-            title = "Событие",
-            timestamp = 1234567890000L,
-            colorTag = null,
-            displayOption = DisplayOption.DAY
-        )
+        val domain =
+            Item(
+                id = 2L,
+                title = "Событие",
+                timestamp = 1234567890000L,
+                colorTag = null,
+                displayOption = DisplayOption.DAY,
+            )
 
         // When
         val entity = domain.toEntity()
@@ -120,10 +124,11 @@ class ItemMapperTest {
     @Test
     fun `toEntity_whenDomainWithDefaultValues_thenConvertsCorrectly`() {
         // Given
-        val domain = Item(
-            title = "Событие",
-            timestamp = 1234567890000L
-        )
+        val domain =
+            Item(
+                title = "Событие",
+                timestamp = 1234567890000L,
+            )
 
         // When
         val entity = domain.toEntity()
@@ -138,14 +143,15 @@ class ItemMapperTest {
     @Test
     fun `roundTripConversion_thenPreservesAllFields`() {
         // Given
-        val originalDomain = Item(
-            id = 5L,
-            title = "Оригинальное событие",
-            details = "Детали",
-            timestamp = 9876543210000L,
-            colorTag = 0xFF00FF00.toInt(),
-            displayOption = DisplayOption.YEAR_MONTH_DAY
-        )
+        val originalDomain =
+            Item(
+                id = 5L,
+                title = "Оригинальное событие",
+                details = "Детали",
+                timestamp = 9876543210000L,
+                colorTag = 0xFF00FF00.toInt(),
+                displayOption = DisplayOption.YEAR_MONTH_DAY,
+            )
 
         // When
         val entity = originalDomain.toEntity()
@@ -163,12 +169,13 @@ class ItemMapperTest {
     @Test
     fun `roundTripConversion_withNullColorTag_thenPreservesNull`() {
         // Given
-        val originalDomain = Item(
-            id = 6L,
-            title = "Событие без цвета",
-            timestamp = 1234567890000L,
-            colorTag = null
-        )
+        val originalDomain =
+            Item(
+                id = 6L,
+                title = "Событие без цвета",
+                timestamp = 1234567890000L,
+                colorTag = null,
+            )
 
         // When
         val entity = originalDomain.toEntity()
@@ -179,4 +186,3 @@ class ItemMapperTest {
         assertEquals(originalDomain, convertedDomain)
     }
 }
-

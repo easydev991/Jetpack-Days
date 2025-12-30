@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:property-naming")
+
 package com.dayscounter.data.database
 
 import android.content.Context
@@ -19,7 +21,7 @@ import com.dayscounter.data.database.entity.ItemEntity
 @Database(
     entities = [ItemEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = false,
 )
 @TypeConverters(DisplayOptionConverter::class)
 abstract class DaysDatabase : RoomDatabase() {
@@ -32,6 +34,7 @@ abstract class DaysDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
+        @Suppress("VariableNaming")
         private var INSTANCE: DaysDatabase? = null
 
         /**
@@ -42,15 +45,15 @@ abstract class DaysDatabase : RoomDatabase() {
          */
         fun getDatabase(context: Context): DaysDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    DaysDatabase::class.java,
-                    "days_database"
-                ).build()
+                val instance =
+                    Room.databaseBuilder(
+                        context.applicationContext,
+                        DaysDatabase::class.java,
+                        "days_database",
+                    ).build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
-

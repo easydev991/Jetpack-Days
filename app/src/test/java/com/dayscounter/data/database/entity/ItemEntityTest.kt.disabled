@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class ItemEntityTest {
-
     @Test
     fun `createItemEntity_withRequiredFields_thenCreatesSuccessfully`() {
         // Given
@@ -14,10 +13,11 @@ class ItemEntityTest {
         val timestamp = 1234567890000L
 
         // When
-        val entity = ItemEntity(
-            title = title,
-            timestamp = timestamp
-        )
+        val entity =
+            ItemEntity(
+                title = title,
+                timestamp = timestamp,
+            )
 
         // Then
         assertEquals(0L, entity.id)
@@ -39,14 +39,15 @@ class ItemEntityTest {
         val displayOption = DisplayOption.MONTH_DAY.name
 
         // When
-        val entity = ItemEntity(
-            id = id,
-            title = title,
-            details = details,
-            timestamp = timestamp,
-            colorTag = colorTag,
-            displayOption = displayOption
-        )
+        val entity =
+            ItemEntity(
+                id = id,
+                title = title,
+                details = details,
+                timestamp = timestamp,
+                colorTag = colorTag,
+                displayOption = displayOption,
+            )
 
         // Then
         assertEquals(id, entity.id)
@@ -64,10 +65,11 @@ class ItemEntityTest {
         val timestamp = 1234567890000L
 
         // When
-        val entity = ItemEntity(
-            title = title,
-            timestamp = timestamp
-        )
+        val entity =
+            ItemEntity(
+                title = title,
+                timestamp = timestamp,
+            )
 
         // Then
         assertEquals(0L, entity.id)
@@ -76,4 +78,3 @@ class ItemEntityTest {
         assertEquals(DisplayOption.DAY.name, entity.displayOption)
     }
 }
-

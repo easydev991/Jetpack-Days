@@ -26,6 +26,5 @@ data class ItemEntity(
     val details: String = "",
     val timestamp: Long,
     val colorTag: Int? = null,
-    val displayOption: String = DisplayOption.DAY.name
+    val displayOption: String = DisplayOption.DAY.name,
 )
-

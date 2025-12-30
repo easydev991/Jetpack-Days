@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class ItemTest {
-
     @Test
     fun `createItem_withRequiredFields_thenCreatesSuccessfully`() {
         // Given
@@ -13,10 +12,11 @@ class ItemTest {
         val timestamp = 1234567890000L
 
         // When
-        val item = Item(
-            title = title,
-            timestamp = timestamp
-        )
+        val item =
+            Item(
+                title = title,
+                timestamp = timestamp,
+            )
 
         // Then
         assertEquals(0L, item.id)
@@ -38,14 +38,15 @@ class ItemTest {
         val displayOption = DisplayOption.MONTH_DAY
 
         // When
-        val item = Item(
-            id = id,
-            title = title,
-            details = details,
-            timestamp = timestamp,
-            colorTag = colorTag,
-            displayOption = displayOption
-        )
+        val item =
+            Item(
+                id = id,
+                title = title,
+                details = details,
+                timestamp = timestamp,
+                colorTag = colorTag,
+                displayOption = displayOption,
+            )
 
         // Then
         assertEquals(id, item.id)
@@ -63,10 +64,11 @@ class ItemTest {
         val timestamp = 1234567890000L
 
         // When
-        val item = Item(
-            title = title,
-            timestamp = timestamp
-        )
+        val item =
+            Item(
+                title = title,
+                timestamp = timestamp,
+            )
 
         // Then
         assertEquals(0L, item.id)
@@ -78,10 +80,11 @@ class ItemTest {
     @Test
     fun `makeDaysCount_whenCalled_thenReturnsStubValue`() {
         // Given
-        val item = Item(
-            title = "Тест",
-            timestamp = 1234567890000L
-        )
+        val item =
+            Item(
+                title = "Тест",
+                timestamp = 1234567890000L,
+            )
         val currentDate = System.currentTimeMillis()
 
         // When
@@ -95,10 +98,11 @@ class ItemTest {
     @Test
     fun `makeDaysCount_withDifferentCurrentDate_thenReturnsStubValue`() {
         // Given
-        val item = Item(
-            title = "Тест",
-            timestamp = 1000000000000L
-        )
+        val item =
+            Item(
+                title = "Тест",
+                timestamp = 1000000000000L,
+            )
         val currentDate1 = 2000000000000L
         val currentDate2 = 3000000000000L
 
@@ -112,4 +116,3 @@ class ItemTest {
         assertEquals("0 дней", result2)
     }
 }
-

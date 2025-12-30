@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class DisplayOptionTest {
-
     @Test
     fun `fromString_whenDay_thenReturnsDay`() {
         // When
@@ -87,4 +86,3 @@ class DisplayOptionTest {
         assertEquals(DisplayOption.DAY, DisplayOption.DEFAULT)
     }
 }
-
