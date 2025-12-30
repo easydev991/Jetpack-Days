@@ -1,0 +1,87 @@
+package com.dayscounter.data.database.converters
+
+import com.dayscounter.domain.model.DisplayOption
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class DisplayOptionConverterTest {
+
+    private val converter = DisplayOptionConverter()
+
+    @Test
+    fun `fromDisplayOption_whenDay_thenReturnsDayString`() {
+        // When
+        val result = converter.fromDisplayOption(DisplayOption.DAY)
+
+        // Then
+        assertEquals("DAY", result)
+    }
+
+    @Test
+    fun `fromDisplayOption_whenMonthDay_thenReturnsMonthDayString`() {
+        // When
+        val result = converter.fromDisplayOption(DisplayOption.MONTH_DAY)
+
+        // Then
+        assertEquals("MONTH_DAY", result)
+    }
+
+    @Test
+    fun `fromDisplayOption_whenYearMonthDay_thenReturnsYearMonthDayString`() {
+        // When
+        val result = converter.fromDisplayOption(DisplayOption.YEAR_MONTH_DAY)
+
+        // Then
+        assertEquals("YEAR_MONTH_DAY", result)
+    }
+
+    @Test
+    fun `toDisplayOption_whenDayString_thenReturnsDay`() {
+        // When
+        val result = converter.toDisplayOption("DAY")
+
+        // Then
+        assertEquals(DisplayOption.DAY, result)
+    }
+
+    @Test
+    fun `toDisplayOption_whenMonthDayString_thenReturnsMonthDay`() {
+        // When
+        val result = converter.toDisplayOption("MONTH_DAY")
+
+        // Then
+        assertEquals(DisplayOption.MONTH_DAY, result)
+    }
+
+    @Test
+    fun `toDisplayOption_whenYearMonthDayString_thenReturnsYearMonthDay`() {
+        // When
+        val result = converter.toDisplayOption("YEAR_MONTH_DAY")
+
+        // Then
+        assertEquals(DisplayOption.YEAR_MONTH_DAY, result)
+    }
+
+    @Test
+    fun `toDisplayOption_whenUnknownString_thenReturnsDefault`() {
+        // When
+        val result = converter.toDisplayOption("UNKNOWN")
+
+        // Then
+        assertEquals(DisplayOption.DEFAULT, result)
+    }
+
+    @Test
+    fun `roundTripConversion_thenPreservesValue`() {
+        // Given
+        val original = DisplayOption.MONTH_DAY
+
+        // When
+        val stringValue = converter.fromDisplayOption(original)
+        val converted = converter.toDisplayOption(stringValue)
+
+        // Then
+        assertEquals(original, converted)
+    }
+}
+

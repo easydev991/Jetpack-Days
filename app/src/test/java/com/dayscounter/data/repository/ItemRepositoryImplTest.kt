@@ -1,0 +1,183 @@
+package com.dayscounter.data.repository
+
+import com.dayscounter.data.database.dao.ItemDao
+import com.dayscounter.data.database.entity.ItemEntity
+import com.dayscounter.data.database.mapper.toDomain
+import com.dayscounter.data.database.mapper.toEntity
+import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.domain.model.Item
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class ItemRepositoryImplTest {
+
+    private lateinit var itemDao: ItemDao
+    private lateinit var repository: ItemRepositoryImpl
+
+    @BeforeEach
+    fun setup() {
+        itemDao = mockk()
+        repository = ItemRepositoryImpl(itemDao)
+    }
+
+    @Test
+    fun `getAllItems_thenReturnsAllItems`() = runBlocking {
+        // Given
+        val entities = listOf(
+            ItemEntity(id = 1L, title = "Событие 1", timestamp = 1000000000000L),
+            ItemEntity(id = 2L, title = "Событие 2", timestamp = 2000000000000L)
+        )
+        every { itemDao.getAllItems() } returns flowOf(entities)
+
+        // When
+        val result = repository.getAllItems().first()
+
+        // Then
+        assertEquals(2, result.size)
+        assertEquals("Событие 1", result[0].title)
+        assertEquals("Событие 2", result[1].title)
+    }
+
+    @Test
+    fun `getItemById_whenExists_thenReturnsItem`() = runBlocking {
+        // Given
+        val entity = ItemEntity(id = 1L, title = "Событие", timestamp = 1234567890000L)
+        coEvery { itemDao.getItemById(1L) } returns entity
+
+        // When
+        val result = repository.getItemById(1L)
+
+        // Then
+        assert(result != null)
+        assertEquals(1L, result?.id)
+        assertEquals("Событие", result?.title)
+    }
+
+    @Test
+    fun `getItemById_whenNotExists_thenReturnsNull`() = runBlocking {
+        // Given
+        coEvery { itemDao.getItemById(999L) } returns null
+
+        // When
+        val result = repository.getItemById(999L)
+
+        // Then
+        assertNull(result)
+    }
+
+    @Test
+    fun `searchItems_thenReturnsMatchingItems`() = runBlocking {
+        // Given
+        val entities = listOf(
+            ItemEntity(id = 1L, title = "День рождения", timestamp = 1000000000000L)
+        )
+        every { itemDao.searchItems("День") } returns flowOf(entities)
+
+        // When
+        val result = repository.searchItems("День").first()
+
+        // Then
+        assertEquals(1, result.size)
+        assertEquals("День рождения", result[0].title)
+    }
+
+    @Test
+    fun `insertItem_thenCallsDaoInsert`() = runBlocking {
+        // Given
+        val item = Item(title = "Событие", timestamp = 1234567890000L)
+        coEvery { itemDao.insertItem(any()) } returns 1L
+
+        // When
+        val result = repository.insertItem(item)
+
+        // Then
+        assertEquals(1L, result)
+        coVerify { itemDao.insertItem(item.toEntity()) }
+    }
+
+    @Test
+    fun `updateItem_thenCallsDaoUpdate`() = runBlocking {
+        // Given
+        val item = Item(id = 1L, title = "Событие", timestamp = 1234567890000L)
+        coEvery { itemDao.updateItem(any()) } returns Unit
+
+        // When
+        repository.updateItem(item)
+
+        // Then
+        coVerify { itemDao.updateItem(item.toEntity()) }
+    }
+
+    @Test
+    fun `deleteItem_thenCallsDaoDelete`() = runBlocking {
+        // Given
+        val item = Item(id = 1L, title = "Событие", timestamp = 1234567890000L)
+        coEvery { itemDao.deleteItem(any()) } returns Unit
+
+        // When
+        repository.deleteItem(item)
+
+        // Then
+        coVerify { itemDao.deleteItem(item.toEntity()) }
+    }
+
+    @Test
+    fun `deleteAllItems_thenCallsDaoDeleteAll`() = runBlocking {
+        // Given
+        coEvery { itemDao.deleteAllItems() } returns Unit
+
+        // When
+        repository.deleteAllItems()
+
+        // Then
+        coVerify { itemDao.deleteAllItems() }
+    }
+
+    @Test
+    fun `getItemsCount_thenReturnsCount`() = runBlocking {
+        // Given
+        coEvery { itemDao.getItemsCount() } returns 5
+
+        // When
+        val result = repository.getItemsCount()
+
+        // Then
+        assertEquals(5, result)
+    }
+
+    @Test
+    fun `getAllItems_convertsEntitiesToDomain`() = runBlocking {
+        // Given
+        val entity = ItemEntity(
+            id = 1L,
+            title = "Событие",
+            details = "Описание",
+            timestamp = 1234567890000L,
+            colorTag = 0xFFFF0000.toInt(),
+            displayOption = DisplayOption.MONTH_DAY.name
+        )
+        every { itemDao.getAllItems() } returns flowOf(listOf(entity))
+
+        // When
+        val result = repository.getAllItems().first()
+
+        // Then
+        assertEquals(1, result.size)
+        val domainItem = result[0]
+        assertEquals(1L, domainItem.id)
+        assertEquals("Событие", domainItem.title)
+        assertEquals("Описание", domainItem.details)
+        assertEquals(0xFFFF0000.toInt(), domainItem.colorTag)
+        assertEquals(DisplayOption.MONTH_DAY, domainItem.displayOption)
+    }
+}
+

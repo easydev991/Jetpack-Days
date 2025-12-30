@@ -1,0 +1,37 @@
+package com.dayscounter.data.database.converters
+
+import androidx.room.TypeConverter
+import com.dayscounter.domain.model.DisplayOption
+
+/**
+ * Конвертер для преобразования DisplayOption в строку и обратно для Room.
+ */
+class DisplayOptionConverter {
+
+    /**
+     * Преобразует DisplayOption в строку для хранения в базе данных.
+     *
+     * @param value DisplayOption для преобразования
+     * @return Строковое представление (имя enum)
+     */
+    @TypeConverter
+    fun fromDisplayOption(value: DisplayOption): String {
+        return value.name
+    }
+
+    /**
+     * Преобразует строку в DisplayOption из базы данных.
+     *
+     * @param value Строковое представление (имя enum)
+     * @return DisplayOption или DEFAULT, если значение неизвестно
+     */
+    @TypeConverter
+    fun toDisplayOption(value: String): DisplayOption {
+        return try {
+            DisplayOption.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            DisplayOption.DEFAULT
+        }
+    }
+}
+

@@ -89,3 +89,7 @@ detekt {
     config.setFrom(files("../config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
 }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
