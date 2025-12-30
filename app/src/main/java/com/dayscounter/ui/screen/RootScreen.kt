@@ -75,13 +75,12 @@ fun rootScreen(
                     icon = {
                         Icon(
                             imageVector = screen.icon,
-                            contentDescription =
-                                stringResource(
-                                    id = if (screen == Screen.Events) R.string.events_tab else R.string.more_tab,
-                                ),
+                            contentDescription = stringResource(id = screen.titleResId),
                         )
                     },
-                    label = { Text(text = screen.title) },
+                    label = {
+                        Text(text = stringResource(id = screen.titleResId))
+                    },
                     selected = currentTab == screen,
                     onClick = {
                         // Переключаем вкладку в ViewModel

@@ -1,6 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App name -->
     <string name="app_name">JetpackDays</string>
-    <string name="events_tab">События</string>
-    <string name="more_tab">Ещё</string>
+
+    <!-- Navigation and tabs -->
+    <string name="events">Events</string>
+    <string name="more">More</string>
+    <!-- Legacy keys for backward compatibility -->
+    <string name="events_tab">Events</string>
+    <string name="more_tab">More</string>
+
+    <!-- Action buttons -->
+    <string name="add_item">Add Item</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="ok">Ok</string>
+    <string name="done">Done</string>
+
+    <!-- Screen titles -->
+    <string name="new_item">New Item</string>
+    <string name="edit_item">Edit Item</string>
+    <string name="app_data">App data</string>
+    <string name="app_theme_and_icon">App theme and Icon</string>
+
+    <!-- Main Screen -->
+    <string name="what_should_we_remember">What should we remember?</string>
+    <string name="create_your_first_item">Create your first item</string>
+
+    <!-- Sort -->
+    <string name="sort">Sort</string>
+    <string name="sort_order">Sort Order</string>
+    <string name="old_first">Old first</string>
+    <string name="new_first">New first</string>
+
+    <!-- Item Screen -->
+    <string name="title">Title</string>
+    <string name="details">Details</string>
+    <string name="date">Date</string>
+    <string name="color_tag">Color tag</string>
+    <string name="display_format">Display format</string>
+    <string name="today">Today</string>
+
+    <!-- Create/Edit Item Screen -->
+    <string name="title_for_the_item">Title for the Item</string>
+    <string name="details_for_the_item">Details for the Item</string>
+    <string name="add_color_tag">Add color tag</string>
+
+    <!-- Display format options -->
+    <string name="days_only">Days only</string>
+    <string name="months_and_days">Months and days</string>
+    <string name="years_months_and_days">Years, months and days</string>
+
+    <!-- More Screen -->
+    <string name="send_feedback">Send feedback</string>
+    <string name="rate_the_app">Rate the app</string>
+    <string name="share_the_app">Share the app</string>
+    <string name="github_page">GitHub page</string>
+    <string name="app_version">App version: %1$s</string>
+
+    <!-- Theme and Icon Screen -->
+    <string name="app_theme">App theme</string>
+    <string name="app_icon">App Icon</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="system">System</string>
+    <string name="primary_icon">Primary icon</string>
+    <string name="variant">Variant %1$d</string>
+    <string name="selected">Selected</string>
+    <string name="not_selected">Not selected</string>
+
+    <!-- App Data Screen -->
+    <string name="create_a_backup">Create a backup</string>
+    <string name="restore_from_backup">Restore from backup</string>
+    <string name="delete_all_data">Delete all data</string>
+    <string name="do_you_want_to_delete_all_data_permanently">Do you want to delete all data permanently?</string>
+    <string name="backup_data_saved">Backup data saved</string>
+    <string name="data_restored_from_backup">Data restored from backup</string>
+    <string name="all_data_deleted">All data deleted</string>
+    <string name="unable_to_recover_data_from_the_selected_file">Unable to recover data from the selected file</string>
+    <string name="error">Error</string>
 </resources>

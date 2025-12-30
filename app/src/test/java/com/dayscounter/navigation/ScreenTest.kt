@@ -1,5 +1,6 @@
 package com.dayscounter.navigation
 
+import com.dayscounter.R
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import org.junit.Test
@@ -12,7 +13,7 @@ class ScreenTest {
 
         // When & Then
         assertEquals("events", screen.route)
-        assertEquals("События", screen.title)
+        assertEquals(R.string.events, screen.titleResId)
         assertNotNull(screen.icon)
     }
 
@@ -23,7 +24,7 @@ class ScreenTest {
 
         // When & Then
         assertEquals("more", screen.route)
-        assertEquals("Ещё", screen.title)
+        assertEquals(R.string.more, screen.titleResId)
         assertNotNull(screen.icon)
     }
 }

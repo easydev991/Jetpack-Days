@@ -170,8 +170,9 @@ data class CreateEditItemUiState(
 
 **Задачи:**
 1. Добавить маршрут в Screen.kt
-   - Для создания: `object CreateItem : Screen("create_item")`
-   - Для редактирования: `object EditItem : Screen("edit_item/{itemId}")`
+   - Для создания: `object CreateItem : Screen("create_item", icon, R.string.new_item)`
+   - Для редактирования: `object EditItem : Screen("edit_item/{itemId}", icon, R.string.edit_item)`
+   - Использовать `titleResId` для локализации заголовков экранов
 2. Настроить навигацию из Main Screen (кнопка "+")
 3. Настроить навигацию из Item Screen (кнопка "Редактировать")
 
