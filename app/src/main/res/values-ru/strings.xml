@@ -69,8 +69,6 @@
     <string name="system">Системная</string>
     <string name="primary_icon">Основная иконка</string>
     <string name="variant">Вариант %1$d</string>
-    <string name="selected">Выбрано</string>
-    <string name="not_selected">Не выбрано</string>
 
     <!-- App Data Screen -->
     <string name="create_a_backup">Создать резервную копию</string>
@@ -82,5 +80,31 @@
     <string name="all_data_deleted">Все данные удалены</string>
     <string name="unable_to_recover_data_from_the_selected_file">Не удалось восстановить данные из выбранного файла</string>
     <string name="error">Ошибка</string>
+
+    <!-- Days formatting -->
+    <string name="days_abbreviated">дн.</string>
+    <string name="months_abbreviated">мес.</string>
+    <string name="years_abbreviated">г.</string>
+
+    <plurals name="days_count">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+    </plurals>
+
+    <plurals name="months_count">
+        <item quantity="one">%d месяц</item>
+        <item quantity="few">%d месяца</item>
+        <item quantity="many">%d месяцев</item>
+        <item quantity="other">%d месяцев</item>
+    </plurals>
+
+    <plurals name="years_count">
+        <item quantity="one">%d год</item>
+        <item quantity="few">%d года</item>
+        <item quantity="many">%d лет</item>
+        <item quantity="other">%d лет</item>
+    </plurals>
 </resources>
 

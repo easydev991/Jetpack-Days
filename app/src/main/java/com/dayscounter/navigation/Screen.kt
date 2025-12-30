@@ -11,8 +11,8 @@ import com.dayscounter.R
  */
 sealed class Screen(
     val route: String,
-    val icon: ImageVector,
-    val titleResId: Int,
+    val icon: ImageVector? = null,
+    val titleResId: Int? = null,
 ) {
     object Events : Screen(
         route = "events",
@@ -25,4 +25,22 @@ sealed class Screen(
         icon = Icons.Filled.MoreVert,
         titleResId = R.string.more,
     )
+
+    object ItemDetail : Screen(
+        route = "item_detail/{itemId}",
+    ) {
+        /** Создает маршрут для экрана деталей с указанным itemId */
+        fun createRoute(itemId: Long) = "item_detail/$itemId"
+    }
+
+    object CreateItem : Screen(
+        route = "create_item",
+    )
+
+    object EditItem : Screen(
+        route = "edit_item/{itemId}",
+    ) {
+        /** Создает маршрут для экрана редактирования с указанным itemId */
+        fun createRoute(itemId: Long) = "edit_item/$itemId"
+    }
 }

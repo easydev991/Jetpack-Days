@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Material Colors -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +8,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- App Colors for Tags -->
+    <color name="color_primary_red">#FF6B6B</color>
+    <color name="color_primary_teal">#4ECDC4</color>
+    <color name="color_primary_blue">#45B7D1</color>
+    <color name="color_primary_green">#96CEB4</color>
+    <color name="color_primary_yellow">#FFEAA7</color>
+    <color name="color_primary_purple">#DDA0DD</color>
 </resources>

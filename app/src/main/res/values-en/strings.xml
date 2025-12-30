@@ -69,8 +69,6 @@
     <string name="system">System</string>
     <string name="primary_icon">Primary icon</string>
     <string name="variant">Variant %1$d</string>
-    <string name="selected">Selected</string>
-    <string name="not_selected">Not selected</string>
 
     <!-- App Data Screen -->
     <string name="create_a_backup">Create a backup</string>
@@ -103,4 +101,6 @@
         <item quantity="other">%d years</item>
     </plurals>
 </resources>
+
+
 

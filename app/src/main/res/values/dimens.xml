@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common Spacings -->
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_medium">8dp</dimen>
+    <dimen name="spacing_large">12dp</dimen>
+    <dimen name="spacing_extra_large">16dp</dimen>
+    <dimen name="spacing_huge">24dp</dimen>
+    <dimen name="spacing_massive">32dp</dimen>
+
+    <!-- Common Sizes -->
+    <dimen name="size_small">32dp</dimen>
+    <dimen name="size_medium">48dp</dimen>
+    <dimen name="size_large">80dp</dimen>
+
+    <!-- Specific Sizes -->
+    <dimen name="icon_size_small">32dp</dimen>
+    <dimen name="icon_size_medium">48dp</dimen>
+    <dimen name="icon_size_large">80dp</dimen>
+    
+    <!-- Color Tag Sizes -->
+    <dimen name="color_tag_size">48dp</dimen>
+    <dimen name="color_tag_size_small">12dp</dimen>
+</resources>
+
