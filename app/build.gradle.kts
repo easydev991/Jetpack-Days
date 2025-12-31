@@ -1,15 +1,17 @@
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 android {
     namespace = "com.dayscounter"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dayscounter"
@@ -58,7 +60,7 @@ dependencies {
 
     // Material Components (for View-based themes and attributes)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation(libs.androidx.appcompat)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -82,8 +84,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockk)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -97,9 +99,6 @@ detekt {
     buildUponDefaultConfig = true
 }
 
-ktlint {
-    disabledRules.set(setOf("property-naming"))
-}
 
 tasks.withType<Test> {
     useJUnitPlatform()
