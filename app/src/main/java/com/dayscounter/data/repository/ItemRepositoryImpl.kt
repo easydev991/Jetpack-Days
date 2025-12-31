@@ -4,6 +4,7 @@ import com.dayscounter.data.database.dao.ItemDao
 import com.dayscounter.data.database.mapper.toDomain
 import com.dayscounter.data.database.mapper.toEntity
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,6 +20,15 @@ class ItemRepositoryImpl(
     override fun getAllItems(): Flow<List<Item>> {
         return itemDao.getAllItems()
             .map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> {
+        val flow =
+            when (sortOrder) {
+                SortOrder.ASCENDING -> itemDao.getAllItemsAsc()
+                SortOrder.DESCENDING -> itemDao.getAllItemsDesc()
+            }
+        return flow.map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun getItemById(id: Long): Item? {

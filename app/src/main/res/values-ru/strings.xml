@@ -29,6 +29,8 @@
     <!-- Main Screen -->
     <string name="what_should_we_remember">Что нужно запомнить?</string>
     <string name="create_your_first_item">Сделайте вашу первую запись</string>
+    <string name="no_results_found">Ничего не найдено</string>
+    <string name="try_different_search_terms">Попробуйте изменить поисковый запрос</string>
 
     <!-- Sort -->
     <string name="sort">Сортировка</string>

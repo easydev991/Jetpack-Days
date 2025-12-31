@@ -23,6 +23,19 @@ interface ItemDao {
     fun getAllItems(): Flow<List<ItemEntity>>
 
     /**
+     * Получает все записи с заданным порядком сортировки.
+     *
+     * @param ascending true для сортировки по возрастанию (старые первые),
+     *                  false для сортировки по убыванию (новые первые)
+     * @return Flow со списком всех записей
+     */
+    @Query("SELECT * FROM items ORDER BY timestamp ASC")
+    fun getAllItemsAsc(): Flow<List<ItemEntity>>
+
+    @Query("SELECT * FROM items ORDER BY timestamp DESC")
+    fun getAllItemsDesc(): Flow<List<ItemEntity>>
+
+    /**
      * Получает запись по идентификатору.
      *
      * @param id Идентификатор записи

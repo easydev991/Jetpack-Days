@@ -1,6 +1,7 @@
 package com.dayscounter.domain.repository
 
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -14,6 +15,14 @@ interface ItemRepository {
      * @return Flow со списком всех записей
      */
     fun getAllItems(): Flow<List<Item>>
+
+    /**
+     * Получает все записи с заданным порядком сортировки.
+     *
+     * @param sortOrder Порядок сортировки
+     * @return Flow со списком всех записей
+     */
+    fun getAllItems(sortOrder: SortOrder): Flow<List<Item>>
 
     /**
      * Получает запись по идентификатору.

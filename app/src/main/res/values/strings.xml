@@ -29,6 +29,8 @@
     <!-- Main Screen -->
     <string name="what_should_we_remember">What should we remember?</string>
     <string name="create_your_first_item">Create your first item</string>
+    <string name="no_results_found">No results found</string>
+    <string name="try_different_search_terms">Try different search terms</string>
 
     <!-- Sort -->
     <string name="sort">Sort</string>
