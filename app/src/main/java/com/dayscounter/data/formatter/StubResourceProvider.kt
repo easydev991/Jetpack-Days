@@ -3,8 +3,10 @@ package com.dayscounter.data.formatter
 /**
  * Заглушка для ResourceProvider.
  *
- * Используется временно, пока DI контейнер не настроен полностью.
- * Возвращает локализованные строки для русского языка.
+ * Используется ТОЛЬКО для unit-тестов, где нет доступа к Android Context.
+ * В продакшн-коде используйте ResourceProviderImpl через FormatterModule.
+ *
+ * Возвращает локализованные строки для русского языка (для тестов).
  */
 class StubResourceProvider : ResourceProvider {
     companion object {

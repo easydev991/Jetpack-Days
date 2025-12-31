@@ -3,6 +3,8 @@ package com.dayscounter.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dayscounter.data.formatter.ResourceIds
+import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
@@ -15,10 +17,12 @@ import kotlinx.coroutines.launch
  * ViewModel для управления состоянием экрана создания/редактирования события.
  *
  * @property repository Репозиторий для работы с данными
+ * @property resourceProvider Провайдер строковых ресурсов для локализации
  * @property savedStateHandle SavedStateHandle для получения параметров навигации
  */
 class CreateEditScreenViewModel(
     private val repository: ItemRepository,
+    private val resourceProvider: ResourceProvider,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     /**
@@ -63,11 +67,18 @@ class CreateEditScreenViewModel(
                     _uiState.value = CreateEditScreenState.Success(item)
                     android.util.Log.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
                 } else {
-                    _uiState.value = CreateEditScreenState.Error("Событие не найдено")
+                    _uiState.value =
+                        CreateEditScreenState.Error(
+                            resourceProvider.getString(ResourceIds.EVENT_NOT_FOUND),
+                        )
                     android.util.Log.w("CreateEditScreenViewModel", "Событие не найдено: $itemId")
                 }
             } catch (e: ItemException.LoadFailed) {
-                val message = "Ошибка загрузки события: ${e.message}"
+                val message =
+                    resourceProvider.getString(
+                        ResourceIds.ERROR_LOADING_EVENT,
+                        e.message ?: "",
+                    )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }
@@ -86,7 +97,11 @@ class CreateEditScreenViewModel(
                 _uiState.value = CreateEditScreenState.Success(item)
                 android.util.Log.d("CreateEditScreenViewModel", "Событие создано: ${item.title}")
             } catch (e: ItemException.SaveFailed) {
-                val message = "Ошибка создания события: ${e.message}"
+                val message =
+                    resourceProvider.getString(
+                        ResourceIds.ERROR_CREATING_EVENT,
+                        e.message ?: "",
+                    )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }
@@ -105,7 +120,11 @@ class CreateEditScreenViewModel(
                 _uiState.value = CreateEditScreenState.Success(item)
                 android.util.Log.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
             } catch (e: ItemException.UpdateFailed) {
-                val message = "Ошибка обновления события: ${e.message}"
+                val message =
+                    resourceProvider.getString(
+                        ResourceIds.ERROR_UPDATING_EVENT,
+                        e.message ?: "",
+                    )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }

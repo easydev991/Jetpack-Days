@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
@@ -35,7 +36,7 @@ internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Предпросмотр",
+                text = stringResource(R.string.preview),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -57,7 +58,7 @@ internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
             Text(
-                text = if (daysBetween > 0) "прошло" else "осталось",
+                text = if (daysBetween > 0) stringResource(R.string.elapsed) else stringResource(R.string.remaining),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -167,7 +167,7 @@ internal fun dateSection(
             IconButton(onClick = { showDatePicker.value = true }) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
-                    contentDescription = "Выбрать дату",
+                    contentDescription = stringResource(R.string.select_date),
                 )
             }
         },

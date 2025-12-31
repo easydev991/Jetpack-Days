@@ -1,6 +1,7 @@
 package com.dayscounter.viewmodel
 
 import com.dayscounter.data.formatter.DaysFormatterImpl
+import com.dayscounter.data.formatter.StubResourceProvider
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
@@ -30,11 +31,12 @@ class DaysCalculatorViewModelTest {
         val formatter = DaysFormatterImpl()
         formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-        // Создаем ViewModel
+        // Создаем ViewModel с StubResourceProvider для тестов
         viewModel =
             DaysCalculatorViewModel(
                 calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase = formatDaysTextUseCase,
+                resourceProvider = StubResourceProvider(),
                 defaultDisplayOption = DisplayOption.DAY,
             )
     }

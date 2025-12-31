@@ -1,6 +1,6 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.formatter.StubResourceProvider
+import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
@@ -14,10 +14,12 @@ import java.time.LocalDate
  *
  * @property calculateDaysDifferenceUseCase Use case для вычисления разницы дат
  * @property formatDaysTextUseCase Use case для форматирования текста
+ * @property resourceProvider Провайдер строковых ресурсов для локализации
  */
 class GetFormattedDaysForItemUseCase(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val formatDaysTextUseCase: FormatDaysTextUseCase,
+    private val resourceProvider: ResourceProvider,
 ) {
     /**
      * Получает форматированный текст количества дней для указанного Item.
@@ -51,13 +53,12 @@ class GetFormattedDaysForItemUseCase(
             )
 
         // Форматируем результат в текст
-        // Возвращаем заглушку, так как DI еще не настроен полностью
         @Suppress("TooGenericExceptionCaught")
         return try {
             formatDaysTextUseCase(
                 difference = difference,
                 displayOption = displayOption,
-                resourceProvider = StubResourceProvider(),
+                resourceProvider = resourceProvider,
             )
         } catch (e: Exception) {
             // Обрабатываем исключения при форматировании

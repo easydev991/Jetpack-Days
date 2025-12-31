@@ -50,9 +50,11 @@ object FormatterModule {
     fun createGetFormattedDaysForItemUseCase(
         calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
         formatDaysTextUseCase: FormatDaysTextUseCase,
+        resourceProvider: ResourceProvider,
     ): GetFormattedDaysForItemUseCase =
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
+            resourceProvider,
         )
 }

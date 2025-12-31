@@ -1,6 +1,8 @@
 package com.dayscounter.di
 
+import com.dayscounter.DaysCounterApplication
 import com.dayscounter.data.database.DaysDatabase
+import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.viewmodel.DetailScreenViewModel
@@ -14,6 +16,15 @@ import com.dayscounter.viewmodel.MainScreenViewModel
  * Создает экземпляры репозиториев, use cases и ViewModel.
  */
 object AppModule {
+    /**
+     * Создает ResourceProvider для работы со строковыми ресурсами.
+     *
+     * @return Экземпляр ResourceProvider
+     */
+    val resourceProvider: ResourceProvider by lazy {
+        FormatterModule.createResourceProvider(DaysCounterApplication.instance)
+    }
+
     /**
      * Создает репозиторий для работы с событиями.
      *
@@ -62,6 +73,7 @@ object AppModule {
         return { savedStateHandle ->
             com.dayscounter.viewmodel.CreateEditScreenViewModel(
                 repository,
+                resourceProvider,
                 savedStateHandle,
             )
         }

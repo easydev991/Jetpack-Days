@@ -20,4 +20,34 @@ object ResourceIds {
 
     /** Идентификатор строкового ресурса "Сегодня" */
     val TODAY = R.string.today
+
+    /** Идентификатор строкового ресурса "Загрузка..." */
+    val LOADING = R.string.loading
+
+    /** Идентификатор строкового ресурса "Назад" */
+    val BACK = R.string.back
+
+    /** Идентификатор строкового ресурса "Событие удалено" */
+    val EVENT_DELETED = R.string.event_deleted
+
+    /** Идентификатор строкового ресурса "Событие не найдено" */
+    val EVENT_NOT_FOUND = R.string.event_not_found
+
+    /** Идентификатор строкового ресурса "Ошибка загрузки события: %1$s" */
+    val ERROR_LOADING_EVENT = R.string.error_loading_event
+
+    /** Идентификатор строкового ресурса "Ошибка создания события: %1$s" */
+    val ERROR_CREATING_EVENT = R.string.error_creating_event
+
+    /** Идентификатор строкового ресурса "Ошибка обновления события: %1$s" */
+    val ERROR_UPDATING_EVENT = R.string.error_updating_event
+
+    /** Идентификатор строкового ресурса "Ошибка форматирования" */
+    val ERROR_FORMATTING = R.string.error_formatting
+
+    /** Идентификатор строкового ресурса "Ошибка при вычислении: %1$s" */
+    val ERROR_CALCULATING = R.string.error_calculating
+
+    /** Идентификатор строкового ресурса "Ошибка форматирования: %1$s" */
+    val ERROR_FORMATTING_DETAILS = R.string.error_formatting_details
 }

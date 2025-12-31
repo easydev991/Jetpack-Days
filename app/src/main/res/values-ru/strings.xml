@@ -81,6 +81,24 @@
     <string name="unable_to_recover_data_from_the_selected_file">Не удалось восстановить данные из выбранного файла</string>
     <string name="error">Ошибка</string>
 
+    <!-- UI states and messages -->
+    <string name="loading">Загрузка...</string>
+    <string name="back">Назад</string>
+    <string name="event_deleted">Событие удалено</string>
+    <string name="select_date">Выбрать дату</string>
+    <string name="preview">Предпросмотр</string>
+    <string name="elapsed">прошло</string>
+    <string name="remaining">осталось</string>
+
+    <!-- Error messages -->
+    <string name="event_not_found">Событие не найдено</string>
+    <string name="error_loading_event">Ошибка загрузки события: %1$s</string>
+    <string name="error_creating_event">Ошибка создания события: %1$s</string>
+    <string name="error_updating_event">Ошибка обновления события: %1$s</string>
+    <string name="error_formatting">Ошибка форматирования</string>
+    <string name="error_calculating">Ошибка при вычислении: %1$s</string>
+    <string name="error_formatting_details">Ошибка форматирования: %1$s</string>
+
     <!-- Days formatting -->
     <string name="days_abbreviated">дн.</string>
     <string name="months_abbreviated">мес.</string>

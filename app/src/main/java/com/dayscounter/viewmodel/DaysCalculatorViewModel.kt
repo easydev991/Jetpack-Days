@@ -5,7 +5,8 @@ package com.dayscounter.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dayscounter.data.formatter.StubResourceProvider
+import com.dayscounter.data.formatter.ResourceIds
+import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
@@ -39,12 +40,14 @@ data class DaysCalculatorState(
  *
  * @param calculateDaysDifferenceUseCase Use case для вычисления разницы дат
  * @param formatDaysTextUseCase Use case для форматирования текста
+ * @param resourceProvider Провайдер строковых ресурсов для локализации
  * @param defaultDisplayOption Опция отображения по умолчанию
  */
 @Suppress("TooGenericExceptionCaught")
 class DaysCalculatorViewModel(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val formatDaysTextUseCase: FormatDaysTextUseCase,
+    private val resourceProvider: ResourceProvider,
     private val defaultDisplayOption: DisplayOption = DisplayOption.DAY,
 ) : ViewModel() {
     @Suppress("VariableNaming")
@@ -92,12 +95,12 @@ class DaysCalculatorViewModel(
                         formatDaysTextUseCase(
                             difference = difference,
                             displayOption = option,
-                            resourceProvider = StubResourceProvider(),
+                            resourceProvider = resourceProvider,
                         )
                     } catch (e: Exception) {
                         // Обрабатываем исключения при форматировании
                         Log.e(TAG, "Ошибка форматирования: ${e.message}", e)
-                        "Ошибка форматирования"
+                        resourceProvider.getString(ResourceIds.ERROR_FORMATTING)
                     }
 
                 _state.value =
@@ -113,14 +116,22 @@ class DaysCalculatorViewModel(
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
-                        error = "Ошибка при вычислении: ${e.message}",
+                        error =
+                            resourceProvider.getString(
+                                ResourceIds.ERROR_CALCULATING,
+                                e.message ?: "",
+                            ),
                     )
             } catch (e: NumberFormatException) {
                 Log.e(TAG, "Ошибка форматирования чисел: ${e.message}", e)
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
-                        error = "Ошибка форматирования: ${e.message}",
+                        error =
+                            resourceProvider.getString(
+                                ResourceIds.ERROR_FORMATTING_DETAILS,
+                                e.message ?: "",
+                            ),
                     )
             }
         }
