@@ -34,7 +34,7 @@
 
 - **AGP (Android Gradle Plugin)**: 8.13.2
 - **Kotlin**: 2.0.21
-- **Compile SDK**: 35
+- **Compile SDK**: 36
 - **Target SDK**: 35
 - **Min SDK**: 26
 - **KSP (Kotlin Symbol Processing)**: 2.0.21-1.0.25

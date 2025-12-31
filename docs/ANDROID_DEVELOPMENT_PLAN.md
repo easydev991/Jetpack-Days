@@ -27,11 +27,11 @@
 
 ### Инструменты разработки
 - **AGP (Android Gradle Plugin)**: 8.13.2
-- **Kotlin**: 2.1.20
-- **Compile SDK**: 35
+- **Kotlin**: 2.0.21
+- **Compile SDK**: 36
 - **Target SDK**: 35
 - **Min SDK**: 26
-- **KSP (Kotlin Symbol Processing)**: 2.1.20-1.0.28
+- **KSP (Kotlin Symbol Processing)**: 2.0.21-1.0.25
 
 ### Архитектурные принципы
 - **MVVM Pattern**: Model-View-ViewModel архитектура
@@ -860,7 +860,7 @@ Root Screen (TabBar)
 ### Версии
 - AGP: 8.13.2
 - Kotlin: 2.0.21
-- Compile SDK: 35
+- Compile SDK: 36
 - Target SDK: 35
 - Min SDK: 26
 - KSP: 2.0.21-1.0.25
