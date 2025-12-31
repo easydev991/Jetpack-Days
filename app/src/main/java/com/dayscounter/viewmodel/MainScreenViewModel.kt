@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
  *
  * Отвечает за загрузку, управление и отображение списка событий.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MainScreenViewModel(
     private val repository: ItemRepository,
 ) : ViewModel() {
@@ -82,18 +84,24 @@ class MainScreenViewModel(
     private fun observeItems() {
         viewModelScope.launch {
             combine(
-                repository.getAllItems(_sortOrder.value),
+                _sortOrder.flatMapLatest { sortOrder -> repository.getAllItems(sortOrder) },
                 _searchQuery,
             ) { items, query ->
+                println("Обновление списка: количество элементов=${items.size}, запрос поиска='$query'")
                 if (query.isEmpty()) {
                     items
                 } else {
-                    items.filter { item ->
-                        item.title.contains(query, ignoreCase = true) ||
-                            item.details.contains(query, ignoreCase = true)
+                    val filteredItems = items.filter { item ->
+                        val titleContains = item.title.contains(query, ignoreCase = true)
+                        val detailsContains = item.details.contains(query, ignoreCase = true)
+                        println("Фильтрация: элемент='${item.title}', детали='${item.details}', запрос='$query', titleContains=$titleContains, detailsContains=$detailsContains")
+                        titleContains || detailsContains
                     }
+                    println("После фильтрации: ${filteredItems.size} элементов")
+                    filteredItems
                 }
             }.collect { items ->
+                println("Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
                 if (_uiState.value !is MainScreenState.Error) {
                     _uiState.value = MainScreenState.Success(items)
@@ -113,7 +121,8 @@ class MainScreenViewModel(
                 _uiState.value = MainScreenState.Success(loadedItems)
             } catch (e: ItemException.LoadFailed) {
                 val message = "Ошибка загрузки списка событий: ${e.message}"
-                android.util.Log.e("MainScreenViewModel", message, e)
+                println("MainScreenViewModel: $message")
+                e.printStackTrace()
                 _uiState.value = MainScreenState.Error(message)
             }
         }
@@ -135,7 +144,7 @@ class MainScreenViewModel(
      */
     fun updateSortOrder(order: SortOrder) {
         _sortOrder.value = order
-        android.util.Log.d("MainScreenViewModel", "Порядок сортировки обновлен: $order")
+        println("MainScreenViewModel: Порядок сортировки обновлен: $order")
     }
 
     /**
@@ -147,10 +156,11 @@ class MainScreenViewModel(
         viewModelScope.launch {
             try {
                 repository.deleteItem(item)
-                android.util.Log.d("MainScreenViewModel", "Событие удалено: ${item.title}")
+                println("MainScreenViewModel: Событие удалено: ${item.title}")
             } catch (e: ItemException.DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
-                android.util.Log.e("MainScreenViewModel", message, e)
+                println("MainScreenViewModel: $message")
+                e.printStackTrace()
                 _uiState.value = MainScreenState.Error(message)
             }
         }
@@ -165,10 +175,11 @@ class MainScreenViewModel(
         viewModelScope.launch {
             try {
                 repository.updateItem(item)
-                android.util.Log.d("MainScreenViewModel", "Событие обновлено: ${item.title}")
+                println("MainScreenViewModel: Событие обновлено: ${item.title}")
             } catch (e: ItemException.UpdateFailed) {
                 val message = "Ошибка обновления события: ${e.message}"
-                android.util.Log.e("MainScreenViewModel", message, e)
+                println("MainScreenViewModel: $message")
+                e.printStackTrace()
                 _uiState.value = MainScreenState.Error(message)
             }
         }
@@ -181,7 +192,7 @@ class MainScreenViewModel(
      */
     fun updateDefaultDisplayOption(displayOption: DisplayOption) {
         _defaultDisplayOption.value = displayOption
-        android.util.Log.d("MainScreenViewModel", "Опция отображения обновлена: $displayOption")
+        println("MainScreenViewModel: Опция отображения обновлена: $displayOption")
     }
 
     /**

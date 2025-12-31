@@ -146,6 +146,10 @@ internal fun eventsScreenContent(navController: NavHostController) {
             Log.d("RootScreen", "Навигация к экрану редактирования: $itemId")
             navController.navigate(Screen.EditItem.createRoute(itemId))
         },
+        onCreateClick = {
+            Log.d("RootScreen", "Навигация к экрану создания")
+            navController.navigate(Screen.CreateItem.route)
+        },
     )
 }
 

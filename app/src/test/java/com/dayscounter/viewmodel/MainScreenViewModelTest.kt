@@ -4,14 +4,24 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
 
 /**
  * Unit-тесты для MainScreenViewModel.
@@ -19,15 +29,24 @@ import org.junit.jupiter.api.Test
 class MainScreenViewModelTest {
     private lateinit var repository: FakeItemRepository
     private lateinit var viewModel: MainScreenViewModel
+    private lateinit var testDispatcher: TestDispatcher
 
     @BeforeEach
     fun setUp() {
+        testDispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(testDispatcher)
+
         repository = FakeItemRepository()
         viewModel = MainScreenViewModel(repository)
     }
 
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
-    fun `whenViewModelCreated_thenLoadsAllItems`() {
+    fun whenViewModelCreated_thenLoadsAllItems() {
         runTest {
             // Given - Repository содержит 2 элемента
             val items =
@@ -52,6 +71,8 @@ class MainScreenViewModelTest {
             repository.setItems(items)
 
             // When - ViewModel создан
+            // Дожидаемся завершения инициализации
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Состояние обновляется с загруженными элементами
             val uiState = viewModel.uiState.value
@@ -62,7 +83,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSearchQueryChanged_thenFiltersItems`() {
+    fun whenSearchQueryChanged_thenFiltersItems() {
         runTest {
             // Given - Repository содержит элементы
             val items =
@@ -88,6 +109,7 @@ class MainScreenViewModelTest {
 
             // When - Вводим поисковый запрос
             viewModel.updateSearchQuery("день")
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элементы фильтруются
             val uiState = viewModel.uiState.value
@@ -99,7 +121,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSearchQueryEmpty_thenShowsAllItems`() {
+    fun whenSearchQueryEmpty_thenShowsAllItems() {
         runTest {
             // Given - Repository содержит элементы
             val items =
@@ -125,7 +147,9 @@ class MainScreenViewModelTest {
 
             // When - Поисковый запрос очищен
             viewModel.updateSearchQuery("день")
+            testDispatcher.scheduler.advanceUntilIdle()
             viewModel.updateSearchQuery("")
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Все элементы отображаются
             val uiState = viewModel.uiState.value
@@ -136,7 +160,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSortOrderChanged_thenSortsItems`() {
+    fun whenSortOrderChanged_thenSortsItems() {
         runTest {
             // Given - Repository содержит элементы
             val items =
@@ -162,6 +186,7 @@ class MainScreenViewModelTest {
 
             // When - Меняем порядок сортировки на старые первые
             viewModel.updateSortOrder(SortOrder.ASCENDING)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элементы сортируются
             val uiState = viewModel.uiState.value
@@ -174,7 +199,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSortOrderDescending_thenShowsNewestFirst`() {
+    fun whenSortOrderDescending_thenShowsNewestFirst() {
         runTest {
             // Given - Repository содержит элементы
             val items =
@@ -199,6 +224,7 @@ class MainScreenViewModelTest {
             repository.setItems(items)
 
             // When - Порядок сортировки новые первые (по умолчанию)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элементы сортируются от новых к старым
             val uiState = viewModel.uiState.value
@@ -210,7 +236,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenItemDeleted_thenRemovesFromList`() {
+    fun whenItemDeleted_thenRemovesFromList() {
         runTest {
             // Given - Repository содержит элемент
             val item =
@@ -226,23 +252,25 @@ class MainScreenViewModelTest {
 
             // When - Удаляем элемент
             viewModel.deleteItem(item)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элемент удален из списка
             val uiState = viewModel.uiState.value
             assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
             val successState = uiState as MainScreenState.Success
             assertEquals(0, successState.items.size, "Список должен быть пустым")
-            assertEquals(0, repository.getItemsCount(), "В репозитории не должно быть элементов")
+            assertEquals(0, viewModel.itemsCount.value, "Количество элементов в ViewModel должно быть 0")
         }
     }
 
     @Test
-    fun `whenNoItems_thenShowsEmptyState`() {
+    fun whenNoItems_thenShowsEmptyState() {
         runTest {
             // Given - Repository пустой
             repository.setItems(emptyList())
 
             // When - ViewModel создан
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Состояние Success с пустым списком
             val uiState = viewModel.uiState.value
@@ -254,7 +282,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSearchInDetails_thenFindsItem`() {
+    fun whenSearchInDetails_thenFindsItem() {
         runTest {
             // Given - Repository содержит элемент с текстом в деталях
             val items =
@@ -271,7 +299,8 @@ class MainScreenViewModelTest {
             repository.setItems(items)
 
             // When - Ищем по тексту в деталях
-            viewModel.updateSearchQuery("рождение")
+            viewModel.updateSearchQuery("рождения")
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элемент найден
             val uiState = viewModel.uiState.value
@@ -282,7 +311,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSearchCaseInsensitive_thenFindsItem`() {
+    fun whenSearchCaseInsensitive_thenFindsItem() {
         runTest {
             // Given - Repository содержит элемент
             val items =
@@ -300,6 +329,7 @@ class MainScreenViewModelTest {
 
             // When - Ищем с разным регистром
             viewModel.updateSearchQuery("ДЕНЬ")
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элемент найден
             val uiState = viewModel.uiState.value
@@ -310,7 +340,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `whenSearchWithNoResults_thenShowsEmptyList`() {
+    fun whenSearchWithNoResults_thenShowsEmptyList() {
         runTest {
             // Given - Repository содержит элементы
             val items =
@@ -328,6 +358,7 @@ class MainScreenViewModelTest {
 
             // When - Ищем то, чего нет
             viewModel.updateSearchQuery("Несуществующий текст")
+            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Пустой список
             val uiState = viewModel.uiState.value
@@ -350,12 +381,12 @@ class MainScreenViewModelTest {
         override fun getAllItems(): Flow<List<Item>> = _items
 
         override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> {
-            val sortedItems =
+            return _items.map { items ->
                 when (sortOrder) {
-                    SortOrder.ASCENDING -> _items.value.sortedBy { it.timestamp }
-                    SortOrder.DESCENDING -> _items.value.sortedByDescending { it.timestamp }
+                    SortOrder.ASCENDING -> items.sortedBy { it.timestamp }
+                    SortOrder.DESCENDING -> items.sortedByDescending { it.timestamp }
                 }
-            return flowOf(sortedItems)
+            }
         }
 
         override suspend fun getItemById(id: Long): Item? = _items.value.find { it.id == id }

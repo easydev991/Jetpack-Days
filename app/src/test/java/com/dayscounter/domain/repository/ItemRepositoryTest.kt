@@ -1,6 +1,8 @@
 package com.dayscounter.domain.repository
 
+import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 import org.junit.jupiter.api.Test
 
@@ -20,6 +22,10 @@ class ItemRepositoryTest {
         val repository: ItemRepository =
             object : ItemRepository {
                 override fun getAllItems(): Flow<List<Item>> {
+                    throw NotImplementedError()
+                }
+
+                override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> {
                     throw NotImplementedError()
                 }
 
