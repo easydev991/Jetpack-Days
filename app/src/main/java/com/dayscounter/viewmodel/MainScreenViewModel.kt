@@ -1,7 +1,10 @@
 package com.dayscounter.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.exception.ItemException.LoadFailed
@@ -10,11 +13,9 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -25,16 +26,20 @@ import kotlinx.coroutines.launch
 class MainScreenViewModel(
     private val repository: ItemRepository,
 ) : ViewModel() {
+    companion object {
+        fun factory(repository: ItemRepository): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    MainScreenViewModel(repository)
+                }
+            }
+    }
+
     /**
      * Состояние экрана.
      */
     private val _uiState = MutableStateFlow<MainScreenState>(MainScreenState.Loading)
     val uiState: StateFlow<MainScreenState> = _uiState.asStateFlow()
-
-    /**
-     * Список всех событий.
-     * Обновляется автоматически при изменениях в базе данных.
-     */
 
     /**
      * Выбранная опция отображения дней по умолчанию.

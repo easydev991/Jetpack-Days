@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -47,9 +48,19 @@ import com.dayscounter.viewmodel.MainScreenViewModel
 @Composable
 fun mainScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainScreenViewModel = viewModel(),
     onItemClick: (Long) -> Unit = {},
 ) {
+    val viewModel: MainScreenViewModel =
+        viewModel(
+            factory =
+                MainScreenViewModel.factory(
+                    com.dayscounter.di.AppModule.createItemRepository(
+                        com.dayscounter.data.database.DaysDatabase.getDatabase(
+                            androidx.compose.ui.platform.LocalContext.current.applicationContext,
+                        ),
+                    ),
+                ),
+        )
     mainScreenContent(
         modifier = modifier,
         viewModel = viewModel,

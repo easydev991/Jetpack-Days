@@ -88,7 +88,7 @@ internal fun saveButton(
             }
         },
         modifier = Modifier.fillMaxWidth(),
-        enabled = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null
+        enabled = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null,
     ) {
         Text(stringResource(R.string.save))
     }

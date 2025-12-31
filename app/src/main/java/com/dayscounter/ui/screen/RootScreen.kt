@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.dayscounter.navigation.Screen
-import com.dayscounter.ui.screen.components.navigationBarContent
 import com.dayscounter.ui.screen.components.navHostContent
+import com.dayscounter.ui.screen.components.navigationBarContent
 import com.dayscounter.ui.screen.components.updateTabBasedOnRoute
 import com.dayscounter.viewmodel.RootScreenViewModel
 

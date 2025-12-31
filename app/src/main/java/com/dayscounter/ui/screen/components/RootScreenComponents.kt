@@ -77,12 +77,11 @@ internal fun navigationBarContent(
  * NavHost с маршрутами.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 internal fun navHostContent(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Events.route
+        startDestination = Screen.Events.route,
     ) {
         composable(Screen.Events.route) {
             eventsScreenContent(navController)
@@ -131,7 +130,6 @@ internal fun navHostContent(navController: NavHostController) {
         }
     }
 }
-
 
 /**
  * Контент для экрана событий.

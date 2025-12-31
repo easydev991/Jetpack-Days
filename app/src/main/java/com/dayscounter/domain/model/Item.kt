@@ -1,7 +1,5 @@
 package com.dayscounter.domain.model
 
-import androidx.compose.ui.graphics.Color
-
 /**
  * Доменная модель события для отслеживания дней.
  *
