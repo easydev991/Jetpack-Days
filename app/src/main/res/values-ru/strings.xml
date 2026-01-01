@@ -21,6 +21,11 @@
     <string name="ok">Ок</string>
     <string name="done">Готово</string>
 
+    <!-- Delete confirmation dialog -->
+    <string name="delete_item_title">Удалить запись</string>
+    <string name="delete_item_message">Вы уверены, что хотите удалить \"%s\"?</string>
+    <string name="delete_item_confirm">Удалить</string>
+
     <!-- Screen titles -->
     <string name="new_item">Новая запись</string>
     <string name="edit_item">Изменить запись</string>

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -113,6 +114,7 @@ private fun mainScreenContent(
     val sortOrder by viewModel.sortOrder.collectAsState()
     val itemsCount by viewModel.itemsCount.collectAsState()
     val listState = rememberLazyListState()
+    val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -157,6 +159,31 @@ private fun mainScreenContent(
                     viewModel = viewModel,
                 ),
             paddingValues = paddingValues,
+        )
+    }
+
+    // Диалог подтверждения удаления
+    if (showDeleteDialog != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.cancelDelete() },
+            title = { Text(stringResource(R.string.delete_item_title)) },
+            text = {
+                Text(stringResource(R.string.delete_item_message, showDeleteDialog!!.title))
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { viewModel.confirmDelete() },
+                ) {
+                    Text(stringResource(R.string.delete_item_confirm))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { viewModel.cancelDelete() },
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
         )
     }
 }
@@ -334,7 +361,7 @@ private fun itemsListContent(
                             SwipeToDismissBoxValue.EndToStart -> {
                                 // Swipe left to delete
                                 coroutineScope.launch {
-                                    viewModel.deleteItem(item)
+                                    viewModel.requestDelete(item)
                                 }
                             }
 

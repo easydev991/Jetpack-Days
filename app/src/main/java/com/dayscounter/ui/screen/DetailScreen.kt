@@ -2,13 +2,18 @@ package com.dayscounter.ui.screen
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dayscounter.R
 import com.dayscounter.ui.screen.components.detail.detailContentByState
 import com.dayscounter.ui.screen.components.detail.detailTopAppBar
 import com.dayscounter.viewmodel.DetailScreenState
@@ -36,6 +41,7 @@ fun detailScreen(
     onEditClick: (Long) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
     detailScreenContent(
         itemId = itemId,
@@ -44,8 +50,15 @@ fun detailScreen(
         onBackClick = onBackClick,
         onEditClick = onEditClick,
         onDeleteClick = {
-            viewModel.deleteItem()
+            viewModel.requestDelete()
+        },
+        showDeleteDialog = showDeleteDialog,
+        onConfirmDelete = {
+            viewModel.confirmDelete()
             onBackClick()
+        },
+        onCancelDelete = {
+            viewModel.cancelDelete()
         },
     )
 }
@@ -62,7 +75,12 @@ private fun detailScreenContent(
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
     onDeleteClick: () -> Unit,
+    showDeleteDialog: Boolean,
+    onConfirmDelete: () -> Unit,
+    onCancelDelete: () -> Unit,
 ) {
+    val currentItem = (uiState as? DetailScreenState.Success)?.item
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -76,5 +94,32 @@ private fun detailScreenContent(
         },
     ) { paddingValues ->
         detailContentByState(uiState = uiState, modifier = Modifier.padding(paddingValues))
+    }
+
+    // Диалог подтверждения удаления
+    if (showDeleteDialog) {
+        currentItem?.let { item ->
+            AlertDialog(
+                onDismissRequest = { onCancelDelete() },
+                title = { Text(stringResource(R.string.delete_item_title)) },
+                text = {
+                    Text(stringResource(R.string.delete_item_message, item.title))
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { onConfirmDelete() },
+                    ) {
+                        Text(stringResource(R.string.delete_item_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { onCancelDelete() },
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+            )
+        }
     }
 }

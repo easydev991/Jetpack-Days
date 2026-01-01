@@ -70,6 +70,12 @@ class MainScreenViewModel(
     val itemsCount: StateFlow<Int> = _itemsCount.asStateFlow()
 
     /**
+     * Элемент для удаления в диалоговом окне.
+     */
+    private val _showDeleteDialog = MutableStateFlow<Item?>(null)
+    val showDeleteDialog: StateFlow<Item?> = _showDeleteDialog.asStateFlow()
+
+    /**
      * Загружает события при создании ViewModel.
      */
     init {
@@ -167,6 +173,35 @@ class MainScreenViewModel(
                 _uiState.value = MainScreenState.Error(message)
             }
         }
+    }
+
+    /**
+     * Запрашивает подтверждение удаления записи.
+     *
+     * @param item Запись для удаления
+     */
+    fun requestDelete(item: Item) {
+        _showDeleteDialog.value = item
+        println("MainScreenViewModel: Запрос на удаление: ${item.title}")
+    }
+
+    /**
+     * Подтверждает удаление записи.
+     */
+    fun confirmDelete() {
+        _showDeleteDialog.value?.let { item ->
+            deleteItem(item)
+            println("MainScreenViewModel: Удаление подтверждено: ${item.title}")
+        }
+        _showDeleteDialog.value = null
+    }
+
+    /**
+     * Отменяет удаление записи.
+     */
+    fun cancelDelete() {
+        _showDeleteDialog.value = null
+        println("MainScreenViewModel: Удаление отменено")
     }
 
     /**

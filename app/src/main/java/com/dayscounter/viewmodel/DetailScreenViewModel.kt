@@ -72,6 +72,12 @@ class DetailScreenViewModel(
             )
 
     /**
+     * Показывать диалог подтверждения удаления.
+     */
+    private val _showDeleteDialog = MutableStateFlow(false)
+    val showDeleteDialog: StateFlow<Boolean> = _showDeleteDialog.asStateFlow()
+
+    /**
      * Удаляет событие.
      */
     fun deleteItem() {
@@ -87,6 +93,31 @@ class DetailScreenViewModel(
                 android.util.Log.e("DetailScreenViewModel", message, e)
             }
         }
+    }
+
+    /**
+     * Запрашивает подтверждение удаления записи.
+     */
+    fun requestDelete() {
+        _showDeleteDialog.value = true
+        android.util.Log.d("DetailScreenViewModel", "Запрос на удаление")
+    }
+
+    /**
+     * Подтверждает удаление записи.
+     */
+    fun confirmDelete() {
+        deleteItem()
+        _showDeleteDialog.value = false
+        android.util.Log.d("DetailScreenViewModel", "Удаление подтверждено")
+    }
+
+    /**
+     * Отменяет удаление записи.
+     */
+    fun cancelDelete() {
+        _showDeleteDialog.value = false
+        android.util.Log.d("DetailScreenViewModel", "Удаление отменено")
     }
 }
 

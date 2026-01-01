@@ -21,6 +21,11 @@
     <string name="ok">Ok</string>
     <string name="done">Done</string>
 
+    <!-- Delete confirmation dialog -->
+    <string name="delete_item_title">Delete Item</string>
+    <string name="delete_item_message">Are you sure you want to delete \"%s\"?</string>
+    <string name="delete_item_confirm">Delete</string>
+
     <!-- Screen titles -->
     <string name="new_item">New Item</string>
     <string name="edit_item">Edit Item</string>
