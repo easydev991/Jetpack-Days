@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.screen.components.detail.detailContentByState
 import com.dayscounter.ui.screen.components.detail.detailTopAppBar
 import com.dayscounter.viewmodel.DetailScreenState
@@ -43,10 +44,28 @@ fun detailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
+    // Создаем use case для форматирования с учетом displayOption
+    val resourceProvider = com.dayscounter.di.FormatterModule.createResourceProvider(
+        context =
+            androidx.compose.ui.platform.LocalContext.current,
+    )
+    val calculateDaysDifferenceUseCase =
+        com.dayscounter.di.FormatterModule.createCalculateDaysDifferenceUseCase()
+    val daysFormatter = com.dayscounter.di.FormatterModule.createDaysFormatter()
+    val formatDaysTextUseCase =
+        com.dayscounter.di.FormatterModule.createFormatDaysTextUseCase(daysFormatter)
+    val getFormattedDaysForItemUseCase =
+        com.dayscounter.di.FormatterModule.createGetFormattedDaysForItemUseCase(
+            calculateDaysDifferenceUseCase,
+            formatDaysTextUseCase,
+            resourceProvider,
+        )
+
     detailScreenContent(
         itemId = itemId,
         modifier = modifier,
         uiState = uiState,
+        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
         onBackClick = onBackClick,
         onEditClick = onEditClick,
         onDeleteClick = {
@@ -72,6 +91,7 @@ private fun detailScreenContent(
     itemId: Long,
     modifier: Modifier = Modifier,
     uiState: DetailScreenState,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
     onDeleteClick: () -> Unit,
@@ -93,7 +113,11 @@ private fun detailScreenContent(
             )
         },
     ) { paddingValues ->
-        detailContentByState(uiState = uiState, modifier = Modifier.padding(paddingValues))
+        detailContentByState(
+            uiState = uiState,
+            modifier = Modifier.padding(paddingValues),
+            getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+        )
     }
 
     // Диалог подтверждения удаления

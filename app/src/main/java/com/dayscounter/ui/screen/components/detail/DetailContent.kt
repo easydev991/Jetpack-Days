@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
 import com.dayscounter.ui.theme.jetpackDaysTheme
@@ -39,6 +40,7 @@ import java.time.LocalDate
 fun detailContentByState(
     uiState: DetailScreenState,
     modifier: Modifier = Modifier,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
     when (val state = uiState) {
         is DetailScreenState.Loading -> {
@@ -49,6 +51,7 @@ fun detailContentByState(
             detailContentInner(
                 item = state.item,
                 modifier = modifier,
+                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
             )
         }
 
@@ -68,6 +71,7 @@ fun detailContentByState(
 internal fun detailContentInner(
     item: com.dayscounter.domain.model.Item,
     modifier: Modifier = Modifier,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
     val scrollState = rememberScrollState()
     val formatter =
@@ -101,7 +105,7 @@ internal fun detailContentInner(
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_massive)))
 
         // Количество дней
-        daysCountSection(item)
+        daysCountSection(item, getFormattedDaysForItemUseCase)
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_massive)))
 
@@ -170,14 +174,24 @@ internal fun dateSection(
  * Секция с количеством дней.
  */
 @Composable
-fun daysCountSection(item: com.dayscounter.domain.model.Item) {
-    val eventDate =
-        java.time.Instant
-            .ofEpochMilli(item.timestamp)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-    val currentDate = LocalDate.now()
-    val daysText = calculateDaysText(eventDate, currentDate)
+fun daysCountSection(
+    item: com.dayscounter.domain.model.Item,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
+) {
+    val daysText: String =
+        if (getFormattedDaysForItemUseCase != null) {
+            // Используем use case для форматирования с учетом displayOption
+            getFormattedDaysForItemUseCase(item = item)
+        } else {
+            // Fallback: простое форматирование по количеству дней (для preview)
+            val eventDate =
+                java.time.Instant
+                    .ofEpochMilli(item.timestamp)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate()
+            val currentDate = LocalDate.now()
+            calculateDaysText(eventDate, currentDate)
+        }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
