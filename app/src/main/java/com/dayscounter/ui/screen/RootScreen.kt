@@ -1,11 +1,12 @@
 package com.dayscounter.ui.screen
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.screen.components.navHostContent
@@ -52,24 +53,34 @@ private fun rootScreenContent(
     // Получаем текущую вкладку из ViewModel
     val currentTab by viewModel.currentTab
 
+    // Получаем текущий маршрут для управления видимостью навигации
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Определяем, должна ли быть видна навигационная панель
+    val shouldShowNavigationBar = currentRoute in listOf(Screen.Events.route, Screen.More.route)
+
     // Обновляем вкладку при изменении маршрута
     updateTabBasedOnRoute(navController, viewModel)
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize(),
-    ) {
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            // Навигационная панель (только на главных экранах)
+            if (shouldShowNavigationBar) {
+                navigationBarContent(
+                    items = items,
+                    viewModel = viewModel,
+                    navController = navController,
+                )
+            }
+        },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+    ) { paddingValues ->
         // Основной контент с навигацией
         navHostContent(
             navController = navController,
-        )
-
-        // Навигационная панель
-        navigationBarContent(
-            items = items,
-            viewModel = viewModel,
-            navController = navController,
+            paddingValues = paddingValues,
         )
     }
 }

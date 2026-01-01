@@ -84,7 +84,10 @@ internal fun navigationBarContent(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun navHostContent(navController: NavHostController) {
+internal fun navHostContent(
+    navController: NavHostController,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
+) {
     // Получаем зависимости для создания ViewModels
     val context = LocalContext.current.applicationContext
     val database = DaysDatabase.getDatabase(context)
@@ -94,6 +97,7 @@ internal fun navHostContent(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Screen.Events.route,
+        modifier = Modifier.padding(paddingValues),
     ) {
         composable(Screen.Events.route) {
             eventsScreenContent(navController)

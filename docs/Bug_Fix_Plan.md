@@ -15,7 +15,7 @@
 4. ❌ **Баг #4**: Поиск не работает
 5. ❌ **Баг #5**: Пропадание записей при поиске
 6. ❌ **Баг #6**: Неправильная верстка ListItemView
-7. ❌ **Баг #7**: Нижняя навигация не видна
+7. ✅ **Баг #7**: Нижняя навигация не видна (ИСПРАВЛЕН)
 8. ❌ **Баг #8**: Контент заезжает под камеру
 9. ❌ **Баг #9**: Изменение displayOption не обновляет UI
 10. ❌ **Баг #10**: Отсутствуют Composable Preview
@@ -222,51 +222,6 @@ private val itemFlow = savedStateHandle.get<Long>("itemId")?.let { itemId ->
 2. ✅ Применить `contentPadding = paddingValues` к `LazyColumn`
 3. ✅ Добавить параметр `paddingValues` в функции `emptyContent` и `emptySearchContent`
 4. ✅ Применить `paddingValues` в этих функциях перед существующими отступами
-
-**Изменения в коде:**
-
-```kotlin
-// MainScreen.kt
-
-// В функции itemsListContent добавлен параметр paddingValues:
-private fun itemsListContent(
-    items: List<com.dayscounter.domain.model.Item>,
-    listState: androidx.compose.foundation.lazy.LazyListState,
-    onItemClick: (Long) -> Unit,
-    onEditClick: (Long) -> Unit,
-    viewModel: MainScreenViewModel,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues, // ✅ Добавлено
-) {
-    // ...
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = listState,
-        contentPadding = paddingValues, // ✅ Добавлено
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
-    ) {
-        // ...
-    }
-}
-
-// В функции emptyContent и emptySearchContent добавлен параметр paddingValues:
-private fun emptyContent(
-    paddingValues: androidx.compose.foundation.layout.PaddingValues = // ✅ Добавлено
-        androidx.compose.foundation.layout.PaddingValues()
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues) // ✅ Добавлено
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        // ...
-    )
-}
-
-// В mainScreenContentByState передача paddingValues:
-emptyContent(paddingValues = paddingValues)
-emptySearchContent(paddingValues = paddingValues)
-```
 
 **Критерий готовности:**
 - ✅ Список записей отображается полностью (не перекрывается AppBar)
@@ -591,28 +546,35 @@ fun cancelDelete() {
 
 ### Шаги исправления
 
-#### Шаг 7.1: Анализ навигации
+#### Шаг 7.1: Анализ навигации ✅ **ВЫПОЛНЕН**
 
 **Задача:** Понять проблему с навигацией
 
 **Действия:**
-1. Изучить `navigationBarContent()` в RootScreenComponents.kt
-2. Проверить условие видимости NavigationBar
-3. Проверить структуру экранов и вкладок
+1. ✅ Изучить `navigationBarContent()` в RootScreenComponents.kt
+2. ✅ Проверить условие видимости NavigationBar
+3. ✅ Проверить структуру экранов и вкладок
 
-#### Шаг 7.2: Исправление навигации
+**Результат:** Проблема обнаружена в `rootScreenContent()` - используется `Column` вместо `Scaffold`, что не позволяет NavigationBar занимать своё место в верстке
+
+#### Шаг 7.2: Исправление навигации ✅ **ВЫПОЛНЕН**
 
 **Задача:** Обеспечить отображение навигации
 
 **Действия:**
-1. Добавить условие для отображения NavigationBar только на главных экранах
-2. Убедиться, что на DetailScreen и CreateEditScreen навигация скрыта
-3. Проверить, что кнопки "список" и "ещё" видны
+1. ✅ Заменить `Column` на `Scaffold` в `rootScreenContent()`
+2. ✅ Переместить `NavigationBar` в параметр `bottomBar` Scaffold
+3. ✅ Добавить передачу `paddingValues` из Scaffold в `navHostContent()`
+4. ✅ Применить `paddingValues` к `NavHost` через Modifier.padding()
+5. ✅ Добавить `contentWindowInsets = WindowInsets(0, 0, 0, 0)` для отключения автоматических отступов StatusBar
 
 **Критерий готовности:**
 - ✅ На MainScreen видна NavigationBar с двумя вкладками
 - ✅ На DetailScreen и CreateEditScreen NavigationBar скрыта
 - ✅ При переключении вкладок работает корректно
+- ✅ Нет лишнего пространства над заголовком экрана
+
+### Дата исправления: 2025-01-02
 
 ---
 
@@ -1045,3 +1007,4 @@ val displayOption by viewModel.displayOption.collectAsState()
 
 - 2025-01-02: Создан план исправления на основе найденных 12 багов
 - 2025-01-02: Исправлен баг #2 - Toolbar перекрывает контент списка (применены paddingValues к LazyColumn, emptyContent и emptySearchContent)
+- 2025-01-02: Исправлен баг #7 - Нижняя навигация не видна (заменен Column на Scaffold в RootScreen, NavigationBar перенесена в bottomBar Scaffold, добавлена передача paddingValues в navHostContent)
