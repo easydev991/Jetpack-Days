@@ -39,6 +39,7 @@ class FormatDaysTextUseCase(
                     period = difference.period,
                     displayOption = displayOption,
                     resourceProvider = resourceProvider,
+                    totalDays = difference.totalDays,
                 )
             }
         }

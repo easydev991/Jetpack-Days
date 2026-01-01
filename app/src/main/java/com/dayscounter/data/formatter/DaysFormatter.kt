@@ -52,11 +52,13 @@ interface DaysFormatter {
      * @param period Период времени (годы, месяцы, дни)
      * @param displayOption Опция отображения
      * @param resourceProvider Провайдер строковых ресурсов
+     * @param totalDays Общее количество дней (используется для DisplayOption.DAY)
      * @return Отформатированная строка согласно опции отображения
      */
     fun formatComposite(
         period: TimePeriod,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
+        totalDays: Int = 0,
     ): String
 }

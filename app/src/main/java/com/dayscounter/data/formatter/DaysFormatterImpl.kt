@@ -68,10 +68,13 @@ class DaysFormatterImpl : DaysFormatter {
         period: TimePeriod,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
+        totalDays: Int,
     ): String =
         when (displayOption) {
             DisplayOption.DAY -> {
-                format(period.days, resourceProvider)
+                // Для DisplayOption.DAY используем общее количество дней
+                // period.days может быть меньше (остаток после вычета лет и месяцев)
+                format(totalDays, resourceProvider)
             }
 
             DisplayOption.MONTH_DAY -> {
