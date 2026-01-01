@@ -1,19 +1,18 @@
 package com.dayscounter.ui.component
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,12 +42,14 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  * - Слева вертикальный стек с названием и описанием (каждое ограничено 2 строками)
  * - Длинный текст обрезается с многоточием
  * - Поддерживает короткий клик и долгое нажатие
+ * - Поддерживает визуальное выделение элемента
  *
  * @param item Элемент для отображения
  * @param formattedDaysText Форматированный текст с количеством дней (вычисляется извне)
  * @param modifier Modifier для компонента
  * @param onClick Обработчик клика по элементу
- * @param onLongClick Обработчик долгого нажатия по элементу
+ * @param onLongClick Обработчик долгого нажатия по элементу, получает координаты нажатия
+ * @param isSelected Выделен ли элемент (например, когда открыто контекстное меню)
  */
 @Composable
 fun listItemView(
@@ -54,18 +57,37 @@ fun listItemView(
     formattedDaysText: String,
     modifier: Modifier = Modifier,
     onClick: (Item) -> Unit = {},
-    onLongClick: (() -> Unit)? = null,
+    onLongClick: ((Offset) -> Unit)? = null,
+    isSelected: Boolean = false,
 ) {
+    val backgroundColor = animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.surfaceVariant
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        label = "backgroundColor",
+    ).value
+
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
-                ).combinedClickable(
-                    onClick = { onClick(item) },
-                    onLongClick = onLongClick,
+                    color = backgroundColor,
                 )
+                .pointerInput(Unit) {
+                    if (onLongClick != null) {
+                        detectTapGestures(
+                            onTap = { onClick(item) },
+                            onLongPress = { offset -> onLongClick(offset) }
+                        )
+                    } else {
+                        detectTapGestures(
+                            onTap = { onClick(item) }
+                        )
+                    }
+                }
                 .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -1,7 +1,6 @@
 package com.dayscounter.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,11 +41,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.domain.model.SortOrder
@@ -335,6 +340,9 @@ private fun itemsListContent(
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
 ) {
     var contextMenuItem by remember { mutableStateOf<com.dayscounter.domain.model.Item?>(null) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var itemGlobalPosition by remember { mutableStateOf(Offset.Zero) }
+    val density = LocalDensity.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -346,6 +354,8 @@ private fun itemsListContent(
             items = items,
             key = { it.id },
         ) { item ->
+            var itemPosition by remember { mutableStateOf(Offset.Zero) }
+
             val eventDate =
                 java.time.LocalDateTime
                     .ofInstant(
@@ -359,12 +369,29 @@ private fun itemsListContent(
                     .between(eventDate, currentDate)
                     .toInt()
 
-            listItemView(
-                item = item,
-                formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
-                onClick = { onItemClick(it.id) },
-                onLongClick = { contextMenuItem = item },
-            )
+            Box(
+                modifier = Modifier
+                    .onGloballyPositioned { coordinates ->
+                        itemPosition = coordinates.positionInRoot()
+                    }
+            ) {
+                listItemView(
+                    item = item,
+                    formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
+                    onClick = { onItemClick(it.id) },
+                    onLongClick = { localOffset ->
+                        contextMenuItem = item
+                        itemGlobalPosition = itemPosition
+                        menuOffset = with(density) {
+                            DpOffset(
+                                (itemPosition.x + localOffset.x).toDp(),
+                                (itemPosition.y + localOffset.y).toDp()
+                            )
+                        }
+                    },
+                    isSelected = contextMenuItem?.id == item.id,
+                )
+            }
         }
     }
 
@@ -373,6 +400,7 @@ private fun itemsListContent(
         DropdownMenu(
             expanded = true,
             onDismissRequest = { contextMenuItem = null },
+            offset = menuOffset,
         ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.context_menu_view)) },
