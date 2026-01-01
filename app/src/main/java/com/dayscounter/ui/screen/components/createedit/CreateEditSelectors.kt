@@ -168,7 +168,7 @@ internal fun displayOptionSelector(
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
 
-    DisplayOption.values().forEach { option ->
+    DisplayOption.entries.forEach { option ->
         displayOptionSurface(
             option = option,
             selectedDisplayOption = selectedDisplayOption,
@@ -247,45 +247,7 @@ fun colorSelectorRedPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = "Цветовая метка",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Surface(
-                    onClick = {
-                        selectedColor.value =
-                            if (selectedColor.value == Color.Red) null else Color.Red
-                    },
-                    modifier = Modifier.size(48.dp),
-                    shape = CircleShape,
-                    color = Color.Red,
-                ) {}
-                Surface(
-                    onClick = { selectedColor.value = null },
-                    modifier = Modifier.size(48.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
+            colorSelector(selectedColor)
         }
     }
 }
@@ -303,43 +265,7 @@ fun displayOptionSelectorPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = "Формат отображения",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Surface(
-                onClick = { selectedDisplayOption.value = DisplayOption.DAY },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Только дни",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    if (selectedDisplayOption.value == DisplayOption.DAY) {
-                        Text(
-                            text = "✓",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-            }
+            displayOptionSelector(selectedDisplayOption)
         }
     }
 }
