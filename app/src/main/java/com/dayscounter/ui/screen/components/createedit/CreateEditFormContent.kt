@@ -50,9 +50,9 @@ internal fun createEditTopAppBar(
             Text(
                 text =
                     if (itemId != null) {
-                        stringResource(R.string.new_item)
-                    } else {
                         stringResource(R.string.edit_item)
+                    } else {
+                        stringResource(R.string.new_item)
                     },
                 style = MaterialTheme.typography.titleLarge,
             )
