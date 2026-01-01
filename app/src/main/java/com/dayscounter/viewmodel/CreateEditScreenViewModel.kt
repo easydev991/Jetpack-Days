@@ -102,7 +102,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_LOADING_EVENT,
-                        e.message ?: "",
+                        e.message,
                     )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
@@ -125,7 +125,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_CREATING_EVENT,
-                        e.message ?: "",
+                        e.message,
                     )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
@@ -148,7 +148,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_UPDATING_EVENT,
-                        e.message ?: "",
+                        e.message,
                     )
                 android.util.Log.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)

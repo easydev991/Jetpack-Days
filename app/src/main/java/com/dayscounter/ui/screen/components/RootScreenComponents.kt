@@ -3,7 +3,6 @@ package com.dayscounter.ui.screen.components
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -242,40 +240,10 @@ internal fun updateTabBasedOnRoute(
 
 // ==================== PREVIEWS ====================
 
-@Preview(showBackground = true, name = "Навигационная панель")
-@Composable
-fun navigationBarContentPreview() {
-    jetpackDaysTheme {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-        ) {
-            Text("Preview для NavigationBar")
-        }
-    }
-}
-
 @Preview(showBackground = true, name = "Экран настроек")
 @Composable
 fun moreScreenContentPreview() {
     jetpackDaysTheme {
-        Surface(
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Экран настроек не реализован")
-            }
-        }
+        moreScreenContent()
     }
 }

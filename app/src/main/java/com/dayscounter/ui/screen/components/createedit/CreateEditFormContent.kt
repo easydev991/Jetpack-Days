@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screen.components.createedit
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.ui.theme.jetpackDaysTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxSize
 import com.dayscounter.ui.screen.CreateEditUiState as ScreenCreateEditUiState
 
 /**
@@ -213,7 +212,7 @@ fun loadItemData(
     val isTitleEmpty = uiStates.title.value.isEmpty()
 
     if (isEditingExistingItem && isStateSuccess && isTitleEmpty) {
-        val item = (uiState as com.dayscounter.viewmodel.CreateEditScreenState.Success).item
+        val item = uiState.item
         uiStates.title.value = item.title
         uiStates.details.value = item.details
         uiStates.selectedDate.value =
