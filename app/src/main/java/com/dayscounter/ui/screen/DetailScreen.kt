@@ -43,6 +43,10 @@ fun detailScreen(
         uiState = uiState,
         onBackClick = onBackClick,
         onEditClick = onEditClick,
+        onDeleteClick = {
+            viewModel.deleteItem()
+            onBackClick()
+        },
     )
 }
 
@@ -57,11 +61,18 @@ private fun detailScreenContent(
     uiState: DetailScreenState,
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            detailTopAppBar(uiState = uiState, onBackClick = onBackClick, onEditClick = onEditClick, itemId = itemId)
+            detailTopAppBar(
+                uiState = uiState,
+                onBackClick = onBackClick,
+                onEditClick = onEditClick,
+                onDeleteClick = onDeleteClick,
+                itemId = itemId,
+            )
         },
     ) { paddingValues ->
         detailContentByState(uiState = uiState, modifier = Modifier.padding(paddingValues))

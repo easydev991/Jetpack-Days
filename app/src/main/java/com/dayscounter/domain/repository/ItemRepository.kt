@@ -33,6 +33,15 @@ interface ItemRepository {
     suspend fun getItemById(id: Long): Item?
 
     /**
+     * Получает запись по идентификатору в виде Flow.
+     * Поток автоматически обновляется при изменениях записи в базе данных.
+     *
+     * @param id Идентификатор записи
+     * @return Flow с записью или null, если не найдена
+     */
+    fun getItemFlow(id: Long): Flow<Item?>
+
+    /**
      * Ищет записи по запросу в названии или описании.
      *
      * @param query Поисковый запрос

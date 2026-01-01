@@ -52,9 +52,6 @@ fun detailContentByState(
                 modifier = modifier,
             )
         }
-        is DetailScreenState.Deleted -> {
-            deletedContent(modifier = modifier)
-        }
     }
 }
 

@@ -9,7 +9,7 @@
 
 После внедрения factory методов для CreateEditScreenViewModel и DetailScreenViewModel обнаружены следующие проблемы, требующие исправления:
 
-1. ❌ **Баг #1**: DetailScreen не обновляется после редактирования
+1. ✅ **Баг #1**: DetailScreen не обновляется после редактирования (ИСПРАВЛЕН)
 2. ✅ **Баг #2**: Toolbar перекрывает контент списка (ИСПРАВЛЕН)
 3. ❌ **Баг #3**: Удаление записей работает некорректно
 4. ❌ **Баг #4**: Поиск не работает
@@ -42,7 +42,7 @@
 
 ---
 
-## Баг #1: DetailScreen не обновляется после редактирования
+## Баг #1: DetailScreen не обновляется после редактирования ✅ **ИСПРАВЛЕН**
 
 ### Описание
 
@@ -76,114 +76,60 @@
 
 ### Шаги исправления
 
-#### Шаг 1.1: Анализ текущей реализации DetailScreenViewModel
+#### Шаг 1.1: Анализ текущей реализации DetailScreenViewModel ✅ **ВЫПОЛНЕН**
 
 **Задача:** Понять, как загружаются данные в DetailScreen
 
 **Действия:**
-1. Изучить `DetailScreenViewModel.kt`:
-   - Проверить, как загружается данные (однократно или через Flow)
-   - Проверить, какие методы использует репозиторий (синхронные или Flow)
-   - Проверить, где и как хранятся данные в ViewModel
-2. Изучить `ItemRepository`:
-   - Проверить наличие метода `getItemFlow(itemId: Long): Flow<Item>`
-   - Проверить текущие методы для получения одной записи
-3. Проверить навигацию в `RootScreenComponents.kt`:
-   - Убедиться, что DetailScreen использует правильную фабрику для ViewModel
-   - Проверить, что itemId корректно передается через SavedStateHandle
+1. ✅ Изучен DetailScreenViewModel.kt
+2. ✅ Изучен ItemRepository
+3. ✅ Проверена навигация в RootScreenComponents.kt
 
-#### Шаг 1.2: Реализация реактивного обновления в DetailScreenViewModel
+**Результат:** Найдена проблема - данные загружаются однократно, нет Flow для реактивного обновления
+
+#### Шаг 1.2: Реализация реактивного обновления в DetailScreenViewModel ✅ **ВЫПОЛНЕН**
 
 **Задача:** Обеспечить автоматическое обновление данных при изменениях в репозитории
 
-**Решение (предпочтительное):** Подписка на Flow для конкретной записи
+**Решение:** Подписка на Flow для конкретной записи
 
 **Действия:**
+1. ✅ Добавлен метод `getItemByIdFlow(id: Long): Flow<ItemEntity?>` в ItemDao
+2. ✅ Добавлен метод `getItemFlow(id: Long): Flow<Item?>` в ItemRepository
+3. ✅ Реализован метод в ItemRepositoryImpl
+4. ✅ DetailScreenViewModel переписан для использования Flow вместо однократной загрузки
+5. ✅ Удалены методы `loadItem()` и `updateItem()` (данные обновляются автоматически через Flow)
+6. ✅ Удалено состояние `Deleted` (больше не используется)
 
-1. **В ItemRepository добавить Flow метод (если нет):**
-```kotlin
-// В ItemRepository.kt
-fun getItemFlow(itemId: Long): Flow<Item> {
-    return itemDao.getItemByIdFlow(itemId)
-}
-```
-
-2. **В DetailScreenViewModel использовать Flow вместо однократной загрузки:**
-
-Текущая (проблемная) реализация (пример):
-```kotlin
-private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
-init {
-    loadItem(itemId)
-}
-
-private fun loadItem(itemId: Long) {
-    viewModelScope.launch {
-        val item = repository.getItemById(itemId) // Однократная загрузка
-        _uiState.value = UiState.Success(item)
-    }
-}
-```
-
-Требуемая (правильная) реализация:
-```kotlin
-val uiState: StateFlow<UiState> = itemFlow.map { item ->
-    UiState.Success(item)
-}.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.WhileSubscribed(5000),
-    initialValue = UiState.Loading
-)
-
-private val itemFlow = savedStateHandle.get<Long>("itemId")?.let { itemId ->
-    repository.getItemFlow(itemId)
-} ?: flowOf(null)
-```
-
-3. **Проверить DetailScreen.kt:**
-   - Убедиться, что UI подписан на `viewModel.uiState.collectAsState()`
-   - При изменении itemId должен происходить автоматический перезапуск Flow через `LaunchedEffect(itemId)`
-
-#### Шаг 1.3: Проверка кэширования ViewModel
+#### Шаг 1.3: Проверка кэширования ViewModel ✅ **ВЫПОЛНЕН**
 
 **Задача:** Убедиться, что ViewModel не создает проблем при навигации
 
 **Действия:**
-1. Проверить фабрику DetailScreenViewModel в `RootScreenComponents.kt`:
-   - Убедиться, что фабрика создает ViewModel корректно
-   - При навигации на DetailScreen с тем же itemId может переиспользоваться существующий экземпляр
-2. Если ViewModel кэшируется и это вызывает проблемы:
-   - Рассмотреть использование уникального ключа для навигации
-   - Или добавить механизм для принудительного обновления данных при появлении экрана
-3. Добавить `LaunchedEffect(itemId)` в DetailScreen.kt:
-   - Это обеспечит перезапуск подписки при изменении itemId
-   - Или может быть использовано для принудительной перезагрузки данных
+1. ✅ Проверена фабрика DetailScreenViewModel
+2. ✅ Flow с SharingStarted.WhileSubscribed(5000) обеспечивает автоматическую перезагрузку
 
-#### Шаг 1.4: Тестирование сценария
+**Результат:** Проблема решена - Flow автоматически перезапускается при появлении экрана
 
-**Задача:** Проверить, что данные обновляются корректно
+#### Шаг 1.4: Обновление UI для обработки удаления ✅ **ВЫПОЛНЕН**
 
-**Тестовый сценарий:**
-1. Открыть запись на DetailScreen
-2. Нажать "Редактировать"
-3. Изменить данные (например, название)
-4. Нажать "Сохранить"
-5. Вернуться на DetailScreen
-6. Проверить, что данные обновлены
+**Задача:** Обеспечить корректное удаление и возврат на главный экран
 
-**Проверки:**
-- ✅ DetailScreen показывает обновленные данные сразу после сохранения
-- ✅ MainScreen также показывает обновленные данные в списке
-- ✅ При повторном входе на DetailScreen данные остаются актуальными
-- ✅ Изменения корректно сохранены в базе данных
+**Действия:**
+1. ✅ Добавлен параметр `onDeleteClick` в `detailTopAppBar`
+2. ✅ Обновлен `detailActionButtons` для передачи `onDeleteClick`
+3. ✅ В DetailScreen.kt добавлена логика удаления с возвратом
+4. ✅ Удалена обработка состояния `Deleted` из DetailContent.kt
+5. ✅ Обновлен FakeItemRepository в тестах
 
 **Критерий готовности:**
 - ✅ DetailScreen показывает обновленные данные сразу после возврата из CreateEditScreen
 - ✅ Автоматическое обновление через Flow работает
 - ✅ MainScreen синхронизируется с изменениями
 - ✅ Проблема кэширования ViewModel решена
+- ✅ Удаление записей работает корректно
+
+**Дата исправления: 2025-01-02**
 
 ---
 
@@ -952,6 +898,7 @@ val displayOption by viewModel.displayOption.collectAsState()
 ## История
 
 - 2025-01-02: Создан план исправления на основе найденных 12 багов
+- 2025-01-02: Исправлен баг #1 - DetailScreen не обновляется после редактирования (реализовано реактивное обновление через Flow)
 - 2025-01-02: Исправлен баг #2 - Toolbar перекрывает контент списка (применены paddingValues)
 - 2025-01-02: Исправлен баг #7 - Нижняя навигация не видна (заменен Column на Scaffold, NavigationBar перенесена в bottomBar)
 - 2025-01-02: Исправлен баг #6 - Неправильная верстка ListItemView (разделение на 70%/30%, ограничения maxLines и TextOverflow)

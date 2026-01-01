@@ -45,6 +45,16 @@ interface ItemDao {
     suspend fun getItemById(id: Long): ItemEntity?
 
     /**
+     * Получает запись по идентификатору в виде Flow.
+     * Поток автоматически обновляется при изменениях записи в базе данных.
+     *
+     * @param id Идентификатор записи
+     * @return Flow с записью или null, если не найдена
+     */
+    @Query("SELECT * FROM items WHERE id = :id")
+    fun getItemByIdFlow(id: Long): Flow<ItemEntity?>
+
+    /**
      * Ищет записи по запросу в названии или описании.
      *
      * @param searchQuery Поисковый запрос

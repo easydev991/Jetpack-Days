@@ -25,6 +25,7 @@ fun detailTopAppBar(
     uiState: DetailScreenState,
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
+    onDeleteClick: () -> Unit,
     itemId: Long,
 ) {
     TopAppBar(
@@ -44,7 +45,7 @@ fun detailTopAppBar(
         },
         actions = {
             if (uiState is DetailScreenState.Success) {
-                detailActionButtons(onEditClick = onEditClick, itemId = itemId)
+                detailActionButtons(onEditClick = onEditClick, onDeleteClick = onDeleteClick, itemId = itemId)
             }
         },
         colors =
@@ -60,6 +61,7 @@ fun detailTopAppBar(
 @Composable
 internal fun detailActionButtons(
     onEditClick: (Long) -> Unit,
+    onDeleteClick: () -> Unit,
     itemId: Long,
 ) {
     IconButton(onClick = { onEditClick(itemId) }) {
@@ -68,7 +70,7 @@ internal fun detailActionButtons(
             contentDescription = stringResource(R.string.edit),
         )
     }
-    IconButton(onClick = { }) {
+    IconButton(onClick = onDeleteClick) {
         Icon(
             imageVector = Icons.Default.Delete,
             contentDescription = stringResource(R.string.delete),

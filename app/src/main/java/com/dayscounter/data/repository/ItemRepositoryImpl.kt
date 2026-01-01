@@ -33,6 +33,11 @@ class ItemRepositoryImpl(
 
     override suspend fun getItemById(id: Long): Item? = itemDao.getItemById(id)?.toDomain()
 
+    override fun getItemFlow(id: Long): Flow<Item?> =
+        itemDao
+            .getItemByIdFlow(id)
+            .map { entity -> entity?.toDomain() }
+
     override fun searchItems(query: String): Flow<List<Item>> =
         itemDao
             .searchItems(query)

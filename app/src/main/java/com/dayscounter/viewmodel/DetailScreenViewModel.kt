@@ -13,8 +13,12 @@ import com.dayscounter.domain.exception.ItemException.UpdateFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -55,36 +59,17 @@ class DetailScreenViewModel(
     /**
      * Состояние экрана.
      */
-    private val _uiState = MutableStateFlow<DetailScreenState>(DetailScreenState.Loading)
-    val uiState: StateFlow<DetailScreenState> = _uiState.asStateFlow()
-
-    init {
-        loadItem()
-    }
-
-    /**
-     * Загружает событие из репозитория.
-     */
-    private fun loadItem() {
-        viewModelScope.launch {
-            try {
-                _uiState.value = DetailScreenState.Loading
-                val item = repository.getItemById(itemId)
-
-                if (item != null) {
-                    _uiState.value = DetailScreenState.Success(item)
-                    android.util.Log.d("DetailScreenViewModel", "Событие загружено: ${item.title}")
-                } else {
-                    _uiState.value = DetailScreenState.Error("Событие не найдено")
-                    android.util.Log.w("DetailScreenViewModel", "Событие не найдено: $itemId")
-                }
-            } catch (e: ItemException) {
-                val message = "Ошибка загрузки события: ${e.message}"
-                android.util.Log.e("DetailScreenViewModel", message, e)
-                _uiState.value = DetailScreenState.Error(message)
-            }
-        }
-    }
+    val uiState: StateFlow<DetailScreenState> =
+        repository
+            .getItemFlow(itemId)
+            .filterNotNull()
+            .map { item ->
+                DetailScreenState.Success(item)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = DetailScreenState.Loading,
+            )
 
     /**
      * Удаляет событие.
@@ -92,35 +77,14 @@ class DetailScreenViewModel(
     fun deleteItem() {
         viewModelScope.launch {
             try {
-                val currentState = _uiState.value
+                val currentState = uiState.value
                 if (currentState is DetailScreenState.Success) {
                     repository.deleteItem(currentState.item)
-                    _uiState.value = DetailScreenState.Deleted
                     android.util.Log.d("DetailScreenViewModel", "Событие удалено: ${currentState.item.title}")
                 }
             } catch (e: ItemException.DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
                 android.util.Log.e("DetailScreenViewModel", message, e)
-                _uiState.value = DetailScreenState.Error(message)
-            }
-        }
-    }
-
-    /**
-     * Обновляет событие.
-     *
-     * @param item Обновленное событие
-     */
-    fun updateItem(item: Item) {
-        viewModelScope.launch {
-            try {
-                repository.updateItem(item)
-                _uiState.value = DetailScreenState.Success(item)
-                android.util.Log.d("DetailScreenViewModel", "Событие обновлено: ${item.title}")
-            } catch (e: ItemException.UpdateFailed) {
-                val message = "Ошибка обновления события: ${e.message}"
-                android.util.Log.e("DetailScreenViewModel", message, e)
-                _uiState.value = DetailScreenState.Error(message)
             }
         }
     }
@@ -142,7 +106,4 @@ sealed class DetailScreenState {
     data class Error(
         val message: String,
     ) : DetailScreenState()
-
-    /** Событие удалено */
-    data object Deleted : DetailScreenState()
 }

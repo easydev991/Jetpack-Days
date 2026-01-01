@@ -388,6 +388,11 @@ class MainScreenViewModelTest {
 
         override suspend fun getItemById(id: Long): Item? = _items.value.find { it.id == id }
 
+        override fun getItemFlow(id: Long): Flow<Item?> =
+            _items.map { items ->
+                items.find { it.id == id }
+            }
+
         override fun searchItems(query: String): Flow<List<Item>> {
             val filteredItems =
                 _items.value.filter { item ->
