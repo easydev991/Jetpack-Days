@@ -1,7 +1,7 @@
 package com.dayscounter.ui.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,11 +40,13 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  * - Текст с количеством дней справа и занимает не более 30% от ширины экрана
  * - Слева вертикальный стек с названием и описанием (каждое ограничено 2 строками)
  * - Длинный текст обрезается с многоточием
+ * - Поддерживает короткий клик и долгое нажатие
  *
  * @param item Элемент для отображения
  * @param formattedDaysText Форматированный текст с количеством дней (вычисляется извне)
  * @param modifier Modifier для компонента
  * @param onClick Обработчик клика по элементу
+ * @param onLongClick Обработчик долгого нажатия по элементу
  */
 @Composable
 fun listItemView(
@@ -52,6 +54,7 @@ fun listItemView(
     formattedDaysText: String,
     modifier: Modifier = Modifier,
     onClick: (Item) -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier =
@@ -59,7 +62,10 @@ fun listItemView(
                 .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.surface,
-                ).clickable { onClick(item) }
+                ).combinedClickable(
+                    onClick = { onClick(item) },
+                    onLongClick = onLongClick,
+                )
                 .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

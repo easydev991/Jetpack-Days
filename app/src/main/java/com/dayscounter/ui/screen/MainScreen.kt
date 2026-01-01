@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,19 +31,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -328,7 +325,6 @@ private fun loadingContent(modifier: Modifier = Modifier) {
 /**
  * Контент со списком записей.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun itemsListContent(
     items: List<com.dayscounter.domain.model.Item>,
@@ -338,7 +334,7 @@ private fun itemsListContent(
     viewModel: MainScreenViewModel,
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    var contextMenuItem by remember { mutableStateOf<com.dayscounter.domain.model.Item?>(null) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -350,144 +346,6 @@ private fun itemsListContent(
             items = items,
             key = { it.id },
         ) { item ->
-            val dismissBoxState =
-                rememberSwipeToDismissBoxState(
-                    confirmValueChange = { value ->
-                        when (value) {
-                            SwipeToDismissBoxValue.StartToEnd -> {
-                                // Swipe right to edit
-                                onEditClick(item.id)
-                            }
-
-                            SwipeToDismissBoxValue.EndToStart -> {
-                                // Swipe left to delete
-                                coroutineScope.launch {
-                                    viewModel.requestDelete(item)
-                                }
-                            }
-
-                            else -> {}
-                        }
-                        true
-                    },
-                )
-
-            SwipeToDismissBox(
-                state = dismissBoxState,
-                backgroundContent = {
-                    val direction = dismissBoxState.dismissDirection
-                    val color =
-                        when (direction) {
-                            SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                            else -> Color.Transparent
-                        }
-                    val alignment =
-                        when (direction) {
-                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                            else -> Alignment.Center
-                        }
-                    val icon =
-                        when (direction) {
-                            SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
-                            SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
-                            else -> Icons.Filled.Delete
-                        }
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(color)
-                                .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
-                        contentAlignment = alignment,
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = Color.White,
-                        )
-                    }
-                },
-                content = {
-                    val eventDate =
-                        java.time.LocalDateTime
-                            .ofInstant(
-                                java.time.Instant.ofEpochMilli(item.timestamp),
-                                java.time.ZoneId.systemDefault(),
-                            ).toLocalDate()
-
-                    val currentDate = java.time.LocalDate.now()
-                    val daysSince =
-                        java.time.temporal.ChronoUnit.DAYS
-                            .between(eventDate, currentDate)
-                            .toInt()
-
-                    listItemView(
-                        item = item,
-                        formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
-                        onClick = { onItemClick(it.id) },
-                    )
-                },
-                enableDismissFromStartToEnd = true,
-                enableDismissFromEndToStart = true,
-            )
-        }
-    }
-}
-
-/**
- * Swipe to dismiss wrapper for a single item.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun itemSwipeToDismiss(
-    item: com.dayscounter.domain.model.Item,
-    dismissBoxState: androidx.compose.material3.SwipeToDismissBoxState,
-    onItemClick: (Long) -> Unit,
-    onEditClick: (Long) -> Unit,
-    viewModel: MainScreenViewModel,
-) {
-    SwipeToDismissBox(
-        state = dismissBoxState,
-        backgroundContent = {
-            val direction = dismissBoxState.dismissDirection
-            val color =
-                when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                    else -> Color.Transparent
-                }
-            val alignment =
-                when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                    else -> Alignment.Center
-                }
-            val icon =
-                when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
-                    SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
-                    else -> Icons.Filled.Delete
-                }
-
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(color)
-                        .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
-                contentAlignment = alignment,
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color.White,
-                )
-            }
-        },
-        content = {
             val eventDate =
                 java.time.LocalDateTime
                     .ofInstant(
@@ -505,11 +363,58 @@ private fun itemSwipeToDismiss(
                 item = item,
                 formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
                 onClick = { onItemClick(it.id) },
+                onLongClick = { contextMenuItem = item },
             )
-        },
-        enableDismissFromStartToEnd = true,
-        enableDismissFromEndToStart = true,
-    )
+        }
+    }
+
+    // Контекстное меню
+    contextMenuItem?.let { item ->
+        DropdownMenu(
+            expanded = true,
+            onDismissRequest = { contextMenuItem = null },
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.context_menu_view)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = null,
+                    )
+                },
+                onClick = {
+                    contextMenuItem = null
+                    onItemClick(item.id)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.context_menu_edit)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = null,
+                    )
+                },
+                onClick = {
+                    contextMenuItem = null
+                    onEditClick(item.id)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.context_menu_delete)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = null,
+                    )
+                },
+                onClick = {
+                    contextMenuItem = null
+                    viewModel.requestDelete(item)
+                },
+            )
+        }
+    }
 }
 
 /**

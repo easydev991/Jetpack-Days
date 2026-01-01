@@ -26,6 +26,11 @@
     <string name="delete_item_message">Вы уверены, что хотите удалить \"%s\"?</string>
     <string name="delete_item_confirm">Удалить</string>
 
+    <!-- Context menu -->
+    <string name="context_menu_view">Просмотр</string>
+    <string name="context_menu_edit">Изменить</string>
+    <string name="context_menu_delete">Удалить</string>
+
     <!-- Screen titles -->
     <string name="new_item">Новая запись</string>
     <string name="edit_item">Изменить запись</string>
