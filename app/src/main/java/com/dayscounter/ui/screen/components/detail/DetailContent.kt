@@ -21,9 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dayscounter.R
+import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.ui.util.NumberFormattingUtils
 import com.dayscounter.viewmodel.DetailScreenState
 import java.time.LocalDate
@@ -40,12 +44,14 @@ fun detailContentByState(
         is DetailScreenState.Loading -> {
             loadingContent(modifier = modifier)
         }
+
         is DetailScreenState.Success -> {
             detailContentInner(
                 item = state.item,
                 modifier = modifier,
             )
         }
+
         is DetailScreenState.Error -> {
             errorContent(
                 message = state.message,
@@ -242,7 +248,7 @@ fun detailsSection(details: String) {
  * Информация об опции отображения.
  */
 @Composable
-fun displayOptionInfoSection(displayOption: com.dayscounter.domain.model.DisplayOption) {
+fun displayOptionInfoSection(displayOption: DisplayOption) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -262,16 +268,86 @@ fun displayOptionInfoSection(displayOption: com.dayscounter.domain.model.Display
             Text(
                 text =
                     when (displayOption) {
-                        com.dayscounter.domain.model.DisplayOption.DAY -> stringResource(R.string.days_only)
-                        com.dayscounter.domain.model.DisplayOption.MONTH_DAY -> stringResource(R.string.months_and_days)
-                        com.dayscounter.domain.model.DisplayOption.YEAR_MONTH_DAY ->
+                        DisplayOption.DAY -> stringResource(R.string.days_only)
+                        DisplayOption.MONTH_DAY -> stringResource(R.string.months_and_days)
+                        DisplayOption.YEAR_MONTH_DAY ->
                             stringResource(R.string.years_months_and_days)
-                        com.dayscounter.domain.model.DisplayOption.DEFAULT ->
+
+                        DisplayOption.DEFAULT ->
                             stringResource(R.string.days_only)
                     },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "Секция цветовой метки")
+@Composable
+fun colorTagSectionPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            colorTagSection(android.graphics.Color.RED)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Секция заголовка")
+@Composable
+fun titleSectionPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            titleSection("День рождения")
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Секция деталей")
+@Composable
+fun detailsSectionPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            detailsSection("Праздничный день с друзьями")
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Информация об опции отображения")
+@Composable
+fun displayOptionInfoSectionPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            displayOptionInfoSection(DisplayOption.DAY)
         }
     }
 }

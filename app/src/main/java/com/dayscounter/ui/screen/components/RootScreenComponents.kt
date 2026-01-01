@@ -3,6 +3,7 @@ package com.dayscounter.ui.screen.components
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -30,6 +33,7 @@ import com.dayscounter.R
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.RootScreenViewModel
@@ -227,9 +231,50 @@ internal fun updateTabBasedOnRoute(
                 viewModel.switchTab(Screen.Events)
             }
         }
+
         Screen.More.route -> {
             if (viewModel.currentTab != Screen.More) {
                 viewModel.switchTab(Screen.More)
+            }
+        }
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "Навигационная панель")
+@Composable
+fun navigationBarContentPreview() {
+    jetpackDaysTheme {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+        ) {
+            Text("Preview для NavigationBar")
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Экран настроек")
+@Composable
+fun moreScreenContentPreview() {
+    jetpackDaysTheme {
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("Экран настроек не реализован")
             }
         }
     }

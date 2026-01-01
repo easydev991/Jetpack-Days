@@ -1,17 +1,24 @@
 package com.dayscounter.ui.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.screen.components.navHostContent
 import com.dayscounter.ui.screen.components.navigationBarContent
 import com.dayscounter.ui.screen.components.updateTabBasedOnRoute
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.RootScreenViewModel
 
 /**
@@ -34,6 +41,24 @@ fun rootScreen(
     )
 }
 
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "Root Screen")
+@Composable
+fun rootScreenPreview() {
+    jetpackDaysTheme {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("Preview для RootScreen")
+        }
+    }
+}
+
 /**
  * Основной контент экрана.
  */
@@ -51,7 +76,6 @@ private fun rootScreenContent(
         )
 
     // Получаем текущую вкладку из ViewModel
-    val currentTab by viewModel.currentTab
 
     // Получаем текущий маршрут для управления видимостью навигации
     val navBackStackEntry by navController.currentBackStackEntryAsState()

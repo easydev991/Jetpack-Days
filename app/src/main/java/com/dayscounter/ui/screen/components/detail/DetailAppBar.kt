@@ -13,7 +13,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.DetailScreenState
 
 /**
@@ -74,6 +76,31 @@ internal fun detailActionButtons(
         Icon(
             imageVector = Icons.Default.Delete,
             contentDescription = stringResource(R.string.delete),
+        )
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "TopAppBar экрана деталей")
+@Composable
+fun detailTopAppBarPreview() {
+    jetpackDaysTheme {
+        detailTopAppBar(
+            uiState = DetailScreenState.Success(
+                com.dayscounter.domain.model.Item(
+                    id = 1L,
+                    title = "День рождения",
+                    details = "Праздничный день",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = android.graphics.Color.RED,
+                    displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
+                ),
+            ),
+            onBackClick = {},
+            onEditClick = {},
+            onDeleteClick = {},
+            itemId = 1L,
         )
     }
 }

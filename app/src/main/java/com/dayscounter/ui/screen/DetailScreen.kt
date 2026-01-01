@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -10,12 +11,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.ui.screen.components.detail.detailContentByState
 import com.dayscounter.ui.screen.components.detail.detailTopAppBar
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.DetailScreenState
 import com.dayscounter.viewmodel.DetailScreenViewModel
 
@@ -120,6 +126,62 @@ private fun detailScreenContent(
                     }
                 },
             )
+        }
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "Экран деталей с цветом")
+@Composable
+fun detailScreenWithColorPreview() {
+    jetpackDaysTheme {
+        val item =
+            com.dayscounter.domain.model.Item(
+                id = 1L,
+                title = "День рождения",
+                details = "Праздничный день с друзьями",
+                timestamp = System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L),
+                colorTag = android.graphics.Color.RED,
+                displayOption = DisplayOption.DAY,
+            )
+
+        // Отображаем базовый контент детали
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("Preview для DetailScreen")
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Экран деталей без цвета")
+@Composable
+fun detailScreenNoColorPreview() {
+    jetpackDaysTheme {
+        val item =
+            com.dayscounter.domain.model.Item(
+                id = 2L,
+                title = "Начало работы",
+                details = "Первый день на новой работе",
+                timestamp = System.currentTimeMillis() - (365 * 24 * 60 * 60 * 1000L),
+                colorTag = null,
+                displayOption = DisplayOption.YEAR_MONTH_DAY,
+            )
+
+        // Отображаем базовый контент детали
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("Preview для DetailScreen без цвета")
         }
     }
 }

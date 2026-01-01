@@ -1,7 +1,9 @@
 package com.dayscounter.ui.screen.components.createedit
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,9 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
+import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.ui.util.NumberFormattingUtils
 
 /**
@@ -65,6 +70,56 @@ internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true, name = "Предпросмотр дней (сегодня)")
+@Composable
+fun previewDaysContentTodayPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            previewDaysContentInner(java.time.LocalDate.now())
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Предпросмотр дней (прошедшее событие)")
+@Composable
+fun previewDaysContentPastPreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            previewDaysContentInner(java.time.LocalDate.now().minusDays(5))
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Предпросмотр дней (будущее событие)")
+@Composable
+fun previewDaysContentFuturePreview() {
+    jetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            previewDaysContentInner(java.time.LocalDate.now().plusDays(10))
         }
     }
 }
