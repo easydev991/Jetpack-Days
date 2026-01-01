@@ -4,6 +4,7 @@ import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertNotNull
 
 /**
  * Тесты для проверки контракта интерфейса ItemRepository.
@@ -26,6 +27,8 @@ class ItemRepositoryTest {
 
                 override suspend fun getItemById(id: Long): Item? = throw NotImplementedError()
 
+                override fun getItemFlow(id: Long): Flow<Item?> = throw NotImplementedError()
+
                 override fun searchItems(query: String): Flow<List<Item>> = throw NotImplementedError()
 
                 override suspend fun insertItem(item: Item): Long = throw NotImplementedError()
@@ -40,6 +43,7 @@ class ItemRepositoryTest {
             }
 
         // Если код компилируется, значит интерфейс определен правильно
-        assert(repository != null)
+        // Проверяем, что объект успешно создан
+        assertNotNull(repository)
     }
 }
