@@ -2,7 +2,11 @@ package com.dayscounter.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.data.formatter.ResourceIds
 import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
@@ -25,6 +29,27 @@ class CreateEditScreenViewModel(
     private val resourceProvider: ResourceProvider,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    companion object {
+        fun factory(
+            repository: ItemRepository,
+            resourceProvider: ResourceProvider,
+        ): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    CreateEditScreenViewModel(
+                        repository = repository,
+                        resourceProvider = resourceProvider,
+                        savedStateHandle =
+                            checkNotNull(
+                                createSavedStateHandle(),
+                            ) {
+                                "SavedStateHandle is required"
+                            },
+                    )
+                }
+            }
+    }
+
     /**
      * Идентификатор события из параметров навигации (null для создания нового).
      */
@@ -140,8 +165,12 @@ sealed class CreateEditScreenState {
     data object Loading : CreateEditScreenState()
 
     /** Успешная загрузка */
-    data class Success(val item: Item) : CreateEditScreenState()
+    data class Success(
+        val item: Item,
+    ) : CreateEditScreenState()
 
     /** Ошибка загрузки */
-    data class Error(val message: String) : CreateEditScreenState()
+    data class Error(
+        val message: String,
+    ) : CreateEditScreenState()
 }

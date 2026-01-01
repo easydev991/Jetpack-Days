@@ -37,7 +37,5 @@ object NumberFormattingUtils {
      * @param days Количество дней
      * @return Строка с количеством дней и правильным окончанием (например, "5 дней")
      */
-    fun formatDaysCount(days: Int): String {
-        return "$days ${getDaysEnding(days)}"
-    }
+    fun formatDaysCount(days: Int): String = "$days ${getDaysEnding(days)}"
 }

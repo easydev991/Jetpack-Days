@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -25,7 +27,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.dayscounter.R
+import com.dayscounter.data.database.DaysDatabase
+import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
+import com.dayscounter.viewmodel.CreateEditScreenViewModel
+import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.RootScreenViewModel
 
 /**
@@ -79,6 +85,12 @@ internal fun navigationBarContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun navHostContent(navController: NavHostController) {
+    // Получаем зависимости для создания ViewModels
+    val context = LocalContext.current.applicationContext
+    val database = DaysDatabase.getDatabase(context)
+    val repository = AppModule.createItemRepository(database)
+    val resourceProvider = AppModule.resourceProvider
+
     NavHost(
         navController = navController,
         startDestination = Screen.Events.route,
@@ -101,6 +113,10 @@ internal fun navHostContent(navController: NavHostController) {
             val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
             com.dayscounter.ui.screen.detailScreen(
                 itemId = itemId,
+                viewModel =
+                    viewModel(
+                        factory = DetailScreenViewModel.factory(repository),
+                    ),
                 onBackClick = { navController.popBackStack() },
                 onEditClick = { id ->
                     navController.navigate(Screen.EditItem.createRoute(id))
@@ -110,6 +126,10 @@ internal fun navHostContent(navController: NavHostController) {
         composable(Screen.CreateItem.route) {
             com.dayscounter.ui.screen.createEditScreen(
                 itemId = null,
+                viewModel =
+                    viewModel(
+                        factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                    ),
                 onBackClick = { navController.popBackStack() },
             )
         }
@@ -125,6 +145,10 @@ internal fun navHostContent(navController: NavHostController) {
             val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
             com.dayscounter.ui.screen.createEditScreen(
                 itemId = itemId,
+                viewModel =
+                    viewModel(
+                        factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                    ),
                 onBackClick = { navController.popBackStack() },
             )
         }

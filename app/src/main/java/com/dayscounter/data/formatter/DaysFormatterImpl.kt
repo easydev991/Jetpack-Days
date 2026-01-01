@@ -40,39 +40,36 @@ class DaysFormatterImpl : DaysFormatter {
     override fun format(
         days: Int,
         resourceProvider: ResourceProvider,
-    ): String {
-        return resourceProvider.getQuantityString(
+    ): String =
+        resourceProvider.getQuantityString(
             resId = ResourceIds.DAYS_COUNT,
             quantity = days,
         )
-    }
 
     override fun formatMonths(
         months: Int,
         resourceProvider: ResourceProvider,
-    ): String {
-        return resourceProvider.getQuantityString(
+    ): String =
+        resourceProvider.getQuantityString(
             resId = ResourceIds.MONTHS_COUNT,
             quantity = months,
         )
-    }
 
     override fun formatYears(
         years: Int,
         resourceProvider: ResourceProvider,
-    ): String {
-        return resourceProvider.getQuantityString(
+    ): String =
+        resourceProvider.getQuantityString(
             resId = ResourceIds.YEARS_COUNT,
             quantity = years,
         )
-    }
 
     override fun formatComposite(
         period: TimePeriod,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
-    ): String {
-        return when (displayOption) {
+    ): String =
+        when (displayOption) {
             DisplayOption.DAY -> {
                 format(period.days, resourceProvider)
             }
@@ -85,7 +82,6 @@ class DaysFormatterImpl : DaysFormatter {
                 formatYearMonthDay(period, resourceProvider)
             }
         }
-    }
 
     /**
      * Форматирует месяцы и дни.
@@ -164,8 +160,8 @@ class DaysFormatterImpl : DaysFormatter {
     /**
      * Форматирует список компонентов в строку.
      */
-    private fun formatComponents(components: List<String>): String {
-        return when (components.size) {
+    private fun formatComponents(components: List<String>): String =
+        when (components.size) {
             MAX_COMPONENTS -> components.joinToString(" ") { applyAbbreviation(it) }
             TWO_COMPONENTS -> components.joinToString(" ") { applyAbbreviation(it) }
             1 -> components.firstOrNull() ?: ""
@@ -174,15 +170,14 @@ class DaysFormatterImpl : DaysFormatter {
                 ""
             }
         }
-    }
 
     /**
      * Применяет сокращённые суффиксы к форматированным строкам.
      *
      * Заменяет полные формы на сокращённые (например, "дня" → "дн.").
      */
-    private fun applyAbbreviation(formatted: String): String {
-        return when {
+    private fun applyAbbreviation(formatted: String): String =
+        when {
             formatted.contains("дней") || formatted.contains("дня") || formatted.contains("день") ->
                 formatted.replace("дней", "дн.").replace("дня", "дн.").replace("день", "дн.")
             formatted.contains("месяцев") || formatted.contains("месяца") || formatted.contains("месяц") ->
@@ -191,5 +186,4 @@ class DaysFormatterImpl : DaysFormatter {
                 formatted.replace("лет", "г.").replace("года", "г.").replace("год", "г.")
             else -> formatted
         }
-    }
 }

@@ -19,13 +19,12 @@ fun Item.makeDaysCount(
     useCase: GetFormattedDaysForItemUseCase,
     currentDate: LocalDate? = null,
     defaultDisplayOption: DisplayOption = DisplayOption.DAY,
-): String {
-    return useCase(
+): String =
+    useCase(
         item = this,
         currentDate = currentDate,
         defaultDisplayOption = defaultDisplayOption,
     )
-}
 
 /**
  * Создает копию Item с обновленным displayOption.
@@ -33,6 +32,4 @@ fun Item.makeDaysCount(
  * @param displayOption Новая опция отображения
  * @return Новый экземпляр Item с обновленным displayOption
  */
-fun Item.withDisplayOption(displayOption: DisplayOption): Item {
-    return copy(displayOption = displayOption)
-}
+fun Item.withDisplayOption(displayOption: DisplayOption): Item = copy(displayOption = displayOption)

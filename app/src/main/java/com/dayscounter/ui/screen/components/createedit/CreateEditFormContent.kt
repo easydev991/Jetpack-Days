@@ -154,7 +154,9 @@ internal fun dateSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
 ) {
-    val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+    val formatter =
+        java.time.format.DateTimeFormatter
+            .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
     // Выбор даты
     OutlinedTextField(
         value =
@@ -178,8 +180,8 @@ internal fun dateSection(
  * Создает состояния UI.
  */
 @Composable
-internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState {
-    return ScreenCreateEditUiState(
+internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState =
+    ScreenCreateEditUiState(
         title = rememberSaveable { mutableStateOf("") },
         details = rememberSaveable { mutableStateOf("") },
         selectedDate = remember { mutableStateOf<java.time.LocalDate?>(null) },
@@ -192,7 +194,6 @@ internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState {
                 )
             },
     )
-}
 
 /**
  * Загружает данные при редактировании.
@@ -211,7 +212,8 @@ fun loadItemData(
         uiStates.title.value = item.title
         uiStates.details.value = item.details
         uiStates.selectedDate.value =
-            java.time.Instant.ofEpochMilli(item.timestamp)
+            java.time.Instant
+                .ofEpochMilli(item.timestamp)
                 .atZone(java.time.ZoneId.systemDefault())
                 .toLocalDate()
         uiStates.selectedColor.value = item.colorTag?.let { Color(it) }

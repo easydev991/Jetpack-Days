@@ -50,8 +50,7 @@ fun listItemView(
                 .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.surface,
-                )
-                .clickable { onClick(item) }
+                ).clickable { onClick(item) }
                 .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

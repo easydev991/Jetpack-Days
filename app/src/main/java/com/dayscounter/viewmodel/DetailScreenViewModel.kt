@@ -2,7 +2,11 @@ package com.dayscounter.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.exception.ItemException.UpdateFailed
@@ -23,6 +27,23 @@ class DetailScreenViewModel(
     private val repository: ItemRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    companion object {
+        fun factory(repository: ItemRepository): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    DetailScreenViewModel(
+                        repository = repository,
+                        savedStateHandle =
+                            checkNotNull(
+                                createSavedStateHandle(),
+                            ) {
+                                "SavedStateHandle is required"
+                            },
+                    )
+                }
+            }
+    }
+
     /**
      * Идентификатор события из параметров навигации.
      */
@@ -113,10 +134,14 @@ sealed class DetailScreenState {
     data object Loading : DetailScreenState()
 
     /** Успешная загрузка */
-    data class Success(val item: Item) : DetailScreenState()
+    data class Success(
+        val item: Item,
+    ) : DetailScreenState()
 
     /** Ошибка загрузки */
-    data class Error(val message: String) : DetailScreenState()
+    data class Error(
+        val message: String,
+    ) : DetailScreenState()
 
     /** Событие удалено */
     data object Deleted : DetailScreenState()

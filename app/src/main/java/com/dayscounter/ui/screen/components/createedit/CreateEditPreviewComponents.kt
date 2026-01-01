@@ -24,7 +24,10 @@ import com.dayscounter.ui.util.NumberFormattingUtils
 @Composable
 internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
     val currentDate = java.time.LocalDate.now()
-    val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(selectedDate, currentDate).toInt()
+    val daysBetween =
+        java.time.temporal.ChronoUnit.DAYS
+            .between(selectedDate, currentDate)
+            .toInt()
 
     Surface(
         modifier = Modifier.fillMaxWidth(),

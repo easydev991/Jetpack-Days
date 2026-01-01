@@ -23,7 +23,9 @@ import com.dayscounter.viewmodel.RootScreenViewModel
 @Composable
 fun rootScreen(
     modifier: Modifier = Modifier,
-    viewModel: RootScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: RootScreenViewModel =
+        androidx.lifecycle.viewmodel.compose
+            .viewModel(),
 ) {
     rootScreenContent(
         modifier = modifier,

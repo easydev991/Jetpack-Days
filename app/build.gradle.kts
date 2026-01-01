@@ -97,7 +97,6 @@ detekt {
     buildUponDefaultConfig = true
 }
 
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }

@@ -120,15 +120,16 @@ private fun mainScreenContent(
         modifier = modifier.fillMaxSize(),
         topBar = {
             mainScreenTopBar(
-                state = MainScreenTopBarState(
-                    isSearchActive = isSearchActive,
-                    searchQuery = searchQuery,
-                    itemsCount = itemsCount,
-                    sortOrder = sortOrder,
-                    viewModel = viewModel,
-                    onSearchActiveChange = { isSearchActive = it },
-                    onSortOrderChange = { viewModel.updateSortOrder(it) }
-                )
+                state =
+                    MainScreenTopBarState(
+                        isSearchActive = isSearchActive,
+                        searchQuery = searchQuery,
+                        itemsCount = itemsCount,
+                        sortOrder = sortOrder,
+                        viewModel = viewModel,
+                        onSearchActiveChange = { isSearchActive = it },
+                        onSortOrderChange = { viewModel.updateSortOrder(it) },
+                    ),
             )
         },
         floatingActionButton = {
@@ -146,19 +147,19 @@ private fun mainScreenContent(
         },
     ) { paddingValues ->
         mainScreenContentByState(
-            state = MainScreenContentState(
-                uiState = uiState,
-                searchQuery = searchQuery,
-                listState = listState,
-                onItemClick = onItemClick,
-                onEditClick = onEditClick,
-                viewModel = viewModel,
-            ),
-            paddingValues = paddingValues
+            state =
+                MainScreenContentState(
+                    uiState = uiState,
+                    searchQuery = searchQuery,
+                    listState = listState,
+                    onItemClick = onItemClick,
+                    onEditClick = onEditClick,
+                    viewModel = viewModel,
+                ),
+            paddingValues = paddingValues,
         )
     }
 }
-
 
 /**
  * Меню сортировки.
@@ -317,75 +318,84 @@ private fun itemsListContent(
             items = items,
             key = { it.id },
         ) { item ->
-            val dismissBoxState = rememberSwipeToDismissBoxState(
-                confirmValueChange = { value ->
-                    when (value) {
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            // Swipe right to edit
-                            onEditClick(item.id)
-                        }
-
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            // Swipe left to delete
-                            coroutineScope.launch {
-                                viewModel.deleteItem(item)
+            val dismissBoxState =
+                rememberSwipeToDismissBoxState(
+                    confirmValueChange = { value ->
+                        when (value) {
+                            SwipeToDismissBoxValue.StartToEnd -> {
+                                // Swipe right to edit
+                                onEditClick(item.id)
                             }
-                        }
 
-                        else -> {}
-                    }
-                    true
-                }
-            )
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                // Swipe left to delete
+                                coroutineScope.launch {
+                                    viewModel.deleteItem(item)
+                                }
+                            }
+
+                            else -> {}
+                        }
+                        true
+                    },
+                )
 
             SwipeToDismissBox(
                 state = dismissBoxState,
                 backgroundContent = {
                     val direction = dismissBoxState.dismissDirection
-                    val color = when (direction) {
-                        SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                        else -> Color.Transparent
-                    }
-                    val alignment = when (direction) {
-                        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                        else -> Alignment.Center
-                    }
-                    val icon = when (direction) {
-                        SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
-                        SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
-                        else -> Icons.Filled.Delete
-                    }
+                    val color =
+                        when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                            else -> Color.Transparent
+                        }
+                    val alignment =
+                        when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                            else -> Alignment.Center
+                        }
+                    val icon =
+                        when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
+                            SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
+                            else -> Icons.Filled.Delete
+                        }
 
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color)
-                            .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
-                        contentAlignment = alignment
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(color)
+                                .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
+                        contentAlignment = alignment,
                     ) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = Color.White,
                         )
                     }
                 },
                 content = {
-                    val eventDate = java.time.LocalDateTime.ofInstant(
-                        java.time.Instant.ofEpochMilli(item.timestamp),
-                        java.time.ZoneId.systemDefault()
-                    ).toLocalDate()
+                    val eventDate =
+                        java.time.LocalDateTime
+                            .ofInstant(
+                                java.time.Instant.ofEpochMilli(item.timestamp),
+                                java.time.ZoneId.systemDefault(),
+                            ).toLocalDate()
 
                     val currentDate = java.time.LocalDate.now()
                     val daysSince =
-                        java.time.temporal.ChronoUnit.DAYS.between(eventDate, currentDate).toInt()
+                        java.time.temporal.ChronoUnit.DAYS
+                            .between(eventDate, currentDate)
+                            .toInt()
 
                     listItemView(
                         item = item,
                         formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
-                        onClick = { onItemClick(it.id) }
+                        onClick = { onItemClick(it.id) },
                     )
                 },
                 enableDismissFromStartToEnd = true,
@@ -411,50 +421,58 @@ private fun itemSwipeToDismiss(
         state = dismissBoxState,
         backgroundContent = {
             val direction = dismissBoxState.dismissDirection
-            val color = when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                else -> Color.Transparent
-            }
-            val alignment = when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                else -> Alignment.Center
-            }
-            val icon = when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
-                SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
-                else -> Icons.Filled.Delete
-            }
+            val color =
+                when (direction) {
+                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                    else -> Color.Transparent
+                }
+            val alignment =
+                when (direction) {
+                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                    else -> Alignment.Center
+                }
+            val icon =
+                when (direction) {
+                    SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Edit
+                    SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
+                    else -> Icons.Filled.Delete
+                }
 
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color)
-                    .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
-                contentAlignment = alignment
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(color)
+                        .padding(horizontal = dimensionResource(R.dimen.spacing_large)),
+                contentAlignment = alignment,
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color.White
+                    tint = Color.White,
                 )
             }
         },
         content = {
-            val eventDate = java.time.LocalDateTime.ofInstant(
-                java.time.Instant.ofEpochMilli(item.timestamp),
-                java.time.ZoneId.systemDefault()
-            ).toLocalDate()
+            val eventDate =
+                java.time.LocalDateTime
+                    .ofInstant(
+                        java.time.Instant.ofEpochMilli(item.timestamp),
+                        java.time.ZoneId.systemDefault(),
+                    ).toLocalDate()
 
             val currentDate = java.time.LocalDate.now()
             val daysSince =
-                java.time.temporal.ChronoUnit.DAYS.between(eventDate, currentDate).toInt()
+                java.time.temporal.ChronoUnit.DAYS
+                    .between(eventDate, currentDate)
+                    .toInt()
 
             listItemView(
                 item = item,
                 formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
-                onClick = { onItemClick(it.id) }
+                onClick = { onItemClick(it.id) },
             )
         },
         enableDismissFromStartToEnd = true,
@@ -485,7 +503,6 @@ private fun errorContent(
         )
     }
 }
-
 
 /**
  * Swipe to dismiss wrapper for a single item.
@@ -574,7 +591,7 @@ private fun mainScreenTopBar(state: MainScreenTopBarState) {
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Search,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             },
             trailingIcon = {
@@ -589,7 +606,7 @@ private fun mainScreenTopBar(state: MainScreenTopBarState) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            content = { }
+            content = { },
         )
     } else {
         TopAppBar(
@@ -618,4 +635,3 @@ private fun mainScreenTopBar(state: MainScreenTopBarState) {
         )
     }
 }
-

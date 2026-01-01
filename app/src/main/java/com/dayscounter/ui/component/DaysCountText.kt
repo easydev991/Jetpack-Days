@@ -17,15 +17,14 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  * Вспомогательная функция для получения стиля для обычного отображения.
  */
 @Composable
-private fun getNormalStyle(customStyle: TextStyle?): TextStyle {
-    return if (customStyle != null) {
+private fun getNormalStyle(customStyle: TextStyle?): TextStyle =
+    if (customStyle != null) {
         customStyle
     } else {
         MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Medium,
         )
     }
-}
 
 /**
  * Вспомогательная функция для получения акцентного стиля.

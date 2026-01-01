@@ -39,14 +39,13 @@ enum class DisplayOption {
          * @param value Строковое значение ("day", "monthDay", "yearMonthDay")
          * @return DisplayOption или DEFAULT, если значение неизвестно
          */
-        fun fromString(value: String): DisplayOption {
-            return when (value.lowercase()) {
+        fun fromString(value: String): DisplayOption =
+            when (value.lowercase()) {
                 "day" -> DAY
                 "monthday", "month_day" -> MONTH_DAY
                 "yearmonthday", "year_month_day" -> YEAR_MONTH_DAY
                 else -> DEFAULT
             }
-        }
     }
 
     /**
@@ -55,11 +54,10 @@ enum class DisplayOption {
      *
      * @return Строковое представление в формате camelCase
      */
-    fun toJsonString(): String {
-        return when (this) {
+    fun toJsonString(): String =
+        when (this) {
             DAY -> "day"
             MONTH_DAY -> "monthDay"
             YEAR_MONTH_DAY -> "yearMonthDay"
         }
-    }
 }

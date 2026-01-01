@@ -26,8 +26,8 @@ class FormatDaysTextUseCase(
         difference: DaysDifference,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
-    ): String {
-        return when (difference) {
+    ): String =
+        when (difference) {
             is DaysDifference.Today -> {
                 // Возвращаем локализованную строку "Сегодня"
                 resourceProvider.getString(com.dayscounter.data.formatter.ResourceIds.TODAY)
@@ -42,5 +42,4 @@ class FormatDaysTextUseCase(
                 )
             }
         }
-    }
 }

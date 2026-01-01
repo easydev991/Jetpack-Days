@@ -15,23 +15,21 @@ class ResourceProviderImpl(
     override fun getString(
         resId: Int,
         vararg formatArgs: Any,
-    ): String {
-        return if (formatArgs.isEmpty()) {
+    ): String =
+        if (formatArgs.isEmpty()) {
             context.getString(resId)
         } else {
             context.getString(resId, *formatArgs)
         }
-    }
 
     override fun getQuantityString(
         resId: Int,
         quantity: Int,
         vararg formatArgs: Any,
-    ): String {
-        return if (formatArgs.isEmpty()) {
+    ): String =
+        if (formatArgs.isEmpty()) {
             context.resources.getQuantityString(resId, quantity, quantity)
         } else {
             context.resources.getQuantityString(resId, quantity, quantity, *formatArgs)
         }
-    }
 }

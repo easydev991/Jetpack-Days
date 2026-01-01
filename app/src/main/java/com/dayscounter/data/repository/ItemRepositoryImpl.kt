@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.map
 class ItemRepositoryImpl(
     private val itemDao: ItemDao,
 ) : ItemRepository {
-    override fun getAllItems(): Flow<List<Item>> {
-        return itemDao.getAllItems()
+    override fun getAllItems(): Flow<List<Item>> =
+        itemDao
+            .getAllItems()
             .map { entities -> entities.map { it.toDomain() } }
-    }
 
     override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> {
         val flow =
@@ -31,18 +31,14 @@ class ItemRepositoryImpl(
         return flow.map { entities -> entities.map { it.toDomain() } }
     }
 
-    override suspend fun getItemById(id: Long): Item? {
-        return itemDao.getItemById(id)?.toDomain()
-    }
+    override suspend fun getItemById(id: Long): Item? = itemDao.getItemById(id)?.toDomain()
 
-    override fun searchItems(query: String): Flow<List<Item>> {
-        return itemDao.searchItems(query)
+    override fun searchItems(query: String): Flow<List<Item>> =
+        itemDao
+            .searchItems(query)
             .map { entities -> entities.map { it.toDomain() } }
-    }
 
-    override suspend fun insertItem(item: Item): Long {
-        return itemDao.insertItem(item.toEntity())
-    }
+    override suspend fun insertItem(item: Item): Long = itemDao.insertItem(item.toEntity())
 
     override suspend fun updateItem(item: Item) {
         itemDao.updateItem(item.toEntity())
@@ -56,7 +52,5 @@ class ItemRepositoryImpl(
         itemDao.deleteAllItems()
     }
 
-    override suspend fun getItemsCount(): Int {
-        return itemDao.getItemsCount()
-    }
+    override suspend fun getItemsCount(): Int = itemDao.getItemsCount()
 }

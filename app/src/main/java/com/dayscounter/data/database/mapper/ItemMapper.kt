@@ -14,8 +14,8 @@ private val displayOptionConverter = DisplayOptionConverter()
  *
  * @return Доменная модель Item
  */
-fun ItemEntity.toDomain(): Item {
-    return Item(
+fun ItemEntity.toDomain(): Item =
+    Item(
         id = id,
         title = title,
         details = details,
@@ -23,15 +23,14 @@ fun ItemEntity.toDomain(): Item {
         colorTag = colorTag,
         displayOption = displayOptionConverter.toDisplayOption(displayOption),
     )
-}
 
 /**
  * Преобразует доменную модель Item в ItemEntity.
  *
  * @return Room Entity ItemEntity
  */
-fun Item.toEntity(): ItemEntity {
-    return ItemEntity(
+fun Item.toEntity(): ItemEntity =
+    ItemEntity(
         id = id,
         title = title,
         details = details,
@@ -39,4 +38,3 @@ fun Item.toEntity(): ItemEntity {
         colorTag = colorTag,
         displayOption = displayOptionConverter.fromDisplayOption(displayOption),
     )
-}

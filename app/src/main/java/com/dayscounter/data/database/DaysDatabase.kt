@@ -43,17 +43,17 @@ abstract class DaysDatabase : RoomDatabase() {
          * @param context Контекст приложения
          * @return Экземпляр DaysDatabase
          */
-        fun getDatabase(context: Context): DaysDatabase {
-            return INSTANCE ?: synchronized(this) {
+        fun getDatabase(context: Context): DaysDatabase =
+            INSTANCE ?: synchronized(this) {
                 val instance =
-                    Room.databaseBuilder(
-                        context.applicationContext,
-                        DaysDatabase::class.java,
-                        "days_database",
-                    ).build()
+                    Room
+                        .databaseBuilder(
+                            context.applicationContext,
+                            DaysDatabase::class.java,
+                            "days_database",
+                        ).build()
                 INSTANCE = instance
                 instance
             }
-        }
     }
 }

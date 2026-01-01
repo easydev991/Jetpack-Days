@@ -67,7 +67,9 @@ internal fun detailContentInner(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
-    val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+    val formatter =
+        java.time.format.DateTimeFormatter
+            .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
 
     Column(
         modifier =
@@ -120,7 +122,9 @@ fun colorTagSection(colorTag: Int) {
     Surface(
         modifier = Modifier.size(dimensionResource(R.dimen.size_large)),
         shape = CircleShape,
-        color = androidx.compose.ui.graphics.Color(colorTag),
+        color =
+            androidx.compose.ui.graphics
+                .Color(colorTag),
     ) {}
 }
 
@@ -146,7 +150,8 @@ internal fun dateSection(
     formatter: java.time.format.DateTimeFormatter,
 ) {
     val eventDate =
-        java.time.Instant.ofEpochMilli(timestamp)
+        java.time.Instant
+            .ofEpochMilli(timestamp)
             .atZone(java.time.ZoneId.systemDefault())
             .toLocalDate()
 
@@ -164,7 +169,8 @@ internal fun dateSection(
 @Composable
 fun daysCountSection(item: com.dayscounter.domain.model.Item) {
     val eventDate =
-        java.time.Instant.ofEpochMilli(item.timestamp)
+        java.time.Instant
+            .ofEpochMilli(item.timestamp)
             .atZone(java.time.ZoneId.systemDefault())
             .toLocalDate()
     val currentDate = LocalDate.now()
@@ -194,14 +200,16 @@ fun daysCountSection(item: com.dayscounter.domain.model.Item) {
 internal fun calculateDaysText(
     eventDate: LocalDate,
     currentDate: LocalDate,
-): String {
-    return if (eventDate == currentDate) {
+): String =
+    if (eventDate == currentDate) {
         "Сегодня"
     } else {
-        val totalDays = java.time.temporal.ChronoUnit.DAYS.between(eventDate, currentDate).toInt()
+        val totalDays =
+            java.time.temporal.ChronoUnit.DAYS
+                .between(eventDate, currentDate)
+                .toInt()
         NumberFormattingUtils.formatDaysCount(totalDays)
     }
-}
 
 /**
  * Секция с деталями события.

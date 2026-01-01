@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -91,12 +91,15 @@ class MainScreenViewModel(
                 if (query.isEmpty()) {
                     items
                 } else {
-                    val filteredItems = items.filter { item ->
-                        val titleContains = item.title.contains(query, ignoreCase = true)
-                        val detailsContains = item.details.contains(query, ignoreCase = true)
-                        println("Фильтрация: элемент='${item.title}', детали='${item.details}', запрос='$query', titleContains=$titleContains, detailsContains=$detailsContains")
-                        titleContains || detailsContains
-                    }
+                    val filteredItems =
+                        items.filter { item ->
+                            val titleContains = item.title.contains(query, ignoreCase = true)
+                            val detailsContains = item.details.contains(query, ignoreCase = true)
+                            println(
+                                "Фильтрация: элемент='${item.title}', детали='${item.details}', запрос='$query', titleContains=$titleContains, detailsContains=$detailsContains",
+                            )
+                            titleContains || detailsContains
+                        }
                     println("После фильтрации: ${filteredItems.size} элементов")
                     filteredItems
                 }
@@ -223,8 +226,12 @@ sealed class MainScreenState {
     data object Loading : MainScreenState()
 
     /** Успешная загрузка */
-    data class Success(val items: List<com.dayscounter.domain.model.Item>) : MainScreenState()
+    data class Success(
+        val items: List<com.dayscounter.domain.model.Item>,
+    ) : MainScreenState()
 
     /** Ошибка загрузки */
-    data class Error(val message: String) : MainScreenState()
+    data class Error(
+        val message: String,
+    ) : MainScreenState()
 }

@@ -31,9 +31,7 @@ object AppModule {
      * @param database База данных Room
      * @return Экземпляр ItemRepository
      */
-    fun createItemRepository(database: DaysDatabase): ItemRepository {
-        return ItemRepositoryImpl(database.itemDao())
-    }
+    fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao())
 
     /**
      * Создает ViewModel для главного экрана.
@@ -41,9 +39,7 @@ object AppModule {
      * @param repository Репозиторий для работы с данными
      * @return Экземпляр MainScreenViewModel
      */
-    fun createMainScreenViewModel(repository: ItemRepository): MainScreenViewModel {
-        return MainScreenViewModel(repository)
-    }
+    fun createMainScreenViewModel(repository: ItemRepository): MainScreenViewModel = MainScreenViewModel(repository)
 
     /**
      * Создает ViewModel для экрана деталей.
@@ -55,11 +51,10 @@ object AppModule {
         repository: ItemRepository,
     ): (
         androidx.lifecycle.SavedStateHandle,
-    ) -> DetailScreenViewModel {
-        return { savedStateHandle ->
+    ) -> DetailScreenViewModel =
+        { savedStateHandle ->
             DetailScreenViewModel(repository, savedStateHandle)
         }
-    }
 
     /**
      * Создает ViewModel для экрана создания/редактирования.
@@ -69,22 +64,19 @@ object AppModule {
      */
     fun createCreateEditScreenViewModelFactory(
         repository: ItemRepository,
-    ): (androidx.lifecycle.SavedStateHandle) -> com.dayscounter.viewmodel.CreateEditScreenViewModel {
-        return { savedStateHandle ->
+    ): (androidx.lifecycle.SavedStateHandle) -> com.dayscounter.viewmodel.CreateEditScreenViewModel =
+        { savedStateHandle ->
             com.dayscounter.viewmodel.CreateEditScreenViewModel(
                 repository,
                 resourceProvider,
                 savedStateHandle,
             )
         }
-    }
 
     /**
      * Возвращает FormatterModule для форматирования дней.
      *
      * @return Объект FormatterModule
      */
-    fun getFormatterModule(): FormatterModule {
-        return FormatterModule
-    }
+    fun getFormatterModule(): FormatterModule = FormatterModule
 }

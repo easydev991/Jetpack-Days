@@ -20,12 +20,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-
-
 /**
  * Unit-тесты для MainScreenViewModel.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MainScreenViewModelTest {
     private lateinit var repository: FakeItemRepository
     private lateinit var viewModel: MainScreenViewModel
@@ -380,14 +378,13 @@ class MainScreenViewModelTest {
 
         override fun getAllItems(): Flow<List<Item>> = _items
 
-        override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> {
-            return _items.map { items ->
+        override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> =
+            _items.map { items ->
                 when (sortOrder) {
                     SortOrder.ASCENDING -> items.sortedBy { it.timestamp }
                     SortOrder.DESCENDING -> items.sortedByDescending { it.timestamp }
                 }
             }
-        }
 
         override suspend fun getItemById(id: Long): Item? = _items.value.find { it.id == id }
 

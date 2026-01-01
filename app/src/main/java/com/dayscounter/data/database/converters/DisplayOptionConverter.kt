@@ -18,9 +18,7 @@ class DisplayOptionConverter {
      * @return Строковое представление (имя enum)
      */
     @TypeConverter
-    fun fromDisplayOption(value: DisplayOption): String {
-        return value.name
-    }
+    fun fromDisplayOption(value: DisplayOption): String = value.name
 
     /**
      * Преобразует строку в DisplayOption из базы данных.
@@ -29,8 +27,8 @@ class DisplayOptionConverter {
      * @return DisplayOption или DEFAULT, если значение неизвестно
      */
     @TypeConverter
-    fun toDisplayOption(value: String): DisplayOption {
-        return try {
+    fun toDisplayOption(value: String): DisplayOption =
+        try {
             DisplayOption.valueOf(value)
         } catch (e: IllegalArgumentException) {
             android.util.Log.w(
@@ -40,5 +38,4 @@ class DisplayOptionConverter {
             )
             DisplayOption.DEFAULT
         }
-    }
 }

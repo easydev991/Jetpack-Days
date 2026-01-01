@@ -26,10 +26,12 @@ class ItemRepositoryIntegrationTest {
     @Before
     fun setup() {
         database =
-            Room.inMemoryDatabaseBuilder(
-                ApplicationProvider.getApplicationContext(),
-                DaysDatabase::class.java,
-            ).allowMainThreadQueries().build()
+            Room
+                .inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext(),
+                    DaysDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
         itemDao = database.itemDao()
         repository = ItemRepositoryImpl(itemDao)
     }
