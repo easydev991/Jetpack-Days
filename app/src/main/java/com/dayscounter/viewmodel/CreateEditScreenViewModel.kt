@@ -61,6 +61,18 @@ class CreateEditScreenViewModel(
     private val _uiState = MutableStateFlow<CreateEditScreenState>(CreateEditScreenState.Loading)
     val uiState: StateFlow<CreateEditScreenState> = _uiState.asStateFlow()
 
+    /**
+     * Оригинальные данные события (для отслеживания изменений при редактировании).
+     */
+    private val _originalItem = MutableStateFlow<Item?>(null)
+    val originalItem: StateFlow<Item?> = _originalItem.asStateFlow()
+
+    /**
+     * Признак наличия изменений по сравнению с оригинальными данными.
+     */
+    private val _hasChanges = MutableStateFlow(false)
+    val hasChanges: StateFlow<Boolean> = _hasChanges.asStateFlow()
+
     init {
         if (itemId != null) {
             loadItem()
@@ -80,6 +92,33 @@ class CreateEditScreenViewModel(
     }
 
     /**
+     * Проверяет наличие изменений по сравнению с оригинальными данными.
+     */
+    fun checkHasChanges(
+        title: String,
+        details: String,
+        timestamp: Long,
+        colorTag: Int?,
+        displayOption: com.dayscounter.domain.model.DisplayOption,
+    ) {
+        val original = _originalItem.value ?: return
+        val hasChanges =
+            title != original.title ||
+                details != original.details ||
+                timestamp != original.timestamp ||
+                colorTag != original.colorTag ||
+                displayOption != original.displayOption
+        _hasChanges.value = hasChanges
+    }
+
+    /**
+     * Сбрасывает состояние изменений.
+     */
+    fun resetHasChanges() {
+        _hasChanges.value = false
+    }
+
+    /**
      * Загружает событие из репозитория (для редактирования).
      */
     private fun loadItem() {
@@ -90,6 +129,8 @@ class CreateEditScreenViewModel(
 
                 if (item != null) {
                     _uiState.value = CreateEditScreenState.Success(item)
+                    _originalItem.value = item
+                    _hasChanges.value = false
                     android.util.Log.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
                 } else {
                     _uiState.value =
@@ -143,6 +184,8 @@ class CreateEditScreenViewModel(
             try {
                 repository.updateItem(item)
                 _uiState.value = CreateEditScreenState.Success(item)
+                _originalItem.value = item
+                _hasChanges.value = false
                 android.util.Log.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
             } catch (e: ItemException.UpdateFailed) {
                 val message =

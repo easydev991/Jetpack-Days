@@ -35,7 +35,10 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  * Селектор цвета.
  */
 @Composable
-internal fun colorSelector(selectedColor: MutableState<Color?>) {
+internal fun colorSelector(
+    selectedColor: MutableState<Color?>,
+    onValueChange: () -> Unit = {},
+) {
     val colors =
         listOf(
             colorResource(R.color.color_primary_red),
@@ -62,11 +65,12 @@ internal fun colorSelector(selectedColor: MutableState<Color?>) {
             colorOptionSurface(
                 color = color,
                 selectedColor = selectedColor,
+                onValueChange = onValueChange,
             )
         }
 
         // Опция без цвета
-        noColorOptionSurface(selectedColor = selectedColor)
+        noColorOptionSurface(selectedColor = selectedColor, onValueChange = onValueChange)
     }
 }
 
@@ -77,6 +81,7 @@ internal fun colorSelector(selectedColor: MutableState<Color?>) {
 internal fun colorOptionSurface(
     color: Color,
     selectedColor: MutableState<Color?>,
+    onValueChange: () -> Unit = {},
 ) {
     Surface(
         onClick = {
@@ -85,6 +90,7 @@ internal fun colorOptionSurface(
             } else {
                 selectedColor.value = color
             }
+            onValueChange()
         },
         modifier =
             Modifier
@@ -108,9 +114,15 @@ internal fun colorOptionSurface(
  * Поверхность для опции без цвета.
  */
 @Composable
-internal fun noColorOptionSurface(selectedColor: MutableState<Color?>) {
+internal fun noColorOptionSurface(
+    selectedColor: MutableState<Color?>,
+    onValueChange: () -> Unit = {},
+) {
     Surface(
-        onClick = { selectedColor.value = null },
+        onClick = {
+            selectedColor.value = null
+            onValueChange()
+        },
         modifier =
             Modifier
                 .size(dimensionResource(R.dimen.color_tag_size))
@@ -144,7 +156,10 @@ internal fun noColorOptionSurface(selectedColor: MutableState<Color?>) {
  * Селектор опции отображения.
  */
 @Composable
-internal fun displayOptionSelector(selectedDisplayOption: MutableState<DisplayOption>) {
+internal fun displayOptionSelector(
+    selectedDisplayOption: MutableState<DisplayOption>,
+    onValueChange: () -> Unit = {},
+) {
     Text(
         text = stringResource(R.string.display_format),
         style = MaterialTheme.typography.titleMedium,
@@ -157,6 +172,7 @@ internal fun displayOptionSelector(selectedDisplayOption: MutableState<DisplayOp
         displayOptionSurface(
             option = option,
             selectedDisplayOption = selectedDisplayOption,
+            onValueChange = onValueChange,
         )
     }
 }
@@ -168,9 +184,13 @@ internal fun displayOptionSelector(selectedDisplayOption: MutableState<DisplayOp
 internal fun displayOptionSurface(
     option: DisplayOption,
     selectedDisplayOption: MutableState<DisplayOption>,
+    onValueChange: () -> Unit = {},
 ) {
     Surface(
-        onClick = { selectedDisplayOption.value = option },
+        onClick = {
+            selectedDisplayOption.value = option
+            onValueChange()
+        },
         modifier =
             Modifier
                 .fillMaxWidth()

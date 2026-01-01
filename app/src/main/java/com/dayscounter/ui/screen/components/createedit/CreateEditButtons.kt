@@ -15,6 +15,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,6 +43,8 @@ internal fun buttonsSection(
     viewModel: CreateEditScreenViewModel,
     onBackClick: () -> Unit,
 ) {
+    val hasChanges by viewModel.hasChanges.collectAsState()
+
     // Кнопки
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -54,6 +58,7 @@ internal fun buttonsSection(
             itemId = itemId,
             viewModel = viewModel,
             onBackClick = onBackClick,
+            hasChanges = hasChanges,
         )
     }
 }
@@ -68,10 +73,14 @@ internal fun saveButton(
     itemId: Long?,
     viewModel: CreateEditScreenViewModel,
     onBackClick: () -> Unit,
+    hasChanges: Boolean,
 ) {
+    val isValidData = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null
+    val isEditing = itemId != null
+
     Button(
         onClick = {
-            if (uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null) {
+            if (isValidData) {
                 val timestamp =
                     uiStates.selectedDate.value
                         ?.atStartOfDay(java.time.ZoneId.systemDefault())
@@ -88,7 +97,7 @@ internal fun saveButton(
                         displayOption = uiStates.selectedDisplayOption.value,
                     )
 
-                if (itemId != null) {
+                if (isEditing) {
                     viewModel.updateItem(item.copy(id = itemId))
                 } else {
                     viewModel.createItem(item)
@@ -97,7 +106,12 @@ internal fun saveButton(
             }
         },
         modifier = Modifier.fillMaxWidth(),
-        enabled = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null,
+        enabled =
+            if (isEditing) {
+                isValidData && hasChanges
+            } else {
+                isValidData
+            },
     ) {
         Text(stringResource(R.string.save))
     }

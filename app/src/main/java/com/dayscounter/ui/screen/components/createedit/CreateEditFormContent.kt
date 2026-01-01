@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,6 +78,25 @@ internal fun createEditTopAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun createEditFormContent(params: CreateEditFormParams) {
+    // Функция для отслеживания изменений
+    val onValueChange: () -> Unit = {
+        if (params.itemId != null) {
+            val timestamp =
+                params.uiStates.selectedDate.value
+                    ?.atStartOfDay(java.time.ZoneId.systemDefault())
+                    ?.toInstant()
+                    ?.toEpochMilli() ?: 0L
+
+            params.viewModel.checkHasChanges(
+                title = params.uiStates.title.value,
+                details = params.uiStates.details.value,
+                timestamp = timestamp,
+                colorTag = params.uiStates.selectedColor.value?.toArgb(),
+                displayOption = params.uiStates.selectedDisplayOption.value,
+            )
+        }
+    }
+
     Column(
         modifier =
             Modifier
@@ -85,11 +105,17 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_extra_large)),
     ) {
-        titleSection(title = params.uiStates.title)
+        titleSection(
+            title = params.uiStates.title,
+            onValueChange = { onValueChange() },
+        )
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-        detailsSection(details = params.uiStates.details)
+        detailsSection(
+            details = params.uiStates.details,
+            onValueChange = { onValueChange() },
+        )
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-        dateSection(selectedDate = params.uiStates.selectedDate, showDatePicker = params.showDatePicker)
+        dateSection(selectedDate = params.uiStates.selectedDate, showDatePicker = params.showDatePicker, onValueChange = onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
 
         // Предпросмотр дней
@@ -101,12 +127,16 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
         // Выбор цвета
         colorSelector(
             selectedColor = params.uiStates.selectedColor,
+            onValueChange = onValueChange,
         )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
 
         // Опция отображения
-        displayOptionSelector(selectedDisplayOption = params.uiStates.selectedDisplayOption)
+        displayOptionSelector(
+            selectedDisplayOption = params.uiStates.selectedDisplayOption,
+            onValueChange = onValueChange,
+        )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
 
@@ -126,10 +156,16 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
  * Секция с заголовком.
  */
 @Composable
-internal fun titleSection(title: MutableState<String>) {
+internal fun titleSection(
+    title: MutableState<String>,
+    onValueChange: (String) -> Unit = {},
+) {
     OutlinedTextField(
         value = title.value,
-        onValueChange = { title.value = it },
+        onValueChange = {
+            title.value = it
+            onValueChange(it)
+        },
         label = { Text(stringResource(R.string.title)) },
         modifier = Modifier.fillMaxWidth(),
     )
@@ -139,10 +175,16 @@ internal fun titleSection(title: MutableState<String>) {
  * Секция с деталями.
  */
 @Composable
-internal fun detailsSection(details: MutableState<String>) {
+internal fun detailsSection(
+    details: MutableState<String>,
+    onValueChange: (String) -> Unit = {},
+) {
     OutlinedTextField(
         value = details.value,
-        onValueChange = { details.value = it },
+        onValueChange = {
+            details.value = it
+            onValueChange(it)
+        },
         label = { Text(stringResource(R.string.details)) },
         modifier = Modifier.fillMaxWidth(),
         minLines = 3,
@@ -157,6 +199,7 @@ internal fun detailsSection(details: MutableState<String>) {
 internal fun dateSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
+    onValueChange: () -> Unit = {},
 ) {
     val formatter =
         java.time.format.DateTimeFormatter
@@ -170,7 +213,12 @@ internal fun dateSection(
         readOnly = true,
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
-            IconButton(onClick = { showDatePicker.value = true }) {
+            IconButton(
+                onClick = {
+                    showDatePicker.value = true
+                    onValueChange()
+                },
+            ) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
                     contentDescription = stringResource(R.string.select_date),
