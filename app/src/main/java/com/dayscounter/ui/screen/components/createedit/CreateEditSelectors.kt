@@ -68,9 +68,6 @@ internal fun colorSelector(
                 onValueChange = onValueChange,
             )
         }
-
-        // Опция без цвета
-        noColorOptionSurface(selectedColor = selectedColor, onValueChange = onValueChange)
     }
 }
 
@@ -100,56 +97,14 @@ internal fun colorOptionSurface(
         color = color,
         border =
             if (selectedColor.value == color) {
-                null
-            } else {
                 BorderStroke(
                     dimensionResource(R.dimen.border_width),
                     MaterialTheme.colorScheme.outline,
                 )
+            } else {
+                null
             },
     ) {}
-}
-
-/**
- * Поверхность для опции без цвета.
- */
-@Composable
-internal fun noColorOptionSurface(
-    selectedColor: MutableState<Color?>,
-    onValueChange: () -> Unit = {},
-) {
-    Surface(
-        onClick = {
-            selectedColor.value = null
-            onValueChange()
-        },
-        modifier =
-            Modifier
-                .size(dimensionResource(R.dimen.color_tag_size))
-                .padding(dimensionResource(R.dimen.spacing_small)),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        border =
-            if (selectedColor.value == null) {
-                null
-            } else {
-                BorderStroke(
-                    dimensionResource(R.dimen.border_width),
-                    MaterialTheme.colorScheme.outline,
-                )
-            },
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "—",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
 }
 
 /**

@@ -1,11 +1,12 @@
 package com.dayscounter.data.formatter
 
+import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.TimePeriod
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * Тесты для [DaysFormatterImpl].
@@ -103,6 +104,7 @@ class DaysFormatterImplTest {
     fun `formatComposite when DAY option then returns days only`() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 3)
+        val totalDays = 365 // 1 год + 2 месяца + 3 дня ≈ 365 дней
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
@@ -111,7 +113,7 @@ class DaysFormatterImplTest {
         } returns "365 дней"
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.DAY, resourceProvider, totalDays)
 
         // Then
         assertEquals("365 дней", result, "Ожидались только дни для опции DAY")
@@ -135,7 +137,7 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("2 мес. 5 дн.", result, "Ожидался краткий формат")
@@ -159,7 +161,7 @@ class DaysFormatterImplTest {
         } returns "10 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("48 мес. 10 дн.", result, "Ожидалась конвертация лет в месяцы для MONTH_DAY")
@@ -183,7 +185,7 @@ class DaysFormatterImplTest {
         } returns "3 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("14 мес. 3 дн.", result, "Ожидалась сумма лет и месяцев для MONTH_DAY")
@@ -201,7 +203,7 @@ class DaysFormatterImplTest {
         } returns "2 месяца"
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("2 месяца", result, "Ожидался полный формат")
@@ -231,7 +233,7 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат")
@@ -255,7 +257,7 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("2 мес. 5 дн.", result, "Ожидался краткий формат")
@@ -273,7 +275,7 @@ class DaysFormatterImplTest {
         } returns "1 год"
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("1 год", result, "Ожидался полный формат")
@@ -303,7 +305,7 @@ class DaysFormatterImplTest {
         } returns "10 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider)
+        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
 
         // Then
         assertEquals("4 г. 10 дн.", result, "Ожидалось отсутствие конвертации лет в месяцы для YEAR_MONTH_DAY")

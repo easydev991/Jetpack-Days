@@ -88,15 +88,21 @@ class DaysFormatterImpl : DaysFormatter {
 
     /**
      * Форматирует месяцы и дни.
+     *
+     * Для MONTH_DAY конвертирует годы в месяцы, так же как в iOS-приложении
+     * (DateComponentsFormatter с allowedUnits = [.month, .day]).
      */
     private fun formatMonthDay(
         period: TimePeriod,
         resourceProvider: ResourceProvider,
     ): String {
+        // Конвертируем годы в месяцы для MONTH_DAY (как в iOS)
+        val totalMonths = period.years * 12 + period.months
+
         val timeComponents =
             TimeComponents(
-                showMonths = period.months != 0,
-                monthsValue = period.months,
+                showMonths = totalMonths != 0,
+                monthsValue = totalMonths,
                 showDays = period.days != 0,
                 daysValue = period.days,
             )
@@ -139,18 +145,14 @@ class DaysFormatterImpl : DaysFormatter {
         components: TimeComponents,
         resourceProvider: ResourceProvider,
     ): List<String> {
-        // Пробел добавляется только для формата с годами (YEAR_MONTH_DAY)
-        // Для других форматов пробелы будут между компонентами
-        val separator = " "
-
         val result = mutableListOf<String>()
 
         if (components.showYears) {
-            result.add(formatYears(components.yearsValue, resourceProvider) + separator)
+            result.add(formatYears(components.yearsValue, resourceProvider))
         }
 
         if (components.showMonths) {
-            result.add(formatMonths(components.monthsValue, resourceProvider) + separator)
+            result.add(formatMonths(components.monthsValue, resourceProvider))
         }
 
         if (components.showDays) {
