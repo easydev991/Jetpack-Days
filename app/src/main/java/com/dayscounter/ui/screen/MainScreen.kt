@@ -220,11 +220,12 @@ private fun sortMenu(
  * Контент с пустым списком.
  */
 @Composable
-private fun emptyContent() {
+private fun emptyContent(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(dimensionResource(R.dimen.spacing_huge)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -251,11 +252,12 @@ private fun emptyContent() {
  * Контент с пустым результатом поиска.
  */
 @Composable
-private fun emptySearchContent() {
+private fun emptySearchContent(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(dimensionResource(R.dimen.spacing_huge)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -306,12 +308,14 @@ private fun itemsListContent(
     onItemClick: (Long) -> Unit,
     onEditClick: (Long) -> Unit,
     viewModel: MainScreenViewModel,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
+        contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
     ) {
         items(
@@ -537,9 +541,9 @@ private fun mainScreenContentByState(
         is MainScreenState.Success -> {
             if (uiState.items.isEmpty()) {
                 if (state.searchQuery.isNotEmpty()) {
-                    emptySearchContent()
+                    emptySearchContent(paddingValues)
                 } else {
-                    emptyContent()
+                    emptyContent(paddingValues)
                 }
             } else {
                 itemsListContent(
@@ -548,6 +552,7 @@ private fun mainScreenContentByState(
                     onItemClick = state.onItemClick,
                     onEditClick = state.onEditClick,
                     viewModel = state.viewModel,
+                    paddingValues = paddingValues,
                 )
             }
         }

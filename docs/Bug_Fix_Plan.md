@@ -10,8 +10,8 @@
 После внедрения factory методов для CreateEditScreenViewModel и DetailScreenViewModel обнаружены следующие проблемы, требующие исправления:
 
 1. ❌ **Баг #1**: DetailScreen не обновляется после редактирования
-2. ❌ **Баг #2**: Toolbar перекрывает контент списка
-3. ❌ **Баг #3**: Удаление записей не работает
+2. ✅ **Баг #2**: Toolbar перекрывает контент списка (ИСПРАВЛЕН)
+3. ❌ **Баг #3**: Удаление записей работает некорректно
 4. ❌ **Баг #4**: Поиск не работает
 5. ❌ **Баг #5**: Пропадание записей при поиске
 6. ❌ **Баг #6**: Неправильная верстка ListItemView
@@ -188,7 +188,7 @@ private val itemFlow = savedStateHandle.get<Long>("itemId")?.let { itemId ->
 
 ---
 
-## Баг #2: Toolbar перекрывает контент списка
+## Баг #2: Toolbar перекрывает контент списка ✅ **ИСПРАВЛЕН**
 
 ### Описание
 
@@ -202,28 +202,80 @@ private val itemFlow = savedStateHandle.get<Long>("itemId")?.let { itemId ->
 
 ### Шаги исправления
 
-#### Шаг 2.1: Анализ верстки MainScreen
+#### Шаг 2.1: Анализ верстки MainScreen ✅ **ВЫПОЛНЕН**
 
 **Задача:** Понять структуру верстки
 
 **Действия:**
-1. Изучить текущую верстку MainScreen.kt
-2. Проверить использование Scaffold и TopAppBar
-3. Сравнить с RootScreen (где навигация)
+1. ✅ Изучить текущую верстку MainScreen.kt
+2. ✅ Проверить использование Scaffold и TopAppBar
+3. ✅ Сравнить с RootScreen (где навигация)
 
-#### Шаг 2.2: Исправление верстки
+**Результат:** Проблема обнаружена в функции `itemsListContent` - LazyColumn не использует `paddingValues` от Scaffold
+
+#### Шаг 2.2: Исправление верстки ✅ **ВЫПОЛНЕН**
 
 **Задача:** Обеспечить правильное расположение контента
 
 **Действия:**
-1. Добавить отступ для контента списка под TopAppBar
-2. Использовать `TopAppBarDefaults.paddedScrollBehavior()` для автоматического добавления отступов
-3. Убедиться, что список начинается ниже AppBar
+1. ✅ Добавить параметр `paddingValues` в функцию `itemsListContent`
+2. ✅ Применить `contentPadding = paddingValues` к `LazyColumn`
+3. ✅ Добавить параметр `paddingValues` в функции `emptyContent` и `emptySearchContent`
+4. ✅ Применить `paddingValues` в этих функциях перед существующими отступами
+
+**Изменения в коде:**
+
+```kotlin
+// MainScreen.kt
+
+// В функции itemsListContent добавлен параметр paddingValues:
+private fun itemsListContent(
+    items: List<com.dayscounter.domain.model.Item>,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    onItemClick: (Long) -> Unit,
+    onEditClick: (Long) -> Unit,
+    viewModel: MainScreenViewModel,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues, // ✅ Добавлено
+) {
+    // ...
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = paddingValues, // ✅ Добавлено
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
+    ) {
+        // ...
+    }
+}
+
+// В функции emptyContent и emptySearchContent добавлен параметр paddingValues:
+private fun emptyContent(
+    paddingValues: androidx.compose.foundation.layout.PaddingValues = // ✅ Добавлено
+        androidx.compose.foundation.layout.PaddingValues()
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues) // ✅ Добавлено
+                .padding(dimensionResource(R.dimen.spacing_huge)),
+        // ...
+    )
+}
+
+// В mainScreenContentByState передача paddingValues:
+emptyContent(paddingValues = paddingValues)
+emptySearchContent(paddingValues = paddingValues)
+```
 
 **Критерий готовности:**
 - ✅ Список записей отображается полностью (не перекрывается AppBar)
 - ✅ При скролле список не заезжает под AppBar
 - ✅ AppBar не перекрывает контент списка
+- ✅ Все тесты проходят успешно
+- ✅ Сборка приложения проходит успешно
+
+### Дата исправления: 2025-01-02
 
 ---
 
@@ -992,3 +1044,4 @@ val displayOption by viewModel.displayOption.collectAsState()
 ## История
 
 - 2025-01-02: Создан план исправления на основе найденных 12 багов
+- 2025-01-02: Исправлен баг #2 - Toolbar перекрывает контент списка (применены paddingValues к LazyColumn, emptyContent и emptySearchContent)
