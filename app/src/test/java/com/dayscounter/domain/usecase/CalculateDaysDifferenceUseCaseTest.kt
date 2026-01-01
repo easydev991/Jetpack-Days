@@ -1,11 +1,11 @@
 package com.dayscounter.domain.usecase
 
 import com.dayscounter.domain.model.DaysDifference
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 
 /**
  * Тесты для [CalculateDaysDifferenceUseCase].

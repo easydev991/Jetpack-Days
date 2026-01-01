@@ -31,6 +31,7 @@ import com.dayscounter.R
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
+import com.dayscounter.ui.screen.mainScreen
 import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
@@ -169,7 +170,7 @@ internal fun navHostContent(
 @Composable
 internal fun eventsScreenContent(navController: NavHostController) {
     Log.d("RootScreen", "Отображение экрана событий")
-    com.dayscounter.ui.screen.mainScreen(
+    mainScreen(
         onItemClick = { itemId ->
             Log.d("RootScreen", "Навигация к экрану деталей: $itemId")
             navController.navigate(Screen.ItemDetail.createRoute(itemId))

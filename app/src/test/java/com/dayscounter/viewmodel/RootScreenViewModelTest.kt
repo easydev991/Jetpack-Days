@@ -1,9 +1,9 @@
 package com.dayscounter.viewmodel
 
 import com.dayscounter.navigation.Screen
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class RootScreenViewModelTest {
     @Test

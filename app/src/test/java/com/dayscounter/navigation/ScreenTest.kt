@@ -1,9 +1,9 @@
 package com.dayscounter.navigation
 
 import com.dayscounter.R
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 class ScreenTest {
     @Test

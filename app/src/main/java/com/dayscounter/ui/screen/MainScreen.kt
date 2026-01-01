@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -51,6 +52,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
+import com.dayscounter.di.AppModule.createItemRepository
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
@@ -78,20 +81,19 @@ fun mainScreen(
     onEditClick: (Long) -> Unit = {},
     onCreateClick: () -> Unit = {},
 ) {
+    val context = LocalContext.current
     val viewModel: MainScreenViewModel =
         viewModel(
             factory =
                 MainScreenViewModel.factory(
-                    com.dayscounter.di.AppModule.createItemRepository(
-                        com.dayscounter.data.database.DaysDatabase.getDatabase(
-                            androidx.compose.ui.platform.LocalContext.current.applicationContext,
+                    createItemRepository(
+                        getDatabase(
+                            context.applicationContext,
                         ),
                     ),
                 ),
         )
-
     // Создаем use cases для форматирования
-    val context = androidx.compose.ui.platform.LocalContext.current
     val resourceProvider =
         com.dayscounter.di.FormatterModule
             .createResourceProvider(context)
