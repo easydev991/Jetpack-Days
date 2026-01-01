@@ -40,107 +40,29 @@
 
 ## Архитектурное решение
 
-**Примечание:** Часть работы по рефакторингу UI ресурсов выполнена в отдельном плане: `UI_Resources_Refactoring_Plan.md`.
+**Примечание:** UI ресурсы рефакторинг выполнен в `UI_Resources_Refactoring_Plan.md`.
 
 ---
 
 ## Реализованные компоненты ✅
 
 ### Domain Layer ✅
-
-**Модели:**
-- `TimePeriod` — DTO для периода (годы/месяцы/дни)
-- `DaysDifference` — sealed класс для результата вычислений (`Today`, `Calculated`)
-- `ItemExtensions` — расширение `Item.makeDaysCount()`
-
-**Use Cases:**
-- `CalculateDaysDifferenceUseCase` — вычисление разницы дат
-- `FormatDaysTextUseCase` — форматирование текста
-- `GetFormattedDaysForItemUseCase` — use case для Item
-
-**Тесты:** ✅ Все unit-тесты созданы
-
----
+Модели (`TimePeriod`, `DaysDifference`), Use Cases (вычисление разницы дат, форматирование текста), тесты.
 
 ### Data Layer ✅
-
-**Интерфейсы и реализации:**
-- `DaysFormatter` + `DaysFormatterImpl` — форматирование текста
-- `ResourceProvider` + `ResourceProviderImpl` — доступ к ресурсам
-
-**Тесты:** ✅ Все unit-тесты созданы
-
----
+`DaysFormatter`, `ResourceProvider` с реализациями, тесты.
 
 ### Dependency Injection ✅
-
-- `FormatterModule` — ручной DI для форматирования
-- `AppModule` — DI для приложения
-- Hilt временно отключен (подробности в `Hilt_Setup_Plan.md`)
-
----
+`FormatterModule`, `AppModule` — ручной DI.
 
 ### Presentation Layer ✅
+ViewModels (`DaysCalculatorViewModel`), UI Components (`DaysCountText`, стили), все экраны (`RootScreen`, `MainScreen`, `DetailScreen`, `CreateEditScreen`), тесты.
 
-**ViewModels:**
-- `DaysCalculatorViewModel` — состояние UI, тесты ✅
+### UI Ресурсы ✅
+`dimens.xml`, `colors.xml`, `NumberFormattingUtils.kt`, локализация (ru + en), все локальные константы удалены.
 
-**UI Components:**
-- `DaysCountText` — Compose компонент для отображения
-- `DaysCountTextStyle` — стили отображения (NORMAL/EMPHASIZED/SECONDARY)
-
-**Экраны:**
-- `ListItemView` — элемент списка
-- `DetailScreen` + `DetailScreenViewModel` — экран деталей
-- `CreateEditScreen` + `CreateEditScreenViewModel` — создание/редактирование
-- `RootScreen` + `RootScreenViewModel` — навигация и роутинг
-- `MainScreen` + `MainScreenViewModel` — главный экран
-
-**Тесты:** ✅ Unit-тесты для ViewModel, Compose тесты для DaysCountText
-
----
-
-### UI Ресурсы и константы ✅ (выполнено в UI_Resources_Refactoring_Plan)
-
-**Размеры (dimens.xml):**
-- Spacings: 4, 8, 12, 16, 24, 32 dp
-- Sizes: 32, 48, 80 dp
-- Icon sizes: 32, 48, 80 dp
-- Color tag sizes: 48, 12 dp
-
-**Цвета (colors.xml):**
-- Material colors (purple, teal, black, white)
-- Tag colors (red, teal, blue, green, yellow, purple)
-
-**Утилиты:**
-- `NumberFormattingUtils.kt` — форматирование множественного числа для русского языка
-
-**Константы:**
-- ✅ Все локальные объекты констант удалены
-- ✅ Все размеры берутся из `R.dimen.*`
-- ✅ Все цвета берутся из `R.color.*`
-- ✅ Все форматирования чисел берутся из `NumberFormattingUtils`
-
-**Локализация:**
-- Локализованные строки (ru + en)
-- Строковые ресурсы для форматирования дней, месяцев, лет
-
-**Навигация:** маршруты для всех экранов  
-**Документация:** KDoc, обновленный план
-
----
-
-## Оставшиеся задачи
-
-### 6.3 Интегрировать в MainScreenViewModel ✅ ВЫПОЛНЕНО
-
-**Файл:** `app/src/main/java/com/dayscounter/viewmodel/MainScreenViewModel.kt`
-
-**Статус:** ✅ ВЫПОЛНЕНО
-
-**Реализация:** ViewModel создана и протестирована, использует `Item.makeDaysCount()` для форматирования.
-
-**Примечание:** Все UI компоненты готовы к использованию, интеграция выполнена в экранах.
+### Интеграция ✅
+`MainScreenViewModel` — использует `Item.makeDaysCount()`, интеграция выполнена во всех экранах.
 
 ---
 
@@ -198,18 +120,12 @@
 ## Этап 11: Оптимизация и улучшения
 
 ### 11.1 Производительность ❌ НЕ НАЧАТО
-
-**Оптимизировать:**
-- ❌ Кэширование форматированного текста (если часто вызывается)
-- ❌ Использование `remember` в Compose для предотвращения лишних рекомпозиций
-- ❌ Оптимизация вычислений для больших списков
+Кэширование, `remember` в Compose, оптимизация для больших списков.
 
 ### 11.2 Обработка ошибок ✅ ВЫПОЛНЕНО
-
 Валидация timestamp, обработка некорректных дат, fallback на "Today".
 
 ### 11.3 Логирование ✅ ВЫПОЛНЕНО ЧАСТИЧНО
-
 Логи в `CalculateDaysDifferenceUseCase` и `DaysCalculatorViewModel`.
 
 ---
@@ -217,11 +133,7 @@
 ## Порядок выполнения
 
 ### Выполнено (Фазы 1-4) ✅
-1-5. Domain + Data слои (модели, use cases, formatter)  
-6-9. DI + ViewModel (ручной DI, ViewModels, тесты)  
-10-16. UI (компоненты, экраны, навигация, тесты)  
-17-19. Ресурсы, документация, код-ревью  
-20. UI Рефакторинг ресурсов — созданы dimens.xml, colors.xml, NumberFormattingUtils.kt, удалены локальные константы
+Domain + Data слои, DI + ViewModel, UI (компоненты, экраны, навигация, тесты), ресурсы, документация, рефакторинг UI ресурсов.
 
 ### Осталось (Фаза 5) ⚠️
 - Ручное тестирование на устройстве/симуляторе
@@ -234,20 +146,18 @@
 
 ## Критерии завершения
 
-- ✅ Unit-тесты бизнес-логики (Domain + Data)
-- ✅ Unit-тесты ViewModel
+**Выполнено:**
+- ✅ Unit-тесты (Domain + Data + ViewModel)
 - ✅ Compose тесты для DaysCountText
-- ✅ UI ресурсы и константы (dimens.xml, colors.xml, NumberFormattingUtils.kt)
-- ✅ Все локальные константные объекты удалены
-- ✅ RootScreen, MainScreen, DetailScreen, CreateEditScreen созданы и протестированы
-- ✅ MainScreenViewModel создана и протестирована
+- ✅ UI ресурсы и константы
+- ✅ Все экраны (RootScreen, MainScreen, DetailScreen, CreateEditScreen)
+- ✅ Локализация (ru + en), три опции отображения, документация
+
+**Осталось:**
 - ⚠️ Ручное тестирование по сценариям (требует запуска приложения)
+- ⚠️ Совместимость с iOS (требует проверки)
 
 **Примечание:** Критерии прохождения ktlint, detekt и lint перенесены в `Stage_6_Refactoring_Plan.md`.
-- ✅ Локализация (ru + en)
-- ✅ Три опции отображения
-- ✅ Документация обновлена
-- ⚠️ Совместимость с iOS (требует проверки)
 
 ---
 

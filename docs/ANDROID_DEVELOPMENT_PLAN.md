@@ -105,9 +105,9 @@
 - **Этап 5**: Дополнительные функции (More Screen и подэкраны)
   - ✅ Навигация к More Screen настроена через RootScreen
   - ✅ Создана заглушка moreScreenContent() в RootScreenComponents.kt
-  - ⚠️ Требуется реализация UI компонентов экрана и подэкранов
-  - ⚠️ Требуется создание отдельного файла MoreScreen.kt
-  - ⚠️ Требуется добавление маршрутов для ThemeIcon и AppData в Screen.kt
+  - ❌ Требуется реализация UI компонентов экрана и подэкранов
+  - ❌ Требуется создание отдельного файла MoreScreen.kt
+  - ❌ Требуется добавление маршрутов для ThemeIcon и AppData в Screen.kt
 
 ### Не начато ❌
 - **Этап 5.2**: Theme and Icon Screen
@@ -807,11 +807,13 @@ Root Screen (TabBar)
 Активные тесты:
 - Repository: ItemRepositoryTest (в test/domain/repository/)
 - ViewModels: MainScreenViewModelTest, DaysCalculatorViewModelTest
+- Formatter: DaysFormatterImplTest (в test/data/formatter/)
+- Use Cases: CalculateDaysDifferenceUseCaseTest, FormatDaysTextUseCaseTest (активны, без .disabled)
 
 Отключенные тесты (требуют активации):
 - Domain layer: DisplayOptionTest, ItemTest, TimePeriodTest, DaysDifferenceTest
-- Data layer: ItemEntityTest, DisplayOptionConverterTest, ItemMapperTest, DaysFormatterImplTest, ItemRepositoryImplTest
-- Use Cases: CalculateDaysDifferenceUseCaseTest, FormatDaysTextUseCaseTest, GetFormattedDaysForItemUseCaseTest
+- Data layer: ItemEntityTest, DisplayOptionConverterTest, ItemMapperTest, DaysFormatterImplTest (есть активная версия)
+- Use Cases: GetFormattedDaysForItemUseCaseTest
 - Navigation: ScreenTest
 - UI State: RootScreenStateTest
 - ViewModels: RootScreenViewModelTest, RootScreenViewModelIntegrationTest
