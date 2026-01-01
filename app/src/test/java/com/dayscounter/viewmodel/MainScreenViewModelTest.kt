@@ -371,6 +371,7 @@ class MainScreenViewModelTest {
      */
     private class FakeItemRepository : ItemRepository {
         private val _items = MutableStateFlow<List<Item>>(emptyList())
+        val items: Flow<List<Item>> = _items
 
         fun setItems(items: List<Item>) {
             _items.value = items

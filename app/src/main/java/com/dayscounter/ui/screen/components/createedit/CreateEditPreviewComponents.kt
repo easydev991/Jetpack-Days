@@ -18,21 +18,78 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
+import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
+import com.dayscounter.domain.usecase.FormatDaysTextUseCase
+import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
 import com.dayscounter.ui.theme.jetpackDaysTheme
-import com.dayscounter.ui.util.NumberFormattingUtils
 
 /**
  * Внутренний компонент предпросмотра.
+ *
+ * @param selectedDate Выбранная дата события
+ * @param displayOption Опция отображения дней
  */
 @Composable
-internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
+internal fun previewDaysContentInner(
+    selectedDate: java.time.LocalDate,
+    displayOption: DisplayOption = DisplayOption.DAY,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Создаем use cases для форматирования
+    val resourceProvider =
+        com.dayscounter.di.FormatterModule
+            .createResourceProvider(context)
+    val daysFormatter =
+        com.dayscounter.di.FormatterModule
+            .createDaysFormatter()
+    val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
+    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+    val getFormattedDaysForItemUseCase =
+        GetFormattedDaysForItemUseCase(
+            calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+            formatDaysTextUseCase = formatDaysTextUseCase,
+            resourceProvider = resourceProvider,
+        )
+
+    // Вычисляем разницу между датами
     val currentDate = java.time.LocalDate.now()
     val daysBetween =
         java.time.temporal.ChronoUnit.DAYS
             .between(selectedDate, currentDate)
             .toInt()
+
+    // Создаем временный Item для форматирования
+    val timestamp =
+        selectedDate
+            .atStartOfDay(java.time.ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+    val item =
+        com.dayscounter.domain.model.Item(
+            id = 0L,
+            title = "",
+            details = "",
+            timestamp = timestamp,
+            colorTag = null,
+            displayOption = displayOption,
+        )
+
+    // Получаем форматированный текст
+    val daysText =
+        when {
+            daysBetween == 0 -> stringResource(R.string.today)
+            else ->
+                getFormattedDaysForItemUseCase(
+                    item = item,
+                    currentDate = currentDate,
+                    defaultDisplayOption = displayOption,
+                )
+        }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -50,13 +107,6 @@ internal fun previewDaysContentInner(selectedDate: java.time.LocalDate) {
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
-
-            val daysText =
-                when {
-                    daysBetween == 0 -> "Сегодня"
-                    daysBetween > 0 -> NumberFormattingUtils.formatDaysCount(daysBetween)
-                    else -> NumberFormattingUtils.formatDaysCount(-daysBetween)
-                }
 
             daysCountText(
                 formattedText = daysText,
@@ -103,7 +153,11 @@ fun previewDaysContentPastPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            previewDaysContentInner(java.time.LocalDate.now().minusDays(5))
+            previewDaysContentInner(
+                java.time.LocalDate
+                    .now()
+                    .minusDays(5),
+            )
         }
     }
 }
@@ -119,7 +173,11 @@ fun previewDaysContentFuturePreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            previewDaysContentInner(java.time.LocalDate.now().plusDays(10))
+            previewDaysContentInner(
+                java.time.LocalDate
+                    .now()
+                    .plusDays(10),
+            )
         }
     }
 }

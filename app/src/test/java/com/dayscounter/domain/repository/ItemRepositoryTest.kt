@@ -3,8 +3,8 @@ package com.dayscounter.domain.repository
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import kotlinx.coroutines.flow.Flow
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 /**
  * Тесты для проверки контракта интерфейса ItemRepository.

@@ -87,16 +87,17 @@ internal fun detailActionButtons(
 fun detailTopAppBarPreview() {
     jetpackDaysTheme {
         detailTopAppBar(
-            uiState = DetailScreenState.Success(
-                com.dayscounter.domain.model.Item(
-                    id = 1L,
-                    title = "День рождения",
-                    details = "Праздничный день",
-                    timestamp = System.currentTimeMillis(),
-                    colorTag = android.graphics.Color.RED,
-                    displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
+            uiState =
+                DetailScreenState.Success(
+                    com.dayscounter.domain.model.Item(
+                        id = 1L,
+                        title = "День рождения",
+                        details = "Праздничный день",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = android.graphics.Color.RED,
+                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
+                    ),
                 ),
-            ),
             onBackClick = {},
             onEditClick = {},
             onDeleteClick = {},

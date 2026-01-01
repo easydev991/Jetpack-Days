@@ -9,7 +9,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
-import com.dayscounter.domain.exception.ItemException.UpdateFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -4,7 +4,6 @@ import com.dayscounter.domain.model.DisplayOption.DAY
 import com.dayscounter.domain.model.DisplayOption.MONTH_DAY
 import com.dayscounter.domain.model.DisplayOption.YEAR_MONTH_DAY
 
-
 /**
  * Опция отображения дней для события.
  * Используется для форматирования количества дней в различных форматах.

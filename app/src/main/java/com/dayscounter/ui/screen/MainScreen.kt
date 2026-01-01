@@ -52,8 +52,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.domain.model.SortOrder
+import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
+import com.dayscounter.domain.usecase.FormatDaysTextUseCase
+import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.component.listItemView
-import com.dayscounter.ui.util.NumberFormattingUtils
 import com.dayscounter.viewmodel.MainScreenState
 import com.dayscounter.viewmodel.MainScreenViewModel
 
@@ -87,9 +89,28 @@ fun mainScreen(
                     ),
                 ),
         )
+
+    // Создаем use cases для форматирования
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val resourceProvider =
+        com.dayscounter.di.FormatterModule
+            .createResourceProvider(context)
+    val daysFormatter =
+        com.dayscounter.di.FormatterModule
+            .createDaysFormatter()
+    val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
+    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+    val getFormattedDaysForItemUseCase =
+        GetFormattedDaysForItemUseCase(
+            calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+            formatDaysTextUseCase = formatDaysTextUseCase,
+            resourceProvider = resourceProvider,
+        )
+
     mainScreenContent(
         modifier = modifier,
         viewModel = viewModel,
+        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
         onItemClick = onItemClick,
         onEditClick = onEditClick,
         onCreateClick = onCreateClick,
@@ -104,6 +125,7 @@ fun mainScreen(
 private fun mainScreenContent(
     modifier: Modifier = Modifier,
     viewModel: MainScreenViewModel,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     onItemClick: (Long) -> Unit,
     onEditClick: (Long) -> Unit,
     onCreateClick: () -> Unit,
@@ -153,6 +175,7 @@ private fun mainScreenContent(
                     uiState = uiState,
                     searchQuery = searchQuery,
                     listState = listState,
+                    getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
                     onItemClick = onItemClick,
                     onEditClick = onEditClick,
                     viewModel = viewModel,
@@ -246,7 +269,11 @@ private fun sortMenu(
  * Контент с пустым списком.
  */
 @Composable
-private fun emptyContent(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
+private fun emptyContent(
+    paddingValues: androidx.compose.foundation.layout.PaddingValues =
+        androidx.compose.foundation.layout
+            .PaddingValues(),
+) {
     Column(
         modifier =
             Modifier
@@ -278,7 +305,11 @@ private fun emptyContent(paddingValues: androidx.compose.foundation.layout.Paddi
  * Контент с пустым результатом поиска.
  */
 @Composable
-private fun emptySearchContent(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
+private fun emptySearchContent(
+    paddingValues: androidx.compose.foundation.layout.PaddingValues =
+        androidx.compose.foundation.layout
+            .PaddingValues(),
+) {
     Column(
         modifier =
             Modifier
@@ -330,6 +361,7 @@ private fun loadingContent(modifier: Modifier = Modifier) {
 private fun itemsListContent(
     items: List<com.dayscounter.domain.model.Item>,
     listState: androidx.compose.foundation.lazy.LazyListState,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     onItemClick: (Long) -> Unit,
     onEditClick: (Long) -> Unit,
     viewModel: MainScreenViewModel,
@@ -352,38 +384,30 @@ private fun itemsListContent(
         ) { item ->
             var itemPosition by remember { mutableStateOf(Offset.Zero) }
 
-            val eventDate =
-                java.time.LocalDateTime
-                    .ofInstant(
-                        java.time.Instant.ofEpochMilli(item.timestamp),
-                        java.time.ZoneId.systemDefault(),
-                    ).toLocalDate()
-
-            val currentDate = java.time.LocalDate.now()
-            val daysSince =
-                java.time.temporal.ChronoUnit.DAYS
-                    .between(eventDate, currentDate)
-                    .toInt()
+            // Форматируем текст с учетом displayOption из Item
+            val formattedDaysText = getFormattedDaysForItemUseCase(item = item)
 
             Box(
-                modifier = Modifier
-                    .onGloballyPositioned { coordinates ->
-                        itemPosition = coordinates.positionInRoot()
-                    }
+                modifier =
+                    Modifier
+                        .onGloballyPositioned { coordinates ->
+                            itemPosition = coordinates.positionInRoot()
+                        },
             ) {
                 listItemView(
                     item = item,
-                    formattedDaysText = NumberFormattingUtils.formatDaysCount(daysSince),
+                    formattedDaysText = formattedDaysText,
                     onClick = { onItemClick(it.id) },
                     onLongClick = { localOffset ->
                         contextMenuItem = item
                         itemGlobalPosition = itemPosition
-                        menuOffset = with(density) {
-                            DpOffset(
-                                (itemPosition.x + localOffset.x).toDp(),
-                                (itemPosition.y + localOffset.y).toDp()
-                            )
-                        }
+                        menuOffset =
+                            with(density) {
+                                DpOffset(
+                                    (itemPosition.x + localOffset.x).toDp(),
+                                    (itemPosition.y + localOffset.y).toDp(),
+                                )
+                            }
                     },
                     isSelected = contextMenuItem?.id == item.id,
                 )
@@ -477,6 +501,7 @@ private data class MainScreenContentState(
     val uiState: MainScreenState,
     val searchQuery: String,
     val listState: androidx.compose.foundation.lazy.LazyListState,
+    val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
     val viewModel: MainScreenViewModel,
@@ -506,6 +531,7 @@ private fun mainScreenContentByState(
                 itemsListContent(
                     items = uiState.items,
                     listState = state.listState,
+                    getFormattedDaysForItemUseCase = state.getFormattedDaysForItemUseCase,
                     onItemClick = state.onItemClick,
                     onEditClick = state.onEditClick,
                     viewModel = state.viewModel,

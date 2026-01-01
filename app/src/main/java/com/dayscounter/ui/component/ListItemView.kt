@@ -60,14 +60,16 @@ fun listItemView(
     onLongClick: ((Offset) -> Unit)? = null,
     isSelected: Boolean = false,
 ) {
-    val backgroundColor = animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.surfaceVariant
-        } else {
-            MaterialTheme.colorScheme.surface
-        },
-        label = "backgroundColor",
-    ).value
+    val backgroundColor =
+        animateColorAsState(
+            targetValue =
+                if (isSelected) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            label = "backgroundColor",
+        ).value
 
     Row(
         modifier =
@@ -75,20 +77,18 @@ fun listItemView(
                 .fillMaxWidth()
                 .background(
                     color = backgroundColor,
-                )
-                .pointerInput(Unit) {
+                ).pointerInput(Unit) {
                     if (onLongClick != null) {
                         detectTapGestures(
                             onTap = { onClick(item) },
-                            onLongPress = { offset -> onLongClick(offset) }
+                            onLongPress = { offset -> onLongClick(offset) },
                         )
                     } else {
                         detectTapGestures(
-                            onTap = { onClick(item) }
+                            onTap = { onClick(item) },
                         )
                     }
-                }
-                .padding(16.dp),
+                }.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Цветовая метка

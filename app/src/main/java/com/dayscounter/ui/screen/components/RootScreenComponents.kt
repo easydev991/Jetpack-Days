@@ -88,7 +88,9 @@ internal fun navigationBarContent(
 @Composable
 internal fun navHostContent(
     navController: NavHostController,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
+    paddingValues: androidx.compose.foundation.layout.PaddingValues =
+        androidx.compose.foundation.layout
+            .PaddingValues(),
 ) {
     // Получаем зависимости для создания ViewModels
     val context = LocalContext.current.applicationContext

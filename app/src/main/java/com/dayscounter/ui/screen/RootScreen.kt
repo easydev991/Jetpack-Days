@@ -73,7 +73,9 @@ private fun rootScreenContent(
                 )
             }
         },
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        contentWindowInsets =
+            androidx.compose.foundation.layout
+                .WindowInsets(0, 0, 0, 0),
     ) { paddingValues ->
         // Основной контент с навигацией
         navHostContent(

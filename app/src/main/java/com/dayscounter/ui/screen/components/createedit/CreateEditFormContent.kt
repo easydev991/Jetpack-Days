@@ -91,7 +91,9 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
                 title = params.uiStates.title.value,
                 details = params.uiStates.details.value,
                 timestamp = timestamp,
-                colorTag = params.uiStates.selectedColor.value?.toArgb(),
+                colorTag =
+                    params.uiStates.selectedColor.value
+                        ?.toArgb(),
                 displayOption = params.uiStates.selectedDisplayOption.value,
             )
         }
@@ -120,7 +122,10 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
 
         // Предпросмотр дней
         if (params.uiStates.selectedDate.value != null) {
-            previewDaysContentInner(selectedDate = params.uiStates.selectedDate.value!!)
+            previewDaysContentInner(
+                selectedDate = params.uiStates.selectedDate.value!!,
+                displayOption = params.uiStates.selectedDisplayOption.value,
+            )
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
         }
 
