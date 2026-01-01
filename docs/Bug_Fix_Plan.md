@@ -17,11 +17,13 @@
 6. ✅ **Баг #6**: Неправильная верстка ListItemView (ИСПРАВЛЕН)
 7. ✅ **Баг #7**: Нижняя навигация не видна (ИСПРАВЛЕН)
 8. ✅ **Баг #8**: Контент заезжает под камеру (ИСПРАВЛЕН)
-9. ❌ **Баг #9**: Изменение displayOption не обновляет UI
+9. ✅ **Баг #9**: Изменение displayOption не обновляет UI (ИСПРАВЛЕН)
 10. ✅ **Баг #10**: Свайп слева направо открывает несколько экранов редактирования (ИСПРАВЛЕН)
 11. ✅ **Баг #11**: Состояние свайпа не сбрасывается при отмене удаления в диалоговом окне (ИСПРАВЛЕН)
 12. ✅ **Баг #12**: Кнопка "Сохранить" активна без изменений (ИСПРАВЛЕН)
 13. ❌ **Баг #13**: Заголовок экрана создания/редактирования всегда одинаковый
+14. ❌ **Баг #14**: Месяцы игнорируются в MONTH_DAY и YEAR_MONTH_DAY
+15. ❌ **Баг #15**: DetailScreen игнорирует displayOption
 
 ---
 
@@ -40,6 +42,8 @@
 | #11  | Высокий    | Высокое   | Средняя   | 2-3 ч     |
 | #12  | Средний    | Среднее   | Средняя   | 2-3 ч     |
 | #13  | Низкий     | Низкое    | Низкая    | 0.5-1 ч   |
+| #14  | Высокий    | Высокое   | Средняя   | 2-3 ч     |
+| #15  | Высокий    | Высокое   | Низкая    | 1-2 ч     |
 
 ---
 
@@ -484,6 +488,229 @@ SearchBar может не отправлять запрос в ViewModel при 
 
 ---
 
+## Баг #14: Месяцы игнорируются в MONTH_DAY и YEAR_MONTH_DAY
+
+### Описание
+
+При выборе DisplayOption.MONTH_DAY или DisplayOption.YEAR_MONTH_DAY месяцы игнорируются и не отображаются.
+
+**Пример:**
+- При разнице 389 дней:
+  - При выборе DAY: "389 дней" ✅
+  - При выборе MONTH_DAY: должно быть "12 мес 18 дн", но показывается "389 дней" ❌
+  - При выборе YEAR_MONTH_DAY: должно быть "1 г 18 дн" (потому что нет целого месяца), но показывается "389 дней" ❌
+
+**Требование:**
+- При выборе MONTH_DAY должны отображаться месяцы и дни (например, "12 мес 18 дн")
+- При выборе YEAR_MONTH_DAY должны отображаться годы, месяцы и дни (например, "1 г 18 дн")
+- Логика должна соответствовать iOS-приложению (источник истины)
+
+### Причина
+
+Проблема в вычислении TimePeriod или в его использовании при форматировании:
+
+1. **CalculateDaysDifferenceUseCase** может неправильно вычислять месяцы в TimePeriod
+2. **TimePeriod** может содержать некорректные значения месяцев
+3. **FormatDaysTextUseCase** или **DaysFormatterImpl** могут игнорировать месяцы при форматировании
+4. Возможно, используется только totalDays вместо периодов с месяцами
+
+**Источник истины:**
+iOS-приложение (SwiftUI-Days) имеет тесты DisplayOptionTests.swift, которые определяют правильную логику:
+- DisplayOption.day: всегда .full формат
+- DisplayOption.monthDay: .short когда есть месяцы и дни одновременно, иначе .full
+- DisplayOption.yearMonthDay: .abbreviated когда все три значения, .short когда два, .full когда ноль или одно значение
+
+### Шаги исправления
+
+#### Шаг 14.1: Анализ вычисления TimePeriod
+
+**Задача:** Понять, как сейчас вычисляются годы, месяцы и дни
+
+**Действия:**
+1. Изучить `CalculateDaysDifferenceUseCase`:
+   - Проверить, как вычисляется разница между датами
+   - Проверить, как создается TimePeriod
+   - Проверить, корректно ли вычисляются месяцы
+2. Изучить `TimePeriod`:
+   - Проверить поля (years, months, days)
+   - Проверить, что они вычисляются корректно
+3. Сравнить с iOS-реализацией:
+   - Найти аналогичную логику в iOS-приложении
+   - Проверить, соответствует ли логика Android iOS
+4. Добавить unit-тесты для CalculateDaysDifferenceUseCase:
+   - Тест для MONTH_DAY: убедиться, что месяцы вычисляются
+   - Тест для YEAR_MONTH_DAY: убедиться, что годы и месяцы вычисляются
+
+#### Шаг 14.2: Анализ форматирования с месяцами
+
+**Задача:** Проверить, как DaysFormatter использует месяцы при форматировании
+
+**Действия:**
+1. Изучить `DaysFormatterImpl.formatComposite()`:
+   - Проверить логику для MONTH_DAY
+   - Проверить логику для YEAR_MONTH_DAY
+   - Проверить, что используются period.months и period.years
+2. Изучить `DaysFormatterImpl.formatMonthDay()`:
+   - Проверить, что месяцы добавляются в список компонентов
+   - Проверить условия showMonths и showDays
+3. Изучить `DaysFormatterImpl.formatYearMonthDay()`:
+   - Проверить, что годы, месяцы и дни добавляются в список компонентов
+4. Добавить unit-тесты для DaysFormatterImpl:
+   - Тест formatMonthDay с различными комбинациями
+   - Тест formatYearMonthDay с различными комбинациями
+   - Убедиться, что месяцы включаются в результат
+
+#### Шаг 14.3: Сравнение с iOS-логикой
+
+**Задача:** Реализовать логику, соответствующую iOS
+
+**Действия:**
+1. Изучить `DisplayOptionTests.swift`:
+   - Понять логику unitsStyle() в iOS
+   - Понять, когда использовать .abbreviated, .short, .full
+2. Проверить тестовые данные из iOS:
+   - monthDayShortCombos: когда MONTH_DAY должен быть .short
+   - monthDayFullCombos: когда MONTH_DAY должен быть .full
+   - ymdAbbreviatedCombos: когда YEAR_MONTH_DAY должен быть .abbreviated
+   - ymdShortCombos: когда YEAR_MONTH_DAY должен быть .short
+   - ymdFullCombos: когда YEAR_MONTH_DAY должен быть .full
+3. Реализовать аналогичную логику в Android:
+   - Добавить метод в DisplayOption для выбора формата
+   - Или реализовать логику внутри DaysFormatterImpl
+4. Добавить тесты, соответствующие iOS-тестам:
+   - Все тесты из DisplayOptionTests.swift
+
+#### Шаг 14.4: Проверка интеграции
+
+**Задача:** Убедиться, что форматирование работает во всех местах
+
+**Действия:**
+1. Проверить `CreateEditPreviewComponents`:
+   - Убедиться, что preview использует правильное форматирование
+   - Проверить все три DisplayOption
+2. Проверить `MainScreen`:
+   - Убедиться, что список использует правильное форматирование
+   - Проверить все три DisplayOption
+3. Проверить `DetailScreen`:
+   - Убедиться, что детали используют правильное форматирование (если использует)
+   - Проверить все три DisplayOption
+
+**Критерий готовности:**
+- ✅ При выборе MONTH_DAY отображаются месяцы и дни (например, "12 мес 18 дн")
+- ✅ При выборе YEAR_MONTH_DAY отображаются годы, месяцы и дни (например, "1 г 18 дн")
+- ✅ При выборе DAY отображается только общее количество дней (например, "389 дней")
+- ✅ Форматирование соответствует iOS-приложению для всех DisplayOption
+- ✅ Unit-тесты покрывают все сценарии из iOS-тестов
+- ✅ Форматирование работает корректно на CreateEditScreen preview
+- ✅ Форматирование работает корректно на MainScreen в списке
+- ✅ TimePeriod вычисляет корректные значения years, months, days
+- ✅ DaysFormatterImpl использует все компоненты TimePeriod
+
+---
+
+## Баг #15: DetailScreen игнорирует displayOption
+
+### Описание
+
+На экране DetailScreen displayOption игнорируется и всегда отображается только количество дней в формате N дней, независимо от выбранного displayOption в записи.
+
+**Проблема:**
+- DetailScreen использует `NumberFormattingUtils.formatDaysCount()` для форматирования
+- Функция `calculateDaysText()` в DetailContent.kt не учитывает displayOption
+- Даже если в Item установлено MONTH_DAY или YEAR_MONTH_DAY, на DetailScreen показываются только дни
+
+**Требование:**
+- При displayOption = DAY: отображать только дни (например, "389 дней")
+- При displayOption = MONTH_DAY: отображать месяцы и дни (например, "12 мес 18 дн")
+- При displayOption = YEAR_MONTH_DAY: отображать годы, месяцы и дни (например, "1 г 18 дн")
+- Форматирование должно соответствовать выбранному displayOption в Item
+
+### Причина
+
+DetailScreen использует упрощенное форматирование:
+
+1. **Функция calculateDaysText()** в DetailContent.kt:
+   - Вычисляет totalDays через ChronoUnit.DAYS.between()
+   - Использует NumberFormattingUtils.formatDaysCount(totalDays)
+   - Не использует GetFormattedDaysForItemUseCase
+   - Не учитывает displayOption из Item
+
+2. **daysCountSection()** не получает displayOption:
+   - Принимает только item
+   - Не передает displayOption в форматирование
+   - Не использует существующие use cases для форматирования
+
+### Шаги исправления
+
+#### Шаг 15.1: Анализ текущей реализации DetailScreen
+
+**Задача:** Понять, как сейчас форматируется количество дней на DetailScreen
+
+**Действия:**
+1. Изучить `DetailContent.kt`:
+   - Найти функцию `daysCountSection()`
+   - Изучить `calculateDaysText()`
+   - Проверить, что использует NumberFormattingUtils.formatDaysCount()
+2. Изучить `DetailScreenViewModel`:
+   - Проверить, какие use cases используются
+   - Проверить, есть ли GetFormattedDaysForItemUseCase
+3. Изучить навигацию и передачу Item:
+   - Проверить, как Item передается в DetailContent
+   - Проверить, что displayOption присутствует в Item
+
+#### Шаг 15.2: Интеграция GetFormattedDaysForItemUseCase в DetailScreen
+
+**Задача:** Использовать существующий use case для форматирования на DetailScreen
+
+**Действия:**
+1. Добавить GetFormattedDaysForItemUseCase в DetailScreenViewModel:
+   - Создать use case через FormatterModule
+   - Добавить как параметр ViewModel или создать внутри
+2. Обновить DetailContent.kt:
+   - Заменить `calculateDaysText()` на использование `GetFormattedDaysForItemUseCase`
+   - Обновить `daysCountSection()` для использования item.makeDaysCount()
+3. Убедиться, что displayOption используется:
+   - GetFormattedDaysForItemUseCase автоматически использует item.displayOption
+   - Форматирование учитывает выбранную опцию
+
+#### Шаг 15.3: Удаление устаревшего кода
+
+**Задача:** Убрать NumberFormattingUtils.formatDaysCount() из DetailScreen
+
+**Действия:**
+1. Удалить функцию `calculateDaysText()` из DetailContent.kt
+2. Обновить импорты (убрать NumberFormattingUtils, если не используется)
+3. Убедиться, что нет других мест, где используется NumberFormattingUtils для форматирования дней на DetailScreen
+
+#### Шаг 15.4: Тестирование
+
+**Задача:** Проверить, что форматирование работает для всех DisplayOption
+
+**Действия:**
+1. Создать unit-тесты для DetailContent:
+   - Тест для displayOption = DAY
+   - Тест для displayOption = MONTH_DAY
+   - Тест для displayOption = YEAR_MONTH_DAY
+2. Вручную протестировать на эмуляторе:
+   - Создать запись с каждым displayOption
+   - Открыть DetailScreen для каждой записи
+   - Проверить, что форматирование соответствует выбранному displayOption
+3. Убедиться, что секция с информацией о displayOption корректно отображается:
+   - Проверить displayOptionInfoSection()
+   - Убедиться, что она показывает правильное значение
+
+**Критерий готовности:**
+- ✅ При displayOption = DAY на DetailScreen отображается только количество дней
+- ✅ При displayOption = MONTH_DAY на DetailScreen отображаются месяцы и дни
+- ✅ При displayOption = YEAR_MONTH_DAY на DetailScreen отображаются годы, месяцы и дни
+- ✅ Форматирование на DetailScreen соответствует выбранному displayOption в Item
+- ✅ Форматирование на DetailScreen соответствует форматированию на MainScreen и CreateEditScreen
+- ✅ NumberFormattingUtils.formatDaysCount() больше не используется для форматирования дней
+- ✅ Unit-тесты покрывают все три DisplayOption
+- ✅ Секция displayOptionInfoSection показывает корректное значение displayOption
+
+---
+
 ## Стратегия тестирования
 
 ### Перед исправлениями
@@ -510,13 +737,20 @@ SearchBar может не отправлять запрос в ViewModel при 
 
 Эти исправления затрагивают следующие экраны и компоненты:
 
-- **MainScreen.kt** - основной экран (баги #2, #3, #4, #5, #6, #8, #11)
-- **ListItemView.kt** - компонент карточки (баги #6, #11)
-- **DetailScreen.kt** - экран деталей (баги #1, #10)
-- **CreateEditScreen.kt** - экран создания/редактирования (баги #9, #10, #11, #13)
+- **MainScreen.kt** - основной экран (баги #2, #3, #4, #5, #6, #8, #11, #14)
+- **ListItemView.kt** - компонент карточки (баги #6, #11, #14)
+- **DetailScreen.kt** - экран деталей (баги #1, #10, #15)
+- **CreateEditScreen.kt** - экран создания/редактирования (баги #9, #10, #11, #13, #14)
 - **RootScreenComponents.kt** - навигация (баги #2, #7, #11)
-- **MainScreenViewModel.kt** - ViewModel (баги #3, #5, #9)
+- **MainScreenViewModel.kt** - ViewModel (баги #3, #5, #9, #14)
 - **CreateEditScreenViewModel.kt** - ViewModel (баг #12)
+- **DetailContent.kt** - компонент деталей (баг #15)
+- **DaysFormatterImpl.kt** - форматирование (баг #14)
+- **CalculateDaysDifferenceUseCase.kt** - вычисление разницы дат (баг #14)
+- **FormatDaysTextUseCase.kt** - форматирование текста (баг #14)
+- **GetFormattedDaysForItemUseCase.kt** - получение форматированного текста (баг #14)
+- **DisplayOption.kt** - модель опции отображения (баг #14)
+- **TimePeriod.kt** - модель периода времени (баг #14)
 
 ---
 
@@ -524,7 +758,7 @@ SearchBar может не отправлять запрос в ViewModel при 
 
 План считается выполненным, когда:
 
-- ✅ Все 13 багов исправлены
+- ✅ Все 15 багов исправлены
 - ✅ Все изменения протестированы
 - ✅ Нет новых багов
 - ✅ Производительность не ухудшилась
@@ -543,3 +777,6 @@ SearchBar может не отправлять запрос в ViewModel при 
 - 2025-01-02: Исправлен баг #8 - Контент заезжает под камеру (заменен Column на Scaffold, применены paddingValues к NavHost)
 - 2025-01-02: Исправлен баг #12 - Кнопка "Сохранить" активна без изменений (реализовано отслеживание изменений через _originalItem и _hasChanges)
 - 2025-01-01: Добавлен баг #13 - Заголовок экрана создания/редактирования всегда одинаковый
+- 2025-01-02: Исправлен баг #9 - Изменение displayOption не обновляет UI (реализовано реактивное форматирование через GetFormattedDaysForItemUseCase)
+- 2025-01-02: Добавлен баг #14 - Месяцы игнорируются в MONTH_DAY и YEAR_MONTH_DAY
+- 2025-01-02: Добавлен баг #15 - DetailScreen игнорирует displayOption
