@@ -2,15 +2,18 @@ package com.dayscounter.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
@@ -31,6 +35,11 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  *
  * Показывает заголовок события, количество дней и цветовую метку.
  * Использует [daysCountText] для форматированного отображения количества дней.
+ *
+ * На главном экране:
+ * - Текст с количеством дней справа и занимает не более 30% от ширины экрана
+ * - Слева вертикальный стек с названием и описанием (каждое ограничено 2 строками)
+ * - Длинный текст обрезается с многоточием
  *
  * @param item Элемент для отображения
  * @param formattedDaysText Форматированный текст с количеством дней (вычисляется извне)
@@ -66,20 +75,39 @@ fun listItemView(
             Spacer(modifier = Modifier.width(12.dp))
         }
 
-        // Основной контент
+        // Левая часть: название и описание (ограничены по ширине)
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(0.7f),
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            // Заголовок события
+            // Заголовок события (до 2 строк)
             Text(
                 text = item.title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
 
-            // Количество дней
-            Spacer(modifier = Modifier.height(4.dp))
+            // Описание события (до 2 строк)
+            if (item.details.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = item.details,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
 
+        // Правая часть: количество дней (30% ширины)
+        Column(
+            modifier = Modifier.weight(0.3f),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center,
+        ) {
             daysCountText(
                 formattedText = formattedDaysText,
                 textStyle = DaysCountTextStyle.NORMAL,
