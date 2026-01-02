@@ -83,6 +83,96 @@ internal fun navigationBarContent(
 }
 
 /**
+ * Навигационное назначение для главного экрана событий.
+ */
+private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navController: NavHostController) {
+    composable(Screen.Events.route) {
+        eventsScreenContent(navController)
+    }
+}
+
+/**
+ * Навигационное назначение для экрана деталей события.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
+    repository: com.dayscounter.domain.repository.ItemRepository,
+    navController: NavHostController,
+) {
+    composable(
+        route = Screen.ItemDetail.route,
+        arguments =
+            listOf(
+                navArgument("itemId") {
+                    type = NavType.LongType
+                },
+            ),
+    ) { backStackEntry ->
+        val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+        com.dayscounter.ui.screen.detailScreen(
+            itemId = itemId,
+            viewModel =
+                viewModel(
+                    factory = DetailScreenViewModel.factory(repository),
+                ),
+            onBackClick = { navController.popBackStack() },
+            onEditClick = { id ->
+                navController.navigate(Screen.EditItem.createRoute(id))
+            },
+        )
+    }
+}
+
+/**
+ * Навигационное назначение для экрана создания/редактирования события.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
+    repository: com.dayscounter.domain.repository.ItemRepository,
+    resourceProvider: com.dayscounter.data.formatter.ResourceProvider,
+    navController: NavHostController,
+) {
+    composable(Screen.CreateItem.route) {
+        com.dayscounter.ui.screen.createEditScreen(
+            itemId = null,
+            viewModel =
+                viewModel(
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                ),
+            onBackClick = { navController.popBackStack() },
+        )
+    }
+    composable(
+        route = Screen.EditItem.route,
+        arguments =
+            listOf(
+                navArgument("itemId") {
+                    type = NavType.LongType
+                },
+            ),
+    ) { backStackEntry ->
+        val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+        com.dayscounter.ui.screen.createEditScreen(
+            itemId = itemId,
+            viewModel =
+                viewModel(
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                ),
+            onBackClick = { navController.popBackStack() },
+        )
+    }
+}
+
+/**
+ * Навигационное назначение для экрана настроек.
+ */
+private fun androidx.navigation.NavGraphBuilder.moreScreenDestination() {
+    composable(Screen.More.route) {
+        moreScreenContent()
+    }
+}
+
+/**
  * NavHost с маршрутами.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,63 +194,10 @@ internal fun navHostContent(
         startDestination = Screen.Events.route,
         modifier = Modifier.padding(paddingValues),
     ) {
-        composable(Screen.Events.route) {
-            eventsScreenContent(navController)
-        }
-        composable(Screen.More.route) {
-            moreScreenContent()
-        }
-        composable(
-            route = Screen.ItemDetail.route,
-            arguments =
-                listOf(
-                    navArgument("itemId") {
-                        type = NavType.LongType
-                    },
-                ),
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-            com.dayscounter.ui.screen.detailScreen(
-                itemId = itemId,
-                viewModel =
-                    viewModel(
-                        factory = DetailScreenViewModel.factory(repository),
-                    ),
-                onBackClick = { navController.popBackStack() },
-                onEditClick = { id ->
-                    navController.navigate(Screen.EditItem.createRoute(id))
-                },
-            )
-        }
-        composable(Screen.CreateItem.route) {
-            com.dayscounter.ui.screen.createEditScreen(
-                itemId = null,
-                viewModel =
-                    viewModel(
-                        factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
-                    ),
-                onBackClick = { navController.popBackStack() },
-            )
-        }
-        composable(
-            route = Screen.EditItem.route,
-            arguments =
-                listOf(
-                    navArgument("itemId") {
-                        type = NavType.LongType
-                    },
-                ),
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-            com.dayscounter.ui.screen.createEditScreen(
-                itemId = itemId,
-                viewModel =
-                    viewModel(
-                        factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
-                    ),
-                onBackClick = { navController.popBackStack() },
-            )
-        }
+        this.mainScreenDestination(navController)
+        this.detailScreenDestination(repository, navController)
+        this.createEditScreenDestination(repository, resourceProvider, navController)
+        this.moreScreenDestination()
     }
 }
 

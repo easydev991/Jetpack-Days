@@ -4,23 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -28,9 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -50,9 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -117,12 +107,104 @@ fun mainScreen(
         )
 
     mainScreenContent(
+        params =
+            MainScreenParams(
+                viewModel = viewModel,
+                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+                onItemClick = onItemClick,
+                onEditClick = onEditClick,
+                onCreateClick = onCreateClick,
+            ),
         modifier = modifier,
-        viewModel = viewModel,
-        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-        onItemClick = onItemClick,
-        onEditClick = onEditClick,
-        onCreateClick = onCreateClick,
+    )
+}
+
+/**
+ * Заголовок экрана (TopBar).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun screenHeader(
+    itemsCount: Int,
+    sortOrder: com.dayscounter.domain.model.SortOrder,
+    onSortOrderChange: (com.dayscounter.domain.model.SortOrder) -> Unit,
+) {
+    mainScreenTopBar(
+        state =
+            MainScreenTopBarState(
+                itemsCount = itemsCount,
+                sortOrder = sortOrder,
+                onSortOrderChange = onSortOrderChange,
+            ),
+    )
+}
+
+/**
+ * Тело экрана со списком и полем поиска.
+ */
+@Composable
+private fun screenBody(
+    searchQuery: String,
+    itemsCount: Int,
+    paddingValues: PaddingValues,
+    state: MainScreenContentState,
+    onSearchQueryChange: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
+        if (showSearchField) {
+            searchField(
+                searchQuery = searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        }
+        mainScreenContentByState(
+            state = state,
+            paddingValues =
+                PaddingValues(
+                    top = if (showSearchField) 0.dp else paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                    bottom = paddingValues.calculateBottomPadding(),
+                ),
+        )
+    }
+}
+
+/**
+ * Диалог подтверждения удаления.
+ */
+@Composable
+private fun deleteDialog(
+    item: com.dayscounter.domain.model.Item,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.delete_item_title)) },
+        text = {
+            Text(stringResource(R.string.delete_item_message, item.title))
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = onConfirm,
+            ) {
+                Text(stringResource(R.string.delete_item_confirm))
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(
+                onClick = onCancel,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
     )
 }
 
@@ -131,38 +213,28 @@ fun mainScreen(
  */
 @Composable
 private fun mainScreenContent(
+    params: MainScreenParams,
     modifier: Modifier = Modifier,
-    viewModel: MainScreenViewModel,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-    onItemClick: (Long) -> Unit,
-    onEditClick: (Long) -> Unit,
-    onCreateClick: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val sortOrder by viewModel.sortOrder.collectAsState()
-    val itemsCount by viewModel.itemsCount.collectAsState()
+    val uiState by params.viewModel.uiState.collectAsState()
+    val searchQuery by params.viewModel.searchQuery.collectAsState()
+    val sortOrder by params.viewModel.sortOrder.collectAsState()
+    val itemsCount by params.viewModel.itemsCount.collectAsState()
     val listState = rememberLazyListState()
-    val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
+    val showDeleteDialog by params.viewModel.showDeleteDialog.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            mainScreenTopBar(
-                state =
-                    MainScreenTopBarState(
-                        itemsCount = itemsCount,
-                        sortOrder = sortOrder,
-                        onSortOrderChange = { viewModel.updateSortOrder(it) },
-                    ),
+            screenHeader(
+                itemsCount = itemsCount,
+                sortOrder = sortOrder,
+                onSortOrderChange = { params.viewModel.updateSortOrder(it) },
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    // Navigate to create item screen
-                    onCreateClick()
-                },
+                onClick = params.onCreateClick,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -171,202 +243,113 @@ private fun mainScreenContent(
             }
         },
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Поле поиска над списком (отображается, если есть текст в поиске ИЛИ есть 5+ записей)
-            val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
-            if (showSearchField) {
-                searchField(
+        screenBody(
+            searchQuery = searchQuery,
+            itemsCount = itemsCount,
+            paddingValues = paddingValues,
+            state =
+                MainScreenContentState(
+                    uiState = uiState,
                     searchQuery = searchQuery,
-                    onSearchQueryChange = { viewModel.updateSearchQuery(it) },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
-
-            // Список записей (адаптивный padding в зависимости от видимости поля поиска)
-            mainScreenContentByState(
-                state =
-                    MainScreenContentState(
-                        uiState = uiState,
-                        searchQuery = searchQuery,
-                        listState = listState,
-                        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-                        onItemClick = onItemClick,
-                        onEditClick = onEditClick,
-                        viewModel = viewModel,
-                    ),
-                paddingValues =
-                    PaddingValues(
-                        top = if (showSearchField) 0.dp else paddingValues.calculateTopPadding(),
-                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                        bottom = paddingValues.calculateBottomPadding(),
-                    ),
-            )
-        }
+                    listState = listState,
+                    getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
+                    onItemClick = params.onItemClick,
+                    onEditClick = params.onEditClick,
+                    viewModel = params.viewModel,
+                ),
+            onSearchQueryChange = { params.viewModel.updateSearchQuery(it) },
+        )
     }
 
-    // Диалог подтверждения удаления
-    if (showDeleteDialog != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.cancelDelete() },
-            title = { Text(stringResource(R.string.delete_item_title)) },
-            text = {
-                Text(stringResource(R.string.delete_item_message, showDeleteDialog!!.title))
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { viewModel.confirmDelete() },
-                ) {
-                    Text(stringResource(R.string.delete_item_confirm))
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { viewModel.cancelDelete() },
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
+    showDeleteDialog?.let { item ->
+        deleteDialog(
+            item = item,
+            onConfirm = { params.viewModel.confirmDelete() },
+            onCancel = { params.viewModel.cancelDelete() },
         )
     }
 }
 
 /**
- * Меню сортировки.
+ * Обертка для элемента списка с позиционированием.
  */
 @Composable
-private fun sortMenu(
-    sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit,
+private fun listItemWrapper(
+    item: com.dayscounter.domain.model.Item,
+    formattedDaysText: String,
+    onItemClick: (Long) -> Unit,
+    onLongClick: (Offset, Offset) -> Unit,
+    isSelected: Boolean,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                painter = painterResource(R.drawable.sort_24px),
-                contentDescription = stringResource(R.string.sort),
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.old_first)) },
-                onClick = {
-                    onSortOrderChange(SortOrder.ASCENDING)
-                    expanded = false
-                },
-                trailingIcon = {
-                    if (sortOrder == SortOrder.ASCENDING) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                        )
-                    }
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.new_first)) },
-                onClick = {
-                    onSortOrderChange(SortOrder.DESCENDING)
-                    expanded = false
-                },
-                trailingIcon = {
-                    if (sortOrder == SortOrder.DESCENDING) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                        )
-                    }
-                },
-            )
-        }
-    }
-}
-
-/**
- * Контент с пустым списком.
- */
-@Composable
-private fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.what_should_we_remember),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-
-        Text(
-            text = stringResource(R.string.create_your_first_item),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-/**
- * Контент с пустым результатом поиска.
- */
-@Composable
-private fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.no_results_found),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-
-        Text(
-            text = stringResource(R.string.try_different_search_terms),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-/**
- * Контент при загрузке.
- */
-@Composable
-private fun loadingContent(modifier: Modifier = Modifier) {
+    var itemPosition by remember { mutableStateOf(Offset.Zero) }
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .onGloballyPositioned { coordinates ->
+                    itemPosition = coordinates.positionInRoot()
+                },
     ) {
-        Text(
-            text = stringResource(R.string.loading),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        listItemView(
+            params =
+                com.dayscounter.ui.component.ListItemParams(
+                    item = item,
+                    formattedDaysText = formattedDaysText,
+                    onClick = { onItemClick(item.id) },
+                    onLongClick = { localOffset -> onLongClick(localOffset, itemPosition) },
+                    isSelected = isSelected,
+                ),
+        )
+    }
+}
+
+/**
+ * Контекстное меню для элемента списка.
+ */
+@Composable
+private fun contextMenu(params: ContextMenuParams) {
+    DropdownMenu(
+        expanded = true,
+        onDismissRequest = params.onDismiss,
+        offset = params.menuOffset,
+    ) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.context_menu_view)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Visibility,
+                    contentDescription = null,
+                )
+            },
+            onClick = {
+                params.onDismiss()
+                params.onItemClick(params.item.id)
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.context_menu_edit)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = null,
+                )
+            },
+            onClick = {
+                params.onDismiss()
+                params.onEditClick(params.item.id)
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.context_menu_delete)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                )
+            },
+            onClick = {
+                params.onDismiss()
+                params.onDeleteClick(params.item)
+            },
         )
     }
 }
@@ -375,133 +358,52 @@ private fun loadingContent(modifier: Modifier = Modifier) {
  * Контент со списком записей.
  */
 @Composable
-private fun itemsListContent(
-    items: List<com.dayscounter.domain.model.Item>,
-    listState: androidx.compose.foundation.lazy.LazyListState,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-    onItemClick: (Long) -> Unit,
-    onEditClick: (Long) -> Unit,
-    viewModel: MainScreenViewModel,
-    paddingValues: PaddingValues,
-) {
+private fun itemsListContent(params: ItemsListParams) {
     var contextMenuItem by remember { mutableStateOf<com.dayscounter.domain.model.Item?>(null) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
-    var itemGlobalPosition by remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        state = listState,
-        contentPadding = paddingValues,
+        state = params.listState,
+        contentPadding = params.paddingValues,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
     ) {
         items(
-            items = items,
+            items = params.items,
             key = { it.id },
         ) { item ->
-            var itemPosition by remember { mutableStateOf(Offset.Zero) }
-
-            // Форматируем текст с учетом displayOption из Item
-            val formattedDaysText = getFormattedDaysForItemUseCase(item = item)
-
-            Box(
-                modifier =
-                    Modifier
-                        .onGloballyPositioned { coordinates ->
-                            itemPosition = coordinates.positionInRoot()
-                        },
-            ) {
-                listItemView(
-                    item = item,
-                    formattedDaysText = formattedDaysText,
-                    onClick = { onItemClick(it.id) },
-                    onLongClick = { localOffset ->
-                        contextMenuItem = item
-                        itemGlobalPosition = itemPosition
-                        menuOffset =
-                            with(density) {
-                                DpOffset(
-                                    (itemPosition.x + localOffset.x).toDp(),
-                                    (itemPosition.y + localOffset.y).toDp(),
-                                )
-                            }
-                    },
-                    isSelected = contextMenuItem?.id == item.id,
-                )
-            }
+            val formattedDaysText = params.getFormattedDaysForItemUseCase(item = item)
+            listItemWrapper(
+                item = item,
+                formattedDaysText = formattedDaysText,
+                onItemClick = params.onItemClick,
+                onLongClick = { localOffset, itemPosition ->
+                    contextMenuItem = item
+                    menuOffset =
+                        with(density) {
+                            DpOffset(
+                                (itemPosition.x + localOffset.x).toDp(),
+                                (itemPosition.y + localOffset.y).toDp(),
+                            )
+                        }
+                },
+                isSelected = contextMenuItem?.id == item.id,
+            )
         }
     }
 
-    // Контекстное меню
     contextMenuItem?.let { item ->
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = { contextMenuItem = null },
-            offset = menuOffset,
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.context_menu_view)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Visibility,
-                        contentDescription = null,
-                    )
-                },
-                onClick = {
-                    contextMenuItem = null
-                    onItemClick(item.id)
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.context_menu_edit)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = null,
-                    )
-                },
-                onClick = {
-                    contextMenuItem = null
-                    onEditClick(item.id)
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.context_menu_delete)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = null,
-                    )
-                },
-                onClick = {
-                    contextMenuItem = null
-                    viewModel.requestDelete(item)
-                },
-            )
-        }
-    }
-}
-
-/**
- * Контент при ошибке.
- */
-@Composable
-private fun errorContent(
-    message: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(dimensionResource(R.dimen.spacing_huge)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
+        contextMenu(
+            params =
+                ContextMenuParams(
+                    item = item,
+                    menuOffset = menuOffset,
+                    onDismiss = { contextMenuItem = null },
+                    onItemClick = params.onItemClick,
+                    onEditClick = params.onEditClick,
+                    onDeleteClick = { params.viewModel.requestDelete(it) },
+                ),
         )
     }
 }
@@ -540,43 +442,6 @@ private fun mainScreenTopBar(state: MainScreenTopBarState) {
 }
 
 /**
- * Поле поиска для фильтрации списка записей.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun searchField(
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    OutlinedTextField(
-        value = searchQuery,
-        onValueChange = onSearchQueryChange,
-        placeholder = {
-            Text(stringResource(R.string.search))
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(R.string.search),
-            )
-        },
-        trailingIcon = {
-            if (searchQuery.isNotEmpty()) {
-                IconButton(onClick = { onSearchQueryChange("") }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
-                    )
-                }
-            }
-        },
-        singleLine = true,
-        modifier = modifier.height(56.dp),
-    )
-}
-
-/**
  * Data class for parameters of main screen content by state.
  */
 private data class MainScreenContentState(
@@ -611,13 +476,16 @@ private fun mainScreenContentByState(
                 }
             } else {
                 itemsListContent(
-                    items = uiState.items,
-                    listState = state.listState,
-                    getFormattedDaysForItemUseCase = state.getFormattedDaysForItemUseCase,
-                    onItemClick = state.onItemClick,
-                    onEditClick = state.onEditClick,
-                    viewModel = state.viewModel,
-                    paddingValues = paddingValues,
+                    params =
+                        ItemsListParams(
+                            items = uiState.items,
+                            listState = state.listState,
+                            getFormattedDaysForItemUseCase = state.getFormattedDaysForItemUseCase,
+                            onItemClick = state.onItemClick,
+                            onEditClick = state.onEditClick,
+                            viewModel = state.viewModel,
+                            paddingValues = paddingValues,
+                        ),
                 )
             }
         }

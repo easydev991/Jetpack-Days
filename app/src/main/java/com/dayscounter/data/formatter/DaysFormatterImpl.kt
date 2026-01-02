@@ -17,6 +17,9 @@ class DaysFormatterImpl : DaysFormatter {
         /** Константа для формата с двумя компонентами */
         private const val TWO_COMPONENTS = 2
 
+        /** Количество месяцев в году */
+        private const val MONTHS_IN_YEAR = 12
+
         /**
          * Контейнер для компонентов времени.
          *
@@ -97,7 +100,7 @@ class DaysFormatterImpl : DaysFormatter {
         resourceProvider: ResourceProvider,
     ): String {
         // Конвертируем годы в месяцы для MONTH_DAY (как в iOS)
-        val totalMonths = period.years * 12 + period.months
+        val totalMonths = period.years * MONTHS_IN_YEAR + period.months
 
         val timeComponents =
             TimeComponents(

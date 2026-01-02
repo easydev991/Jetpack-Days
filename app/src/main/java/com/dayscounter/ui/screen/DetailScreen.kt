@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
-import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.screen.components.detail.detailContentByState
 import com.dayscounter.ui.screen.components.detail.detailTopAppBar
 import com.dayscounter.viewmodel.DetailScreenState
@@ -67,23 +66,26 @@ fun detailScreen(
         )
 
     detailScreenContent(
-        itemId = itemId,
+        params =
+            DetailScreenParams(
+                itemId = itemId,
+                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+                onBackClick = onBackClick,
+                onEditClick = onEditClick,
+                onDeleteClick = {
+                    viewModel.requestDelete()
+                },
+                showDeleteDialog = showDeleteDialog,
+                onConfirmDelete = {
+                    viewModel.confirmDelete()
+                    onBackClick()
+                },
+                onCancelDelete = {
+                    viewModel.cancelDelete()
+                },
+            ),
         modifier = modifier,
         uiState = uiState,
-        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-        onBackClick = onBackClick,
-        onEditClick = onEditClick,
-        onDeleteClick = {
-            viewModel.requestDelete()
-        },
-        showDeleteDialog = showDeleteDialog,
-        onConfirmDelete = {
-            viewModel.confirmDelete()
-            onBackClick()
-        },
-        onCancelDelete = {
-            viewModel.cancelDelete()
-        },
     )
 }
 
@@ -93,16 +95,9 @@ fun detailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun detailScreenContent(
-    itemId: Long,
+    params: DetailScreenParams,
     modifier: Modifier = Modifier,
     uiState: DetailScreenState,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-    onBackClick: () -> Unit,
-    onEditClick: (Long) -> Unit,
-    onDeleteClick: () -> Unit,
-    showDeleteDialog: Boolean,
-    onConfirmDelete: () -> Unit,
-    onCancelDelete: () -> Unit,
 ) {
     val currentItem = (uiState as? DetailScreenState.Success)?.item
 
@@ -111,39 +106,39 @@ private fun detailScreenContent(
         topBar = {
             detailTopAppBar(
                 uiState = uiState,
-                onBackClick = onBackClick,
-                onEditClick = onEditClick,
-                onDeleteClick = onDeleteClick,
-                itemId = itemId,
+                onBackClick = params.onBackClick,
+                onEditClick = params.onEditClick,
+                onDeleteClick = params.onDeleteClick,
+                itemId = params.itemId,
             )
         },
     ) { paddingValues ->
         detailContentByState(
             uiState = uiState,
             modifier = Modifier.padding(paddingValues),
-            getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+            getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
         )
     }
 
     // Диалог подтверждения удаления
-    if (showDeleteDialog) {
+    if (params.showDeleteDialog) {
         currentItem?.let { item ->
             AlertDialog(
-                onDismissRequest = { onCancelDelete() },
+                onDismissRequest = { params.onCancelDelete() },
                 title = { Text(stringResource(R.string.delete_item_title)) },
                 text = {
                     Text(stringResource(R.string.delete_item_message, item.title))
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = { onConfirmDelete() },
+                        onClick = { params.onConfirmDelete() },
                     ) {
                         Text(stringResource(R.string.delete_item_confirm))
                     }
                 },
                 dismissButton = {
                     TextButton(
-                        onClick = { onCancelDelete() },
+                        onClick = { params.onCancelDelete() },
                     ) {
                         Text(stringResource(R.string.cancel))
                     }

@@ -5,15 +5,16 @@ import com.dayscounter.data.formatter.StubResourceProvider
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
+import com.dayscounter.util.NoOpLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.robolectric.annotation.Config
 import java.time.LocalDate
@@ -25,9 +26,6 @@ import java.time.LocalDate
  *
  * Тесты создают реальные экземпляры Use Cases вместо моков,
  * так как ручной DI не требует сложной настройки для unit-тестирования.
- *
- * ПРИМЕЧАНИЕ: После миграции JUnit Jupiter 5.x → 6.0.1 возникли проблемы
- * с корутинами в viewModelScope. Подробная информация в docs/JUNIT_6_MIGRATION_FIX.md
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Config(sdk = [30])
@@ -51,13 +49,14 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Then
@@ -68,7 +67,6 @@ class DaysCalculatorViewModelTest {
             )
         }
 
-    @Disabled("TODO: Fix test - reset calls Log which is not mocked")
     @Test
     fun `reset when called then clears state`() =
         runTest {
@@ -80,17 +78,19 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Given - устанавливаем состояние
             viewModel.calculateDays(1704067200000L, LocalDate.of(2024, 1, 10))
+            advanceUntilIdle() // Ждем выполнения корутин
 
             // Проверяем, что состояние установилось
             val stateBefore = viewModel.state.value
@@ -106,7 +106,6 @@ class DaysCalculatorViewModelTest {
             Assertions.assertNull(state.error, "error должен быть null")
         }
 
-    @Disabled("TODO: Fix test - clearError - viewModelScope coroutines don't execute with test dispatcher")
     @Test
     fun `clearError when called then clears error state`() =
         runTest {
@@ -118,17 +117,19 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Given - сначала создаем состояние
             viewModel.calculateDays(1704067200000L, LocalDate.of(2024, 1, 10))
+            advanceUntilIdle() // Ждем выполнения корутин
 
             // Then проверяем, что текст есть
             Assertions.assertNotNull(viewModel.state.value.formattedText, "Должен быть форматированный текст")
@@ -142,7 +143,6 @@ class DaysCalculatorViewModelTest {
             Assertions.assertNotNull(state.formattedText, "formattedText должен сохраниться")
         }
 
-    @Disabled("TODO: Fix test - updateDisplayOption calls Log which is not mocked")
     @Test
     fun `updateDisplayOption when called then updates display option`() =
         runTest {
@@ -154,13 +154,14 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Given
@@ -173,7 +174,6 @@ class DaysCalculatorViewModelTest {
             Assertions.assertEquals(newOption, viewModel.displayOption.value, "displayOption должен быть MONTH_DAY")
         }
 
-    @Disabled("TODO: Fix test - calculateDays - viewModelScope coroutines don't execute with test dispatcher")
     @Test
     fun `calculateDays when timestamp provided then updates state`() =
         runTest {
@@ -185,13 +185,14 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Given
@@ -201,6 +202,7 @@ class DaysCalculatorViewModelTest {
 
             // When
             viewModel.calculateDays(timestamp, currentDate)
+            advanceUntilIdle() // Ждем выполнения корутин
 
             // Then
             val state = viewModel.state.value
@@ -213,7 +215,6 @@ class DaysCalculatorViewModelTest {
             Assertions.assertNull(state.error, "error должен быть null")
         }
 
-    @Disabled("TODO: Fix test - calculateDays with custom displayOption - viewModelScope coroutines don't execute with test dispatcher")
     @Test
     fun `calculateDays with custom displayOption then uses custom option`() =
         runTest {
@@ -225,13 +226,14 @@ class DaysCalculatorViewModelTest {
             val formatter = DaysFormatterImpl()
             formatDaysTextUseCase = FormatDaysTextUseCase(formatter)
 
-            // Создаем ViewModel с StubResourceProvider для тестов
+            // Создаем ViewModel с NoOpLogger для тестов
             val viewModel =
                 DaysCalculatorViewModel(
                     calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                     formatDaysTextUseCase = formatDaysTextUseCase,
                     resourceProvider = StubResourceProvider(),
                     defaultDisplayOption = DisplayOption.DAY,
+                    logger = NoOpLogger(),
                 )
 
             // Given
@@ -241,6 +243,7 @@ class DaysCalculatorViewModelTest {
 
             // When
             viewModel.calculateDays(timestamp, currentDate, displayOption = customOption)
+            advanceUntilIdle() // Ждем выполнения корутин
 
             // Then
             val state = viewModel.state.value

@@ -1,6 +1,5 @@
 package com.dayscounter.ui.screen.components.createedit
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,10 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.dayscounter.R
-import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.ui.screen.CreateEditUiState as ScreenCreateEditUiState
 
 /**
@@ -73,6 +69,51 @@ internal fun createEditTopAppBar(
 }
 
 /**
+ * Основные секции формы (название, детали, дата).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun mainFormSections(
+    params: CreateEditFormParams,
+    onValueChange: () -> Unit,
+) {
+    titleSection(
+        title = params.uiStates.title,
+        onValueChange = { onValueChange() },
+    )
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    detailsSection(
+        details = params.uiStates.details,
+        onValueChange = { onValueChange() },
+    )
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    dateSection(
+        selectedDate = params.uiStates.selectedDate,
+        showDatePicker = params.showDatePicker,
+        onValueChange = onValueChange,
+    )
+}
+
+/**
+ * Секция выбора цвета и опции отображения.
+ */
+@Composable
+private fun colorAndDisplayOptionSection(
+    params: CreateEditFormParams,
+    onValueChange: () -> Unit,
+) {
+    colorSelector(
+        selectedColor = params.uiStates.selectedColor,
+        onValueChange = onValueChange,
+    )
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    displayOptionSelector(
+        selectedDisplayOption = params.uiStates.selectedDisplayOption,
+        onValueChange = onValueChange,
+    )
+}
+
+/**
  * Контент формы создания/редактирования.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,52 +148,26 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_extra_large)),
     ) {
-        titleSection(
-            title = params.uiStates.title,
-            onValueChange = { onValueChange() },
-        )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-        detailsSection(
-            details = params.uiStates.details,
-            onValueChange = { onValueChange() },
-        )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-        dateSection(selectedDate = params.uiStates.selectedDate, showDatePicker = params.showDatePicker, onValueChange = onValueChange)
+        mainFormSections(params, onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
 
-//        // Предпросмотр дней
-//        if (params.uiStates.selectedDate.value != null) {
-//            previewDaysContentInner(
-//                selectedDate = params.uiStates.selectedDate.value!!,
-//                displayOption = params.uiStates.selectedDisplayOption.value,
-//            )
-//            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-//        }
+        // Предпросмотр дней (закомментировано)
+        // if (params.uiStates.selectedDate.value != null) {
+        //     previewDaysContentInner(
+        //         selectedDate = params.uiStates.selectedDate.value!!,
+        //         displayOption = params.uiStates.selectedDisplayOption.value,
+        //     )
+        //     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        // }
 
-        // Выбор цвета
-        colorSelector(
-            selectedColor = params.uiStates.selectedColor,
-            onValueChange = onValueChange,
-        )
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-
-        // Опция отображения
-        displayOptionSelector(
-            selectedDisplayOption = params.uiStates.selectedDisplayOption,
-            onValueChange = onValueChange,
-        )
-
+        colorAndDisplayOptionSection(params, onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
-
-        // Кнопки
         buttonsSection(
             uiStates = params.uiStates,
             itemId = params.itemId,
             viewModel = params.viewModel,
             onBackClick = params.onBackClick,
         )
-
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
     }
 }
@@ -275,88 +290,5 @@ fun loadItemData(
                 .toLocalDate()
         uiStates.selectedColor.value = item.colorTag?.let { Color(it) }
         uiStates.selectedDisplayOption.value = item.displayOption
-    }
-}
-
-// ==================== PREVIEWS ====================
-
-@Preview(showBackground = true, name = "Секция заголовка")
-@Composable
-fun titleSectionPreview() {
-    jetpackDaysTheme {
-        val title = remember { mutableStateOf("День рождения") }
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            OutlinedTextField(
-                value = title.value,
-                onValueChange = { title.value = it },
-                label = { Text("Название") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Секция деталей")
-@Composable
-fun detailsSectionPreview() {
-    jetpackDaysTheme {
-        val details = remember { mutableStateOf("Праздничный день с друзьями") }
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            OutlinedTextField(
-                value = details.value,
-                onValueChange = { details.value = it },
-                label = { Text("Описание") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Секция даты")
-@Composable
-fun dateSectionPreview() {
-    jetpackDaysTheme {
-        val selectedDate = remember { mutableStateOf(java.time.LocalDate.now()) }
-        val showDatePicker = remember { mutableStateOf(false) }
-        val formatter =
-            java.time.format.DateTimeFormatter
-                .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
-
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            OutlinedTextField(
-                value = selectedDate.value?.format(formatter) ?: "",
-                onValueChange = { },
-                label = { Text("Дата") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker.value = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.DateRange,
-                            contentDescription = "Выбрать дату",
-                        )
-                    }
-                },
-            )
-        }
     }
 }

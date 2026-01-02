@@ -2,7 +2,6 @@ package com.dayscounter.data.database.converters
 
 import com.dayscounter.domain.model.DisplayOption
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class DisplayOptionConverterTest {
@@ -60,18 +59,6 @@ class DisplayOptionConverterTest {
 
         // Then
         assertEquals(DisplayOption.YEAR_MONTH_DAY, result)
-    }
-
-    @Disabled("Этот тест проверяет детали реализации с использованием Log.w, который не работает в unit-тестах")
-    @Test
-    fun `toDisplayOption_whenUnknownString_thenReturnsDefault`() {
-        // When
-        val result = converter.toDisplayOption("UNKNOWN")
-
-        // Then
-        // Note: DisplayOptionConverter использует Log.w для логирования предупреждений
-        // Это вызывает RuntimeException в unit-test среде
-        assertEquals(DisplayOption.DEFAULT, result)
     }
 
     @Test

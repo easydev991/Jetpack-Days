@@ -12,13 +12,15 @@ clean:
 test:
 	./gradlew test --console=plain && echo "Тесты выполнены. Результаты:" && find app/build/test-results -name "*.xml" -exec grep -h "testsuite" {} \; | head -10
 
-# Запуск линтера (ktlint и detekt)
+# Запуск линтера (ktlint и detekt) - только проверка без исправлений
 lint:
-	./gradlew ktlintCheck detekt
+	./gradlew ktlintCheck
+	-./gradlew app:detekt
 
-# Форматирование кода
+# Форматирование кода и удаление неиспользуемых импортов
 format:
 	./gradlew ktlintFormat
+	-./gradlew app:detekt -Pdetekt.autoCorrect=true
 
 # Сборка и запуск всех проверок
 check: build

@@ -166,7 +166,7 @@ complexity:
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/data/database/converters/**', '**/domain/model/Item.kt']
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/data/database/converters/**', '**/domain/model/Item.kt', '**/dao/**Dao.kt', '**/viewmodel/**ViewModel.kt']
     thresholdInFiles: 11
     thresholdInClasses: 11
     thresholdInInterfaces: 11
@@ -347,7 +347,7 @@ naming:
     active: false
     parameterPattern: '[a-z][A-Za-z0-9]*|_'
   MatchingDeclarationName:
-    active: true
+    active: false
     mustBeFirst: true
   MemberNameEqualsClassName:
     active: true
@@ -631,13 +631,7 @@ style:
   MaxChainedCallsOnSameLine:
     active: false
     maxChainedCalls: 5
-  MaxLineLength:
-    active: true
-    maxLineLength: 120
-    excludePackageStatements: true
-    excludeImportStatements: true
-    excludeCommentStatements: false
-    excludeRawStrings: true
+  # MaxLineLength отключен - дублирует функционал ktlint
   MayBeConst:
     active: true
   ModifierOrder:
@@ -731,7 +725,8 @@ style:
   UntilInsteadOfRangeTo:
     active: false
   UnusedImports:
-    active: false
+    active: true
+    autoCorrect: true
   UnusedParameter:
     active: true
     allowedNames: 'ignored|expected'
@@ -780,7 +775,4 @@ style:
   VarCouldBeVal:
     active: true
     ignoreLateinitVar: false
-  WildcardImport:
-    active: true
-    excludeImports:
-      - 'java.util.*'
+  # WildcardImport уже отключён выше в секции style

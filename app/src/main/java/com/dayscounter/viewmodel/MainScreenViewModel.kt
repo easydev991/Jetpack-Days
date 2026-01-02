@@ -101,7 +101,11 @@ class MainScreenViewModel(
                             val titleContains = item.title.contains(query, ignoreCase = true)
                             val detailsContains = item.details.contains(query, ignoreCase = true)
                             println(
-                                "Фильтрация: элемент='${item.title}', детали='${item.details}', запрос='$query', titleContains=$titleContains, detailsContains=$detailsContains",
+                                "Фильтрация: элемент='${item.title}', " +
+                                    "детали='${item.details}', " +
+                                    "запрос='$query', " +
+                                    "titleContains=$titleContains, " +
+                                    "detailsContains=$detailsContains",
                             )
                             titleContains || detailsContains
                         }

@@ -20,16 +20,96 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.theme.jetpackDaysTheme
+
+/**
+ * Константы для компонента списка элементов.
+ */
+private object ListItemViewConstants {
+    /** Вес левой колонки с названием и описанием (70% ширины) */
+    const val TITLE_WEIGHT = 0.7f
+
+    /** Вес правой колонки с количеством дней (30% ширины) */
+    const val DAYS_WEIGHT = 0.3f
+}
+
+/**
+ * Цветовая метка элемента.
+ */
+@Composable
+private fun itemColorTag(colorTag: Int) {
+    Box(
+        modifier =
+            Modifier
+                .size(dimensionResource(R.dimen.color_tag_size_small))
+                .clip(CircleShape)
+                .background(color = Color(colorTag)),
+    )
+    Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_extra_large)))
+}
+
+/**
+ * Левая колонка с названием и описанием элемента.
+ */
+@Composable
+private fun itemTitleAndDetails(
+    modifier: Modifier = Modifier,
+    item: Item,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        // Заголовок события (до 2 строк)
+        Text(
+            text = item.title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        // Описание события (до 2 строк)
+        if (item.details.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+            Text(
+                text = item.details,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+/**
+ * Правая колонка с количеством дней.
+ */
+@Composable
+private fun itemDaysBadge(
+    modifier: Modifier = Modifier,
+    formattedDaysText: String,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        daysCountText(
+            formattedText = formattedDaysText,
+            textStyle = DaysCountTextStyle.NORMAL,
+        )
+    }
+}
 
 /**
  * Компонент для отображения элемента списка событий.
@@ -44,26 +124,18 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  * - Поддерживает короткий клик и долгое нажатие
  * - Поддерживает визуальное выделение элемента
  *
- * @param item Элемент для отображения
- * @param formattedDaysText Форматированный текст с количеством дней (вычисляется извне)
+ * @param params Параметры компонента
  * @param modifier Modifier для компонента
- * @param onClick Обработчик клика по элементу
- * @param onLongClick Обработчик долгого нажатия по элементу, получает координаты нажатия
- * @param isSelected Выделен ли элемент (например, когда открыто контекстное меню)
  */
 @Composable
 fun listItemView(
-    item: Item,
-    formattedDaysText: String,
+    params: ListItemParams,
     modifier: Modifier = Modifier,
-    onClick: (Item) -> Unit = {},
-    onLongClick: ((Offset) -> Unit)? = null,
-    isSelected: Boolean = false,
 ) {
     val backgroundColor =
         animateColorAsState(
             targetValue =
-                if (isSelected) {
+                if (params.isSelected) {
                     MaterialTheme.colorScheme.surfaceVariant
                 } else {
                     MaterialTheme.colorScheme.surface
@@ -75,72 +147,32 @@ fun listItemView(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(
-                    color = backgroundColor,
-                ).pointerInput(Unit) {
-                    if (onLongClick != null) {
+                .background(color = backgroundColor)
+                .pointerInput(Unit) {
+                    if (params.onLongClick != null) {
                         detectTapGestures(
-                            onTap = { onClick(item) },
-                            onLongPress = { offset -> onLongClick(offset) },
+                            onTap = { params.onClick(params.item) },
+                            onLongPress = { offset -> params.onLongClick.invoke(offset) },
                         )
                     } else {
                         detectTapGestures(
-                            onTap = { onClick(item) },
+                            onTap = { params.onClick(params.item) },
                         )
                     }
-                }.padding(16.dp),
+                }.padding(dimensionResource(R.dimen.spacing_extra_large)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Цветовая метка
-        if (item.colorTag != null) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(color = Color(item.colorTag)),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+        if (params.item.colorTag != null) {
+            itemColorTag(params.item.colorTag)
         }
-
-        // Левая часть: название и описание (ограничены по ширине)
-        Column(
-            modifier = Modifier.weight(0.7f),
-            verticalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            // Заголовок события (до 2 строк)
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            // Описание события (до 2 строк)
-            if (item.details.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = item.details,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-
-        // Правая часть: количество дней (30% ширины)
-        Column(
-            modifier = Modifier.weight(0.3f),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            daysCountText(
-                formattedText = formattedDaysText,
-                textStyle = DaysCountTextStyle.NORMAL,
-            )
-        }
+        itemTitleAndDetails(
+            modifier = Modifier.weight(ListItemViewConstants.TITLE_WEIGHT),
+            params.item,
+        )
+        itemDaysBadge(
+            modifier = Modifier.weight(ListItemViewConstants.DAYS_WEIGHT),
+            params.formattedDaysText,
+        )
     }
 }
 
@@ -151,16 +183,19 @@ fun listItemView(
 fun listItemViewPreview() {
     jetpackDaysTheme {
         listItemView(
-            item =
-                Item(
-                    id = 1L,
-                    title = "День рождения",
-                    details = "Праздничный день",
-                    timestamp = System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L),
-                    colorTag = R.color.color_primary_red,
-                    displayOption = DisplayOption.DAY,
+            params =
+                ListItemParams(
+                    item =
+                        Item(
+                            id = 1L,
+                            title = "День рождения",
+                            details = "Праздничный день",
+                            timestamp = System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L),
+                            colorTag = R.color.color_primary_red,
+                            displayOption = DisplayOption.DAY,
+                        ),
+                    formattedDaysText = "5 дней",
                 ),
-            formattedDaysText = "5 дней",
         )
     }
 }
@@ -170,16 +205,19 @@ fun listItemViewPreview() {
 fun listItemViewNoColorPreview() {
     jetpackDaysTheme {
         listItemView(
-            item =
-                Item(
-                    id = 2L,
-                    title = "Начало работы",
-                    details = "Первый день на новой работе",
-                    timestamp = System.currentTimeMillis() - (365 * 24 * 60 * 60 * 1000L),
-                    colorTag = null,
-                    displayOption = DisplayOption.YEAR_MONTH_DAY,
+            params =
+                ListItemParams(
+                    item =
+                        Item(
+                            id = 2L,
+                            title = "Начало работы",
+                            details = "Первый день на новой работе",
+                            timestamp = System.currentTimeMillis() - (365 * 24 * 60 * 60 * 1000L),
+                            colorTag = null,
+                            displayOption = DisplayOption.YEAR_MONTH_DAY,
+                        ),
+                    formattedDaysText = "1 год",
                 ),
-            formattedDaysText = "1 год",
         )
     }
 }
@@ -189,16 +227,19 @@ fun listItemViewNoColorPreview() {
 fun listItemViewTodayPreview() {
     jetpackDaysTheme {
         listItemView(
-            item =
-                Item(
-                    id = 3L,
-                    title = "Сегодняшнее событие",
-                    details = "Произошло сегодня",
-                    timestamp = System.currentTimeMillis(),
-                    colorTag = R.color.color_primary_teal,
-                    displayOption = DisplayOption.MONTH_DAY,
+            params =
+                ListItemParams(
+                    item =
+                        Item(
+                            id = 3L,
+                            title = "Сегодняшнее событие",
+                            details = "Произошло сегодня",
+                            timestamp = System.currentTimeMillis(),
+                            colorTag = R.color.color_primary_teal,
+                            displayOption = DisplayOption.MONTH_DAY,
+                        ),
+                    formattedDaysText = "Сегодня",
                 ),
-            formattedDaysText = "Сегодня",
         )
     }
 }
@@ -208,16 +249,19 @@ fun listItemViewTodayPreview() {
 fun listItemViewLongTitlePreview() {
     jetpackDaysTheme {
         listItemView(
-            item =
-                Item(
-                    id = 4L,
-                    title = "Очень длинное название события, которое должно переноситься на новую строку",
-                    details = "Детали события",
-                    timestamp = System.currentTimeMillis() - (100 * 24 * 60 * 60 * 1000L),
-                    colorTag = R.color.color_primary_blue,
-                    displayOption = DisplayOption.DAY,
+            params =
+                ListItemParams(
+                    item =
+                        Item(
+                            id = 4L,
+                            title = "Очень длинное название события, которое должно переноситься на новую строку",
+                            details = "Детали события",
+                            timestamp = System.currentTimeMillis() - (100 * 24 * 60 * 60 * 1000L),
+                            colorTag = R.color.color_primary_blue,
+                            displayOption = DisplayOption.DAY,
+                        ),
+                    formattedDaysText = "100 дней",
                 ),
-            formattedDaysText = "100 дней",
         )
     }
 }

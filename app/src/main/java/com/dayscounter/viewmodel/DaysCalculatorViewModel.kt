@@ -2,7 +2,6 @@
 
 package com.dayscounter.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dayscounter.data.formatter.ResourceIds
@@ -11,6 +10,8 @@ import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,7 @@ data class DaysCalculatorState(
  * @param formatDaysTextUseCase Use case для форматирования текста
  * @param resourceProvider Провайдер строковых ресурсов для локализации
  * @param defaultDisplayOption Опция отображения по умолчанию
+ * @param logger Логгер для записи сообщений (по умолчанию AndroidLogger)
  */
 @Suppress("TooGenericExceptionCaught")
 class DaysCalculatorViewModel(
@@ -49,6 +51,7 @@ class DaysCalculatorViewModel(
     private val formatDaysTextUseCase: FormatDaysTextUseCase,
     private val resourceProvider: ResourceProvider,
     private val defaultDisplayOption: DisplayOption = DisplayOption.DAY,
+    private val logger: Logger = AndroidLogger(),
 ) : ViewModel() {
     @Suppress("VariableNaming")
     private val TAG = "DaysCalculatorVM"
@@ -81,7 +84,7 @@ class DaysCalculatorViewModel(
 
                 val option = displayOption ?: currentDisplayOption.value
 
-                Log.d(TAG, "Вычисление разницы для timestamp=$eventTimestamp с опцией $option")
+                logger.d(TAG, "Вычисление разницы для timestamp=$eventTimestamp с опцией $option")
 
                 val difference: DaysDifference =
                     calculateDaysDifferenceUseCase(
@@ -99,7 +102,7 @@ class DaysCalculatorViewModel(
                         )
                     } catch (e: Exception) {
                         // Обрабатываем исключения при форматировании
-                        Log.e(TAG, "Ошибка форматирования: ${e.message}", e)
+                        logger.e(TAG, "Ошибка форматирования: ${e.message}", e)
                         resourceProvider.getString(ResourceIds.ERROR_FORMATTING)
                     }
 
@@ -110,9 +113,9 @@ class DaysCalculatorViewModel(
                         error = null,
                     )
 
-                Log.d(TAG, "Результат форматирования: $formattedText")
+                logger.d(TAG, "Результат форматирования: $formattedText")
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Ошибка при вычислении дней: ${e.message}", e)
+                logger.e(TAG, "Ошибка при вычислении дней: ${e.message}", e)
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
@@ -123,7 +126,7 @@ class DaysCalculatorViewModel(
                             ),
                     )
             } catch (e: NumberFormatException) {
-                Log.e(TAG, "Ошибка форматирования чисел: ${e.message}", e)
+                logger.e(TAG, "Ошибка форматирования чисел: ${e.message}", e)
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
@@ -148,7 +151,7 @@ class DaysCalculatorViewModel(
         eventTimestamp: Long? = null,
     ) {
         currentDisplayOption.value = newDisplayOption
-        Log.d(TAG, "Опция отображения обновлена на: $newDisplayOption")
+        logger.d(TAG, "Опция отображения обновлена на: $newDisplayOption")
 
         if (eventTimestamp != null && _state.value.formattedText != null) {
             calculateDays(eventTimestamp, displayOption = newDisplayOption)
@@ -169,7 +172,7 @@ class DaysCalculatorViewModel(
      */
     fun reset() {
         _state.value = DaysCalculatorState()
-        Log.d(TAG, "Состояние сброшено")
+        logger.d(TAG, "Состояние сброшено")
     }
 
     /**

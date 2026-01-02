@@ -31,6 +31,9 @@ class DetailScreenViewModel(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     companion object {
+        /** Таймаут подписки на StateFlow в миллисекундах */
+        private const val STATE_SUBSCRIPTION_TIMEOUT_MS = 5000L
+
         fun factory(repository: ItemRepository): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -66,7 +69,7 @@ class DetailScreenViewModel(
                 DetailScreenState.Success(item)
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
+                started = SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_TIMEOUT_MS),
                 initialValue = DetailScreenState.Loading,
             )
 

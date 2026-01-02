@@ -96,6 +96,7 @@ dependencies {
 detekt {
     config.setFrom(files("../config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
+    allRules = false
 }
 
 tasks.withType<Test> {

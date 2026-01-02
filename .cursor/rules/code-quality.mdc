@@ -4,6 +4,8 @@ alwaysApply: true
 
 # Качество кода
 
+После изменений в коде нужно выполнять команду `make format`.
+
 ## Линтинг
 
 - ktlint: `./gradlew ktlintCheck`, `./gradlew ktlintFormat`
