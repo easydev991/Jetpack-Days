@@ -112,7 +112,7 @@ class DaysFormatterImpl : DaysFormatter {
 
         val components = buildComponentsList(timeComponents, resourceProvider)
 
-        return formatComponents(components, resourceProvider)
+        return formatComponents(components)
     }
 
     /**
@@ -134,7 +134,7 @@ class DaysFormatterImpl : DaysFormatter {
 
         val components = buildComponentsList(timeComponents, resourceProvider)
 
-        return formatComponents(components, resourceProvider)
+        return formatComponents(components)
     }
 
     /**
@@ -168,33 +168,16 @@ class DaysFormatterImpl : DaysFormatter {
     /**
      * Форматирует список компонентов в строку.
      */
-    private fun formatComponents(
-        components: List<String>,
-        resourceProvider: ResourceProvider,
-    ): String =
+    private fun formatComponents(components: List<String>): String =
         when (components.size) {
             MAX_COMPONENTS ->
-                components.joinToString(" ") { applyAbbreviation(it, resourceProvider) }
+                components.joinToString(" ")
             TWO_COMPONENTS ->
-                components.joinToString(" ") { applyAbbreviation(it, resourceProvider) }
+                components.joinToString(" ")
             1 -> components.firstOrNull() ?: ""
             else -> {
                 // Возвращаем пустую строку для остальных случаев
                 ""
             }
         }
-
-    /**
-     * Применяет сокращённые суффиксы к форматированным строкам.
-     *
-     * Заменяет полные формы на сокращённые (например, "день" → "дн.", "day" → "d").
-     * Использует локализованные ресурсы для сокращений.
-     */
-    private fun applyAbbreviation(
-        formatted: String,
-        resourceProvider: ResourceProvider,
-    ): String {
-        // Не применяем сокращения - это теперь ответственность plurals
-        return formatted
-    }
 }

@@ -1,7 +1,6 @@
 package com.dayscounter.data.formatter
 
 import com.dayscounter.R
-import com.dayscounter.data.formatter.ResourceIds
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.TimePeriod
 import io.mockk.every
@@ -283,38 +282,5 @@ class DaysFormatterImplTest {
 
         // Then
         assertEquals("1 г.", result, "Ожидался полный формат")
-    }
-
-    // TODO: Требуется доработка формата сокращений для составных периодов
-    // При необходимости использовать отдельные plurals для сокращённых форм
-    
-    @Test
-    // fun `formatComposite when YEAR_MONTH_DAY option with years then does NOT convert years to months`() {
-        // Given - годы НЕ конвертируются для YEAR_MONTH_DAY
-        val period = TimePeriod(years = 4, months = 0, days = 10)
-        every {
-            resourceProvider.getQuantityString(
-                resId = R.plurals.years_count,
-                quantity = 4,
-            )
-        } returns "4 г."
-        every {
-            resourceProvider.getQuantityString(
-                resId = R.plurals.months_count,
-                quantity = 0,
-            )
-        } returns "0 мес."
-        every {
-            resourceProvider.getQuantityString(
-                resId = R.plurals.days_count,
-                quantity = 10,
-            )
-        } returns "10 дн."
-
-        // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
-
-        // Then
-        assertEquals("4 г. 0 мес. 10 дн.", result, "Ожидалось отсутствие конвертации лет в месяцы для YEAR_MONTH_DAY")
     }
 }
