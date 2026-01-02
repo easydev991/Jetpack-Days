@@ -228,6 +228,6 @@ internal fun searchField(
             }
         },
         singleLine = true,
-        modifier = modifier.height(56.dp),
+        modifier = modifier
     )
 }
