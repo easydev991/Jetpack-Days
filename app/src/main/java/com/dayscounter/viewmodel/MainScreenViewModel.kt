@@ -79,7 +79,6 @@ class MainScreenViewModel(
      * Загружает события при создании ViewModel.
      */
     init {
-        loadItems()
         // Observe items and update UI state accordingly
         observeItems()
     }
@@ -112,9 +111,7 @@ class MainScreenViewModel(
             }.collect { items ->
                 println("Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
-                if (_uiState.value !is MainScreenState.Error) {
-                    _uiState.value = MainScreenState.Success(items)
-                }
+                _uiState.value = MainScreenState.Success(items)
             }
         }
     }

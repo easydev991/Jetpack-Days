@@ -120,14 +120,14 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
         dateSection(selectedDate = params.uiStates.selectedDate, showDatePicker = params.showDatePicker, onValueChange = onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
 
-        // Предпросмотр дней
-        if (params.uiStates.selectedDate.value != null) {
-            previewDaysContentInner(
-                selectedDate = params.uiStates.selectedDate.value!!,
-                displayOption = params.uiStates.selectedDisplayOption.value,
-            )
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
-        }
+//        // Предпросмотр дней
+//        if (params.uiStates.selectedDate.value != null) {
+//            previewDaysContentInner(
+//                selectedDate = params.uiStates.selectedDate.value!!,
+//                displayOption = params.uiStates.selectedDisplayOption.value,
+//            )
+//            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+//        }
 
         // Выбор цвета
         colorSelector(

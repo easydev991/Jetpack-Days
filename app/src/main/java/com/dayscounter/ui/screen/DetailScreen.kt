@@ -45,15 +45,20 @@ fun detailScreen(
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
     // Создаем use case для форматирования с учетом displayOption
-    val resourceProvider = com.dayscounter.di.FormatterModule.createResourceProvider(
-        context =
-            androidx.compose.ui.platform.LocalContext.current,
-    )
+    val resourceProvider =
+        com.dayscounter.di.FormatterModule.createResourceProvider(
+            context =
+                androidx.compose.ui.platform.LocalContext.current,
+        )
     val calculateDaysDifferenceUseCase =
-        com.dayscounter.di.FormatterModule.createCalculateDaysDifferenceUseCase()
-    val daysFormatter = com.dayscounter.di.FormatterModule.createDaysFormatter()
+        com.dayscounter.di.FormatterModule
+            .createCalculateDaysDifferenceUseCase()
+    val daysFormatter =
+        com.dayscounter.di.FormatterModule
+            .createDaysFormatter()
     val formatDaysTextUseCase =
-        com.dayscounter.di.FormatterModule.createFormatDaysTextUseCase(daysFormatter)
+        com.dayscounter.di.FormatterModule
+            .createFormatDaysTextUseCase(daysFormatter)
     val getFormattedDaysForItemUseCase =
         com.dayscounter.di.FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,

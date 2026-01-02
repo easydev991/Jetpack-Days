@@ -3,7 +3,10 @@ package com.dayscounter.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,8 +30,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,11 +48,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
@@ -62,6 +67,9 @@ import com.dayscounter.ui.component.listItemView
 import com.dayscounter.viewmodel.MainScreenState
 import com.dayscounter.viewmodel.MainScreenViewModel
 
+// Минимальное количество записей для отображения поля поиска
+private const val MIN_ITEMS_FOR_SEARCH = 5
+
 /**
  * Главный экран со списком событий.
  *
@@ -73,7 +81,6 @@ import com.dayscounter.viewmodel.MainScreenViewModel
  * @param onEditClick Обработчик клика на редактирование
  * @param onCreateClick Обработчик клика на создание новой записи
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun mainScreen(
     modifier: Modifier = Modifier,
@@ -122,7 +129,6 @@ fun mainScreen(
 /**
  * Основной контент экрана.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun mainScreenContent(
     modifier: Modifier = Modifier,
@@ -139,20 +145,14 @@ private fun mainScreenContent(
     val listState = rememberLazyListState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
-    var isSearchActive by remember { mutableStateOf(false) }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             mainScreenTopBar(
                 state =
                     MainScreenTopBarState(
-                        isSearchActive = isSearchActive,
-                        searchQuery = searchQuery,
                         itemsCount = itemsCount,
                         sortOrder = sortOrder,
-                        viewModel = viewModel,
-                        onSearchActiveChange = { isSearchActive = it },
                         onSortOrderChange = { viewModel.updateSortOrder(it) },
                     ),
             )
@@ -171,19 +171,42 @@ private fun mainScreenContent(
             }
         },
     ) { paddingValues ->
-        mainScreenContentByState(
-            state =
-                MainScreenContentState(
-                    uiState = uiState,
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Поле поиска над списком (отображается, если есть текст в поиске ИЛИ есть 5+ записей)
+            val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
+            if (showSearchField) {
+                searchField(
                     searchQuery = searchQuery,
-                    listState = listState,
-                    getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-                    onItemClick = onItemClick,
-                    onEditClick = onEditClick,
-                    viewModel = viewModel,
-                ),
-            paddingValues = paddingValues,
-        )
+                    onSearchQueryChange = { viewModel.updateSearchQuery(it) },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(paddingValues)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+
+            // Список записей (адаптивный padding в зависимости от видимости поля поиска)
+            mainScreenContentByState(
+                state =
+                    MainScreenContentState(
+                        uiState = uiState,
+                        searchQuery = searchQuery,
+                        listState = listState,
+                        getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+                        onItemClick = onItemClick,
+                        onEditClick = onEditClick,
+                        viewModel = viewModel,
+                    ),
+                paddingValues =
+                    PaddingValues(
+                        top = if (showSearchField) 0.dp else paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                        bottom = paddingValues.calculateBottomPadding(),
+                    ),
+            )
+        }
     }
 
     // Диалог подтверждения удаления
@@ -271,11 +294,7 @@ private fun sortMenu(
  * Контент с пустым списком.
  */
 @Composable
-private fun emptyContent(
-    paddingValues: androidx.compose.foundation.layout.PaddingValues =
-        androidx.compose.foundation.layout
-            .PaddingValues(),
-) {
+private fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
     Column(
         modifier =
             Modifier
@@ -307,11 +326,7 @@ private fun emptyContent(
  * Контент с пустым результатом поиска.
  */
 @Composable
-private fun emptySearchContent(
-    paddingValues: androidx.compose.foundation.layout.PaddingValues =
-        androidx.compose.foundation.layout
-            .PaddingValues(),
-) {
+private fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) {
     Column(
         modifier =
             Modifier
@@ -367,7 +382,7 @@ private fun itemsListContent(
     onItemClick: (Long) -> Unit,
     onEditClick: (Long) -> Unit,
     viewModel: MainScreenViewModel,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    paddingValues: PaddingValues,
 ) {
     var contextMenuItem by remember { mutableStateOf<com.dayscounter.domain.model.Item?>(null) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
@@ -492,12 +507,77 @@ private fun errorContent(
 }
 
 /**
- * Swipe to dismiss wrapper for a single item.
+ * Data class for parameters of main screen top bar.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+private data class MainScreenTopBarState(
+    val itemsCount: Int,
+    val sortOrder: SortOrder,
+    val onSortOrderChange: (SortOrder) -> Unit,
+)
 
 /**
- * Data class for parameters of the main screen content by state.
+ * Top bar for main screen with sort functionality.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun mainScreenTopBar(state: MainScreenTopBarState) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.events)) },
+        navigationIcon = {
+            if (state.itemsCount > 1) {
+                sortMenu(
+                    sortOrder = state.sortOrder,
+                    onSortOrderChange = state.onSortOrderChange,
+                )
+            }
+        },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+    )
+}
+
+/**
+ * Поле поиска для фильтрации списка записей.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun searchField(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = onSearchQueryChange,
+        placeholder = {
+            Text(stringResource(R.string.search))
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = stringResource(R.string.search),
+            )
+        },
+        trailingIcon = {
+            if (searchQuery.isNotEmpty()) {
+                IconButton(onClick = { onSearchQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.close),
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        modifier = modifier.height(56.dp),
+    )
+}
+
+/**
+ * Data class for parameters of main screen content by state.
  */
 private data class MainScreenContentState(
     val uiState: MainScreenState,
@@ -510,12 +590,12 @@ private data class MainScreenContentState(
 )
 
 /**
- * Displays content based on the UI state.
+ * Displays content based on UI state.
  */
 @Composable
 private fun mainScreenContentByState(
     state: MainScreenContentState,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    paddingValues: PaddingValues,
 ) {
     when (val uiState = state.uiState) {
         is MainScreenState.Loading -> {
@@ -548,80 +628,5 @@ private fun mainScreenContentByState(
                 modifier = Modifier.padding(paddingValues),
             )
         }
-    }
-}
-
-/**
- * Data class for parameters of the main screen top bar.
- */
-private data class MainScreenTopBarState(
-    val isSearchActive: Boolean,
-    val searchQuery: String,
-    val itemsCount: Int,
-    val sortOrder: SortOrder,
-    val viewModel: MainScreenViewModel,
-    val onSearchActiveChange: (Boolean) -> Unit,
-    val onSortOrderChange: (SortOrder) -> Unit,
-)
-
-/**
- * Top bar for the main screen with search and sort functionality.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun mainScreenTopBar(state: MainScreenTopBarState) {
-    if (state.isSearchActive) {
-        SearchBar(
-            query = state.searchQuery,
-            onQueryChange = { state.viewModel.updateSearchQuery(it) },
-            onSearch = { },
-            active = state.isSearchActive,
-            onActiveChange = { state.onSearchActiveChange(it) },
-            placeholder = { Text(stringResource(R.string.search)) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    state.onSearchActiveChange(false)
-                    state.viewModel.updateSearchQuery("")
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
-                    )
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            content = { },
-        )
-    } else {
-        TopAppBar(
-            title = { Text(stringResource(R.string.events)) },
-            navigationIcon = {
-                if (state.itemsCount > 1) {
-                    sortMenu(
-                        sortOrder = state.sortOrder,
-                        onSortOrderChange = state.onSortOrderChange,
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { state.onSearchActiveChange(true) }) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = stringResource(R.string.search),
-                    )
-                }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-        )
     }
 }
