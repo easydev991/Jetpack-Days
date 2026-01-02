@@ -126,8 +126,8 @@ fun mainScreen(
 @Composable
 private fun screenHeader(
     itemsCount: Int,
-    sortOrder: com.dayscounter.domain.model.SortOrder,
-    onSortOrderChange: (com.dayscounter.domain.model.SortOrder) -> Unit,
+    sortOrder: SortOrder,
+    onSortOrderChange: (SortOrder) -> Unit,
 ) {
     mainScreenTopBar(
         state =
