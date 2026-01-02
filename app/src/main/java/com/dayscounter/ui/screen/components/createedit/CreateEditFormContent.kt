@@ -256,9 +256,9 @@ internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState =
     ScreenCreateEditUiState(
         title = rememberSaveable { mutableStateOf("") },
         details = rememberSaveable { mutableStateOf("") },
-        selectedDate = remember { mutableStateOf<java.time.LocalDate?>(null) },
+        selectedDate = remember { mutableStateOf(null) },
         showDatePicker = remember { mutableStateOf(false) },
-        selectedColor = remember { mutableStateOf<Color?>(null) },
+        selectedColor = remember { mutableStateOf(null) },
         selectedDisplayOption =
             remember {
                 mutableStateOf(

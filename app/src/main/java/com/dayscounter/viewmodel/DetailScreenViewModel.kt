@@ -7,7 +7,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
@@ -90,7 +89,7 @@ class DetailScreenViewModel(
                     repository.deleteItem(currentState.item)
                     android.util.Log.d("DetailScreenViewModel", "Событие удалено: ${currentState.item.title}")
                 }
-            } catch (e: ItemException.DeleteFailed) {
+            } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
                 android.util.Log.e("DetailScreenViewModel", message, e)
             }

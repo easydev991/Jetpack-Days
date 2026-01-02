@@ -18,13 +18,10 @@ import com.dayscounter.ui.theme.jetpackDaysTheme
  */
 @Composable
 private fun getNormalStyle(customStyle: TextStyle?): TextStyle =
-    if (customStyle != null) {
-        customStyle
-    } else {
-        MaterialTheme.typography.bodyLarge.copy(
+    customStyle
+        ?: MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Medium,
         )
-    }
 
 /**
  * Вспомогательная функция для получения акцентного стиля.
@@ -41,17 +38,14 @@ private fun getEmphasizedStyle(
             color
         }
 
-    return if (customStyle != null) {
-        customStyle.copy(
+    return customStyle?.copy(
+        fontWeight = FontWeight.Bold,
+        color = accentColor,
+    )
+        ?: MaterialTheme.typography.headlineSmall.copy(
             fontWeight = FontWeight.Bold,
             color = accentColor,
         )
-    } else {
-        MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = accentColor,
-        )
-    }
 }
 
 /**
@@ -69,11 +63,8 @@ private fun getSecondaryStyle(
             color
         }
 
-    return if (customStyle != null) {
-        customStyle.copy(color = secondaryColor)
-    } else {
-        MaterialTheme.typography.bodyMedium.copy(color = secondaryColor)
-    }
+    return customStyle?.copy(color = secondaryColor)
+        ?: MaterialTheme.typography.bodyMedium.copy(color = secondaryColor)
 }
 
 /**

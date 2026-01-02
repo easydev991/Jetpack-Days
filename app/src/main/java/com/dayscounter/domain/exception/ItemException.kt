@@ -4,12 +4,6 @@ package com.dayscounter.domain.exception
  * Исключение для ошибок при работе с элементами (Item).
  */
 sealed class ItemException : Exception() {
-    /**
-     * Элемент не найден.
-     */
-    data class ItemNotFound(
-        override val message: String,
-    ) : ItemException()
 
     /**
      * Ошибка при сохранении элемента.

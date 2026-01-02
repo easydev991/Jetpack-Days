@@ -32,7 +32,7 @@ data class Item(
         message = "Используйте Item.makeDaysCount(useCase, currentDate) вместо этого метода",
         replaceWith = ReplaceWith("makeDaysCount(useCase, currentDate)"),
     )
-    @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
+    @Suppress("FunctionOnlyReturningConstant", "SameReturnValue")
     fun makeDaysCount(currentDate: Long): String {
         // Заглушка для обратной совместимости
         return "0 дней"

@@ -25,7 +25,7 @@ class ItemRepositoryTest {
 
                 override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> = throw NotImplementedError()
 
-                override suspend fun getItemById(id: Long): Item? = throw NotImplementedError()
+                override suspend fun getItemById(id: Long): Item = throw NotImplementedError()
 
                 override fun getItemFlow(id: Long): Flow<Item?> = throw NotImplementedError()
 

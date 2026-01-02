@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.exception.ItemException.LoadFailed
 import com.dayscounter.domain.exception.ItemException.UpdateFailed
@@ -61,7 +60,6 @@ class MainScreenViewModel(
      * Выбранная опция отображения дней по умолчанию.
      */
     private val _defaultDisplayOption = MutableStateFlow(DisplayOption.DAY)
-    val defaultDisplayOption: StateFlow<DisplayOption> = _defaultDisplayOption.asStateFlow()
 
     /**
      * Количество элементов (для отображения кнопки сортировки).
@@ -129,7 +127,7 @@ class MainScreenViewModel(
                 _uiState.value = MainScreenState.Loading
                 val loadedItems = repository.getAllItems(_sortOrder.value).first()
                 _uiState.value = MainScreenState.Success(loadedItems)
-            } catch (e: ItemException.LoadFailed) {
+            } catch (e: LoadFailed) {
                 val message = "Ошибка загрузки списка событий: ${e.message}"
                 println("MainScreenViewModel: $message")
                 e.printStackTrace()
@@ -167,7 +165,7 @@ class MainScreenViewModel(
             try {
                 repository.deleteItem(item)
                 println("MainScreenViewModel: Событие удалено: ${item.title}")
-            } catch (e: ItemException.DeleteFailed) {
+            } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
                 println("MainScreenViewModel: $message")
                 e.printStackTrace()
@@ -215,7 +213,7 @@ class MainScreenViewModel(
             try {
                 repository.updateItem(item)
                 println("MainScreenViewModel: Событие обновлено: ${item.title}")
-            } catch (e: ItemException.UpdateFailed) {
+            } catch (e: UpdateFailed) {
                 val message = "Ошибка обновления события: ${e.message}"
                 println("MainScreenViewModel: $message")
                 e.printStackTrace()
@@ -224,34 +222,6 @@ class MainScreenViewModel(
         }
     }
 
-    /**
-     * Изменяет опцию отображения дней по умолчанию.
-     *
-     * @param displayOption Новая опция отображения
-     */
-    fun updateDefaultDisplayOption(displayOption: DisplayOption) {
-        _defaultDisplayOption.value = displayOption
-        println("MainScreenViewModel: Опция отображения обновлена: $displayOption")
-    }
-
-    /**
-     * Сбрасывает состояние ошибки.
-     */
-    fun clearError() {
-        if (_uiState.value is MainScreenState.Error) {
-            viewModelScope.launch {
-                val loadedItems = repository.getAllItems().first()
-                _uiState.value = MainScreenState.Success(loadedItems)
-            }
-        }
-    }
-
-    /**
-     * Обновляет состояние загрузки.
-     */
-    fun refresh() {
-        loadItems()
-    }
 }
 
 /**
@@ -263,7 +233,7 @@ sealed class MainScreenState {
 
     /** Успешная загрузка */
     data class Success(
-        val items: List<com.dayscounter.domain.model.Item>,
+        val items: List<Item>,
     ) : MainScreenState()
 
     /** Ошибка загрузки */

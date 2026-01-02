@@ -427,7 +427,7 @@ private fun mainScreenTopBar(state: MainScreenTopBarState) {
         title = { Text(stringResource(R.string.events)) },
         navigationIcon = {
             if (state.itemsCount > 1) {
-                sortMenu(
+                SortMenu(
                     sortOrder = state.sortOrder,
                     onSortOrderChange = state.onSortOrderChange,
                 )

@@ -39,14 +39,14 @@ fun detailContentByState(
     modifier: Modifier = Modifier,
     getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
-    when (val state = uiState) {
+    when (uiState) {
         is DetailScreenState.Loading -> {
             loadingContent(modifier = modifier)
         }
 
         is DetailScreenState.Success -> {
             detailContentInner(
-                item = state.item,
+                item = uiState.item,
                 modifier = modifier,
                 getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
             )
@@ -54,7 +54,7 @@ fun detailContentByState(
 
         is DetailScreenState.Error -> {
             errorContent(
-                message = state.message,
+                message = uiState.message,
                 modifier = modifier,
             )
         }

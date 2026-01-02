@@ -74,7 +74,7 @@ class CalculateDaysDifferenceUseCase {
     ): TimePeriod {
         var years = 0
         var months = 0
-        var days = 0
+        var days: Int
 
         // Вычисляем полные годы
         var tempDate = startDate

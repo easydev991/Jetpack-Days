@@ -38,7 +38,7 @@ import com.dayscounter.domain.model.SortOrder
  * Меню сортировки.
  */
 @Composable
-internal fun sortMenu(
+internal fun SortMenu(
     sortOrder: SortOrder,
     onSortOrderChange: (SortOrder) -> Unit,
 ) {

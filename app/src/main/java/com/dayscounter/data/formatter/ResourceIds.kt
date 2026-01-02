@@ -21,15 +21,6 @@ object ResourceIds {
     /** Идентификатор строкового ресурса "Сегодня" */
     val TODAY = R.string.today
 
-    /** Идентификатор строкового ресурса "Загрузка..." */
-    val LOADING = R.string.loading
-
-    /** Идентификатор строкового ресурса "Назад" */
-    val BACK = R.string.back
-
-    /** Идентификатор строкового ресурса "Событие удалено" */
-    val EVENT_DELETED = R.string.event_deleted
-
     /** Идентификатор строкового ресурса "Событие не найдено" */
     val EVENT_NOT_FOUND = R.string.event_not_found
 
