@@ -508,7 +508,7 @@ sealed class MainScreenState {
 **Статус:** ✅ ВЫПОЛНЕНО
 
 **Что сделано:**
-- Исправлена версия Gradle (AGP 8.13.2 → Gradle 8.13+)
+- Исправлена версия Gradle (AGP 8.13.2 → Gradle 9.2.1)
 - Добавлена зависимость `material-icons-extended`
 - Реализована функция `itemsListContent()`
 
