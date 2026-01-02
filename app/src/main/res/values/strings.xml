@@ -69,8 +69,8 @@
 
     <!-- More Screen -->
     <string name="send_feedback">Send feedback</string>
-    <string name="rate_the_app">Rate the app</string>
-    <string name="share_the_app">Share the app</string>
+    <string name="rate_the_app">Rate app</string>
+    <string name="share_the_app">Share app</string>
     <string name="github_page">GitHub page</string>
     <string name="app_version">App version: %1$s</string>
 
@@ -91,7 +91,7 @@
     <string name="backup_data_saved">Backup data saved</string>
     <string name="data_restored_from_backup">Data restored from backup</string>
     <string name="all_data_deleted">All data deleted</string>
-    <string name="unable_to_recover_data_from_the_selected_file">Unable to recover data from the selected file</string>
+    <string name="unable_to_recover_data_from_the_selected_file">Unable to recover data from selected file</string>
     <string name="error">Error</string>
 
     <!-- UI states and messages -->
@@ -112,29 +112,40 @@
     <string name="error_calculating">Calculation error: %1$s</string>
     <string name="error_formatting_details">Formatting error: %1$s</string>
 
-    <!-- Days formatting -->
-    <string name="days_abbreviated">дн.</string>
-    <string name="months_abbreviated">мес.</string>
-    <string name="years_abbreviated">г.</string>
+    <!-- Days formatting - full forms -->
+    <plurals name="days_count_full">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
 
+    <plurals name="months_count_full">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+
+    <plurals name="years_count_full">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+
+    <!-- Days formatting - abbreviated -->
+    <string name="days_abbreviated">d</string>
+    <string name="months_abbreviated">mo</string>
+    <string name="years_abbreviated">y</string>
+
+    <!-- Days formatting -->
     <plurals name="days_count">
-        <item quantity="one">%d день</item>
-        <item quantity="few">%d дня</item>
-        <item quantity="many">%d дней</item>
-        <item quantity="other">%d дней</item>
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
     </plurals>
 
     <plurals name="months_count">
-        <item quantity="one">%d месяц</item>
-        <item quantity="few">%d месяца</item>
-        <item quantity="many">%d месяцев</item>
-        <item quantity="other">%d месяцев</item>
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
     </plurals>
 
     <plurals name="years_count">
-        <item quantity="one">%d год</item>
-        <item quantity="few">%d года</item>
-        <item quantity="many">%d лет</item>
-        <item quantity="other">%d лет</item>
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
     </plurals>
 </resources>

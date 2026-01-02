@@ -18,6 +18,15 @@ object ResourceIds {
     /** Идентификатор ресурса для множественного числа лет */
     val YEARS_COUNT = R.plurals.years_count
 
+    /** Идентификатор строкового ресурса для сокращения дней */
+    val DAYS_ABBREVIATED = R.string.days_abbreviated
+
+    /** Идентификатор строкового ресурса для сокращения месяцев */
+    val MONTHS_ABBREVIATED = R.string.months_abbreviated
+
+    /** Идентификатор строкового ресурса для сокращения лет */
+    val YEARS_ABBREVIATED = R.string.years_abbreviated
+
     /** Идентификатор строкового ресурса "Сегодня" */
     val TODAY = R.string.today
 

@@ -112,30 +112,53 @@
     <string name="error_calculating">Ошибка при вычислении: %1$s</string>
     <string name="error_formatting_details">Ошибка форматирования: %1$s</string>
 
-    <!-- Days formatting -->
-    <string name="days_abbreviated">дн.</string>
-    <string name="months_abbreviated">мес.</string>
-    <string name="years_abbreviated">г.</string>
-
-    <plurals name="days_count">
+    <!-- Days formatting - full forms -->
+    <plurals name="days_count_full">
         <item quantity="one">%d день</item>
         <item quantity="few">%d дня</item>
         <item quantity="many">%d дней</item>
         <item quantity="other">%d дней</item>
     </plurals>
 
-    <plurals name="months_count">
+    <plurals name="months_count_full">
         <item quantity="one">%d месяц</item>
         <item quantity="few">%d месяца</item>
         <item quantity="many">%d месяцев</item>
         <item quantity="other">%d месяцев</item>
     </plurals>
 
-    <plurals name="years_count">
+    <plurals name="years_count_full">
         <item quantity="one">%d год</item>
         <item quantity="few">%d года</item>
         <item quantity="many">%d лет</item>
         <item quantity="other">%d лет</item>
+    </plurals>
+
+    <!-- Days formatting - abbreviated -->
+    <string name="days_abbreviated">дн.</string>
+    <string name="months_abbreviated">мес.</string>
+    <string name="years_abbreviated">г.</string>
+
+    <!-- Days formatting -->
+    <plurals name="days_count">
+        <item quantity="one">%d дн.</item>
+        <item quantity="few">%d дн.</item>
+        <item quantity="many">%d дн.</item>
+        <item quantity="other">%d дн.</item>
+    </plurals>
+
+    <plurals name="months_count">
+        <item quantity="one">%d мес.</item>
+        <item quantity="few">%d мес.</item>
+        <item quantity="many">%d мес.</item>
+        <item quantity="other">%d мес.</item>
+    </plurals>
+
+    <plurals name="years_count">
+        <item quantity="one">%d г.</item>
+        <item quantity="few">%d г.</item>
+        <item quantity="many">%d г.</item>
+        <item quantity="other">%d г.</item>
     </plurals>
 </resources>
 

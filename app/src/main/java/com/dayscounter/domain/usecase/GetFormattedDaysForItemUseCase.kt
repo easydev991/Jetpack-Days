@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.data.formatter.ResourceIds
 import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
@@ -66,8 +67,9 @@ class GetFormattedDaysForItemUseCase(
             android.util.Log.e("GetFormattedDaysForItemUseCase", message, e)
             // Вычисляем общее количество дней как заглушку
             when (difference) {
-                is DaysDifference.Today -> "Сегодня"
-                is DaysDifference.Calculated -> "Заглушка: ${difference.totalDays} дней"
+                is DaysDifference.Today -> resourceProvider.getString(ResourceIds.TODAY)
+                is DaysDifference.Calculated ->
+                    "${resourceProvider.getString(ResourceIds.ERROR_FORMATTING)}: ${difference.totalDays}"
             }
         }
     }

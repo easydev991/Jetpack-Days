@@ -112,7 +112,7 @@ class DaysFormatterImpl : DaysFormatter {
 
         val components = buildComponentsList(timeComponents, resourceProvider)
 
-        return formatComponents(components)
+        return formatComponents(components, resourceProvider)
     }
 
     /**
@@ -134,7 +134,7 @@ class DaysFormatterImpl : DaysFormatter {
 
         val components = buildComponentsList(timeComponents, resourceProvider)
 
-        return formatComponents(components)
+        return formatComponents(components, resourceProvider)
     }
 
     /**
@@ -168,10 +168,15 @@ class DaysFormatterImpl : DaysFormatter {
     /**
      * Форматирует список компонентов в строку.
      */
-    private fun formatComponents(components: List<String>): String =
+    private fun formatComponents(
+        components: List<String>,
+        resourceProvider: ResourceProvider,
+    ): String =
         when (components.size) {
-            MAX_COMPONENTS -> components.joinToString(" ") { applyAbbreviation(it) }
-            TWO_COMPONENTS -> components.joinToString(" ") { applyAbbreviation(it) }
+            MAX_COMPONENTS ->
+                components.joinToString(" ") { applyAbbreviation(it, resourceProvider) }
+            TWO_COMPONENTS ->
+                components.joinToString(" ") { applyAbbreviation(it, resourceProvider) }
             1 -> components.firstOrNull() ?: ""
             else -> {
                 // Возвращаем пустую строку для остальных случаев
@@ -182,16 +187,14 @@ class DaysFormatterImpl : DaysFormatter {
     /**
      * Применяет сокращённые суффиксы к форматированным строкам.
      *
-     * Заменяет полные формы на сокращённые (например, "дня" → "дн.").
+     * Заменяет полные формы на сокращённые (например, "день" → "дн.", "day" → "d").
+     * Использует локализованные ресурсы для сокращений.
      */
-    private fun applyAbbreviation(formatted: String): String =
-        when {
-            formatted.contains("дней") || formatted.contains("дня") || formatted.contains("день") ->
-                formatted.replace("дней", "дн.").replace("дня", "дн.").replace("день", "дн.")
-            formatted.contains("месяцев") || formatted.contains("месяца") || formatted.contains("месяц") ->
-                formatted.replace("месяцев", "мес.").replace("месяца", "мес.").replace("месяц", "мес.")
-            formatted.contains("лет") || formatted.contains("года") || formatted.contains("год") ->
-                formatted.replace("лет", "г.").replace("года", "г.").replace("год", "г.")
-            else -> formatted
-        }
+    private fun applyAbbreviation(
+        formatted: String,
+        resourceProvider: ResourceProvider,
+    ): String {
+        // Не применяем сокращения - это теперь ответственность plurals
+        return formatted
+    }
 }

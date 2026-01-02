@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.dayscounter.R
@@ -26,7 +27,6 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.component.DaysCountTextStyle
 import com.dayscounter.ui.component.daysCountText
-import com.dayscounter.ui.util.NumberFormattingUtils
 import com.dayscounter.viewmodel.DetailScreenState
 import java.time.LocalDate
 
@@ -71,9 +71,11 @@ internal fun detailContentInner(
     getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
     val scrollState = rememberScrollState()
+    // Используем локализованное форматирование дат согласно локали устройства
     val formatter =
-        java.time.format.DateTimeFormatter
-            .ofPattern("d MMMM yyyy", java.util.Locale.forLanguageTag("ru"))
+        java.time.format.DateTimeFormatter.ofLocalizedDate(
+            java.time.format.FormatStyle.MEDIUM,
+        )
 
     Column(
         modifier =
@@ -181,13 +183,7 @@ fun daysCountSection(
             getFormattedDaysForItemUseCase(item = item)
         } else {
             // Fallback: простое форматирование по количеству дней (для preview)
-            val eventDate =
-                java.time.Instant
-                    .ofEpochMilli(item.timestamp)
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toLocalDate()
-            val currentDate = LocalDate.now()
-            calculateDaysText(eventDate, currentDate)
+            calculateDaysTextFallback(item.timestamp)
         }
 
     Column(
@@ -201,7 +197,7 @@ fun daysCountSection(
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
 
         Text(
-            text = "прошло",
+            text = stringResource(R.string.elapsed),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -209,21 +205,29 @@ fun daysCountSection(
 }
 
 /**
- * Вычисляет текст с количеством дней.
+ * Вычисляет текст с количеством дней для preview (fallback).
+ * Использует Android plurals для локализации.
  */
-internal fun calculateDaysText(
-    eventDate: LocalDate,
-    currentDate: LocalDate,
-): String =
-    if (eventDate == currentDate) {
-        "Сегодня"
+@Composable
+internal fun calculateDaysTextFallback(timestamp: Long): String {
+    val eventDate =
+        java.time.Instant
+            .ofEpochMilli(timestamp)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+    val currentDate = LocalDate.now()
+
+    return if (eventDate == currentDate) {
+        stringResource(R.string.today)
     } else {
         val totalDays =
             java.time.temporal.ChronoUnit.DAYS
                 .between(eventDate, currentDate)
                 .toInt()
-        NumberFormattingUtils.formatDaysCount(totalDays)
+        // Используем Android plurals для локализации
+        pluralStringResource(R.plurals.days_count, totalDays, totalDays)
     }
+}
 
 /**
  * Секция с деталями события.
