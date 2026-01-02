@@ -11,8 +11,10 @@ Item Screen предназначен для просмотра полной ин
 ## Компоненты
 
 - DetailScreen.kt — главный экран детализации
+- DetailScreenParams.kt — параметры экрана для передачи зависимостей
 - DetailAppBar.kt — TopAppBar с кнопками "Назад", "Редактировать", "Удалить"
 - DetailContent.kt — секции экрана: цветовая метка, название, дата, количество дней, описание, опция отображения
+- DetailContentPreviews.kt — preview компонентов секций
 - DetailStates.kt — состояния экрана: загрузка, ошибка
 - DetailScreenViewModel.kt — ViewModel с factory методом для DI
 
@@ -22,21 +24,25 @@ Item Screen предназначен для просмотра полной ин
 
 ### Выполнено (95%)
 
-- ✅ Навигация настроена (маршрут ItemDetail в Screen.kt, интеграция в RootScreenComponents.kt)
+- ✅ Навигация настроена (маршрут ItemDetail, интеграция в RootScreenComponents.kt)
 - ✅ ViewModel создана (DetailScreenViewModel с factory методом для DI)
 - ✅ UI State реализован (DetailScreenState: Loading, Success, Error)
 - ✅ Все UI компоненты созданы:
   - ✅ DetailScreen.kt — главный экран детализации
+  - ✅ DetailScreenParams.kt — параметры экрана для передачи зависимостей
   - ✅ DetailAppBar.kt — TopAppBar с кнопками редактирования и удаления
   - ✅ DetailContent.kt — контент экрана (секции, цветовая метка, дни)
+  - ✅ DetailContentPreviews.kt — preview для секций (colorTag, title, details, displayOption)
   - ✅ DetailStates.kt — состояния загрузки и ошибки
 - ✅ Навигация из Main Screen работает
 - ✅ Навигация к Edit Screen работает
 - ✅ Функциональность удаления с диалогом подтверждения
 - ✅ Локализация реализована
+- ✅ Preview для TopAppBar реализован
 
 ### Осталось (5%)
 
+- ⚠️ Preview для полного DetailScreen (отсутствует)
 - ⚠️ Unit-тесты для ViewModel (не начаты)
 - ⚠️ Unit-тесты для UI State (не начаты)
 - ⚠️ UI-тесты для DetailScreen (не начаты)
@@ -120,22 +126,19 @@ Item Screen предназначен для просмотра полной ин
 
 - DetailContent.kt — все секции: colorTagSection, titleSection, dateSection, daysCountSection, detailsSection, displayOptionInfoSection
 - DetailStates.kt — состояния: loadingContent, errorContent, deletedContent
-
-**Осталось:**
-
-- Preview для секций
+- DetailContentPreviews.kt — preview для секций: colorTagSection, titleSection, detailsSection, displayOptionInfoSection
 
 ---
 
 #### 4.2. TopAppBar ✅
 
-**Выполнено:** DetailAppBar с кнопками "Назад", "Редактировать", "Удалить"
+**Выполнено:** DetailAppBar с кнопками "Назад", "Редактировать", "Удалить" и preview
 
 ---
 
 #### 4.3. Главный экран DetailScreen ✅
 
-**Выполнено:** detailScreen с Scaffold, ViewModel, всеми секциями, диалогом удаления, интеграция с навигацией
+**Выполнено:** detailScreen с Scaffold, ViewModel, DetailScreenParams, всеми секциями, диалогом удаления, интеграция с навигацией
 
 **Осталось:** Preview для DetailScreen
 
@@ -192,11 +195,13 @@ Item Screen предназначен для просмотра полной ин
 
 ## Реализация ✅
 
+- DetailScreen.kt с Scaffold и DetailScreenParams для передачи зависимостей
 - Column с verticalScroll для прокрутки
 - Все секции в DetailContent.kt: colorTagSection, titleSection, dateSection, daysCountSection, detailsSection, displayOptionInfoSection
+- Preview для секций в DetailContentPreviews.kt
 - Состояния в DetailStates.kt: loadingContent, errorContent, deletedContent
-- DetailAppBar с кнопками "Назад", "Редактировать", "Удалить"
-- detailScreen с Scaffold, ViewModel, всеми секциями, диалогом удаления
+- DetailAppBar с кнопками "Назад", "Редактировать", "Удалить" и preview
+- detailScreen с Scaffold, ViewModel, DetailScreenParams, всеми секциями, диалогом удаления
 - Material Design 3, тема с темным режимом, Material Icons
 
 **Архитектура:** Clean Architecture, ItemRepository.getItemFlow, Flow для реактивности, SavedStateHandle, Factory метод для DI
@@ -238,17 +243,20 @@ Item Screen предназначен для просмотра полной ин
 
 ## Примечания и файлы
 
-1. **Динамическое обновление:** Количество дней вычисляется при отображении, можно добавить реактивное обновление через Flow
-2. **Условное отображение:** ✅ Секции с пустым содержимым не отображаются
+1. **Динамическое обновление:** Количество дней вычисляется при отображении с помощью GetFormattedDaysForItemUseCase, использующего Flow для реактивности
+2. **Условное отображение:** ✅ Секции с пустым содержимым (colorTag, details) не отображаются
 3. **Обработка ошибок:** ✅ Можно вернуться к списку через кнопку "Назад"
-4. **Тестирование:** ⚠️ Компоненты работают, но тесты не написаны
-5. **Зависимости:** ✅ Все этапы завершены (Этап 7, Этап 6, Экран 2.1)
+4. **Preview:** ✅ Preview реализованы для всех секций в DetailContentPreviews.kt и для TopAppBar в DetailAppBar.kt, ⚠️ но отсутствует preview для полного DetailScreen
+5. **Тестирование:** ⚠️ Компоненты работают, но тесты не написаны (отсутствуют unit-тесты для ViewModel и UI State, UI-тесты для DetailScreen)
+6. **Зависимости:** ✅ Все этапы завершены (Этап 7, Этап 6, Экран 2.1)
 
 **Текущие файлы:**
 
 - `app/src/main/java/com/dayscounter/ui/screen/DetailScreen.kt`
+- `app/src/main/java/com/dayscounter/ui/screen/DetailScreenParams.kt`
 - `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailAppBar.kt`
 - `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailContent.kt`
+- `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailContentPreviews.kt`
 - `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailStates.kt`
 - `app/src/main/java/com/dayscounter/viewmodel/DetailScreenViewModel.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/RootScreenComponents.kt` (строки 108-129)
+- `app/src/main/java/com/dayscounter/ui/screen/components/RootScreenComponents.kt` (строки 98-124)
