@@ -291,6 +291,8 @@ sealed class Result<out T> {
 
 - ktlint: `./gradlew ktlintCheck`, `./gradlew ktlintFormat`
 - detekt: `./gradlew detekt` (конфиг: `config/detekt/detekt.yml`)
+  - Разрешено до 10 ошибок перед падением сборки (maxIssues: 10)
+  - Для Composable функций разрешен camelCase (functionPattern: '[a-z][a-zA-Z0-9]*')
 
 ### Требования
 
@@ -380,8 +382,8 @@ app/src/main/java/com/dayscounter/
 - `make build` - сборка проекта
 - `make clean` - очистка кэша проекта
 - `make test` - запуск unit-тестов с отображением результатов
-- `make lint` - запуск линтера (ktlint и detekt)
-- `make format` - форматирование кода
+- `make lint` - запуск линтера (ktlint и detekt) - только проверка без исправлений
+- `make format` - форматирование кода и удаление неиспользуемых импортов
 - `make check` - сборка, запуск тестов и линтера
 - `make install` - установка приложения на устройство/эмулятор
 - `make all` - выполнение всех проверок и установка приложения
