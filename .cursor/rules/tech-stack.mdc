@@ -20,7 +20,7 @@ alwaysApply: true
 
 ## Версии
 
-- AGP: 8.13.2
+- AGP: 9.2.1
 - Kotlin: 2.3.0
 - Compile SDK: 36
 - Target SDK: 35
