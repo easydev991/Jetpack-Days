@@ -5,16 +5,13 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
-import com.dayscounter.util.AndroidLogger
-import com.dayscounter.viewmodel.DetailScreenViewModel
-import com.dayscounter.viewmodel.MainScreenViewModel
 
 /**
  * Модуль внедрения зависимостей для приложения.
  *
  * Использует ручной подход к DI через factory методы.
  *
- * Создает экземпляры репозиториев, use cases и ViewModel.
+ * Создает экземпляры репозиториев.
  */
 object AppModule {
     /**
@@ -33,56 +30,4 @@ object AppModule {
      * @return Экземпляр ItemRepository
      */
     fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao())
-
-    /**
-     * Создает ViewModel для главного экрана.
-     *
-     * @param repository Репозиторий для работы с данными
-     * @return Экземпляр MainScreenViewModel
-     */
-    fun createMainScreenViewModel(repository: ItemRepository): MainScreenViewModel = MainScreenViewModel(repository)
-
-    /**
-     * Создает ViewModel для экрана деталей.
-     *
-     * @param repository Репозиторий для работы с данными
-     * @return Factory для создания DetailScreenViewModel с параметрами
-     */
-    fun createDetailScreenViewModelFactory(
-        repository: ItemRepository,
-    ): (
-        androidx.lifecycle.SavedStateHandle,
-    ) -> DetailScreenViewModel =
-        { savedStateHandle ->
-            DetailScreenViewModel(
-                repository,
-                AndroidLogger(),
-                savedStateHandle,
-            )
-        }
-
-    /**
-     * Создает ViewModel для экрана создания/редактирования.
-     *
-     * @param repository Репозиторий для работы с данными
-     * @return Factory для создания CreateEditScreenViewModel с параметрами
-     */
-    fun createCreateEditScreenViewModelFactory(
-        repository: ItemRepository,
-    ): (androidx.lifecycle.SavedStateHandle) -> com.dayscounter.viewmodel.CreateEditScreenViewModel =
-        { savedStateHandle ->
-            com.dayscounter.viewmodel.CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                AndroidLogger(),
-                savedStateHandle,
-            )
-        }
-
-    /**
-     * Возвращает FormatterModule для форматирования дней.
-     *
-     * @return Объект FormatterModule
-     */
-    fun getFormatterModule(): FormatterModule = FormatterModule
 }

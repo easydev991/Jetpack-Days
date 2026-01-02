@@ -25,11 +25,3 @@ fun Item.makeDaysCount(
         currentDate = currentDate,
         defaultDisplayOption = defaultDisplayOption,
     )
-
-/**
- * Создает копию Item с обновленным displayOption.
- *
- * @param displayOption Новая опция отображения
- * @return Новый экземпляр Item с обновленным displayOption
- */
-fun Item.withDisplayOption(displayOption: DisplayOption): Item = copy(displayOption = displayOption)
