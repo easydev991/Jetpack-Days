@@ -5,6 +5,7 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.AndroidLogger
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.MainScreenViewModel
 
@@ -53,7 +54,11 @@ object AppModule {
         androidx.lifecycle.SavedStateHandle,
     ) -> DetailScreenViewModel =
         { savedStateHandle ->
-            DetailScreenViewModel(repository, savedStateHandle)
+            DetailScreenViewModel(
+                repository,
+                AndroidLogger(),
+                savedStateHandle,
+            )
         }
 
     /**
@@ -69,6 +74,7 @@ object AppModule {
             com.dayscounter.viewmodel.CreateEditScreenViewModel(
                 repository,
                 resourceProvider,
+                AndroidLogger(),
                 savedStateHandle,
             )
         }

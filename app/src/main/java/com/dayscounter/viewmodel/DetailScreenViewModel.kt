@@ -10,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,10 +25,12 @@ import kotlinx.coroutines.launch
  * ViewModel для управления состоянием экрана деталей события.
  *
  * @property repository Репозиторий для работы с данными
+ * @property logger Логгер для записи логов
  * @property savedStateHandle SavedStateHandle для получения параметров навигации
  */
 class DetailScreenViewModel(
     private val repository: ItemRepository,
+    private val logger: Logger = AndroidLogger(),
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     companion object {
@@ -87,11 +91,11 @@ class DetailScreenViewModel(
                 val currentState = uiState.value
                 if (currentState is DetailScreenState.Success) {
                     repository.deleteItem(currentState.item)
-                    android.util.Log.d("DetailScreenViewModel", "Событие удалено: ${currentState.item.title}")
+                    logger.d("DetailScreenViewModel", "Событие удалено: ${currentState.item.title}")
                 }
             } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
-                android.util.Log.e("DetailScreenViewModel", message, e)
+                logger.e("DetailScreenViewModel", message, e)
             }
         }
     }
@@ -101,7 +105,7 @@ class DetailScreenViewModel(
      */
     fun requestDelete() {
         _showDeleteDialog.value = true
-        android.util.Log.d("DetailScreenViewModel", "Запрос на удаление")
+        logger.d("DetailScreenViewModel", "Запрос на удаление")
     }
 
     /**
@@ -110,7 +114,7 @@ class DetailScreenViewModel(
     fun confirmDelete() {
         deleteItem()
         _showDeleteDialog.value = false
-        android.util.Log.d("DetailScreenViewModel", "Удаление подтверждено")
+        logger.d("DetailScreenViewModel", "Удаление подтверждено")
     }
 
     /**
@@ -118,7 +122,7 @@ class DetailScreenViewModel(
      */
     fun cancelDelete() {
         _showDeleteDialog.value = false
-        android.util.Log.d("DetailScreenViewModel", "Удаление отменено")
+        logger.d("DetailScreenViewModel", "Удаление отменено")
     }
 }
 

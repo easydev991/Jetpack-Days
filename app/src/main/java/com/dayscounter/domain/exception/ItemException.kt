@@ -4,7 +4,6 @@ package com.dayscounter.domain.exception
  * Исключение для ошибок при работе с элементами (Item).
  */
 sealed class ItemException : Exception() {
-
     /**
      * Ошибка при сохранении элемента.
      */

@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
-import com.dayscounter.domain.exception.ItemException.LoadFailed
 import com.dayscounter.domain.exception.ItemException.UpdateFailed
-import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
@@ -16,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
@@ -55,11 +52,6 @@ class MainScreenViewModel(
      */
     private val _sortOrder = MutableStateFlow(SortOrder.DESCENDING)
     val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
-
-    /**
-     * Выбранная опция отображения дней по умолчанию.
-     */
-    private val _defaultDisplayOption = MutableStateFlow(DisplayOption.DAY)
 
     /**
      * Количество элементов (для отображения кнопки сортировки).
@@ -114,24 +106,6 @@ class MainScreenViewModel(
                 println("Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
                 _uiState.value = MainScreenState.Success(items)
-            }
-        }
-    }
-
-    /**
-     * Загружает события из репозитория.
-     */
-    private fun loadItems() {
-        viewModelScope.launch {
-            try {
-                _uiState.value = MainScreenState.Loading
-                val loadedItems = repository.getAllItems(_sortOrder.value).first()
-                _uiState.value = MainScreenState.Success(loadedItems)
-            } catch (e: LoadFailed) {
-                val message = "Ошибка загрузки списка событий: ${e.message}"
-                println("MainScreenViewModel: $message")
-                e.printStackTrace()
-                _uiState.value = MainScreenState.Error(message)
             }
         }
     }
@@ -221,7 +195,6 @@ class MainScreenViewModel(
             }
         }
     }
-
 }
 
 /**

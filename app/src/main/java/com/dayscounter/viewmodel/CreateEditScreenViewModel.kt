@@ -12,6 +12,8 @@ import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,11 +24,13 @@ import kotlinx.coroutines.launch
  *
  * @property repository Репозиторий для работы с данными
  * @property resourceProvider Провайдер строковых ресурсов для локализации
+ * @property logger Логгер для записи логов
  * @property savedStateHandle SavedStateHandle для получения параметров навигации
  */
 class CreateEditScreenViewModel(
     private val repository: ItemRepository,
     private val resourceProvider: ResourceProvider,
+    private val logger: Logger = AndroidLogger(),
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     companion object {
@@ -131,13 +135,13 @@ class CreateEditScreenViewModel(
                     _uiState.value = CreateEditScreenState.Success(item)
                     _originalItem.value = item
                     _hasChanges.value = false
-                    android.util.Log.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
+                    logger.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
                 } else {
                     _uiState.value =
                         CreateEditScreenState.Error(
                             resourceProvider.getString(ResourceIds.EVENT_NOT_FOUND),
                         )
-                    android.util.Log.w("CreateEditScreenViewModel", "Событие не найдено: $itemId")
+                    logger.w("CreateEditScreenViewModel", "Событие не найдено: $itemId")
                 }
             } catch (e: ItemException.LoadFailed) {
                 val message =
@@ -145,7 +149,7 @@ class CreateEditScreenViewModel(
                         ResourceIds.ERROR_LOADING_EVENT,
                         e.message,
                     )
-                android.util.Log.e("CreateEditScreenViewModel", message, e)
+                logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }
@@ -161,14 +165,14 @@ class CreateEditScreenViewModel(
             try {
                 repository.insertItem(item)
                 _uiState.value = CreateEditScreenState.Success(item)
-                android.util.Log.d("CreateEditScreenViewModel", "Событие создано: ${item.title}")
+                logger.d("CreateEditScreenViewModel", "Событие создано: ${item.title}")
             } catch (e: ItemException.SaveFailed) {
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_CREATING_EVENT,
                         e.message,
                     )
-                android.util.Log.e("CreateEditScreenViewModel", message, e)
+                logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }
@@ -186,14 +190,14 @@ class CreateEditScreenViewModel(
                 _uiState.value = CreateEditScreenState.Success(item)
                 _originalItem.value = item
                 _hasChanges.value = false
-                android.util.Log.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
+                logger.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
             } catch (e: ItemException.UpdateFailed) {
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_UPDATING_EVENT,
                         e.message,
                     )
-                android.util.Log.e("CreateEditScreenViewModel", message, e)
+                logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }
