@@ -73,7 +73,7 @@ internal fun detailContentInner(
     val scrollState = rememberScrollState()
     val formatter =
         java.time.format.DateTimeFormatter
-            .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+            .ofPattern("d MMMM yyyy", java.util.Locale.forLanguageTag("ru"))
 
     Column(
         modifier =

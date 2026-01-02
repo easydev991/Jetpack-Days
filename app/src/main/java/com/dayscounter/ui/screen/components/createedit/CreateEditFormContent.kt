@@ -223,7 +223,7 @@ internal fun dateSection(
 ) {
     val formatter =
         java.time.format.DateTimeFormatter
-            .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+            .ofPattern("d MMMM yyyy", java.util.Locale.forLanguageTag("ru"))
     // Выбор даты
     OutlinedTextField(
         value =

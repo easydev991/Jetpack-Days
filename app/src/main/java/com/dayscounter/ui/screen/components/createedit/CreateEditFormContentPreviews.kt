@@ -74,7 +74,7 @@ fun dateSectionPreview() {
         val showDatePicker = remember { mutableStateOf(false) }
         val formatter =
             java.time.format.DateTimeFormatter
-                .ofPattern("d MMMM yyyy", java.util.Locale("ru"))
+                .ofPattern("d MMMM yyyy", java.util.Locale.forLanguageTag("ru"))
 
         Column(
             modifier =
