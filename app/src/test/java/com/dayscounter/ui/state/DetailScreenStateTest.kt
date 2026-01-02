@@ -18,10 +18,7 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Loading
 
         // Then
-        assertTrue(
-            state is DetailScreenState.Loading,
-            "Loading state должен быть экземпляром DetailScreenState.Loading",
-        )
+        assertEquals(DetailScreenState.Loading, state, "Loading state должен быть создан")
     }
 
     @Test
@@ -39,10 +36,9 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Success(testItem)
 
         // Then
-        val successState = state as DetailScreenState.Success
-        assertEquals(testItem, successState.item, "Item в состоянии должен совпадать")
-        assertEquals(testItem.id, successState.item.id, "ID должен совпадать")
-        assertEquals(testItem.title, successState.item.title, "Название должно совпадать")
+        assertEquals(testItem, state.item, "Item в состоянии должен совпадать")
+        assertEquals(testItem.id, state.item.id, "ID должен совпадать")
+        assertEquals(testItem.title, state.item.title, "Название должно совпадать")
     }
 
     @Test
@@ -60,14 +56,13 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Success(testItem)
 
         // When - Доступ к свойствам состояния
-        val successState = state as DetailScreenState.Success
 
         // Then - Все свойства доступны и корректны
-        assertEquals(1L, successState.item.id)
-        assertEquals("День рождения", successState.item.title)
-        assertEquals("Праздничный день", successState.item.details)
-        assertEquals(0xFFFF00, successState.item.colorTag)
-        assertEquals(DisplayOption.DAY, successState.item.displayOption)
+        assertEquals(1L, state.item.id)
+        assertEquals("День рождения", state.item.title)
+        assertEquals("Праздничный день", state.item.details)
+        assertEquals(0xFFFF00, state.item.colorTag)
+        assertEquals(DisplayOption.DAY, state.item.displayOption)
     }
 
     @Test
@@ -77,8 +72,7 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Error(errorMessage)
 
         // Then
-        val errorState = state as DetailScreenState.Error
-        assertEquals(errorMessage, errorState.message, "Сообщение об ошибке должно совпадать")
+        assertEquals(errorMessage, state.message, "Сообщение об ошибке должно совпадать")
     }
 
     @Test
@@ -150,8 +144,7 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Success(item)
 
         // Then
-        val successState = state as DetailScreenState.Success
-        assertEquals("", successState.item.details, "Пустые детали допустимы")
+        assertEquals("", state.item.details, "Пустые детали допустимы")
     }
 
     @Test
@@ -169,8 +162,7 @@ class DetailScreenStateTest {
         val state = DetailScreenState.Success(item)
 
         // Then
-        val successState = state as DetailScreenState.Success
-        assertEquals(null, successState.item.colorTag, "Отсутствие цветовой метки допустимо")
+        assertEquals(null, state.item.colorTag, "Отсутствие цветовой метки допустимо")
     }
 
     @Test
