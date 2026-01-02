@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 class ItemEntityTest {
     @Test
-    fun `createItemEntity_withRequiredFields_thenCreatesSuccessfully`() {
+    fun createItemEntity_withRequiredFields_thenCreatesSuccessfully() {
         // Given
         val title = "Тестовое событие"
         val timestamp = 1234567890000L
@@ -29,7 +29,7 @@ class ItemEntityTest {
     }
 
     @Test
-    fun `createItemEntity_withAllFields_thenCreatesSuccessfully`() {
+    fun createItemEntity_withAllFields_thenCreatesSuccessfully() {
         // Given
         val id = 1L
         val title = "Тестовое событие"
@@ -59,7 +59,7 @@ class ItemEntityTest {
     }
 
     @Test
-    fun `createItemEntity_withDefaultValues_thenUsesDefaults`() {
+    fun createItemEntity_withDefaultValues_thenUsesDefaults() {
         // Given
         val title = "Событие"
         val timestamp = 1234567890000L

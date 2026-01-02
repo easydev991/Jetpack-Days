@@ -39,25 +39,24 @@ class DaysDifferenceTest {
     @Test
     fun `DaysDifference поддерживает when выражение`() {
         // Given
-        val todayDiff = DaysDifference.Today(System.currentTimeMillis())
-        val calculatedDiff = DaysDifference.Calculated(TimePeriod(), 100, System.currentTimeMillis())
+        val differences: List<DaysDifference> =
+            listOf(
+                DaysDifference.Today(System.currentTimeMillis()),
+                DaysDifference.Calculated(TimePeriod(), 100, System.currentTimeMillis()),
+            )
 
         // When
-        val todayResult =
-            when (todayDiff) {
-                is DaysDifference.Today -> "today"
-                is DaysDifference.Calculated -> "calculated"
-            }
-
-        val calculatedResult =
-            when (calculatedDiff) {
-                is DaysDifference.Today -> "today"
-                is DaysDifference.Calculated -> "calculated"
+        val results =
+            differences.map { diff ->
+                when (diff) {
+                    is DaysDifference.Today -> "today"
+                    is DaysDifference.Calculated -> "calculated"
+                }
             }
 
         // Then
-        assertEquals("today", todayResult, "Today должен правильно определяться в when")
-        assertEquals("calculated", calculatedResult, "Calculated должен правильно определяться в when")
+        assertEquals("today", results[0], "Today должен правильно определяться в when")
+        assertEquals("calculated", results[1], "Calculated должен правильно определяться в when")
     }
 
     @Test

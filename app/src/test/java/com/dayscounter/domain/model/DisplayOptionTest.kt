@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 
 class DisplayOptionTest {
     @Test
-    fun `fromString_whenDay_thenReturnsDay`() {
+    fun fromString_whenDay_thenReturnsDay() {
         // When
         val result = DisplayOption.fromString("day")
 
@@ -14,7 +14,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `fromString_whenMonthDay_thenReturnsMonthDay`() {
+    fun fromString_whenMonthDay_thenReturnsMonthDay() {
         // When
         val result = DisplayOption.fromString("monthDay")
 
@@ -23,7 +23,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `fromString_whenYearMonthDay_thenReturnsYearMonthDay`() {
+    fun fromString_whenYearMonthDay_thenReturnsYearMonthDay() {
         // When
         val result = DisplayOption.fromString("yearMonthDay")
 
@@ -32,7 +32,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `fromString_whenUnknownValue_thenReturnsDefault`() {
+    fun fromString_whenUnknownValue_thenReturnsDefault() {
         // When
         val result = DisplayOption.fromString("unknown")
 
@@ -41,7 +41,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `fromString_whenCaseInsensitive_thenReturnsCorrectValue`() {
+    fun fromString_whenCaseInsensitive_thenReturnsCorrectValue() {
         // When
         val result1 = DisplayOption.fromString("DAY")
         val result2 = DisplayOption.fromString("MonthDay")
@@ -54,7 +54,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `toJsonString_whenDay_thenReturnsDay`() {
+    fun toJsonString_whenDay_thenReturnsDay() {
         // When
         val result = DisplayOption.DAY.toJsonString()
 
@@ -63,7 +63,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `toJsonString_whenMonthDay_thenReturnsMonthDay`() {
+    fun toJsonString_whenMonthDay_thenReturnsMonthDay() {
         // When
         val result = DisplayOption.MONTH_DAY.toJsonString()
 
@@ -72,7 +72,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `toJsonString_whenYearMonthDay_thenReturnsYearMonthDay`() {
+    fun toJsonString_whenYearMonthDay_thenReturnsYearMonthDay() {
         // When
         val result = DisplayOption.YEAR_MONTH_DAY.toJsonString()
 
@@ -81,7 +81,7 @@ class DisplayOptionTest {
     }
 
     @Test
-    fun `defaultValue_isDay`() {
+    fun defaultValue_isDay() {
         // Then
         assertEquals(DisplayOption.DAY, DisplayOption.DEFAULT)
     }

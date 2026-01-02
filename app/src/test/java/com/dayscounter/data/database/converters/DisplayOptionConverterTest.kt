@@ -8,7 +8,7 @@ class DisplayOptionConverterTest {
     private val converter = DisplayOptionConverter()
 
     @Test
-    fun `fromDisplayOption_whenDay_thenReturnsDayString`() {
+    fun fromDisplayOption_whenDay_thenReturnsDayString() {
         // When
         val result = converter.fromDisplayOption(DisplayOption.DAY)
 
@@ -17,7 +17,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `fromDisplayOption_whenMonthDay_thenReturnsMonthDayString`() {
+    fun fromDisplayOption_whenMonthDay_thenReturnsMonthDayString() {
         // When
         val result = converter.fromDisplayOption(DisplayOption.MONTH_DAY)
 
@@ -26,7 +26,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `fromDisplayOption_whenYearMonthDay_thenReturnsYearMonthDayString`() {
+    fun fromDisplayOption_whenYearMonthDay_thenReturnsYearMonthDayString() {
         // When
         val result = converter.fromDisplayOption(DisplayOption.YEAR_MONTH_DAY)
 
@@ -35,7 +35,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `toDisplayOption_whenDayString_thenReturnsDay`() {
+    fun toDisplayOption_whenDayString_thenReturnsDay() {
         // When
         val result = converter.toDisplayOption("DAY")
 
@@ -44,7 +44,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `toDisplayOption_whenMonthDayString_thenReturnsMonthDay`() {
+    fun toDisplayOption_whenMonthDayString_thenReturnsMonthDay() {
         // When
         val result = converter.toDisplayOption("MONTH_DAY")
 
@@ -53,7 +53,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `toDisplayOption_whenYearMonthDayString_thenReturnsYearMonthDay`() {
+    fun toDisplayOption_whenYearMonthDayString_thenReturnsYearMonthDay() {
         // When
         val result = converter.toDisplayOption("YEAR_MONTH_DAY")
 
@@ -62,7 +62,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `roundTripConversion_thenPreservesValue`() {
+    fun roundTripConversion_thenPreservesValue() {
         // Given
         val original = DisplayOption.MONTH_DAY
 
@@ -75,7 +75,7 @@ class DisplayOptionConverterTest {
     }
 
     @Test
-    fun `roundTripConversion_withDefault_thenPreservesValue`() {
+    fun roundTripConversion_withDefault_thenPreservesValue() {
         // Given
         val original = DisplayOption.DEFAULT
 

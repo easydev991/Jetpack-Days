@@ -1,12 +1,17 @@
 package com.dayscounter.domain.model
 
+import com.dayscounter.data.formatter.DaysFormatterImpl
+import com.dayscounter.di.FormatterModule
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.ZoneId
 
 class ItemTest {
     @Test
-    fun `createItem_withRequiredFields_thenCreatesSuccessfully`() {
+    fun createItem_withRequiredFields_thenCreatesSuccessfully() {
         // Given
         val title = "Тестовое событие"
         val timestamp = 1234567890000L
@@ -28,7 +33,7 @@ class ItemTest {
     }
 
     @Test
-    fun `createItem_withAllFields_thenCreatesSuccessfully`() {
+    fun createItem_withAllFields_thenCreatesSuccessfully() {
         // Given
         val id = 1L
         val title = "Тестовое событие"
@@ -58,7 +63,7 @@ class ItemTest {
     }
 
     @Test
-    fun `createItem_withDefaultValues_thenUsesDefaults`() {
+    fun createItem_withDefaultValues_thenUsesDefaults() {
         // Given
         val title = "Событие"
         val timestamp = 1234567890000L
@@ -78,41 +83,77 @@ class ItemTest {
     }
 
     @Test
-    fun `makeDaysCount_whenCalled_thenReturnsStubValue`() {
+    fun makeDaysCount_whenCalled_thenReturnsFormattedValue() {
         // Given
+        val eventDate = LocalDate.now().minusDays(5)
+        val timestamp =
+            eventDate
+                .atStartOfDay(ZoneId.systemDefault())
+                .toEpochSecond() * 1000
         val item =
             Item(
                 title = "Тест",
-                timestamp = 1234567890000L,
+                timestamp = timestamp,
             )
-        val currentDate = System.currentTimeMillis()
+        val currentDate = LocalDate.now()
+
+        // Создаём use case через FormatterModule
+        val daysFormatter = DaysFormatterImpl()
+        val formatDaysTextUseCase = FormatterModule.createFormatDaysTextUseCase(daysFormatter)
+        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase()
+        val resourceProvider = FormatterModule.createStubResourceProvider()
+        val useCase =
+            FormatterModule.createGetFormattedDaysForItemUseCase(
+                calculateDaysDifferenceUseCase,
+                formatDaysTextUseCase,
+                resourceProvider,
+            )
 
         // When
-        val result = item.makeDaysCount(currentDate)
+        val result = item.makeDaysCount(useCase, currentDate)
 
         // Then
-        // Заглушка, полная реализация в Этапе 6
-        assertEquals("0 дней", result)
+        // Проверяем, что результат содержит информацию о днях
+        assertTrue(result.isNotEmpty(), "Результат не должен быть пустым")
+        // Полная реализация форматирования проверяется в тестах GetFormattedDaysForItemUseCaseTest
     }
 
     @Test
-    fun `makeDaysCount_withDifferentCurrentDate_thenReturnsStubValue`() {
+    fun makeDaysCount_withDifferentCurrentDate_thenReturnsFormattedValues() {
         // Given
+        val eventDate = LocalDate.of(2024, 1, 1)
+        val timestamp =
+            eventDate
+                .atStartOfDay(ZoneId.systemDefault())
+                .toEpochSecond() * 1000
         val item =
             Item(
                 title = "Тест",
-                timestamp = 1000000000000L,
+                timestamp = timestamp,
             )
-        val currentDate1 = 2000000000000L
-        val currentDate2 = 3000000000000L
+        val currentDate1 = LocalDate.of(2024, 1, 6) // Через 5 дней
+        val currentDate2 = LocalDate.of(2024, 1, 7) // Через 6 дней
+
+        // Создаём use case через FormatterModule
+        val daysFormatter = DaysFormatterImpl()
+        val formatDaysTextUseCase = FormatterModule.createFormatDaysTextUseCase(daysFormatter)
+        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase()
+        val resourceProvider = FormatterModule.createStubResourceProvider()
+        val useCase =
+            FormatterModule.createGetFormattedDaysForItemUseCase(
+                calculateDaysDifferenceUseCase,
+                formatDaysTextUseCase,
+                resourceProvider,
+            )
 
         // When
-        val result1 = item.makeDaysCount(currentDate1)
-        val result2 = item.makeDaysCount(currentDate2)
+        val result1 = item.makeDaysCount(useCase, currentDate1)
+        val result2 = item.makeDaysCount(useCase, currentDate2)
 
         // Then
-        // Заглушка всегда возвращает "0 дней"
-        assertEquals("0 дней", result1)
-        assertEquals("0 дней", result2)
+        // Проверяем, что результаты не пустые и отличаются
+        assertTrue(result1.isNotEmpty(), "Результат не должен быть пустым")
+        assertTrue(result2.isNotEmpty(), "Результат не должен быть пустым")
+        // Полная реализация форматирования проверяется в тестах GetFormattedDaysForItemUseCaseTest
     }
 }

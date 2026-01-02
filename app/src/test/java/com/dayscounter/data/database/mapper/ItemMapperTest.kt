@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 class ItemMapperTest {
     @Test
-    fun `toDomain_whenEntityWithAllFields_thenConvertsCorrectly`() {
+    fun toDomain_whenEntityWithAllFields_thenConvertsCorrectly() {
         // Given
         val entity =
             ItemEntity(
@@ -34,7 +34,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `toDomain_whenEntityWithNullColorTag_thenConvertsCorrectly`() {
+    fun toDomain_whenEntityWithNullColorTag_thenConvertsCorrectly() {
         // Given
         val entity =
             ItemEntity(
@@ -56,7 +56,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `toDomain_whenEntityWithDefaultValues_thenConvertsCorrectly`() {
+    fun toDomain_whenEntityWithDefaultValues_thenConvertsCorrectly() {
         // Given
         val entity =
             ItemEntity(
@@ -75,7 +75,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `toEntity_whenDomainWithAllFields_thenConvertsCorrectly`() {
+    fun toEntity_whenDomainWithAllFields_thenConvertsCorrectly() {
         // Given
         val domain =
             Item(
@@ -100,7 +100,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `toEntity_whenDomainWithNullColorTag_thenConvertsCorrectly`() {
+    fun toEntity_whenDomainWithNullColorTag_thenConvertsCorrectly() {
         // Given
         val domain =
             Item(
@@ -122,7 +122,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `toEntity_whenDomainWithDefaultValues_thenConvertsCorrectly`() {
+    fun toEntity_whenDomainWithDefaultValues_thenConvertsCorrectly() {
         // Given
         val domain =
             Item(
@@ -141,7 +141,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `roundTripConversion_thenPreservesAllFields`() {
+    fun roundTripConversion_thenPreservesAllFields() {
         // Given
         val originalDomain =
             Item(
@@ -167,7 +167,7 @@ class ItemMapperTest {
     }
 
     @Test
-    fun `roundTripConversion_withNullColorTag_thenPreservesNull`() {
+    fun roundTripConversion_withNullColorTag_thenPreservesNull() {
         // Given
         val originalDomain =
             Item(

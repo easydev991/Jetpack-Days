@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 class ScreenTest {
     @Test
-    fun `whenEventsScreenCreated_thenPropertiesAreCorrect`() {
+    fun whenEventsScreenCreated_thenPropertiesAreCorrect() {
         // Given
         val screen = Screen.Events
 
@@ -18,7 +18,7 @@ class ScreenTest {
     }
 
     @Test
-    fun `whenMoreScreenCreated_thenPropertiesAreCorrect`() {
+    fun whenMoreScreenCreated_thenPropertiesAreCorrect() {
         // Given
         val screen = Screen.More
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 class RootScreenStateTest {
     @Test
-    fun `whenStateCreatedWithDefaults_thenEventsTabIsSelected`() {
+    fun whenStateCreatedWithDefaults_thenEventsTabIsSelected() {
         // Given
         val state = RootScreenState()
 
@@ -19,7 +19,7 @@ class RootScreenStateTest {
     }
 
     @Test
-    fun `whenStateCreatedWithCustomTab_thenCustomTabIsSelected`() {
+    fun whenStateCreatedWithCustomTab_thenCustomTabIsSelected() {
         // Given
         val customTab = Screen.More
 
@@ -31,7 +31,7 @@ class RootScreenStateTest {
     }
 
     @Test
-    fun `whenStateCreatedWithCustomTabs_thenCustomTabsAreAvailable`() {
+    fun whenStateCreatedWithCustomTabs_thenCustomTabsAreAvailable() {
         // Given
         val customTabs = listOf(Screen.Events, Screen.More)
 

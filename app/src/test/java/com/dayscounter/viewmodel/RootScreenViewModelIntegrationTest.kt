@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 
 class RootScreenViewModelIntegrationTest {
     @Test
-    fun `whenViewModelCreated_thenEventsTabIsSelectedByDefault`() {
+    fun whenViewModelCreated_thenEventsTabIsSelectedByDefault() {
         // Given
         val viewModel = RootScreenViewModel()
 
@@ -18,7 +18,7 @@ class RootScreenViewModelIntegrationTest {
     }
 
     @Test
-    fun `whenSwitchToMoreTab_thenMoreTabIsSelected`() {
+    fun whenSwitchToMoreTab_thenMoreTabIsSelected() {
         // Given
         val viewModel = RootScreenViewModel()
 
@@ -32,7 +32,7 @@ class RootScreenViewModelIntegrationTest {
     }
 
     @Test
-    fun `whenSwitchToEventsTab_thenEventsTabIsSelected`() {
+    fun whenSwitchToEventsTab_thenEventsTabIsSelected() {
         // Given
         val viewModel = RootScreenViewModel()
         viewModel.switchTab(Screen.More) // Сначала переключаемся на More
@@ -47,7 +47,7 @@ class RootScreenViewModelIntegrationTest {
     }
 
     @Test
-    fun `whenSwitchToSameTab_thenTabRemainsSelected`() {
+    fun whenSwitchToSameTab_thenTabRemainsSelected() {
         // Given
         val viewModel = RootScreenViewModel()
         val initialTab = viewModel.currentTab
@@ -61,7 +61,7 @@ class RootScreenViewModelIntegrationTest {
     }
 
     @Test
-    fun `whenViewModelCreated_thenBothTabsAreAvailable`() {
+    fun whenViewModelCreated_thenBothTabsAreAvailable() {
         // Given
         val viewModel = RootScreenViewModel()
 

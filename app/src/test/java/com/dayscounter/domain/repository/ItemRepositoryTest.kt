@@ -16,7 +16,7 @@ class ItemRepositoryTest {
      * Реальная реализация будет протестирована в ItemRepositoryImplTest.
      */
     @Test
-    fun `interfaceDefinesAllRequiredMethods`() {
+    fun interfaceDefinesAllRequiredMethods() {
         // Этот тест просто проверяет, что интерфейс компилируется
         // Реальная проверка контракта будет в тестах реализации
         val repository: ItemRepository =
