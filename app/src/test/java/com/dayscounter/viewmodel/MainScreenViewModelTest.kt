@@ -114,7 +114,11 @@ class MainScreenViewModelTest {
             assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
             val successState = uiState as MainScreenState.Success
             assertEquals(1, successState.items.size, "Должен быть 1 элемент")
-            assertEquals("День рождения", successState.items[0].title, "Должен быть правильный элемент")
+            assertEquals(
+                "День рождения",
+                successState.items[0].title,
+                "Должен быть правильный элемент"
+            )
         }
     }
 
@@ -192,7 +196,11 @@ class MainScreenViewModelTest {
             val successState = uiState as MainScreenState.Success
             assertEquals(2, successState.items.size, "Должно быть 2 элемента")
             assertEquals(1L, successState.items[0].id, "Первый элемент должен быть старым")
-            assertEquals(SortOrder.ASCENDING, viewModel.sortOrder.value, "Порядок сортировки должен обновиться")
+            assertEquals(
+                SortOrder.ASCENDING,
+                viewModel.sortOrder.value,
+                "Порядок сортировки должен обновиться"
+            )
         }
     }
 
@@ -257,7 +265,11 @@ class MainScreenViewModelTest {
             assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
             val successState = uiState as MainScreenState.Success
             assertEquals(0, successState.items.size, "Список должен быть пустым")
-            assertEquals(0, viewModel.itemsCount.value, "Количество элементов в ViewModel должно быть 0")
+            assertEquals(
+                0,
+                viewModel.itemsCount.value,
+                "Количество элементов в ViewModel должно быть 0"
+            )
         }
     }
 

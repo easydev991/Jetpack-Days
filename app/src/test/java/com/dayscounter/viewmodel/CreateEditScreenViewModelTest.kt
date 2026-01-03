@@ -70,7 +70,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenViewModelCreatedWithNoItemId_thenInitializesWithNewItem`() {
+    fun whenViewModelCreatedWithNoItemId_thenInitializesWithNewItem() {
         runTest {
             // Given - SavedStateHandle без itemId
             val savedStateHandle = SavedStateHandle()
@@ -91,14 +91,17 @@ class CreateEditScreenViewModelTest {
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("", successState.item.title, "Название должно быть пустым")
             assertEquals("", successState.item.details, "Описание должно быть пустым")
-            assertEquals(DisplayOption.DAY, successState.item.displayOption, "Опция отображения должна быть DAY")
+            assertEquals(
+                DisplayOption.DAY,
+                successState.item.displayOption
+            )
             assertNull(newViewModel.originalItem.value, "Оригинальный элемент должен быть null")
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
         }
     }
 
     @Test
-    fun `whenViewModelCreatedWithItemId_thenLoadsItem`() {
+    fun whenViewModelCreatedWithItemId_thenLoadsItem() {
         runTest {
             // Given - SavedStateHandle с itemId
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -120,13 +123,17 @@ class CreateEditScreenViewModelTest {
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
             assertEquals("Описание события", successState.item.details, "Описание должно совпадать")
-            assertEquals(testItem, newViewModel.originalItem.value, "Оригинальный элемент должен быть сохранен")
+            assertEquals(
+                testItem,
+                newViewModel.originalItem.value,
+                "Оригинальный элемент должен быть сохранен"
+            )
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
         }
     }
 
     @Test
-    fun `whenItemNotFound_thenShowsErrorState`() {
+    fun whenItemNotFound_thenShowsErrorState() {
         runTest {
             // Given - SavedStateHandle с несуществующим itemId
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
@@ -145,12 +152,16 @@ class CreateEditScreenViewModelTest {
             val uiState = newViewModel.uiState.value
             assertTrue(uiState is CreateEditScreenState.Error, "Должно быть состояние Error")
             val errorState = uiState as CreateEditScreenState.Error
-            assertEquals("Событие не найдено", errorState.message, "Сообщение об ошибке должно быть корректным")
+            assertEquals(
+                "Событие не найдено",
+                errorState.message,
+                "Сообщение об ошибке должно быть корректным"
+            )
         }
     }
 
     @Test
-    fun `whenCreateItemWithValidData_thenSavesItem`() {
+    fun whenCreateItemWithValidData_thenSavesItem() {
         runTest {
             // Given - ViewModel для создания
             val savedStateHandle = SavedStateHandle()
@@ -183,13 +194,17 @@ class CreateEditScreenViewModelTest {
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Новое событие", successState.item.title, "Название должно совпадать")
             assertEquals("Новое описание", successState.item.details, "Описание должно совпадать")
-            assertEquals(DisplayOption.MONTH_DAY, successState.item.displayOption, "Опция отображения должна совпадать")
+            assertEquals(
+                DisplayOption.MONTH_DAY,
+                successState.item.displayOption,
+                "Опция отображения должна совпадать"
+            )
             assertTrue(repository.insertItemCalled, "Метод insertItem должен быть вызван")
         }
     }
 
     @Test
-    fun `whenCreateItemFails_thenShowsErrorState`() {
+    fun whenCreateItemFails_thenShowsErrorState() {
         runTest {
             // Given - Repository выбрасывает ошибку при вставке
             repository.shouldThrowOnInsert = true
@@ -228,7 +243,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenUpdateItemWithValidData_thenUpdatesItem`() {
+    fun whenUpdateItemWithValidData_thenUpdatesItem() {
         runTest {
             // Given - Элемент в Repository и ViewModel для редактирования
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -259,8 +274,16 @@ class CreateEditScreenViewModelTest {
             val uiState = updateViewModel.uiState.value
             assertTrue(uiState is CreateEditScreenState.Success, "Должно быть состояние Success")
             val successState = uiState as CreateEditScreenState.Success
-            assertEquals("Обновленное название", successState.item.title, "Название должно быть обновлено")
-            assertEquals("Обновленное описание", successState.item.details, "Описание должно быть обновлено")
+            assertEquals(
+                "Обновленное название",
+                successState.item.title,
+                "Название должно быть обновлено"
+            )
+            assertEquals(
+                "Обновленное описание",
+                successState.item.details,
+                "Описание должно быть обновлено"
+            )
             assertEquals(
                 DisplayOption.YEAR_MONTH_DAY,
                 successState.item.displayOption,
@@ -271,7 +294,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenUpdateItemFails_thenShowsErrorState`() {
+    fun whenUpdateItemFails_thenShowsErrorState() {
         runTest {
             // Given - Repository выбрасывает ошибку при обновлении
             repository.shouldThrowOnUpdate = true
@@ -303,7 +326,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenLoadItemFails_thenShowsErrorState`() {
+    fun whenLoadItemFails_thenShowsErrorState() {
         runTest {
             // Given - Repository выбрасывает ошибку при загрузке
             repository.shouldThrowOnGetById = true
@@ -332,7 +355,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithTitleChanged_thenHasChangesIsTrue`() {
+    fun whenCheckHasChangesWithTitleChanged_thenHasChangesIsTrue() {
         runTest {
             // Given - ViewModel с загруженным элементом
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -362,7 +385,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithDetailsChanged_thenHasChangesIsTrue`() {
+    fun whenCheckHasChangesWithDetailsChanged_thenHasChangesIsTrue() {
         runTest {
             // Given - ViewModel с загруженным элементом
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -392,7 +415,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithTimestampChanged_thenHasChangesIsTrue`() {
+    fun whenCheckHasChangesWithTimestampChanged_thenHasChangesIsTrue() {
         runTest {
             // Given - ViewModel с загруженным элементом
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -422,7 +445,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithColorTagChanged_thenHasChangesIsTrue`() {
+    fun whenCheckHasChangesWithColorTagChanged_thenHasChangesIsTrue() {
         runTest {
             // Given - ViewModel с загруженным элементом без цвета
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -452,7 +475,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithDisplayOptionChanged_thenHasChangesIsTrue`() {
+    fun whenCheckHasChangesWithDisplayOptionChanged_thenHasChangesIsTrue() {
         runTest {
             // Given - ViewModel с загруженным элементом
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -482,7 +505,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenCheckHasChangesWithNoChanges_thenHasChangesIsFalse`() {
+    fun whenCheckHasChangesWithNoChanges_thenHasChangesIsFalse() {
         runTest {
             // Given - ViewModel с загруженным элементом
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -512,7 +535,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenResetHasChanges_thenHasChangesIsFalse`() {
+    fun whenResetHasChanges_thenHasChangesIsFalse() {
         runTest {
             // Given - ViewModel с загруженным элементом и обнаруженными изменениями
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
@@ -546,7 +569,7 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
-    fun `whenLoadingItem_thenSetsLoadingStateFirst`() {
+    fun whenLoadingItem_thenSetsLoadingStateFirst() {
         runTest {
             // Given - SavedStateHandle с itemId и задержка в repository
             repository.loadingDelayMs = 100L
@@ -564,12 +587,18 @@ class CreateEditScreenViewModelTest {
 
             // Then - Сначала должно быть состояние Loading
             var uiState = newViewModel.uiState.value
-            assertTrue(uiState is CreateEditScreenState.Loading, "Сначала должно быть состояние Loading")
+            assertTrue(
+                uiState is CreateEditScreenState.Loading,
+                "Сначала должно быть состояние Loading"
+            )
 
             // After delay - должно стать Success
             testDispatcher.scheduler.advanceUntilIdle()
             uiState = newViewModel.uiState.value
-            assertTrue(uiState is CreateEditScreenState.Success, "После загрузки должно быть состояние Success")
+            assertTrue(
+                uiState is CreateEditScreenState.Success,
+                "После загрузки должно быть состояние Success"
+            )
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
         }
@@ -596,7 +625,8 @@ class CreateEditScreenViewModelTest {
         override fun getAllItems(): Flow<List<Item>> = flowOf(emptyList())
 
         @Suppress("MaxLineLength")
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = flowOf(emptyList())
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
+            flowOf(emptyList())
 
         override suspend fun getItemById(id: Long): Item? {
             if (loadingDelayMs > 0) {
