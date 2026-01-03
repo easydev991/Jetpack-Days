@@ -160,7 +160,7 @@ class DetailScreenViewModelTest {
             // Then - Элемент должен быть удален и диалог скрыт
             assertFalse(
                 repository.containsItem(testItemId),
-                "Элемент должен быть удален из repository"
+                "Элемент должен быть удален из repository",
             )
             assertFalse(viewModel.showDeleteDialog.value, "Диалог удаления должен быть скрыт")
             // stateIn кэширует последнее значение, поэтому состояние остается Success
@@ -206,8 +206,7 @@ class DetailScreenViewModelTest {
 
         override fun getAllItems(): Flow<List<Item>> = items
 
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
-            items
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = items
 
         override suspend fun getItemById(id: Long): Item? {
             // Без задержки для тестов - getItemFlow используется для загрузки в ViewModel

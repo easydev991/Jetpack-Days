@@ -45,14 +45,15 @@ class CreateEditScreenViewModelIntegrationTest {
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var context: Context
 
-    private val testItem = Item(
-        id = 1L,
-        title = "Тестовое событие",
-        details = "Описание события",
-        timestamp = System.currentTimeMillis(),
-        colorTag = null,
-        displayOption = DisplayOption.DAY,
-    )
+    private val testItem =
+        Item(
+            id = 1L,
+            title = "Тестовое событие",
+            details = "Описание события",
+            timestamp = System.currentTimeMillis(),
+            colorTag = null,
+            displayOption = DisplayOption.DAY,
+        )
 
     @Before
     fun setUp() {
@@ -61,12 +62,13 @@ class CreateEditScreenViewModelIntegrationTest {
 
         context = ApplicationProvider.getApplicationContext()
 
-        database = Room
-            .inMemoryDatabaseBuilder(
-                context,
-                DaysDatabase::class.java,
-            ).allowMainThreadQueries()
-            .build()
+        database =
+            Room
+                .inMemoryDatabaseBuilder(
+                    context,
+                    DaysDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
 
         repository = ItemRepositoryImpl(database.itemDao())
         resourceProvider = FakeResourceProvider()
@@ -81,20 +83,22 @@ class CreateEditScreenViewModelIntegrationTest {
     fun whenCreateItem_thenItemSavedInDatabase() {
         runTest {
             val savedStateHandle = SavedStateHandle()
-            val newItem = Item(
-                id = 0L,
-                title = "Новое событие",
-                details = "Новое описание",
-                timestamp = System.currentTimeMillis(),
-                colorTag = 0xFFFF0000.toInt(),
-                displayOption = DisplayOption.MONTH_DAY,
-            )
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            val newItem =
+                Item(
+                    id = 0L,
+                    title = "Новое событие",
+                    details = "Новое описание",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = 0xFFFF0000.toInt(),
+                    displayOption = DisplayOption.MONTH_DAY,
+                )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -108,7 +112,7 @@ class CreateEditScreenViewModelIntegrationTest {
             assertEquals("Новое описание", allItems[0].details)
             assertEquals(
                 DisplayOption.MONTH_DAY,
-                allItems[0].displayOption
+                allItems[0].displayOption,
             )
             assertNotNull("Цвет должен быть установлен", allItems[0].colorTag)
         }
@@ -121,21 +125,23 @@ class CreateEditScreenViewModelIntegrationTest {
             val uniqueTestItem = testItem.copy(timestamp = System.currentTimeMillis())
             val insertedId = repository.insertItem(uniqueTestItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            val updatedItem = uniqueTestItem.copy(
-                id = insertedId,
-                title = "Обновленное название",
-                details = "Обновленное описание",
-                timestamp = uniqueTestItem.timestamp + 86400000L,
-                colorTag = 0xFF00FF00.toInt(),
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
-            )
+            val updatedItem =
+                uniqueTestItem.copy(
+                    id = insertedId,
+                    title = "Обновленное название",
+                    details = "Обновленное описание",
+                    timestamp = uniqueTestItem.timestamp + 86400000L,
+                    colorTag = 0xFF00FF00.toInt(),
+                    displayOption = DisplayOption.YEAR_MONTH_DAY,
+                )
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -149,16 +155,16 @@ class CreateEditScreenViewModelIntegrationTest {
             assertNotNull("Элемент должен существовать в базе данных", itemFromDb)
             assertEquals(
                 "Обновленное название",
-                itemFromDb!!.title
+                itemFromDb!!.title,
             )
             assertEquals(
                 "Обновленное описание",
                 itemFromDb.details,
-                "Описание должно быть обновлено"
+                "Описание должно быть обновлено",
             )
             assertEquals(
                 DisplayOption.YEAR_MONTH_DAY,
-                itemFromDb.displayOption
+                itemFromDb.displayOption,
             )
             assertEquals(0xFF00FF00.toInt(), itemFromDb.colorTag)
         }
@@ -171,12 +177,13 @@ class CreateEditScreenViewModelIntegrationTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -198,12 +205,13 @@ class CreateEditScreenViewModelIntegrationTest {
         runTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -223,12 +231,13 @@ class CreateEditScreenViewModelIntegrationTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -254,21 +263,23 @@ class CreateEditScreenViewModelIntegrationTest {
             val insertedId = repository.insertItem(uniqueTestItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            val updatedItem = uniqueTestItem.copy(
-                id = insertedId,
-                title = "Полностью новое название",
-                details = "Полностью новое описание",
-                timestamp = uniqueTestItem.timestamp + 172800000L,
-                colorTag = 0xFF0000FF.toInt(),
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
-            )
+            val updatedItem =
+                uniqueTestItem.copy(
+                    id = insertedId,
+                    title = "Полностью новое название",
+                    details = "Полностью новое описание",
+                    timestamp = uniqueTestItem.timestamp + 172800000L,
+                    colorTag = 0xFF0000FF.toInt(),
+                    displayOption = DisplayOption.YEAR_MONTH_DAY,
+                )
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -280,20 +291,20 @@ class CreateEditScreenViewModelIntegrationTest {
             assertNotNull("Элемент должен существовать", itemFromDb)
             assertEquals(
                 "Полностью новое название",
-                itemFromDb!!.title
+                itemFromDb!!.title,
             )
             assertEquals(
                 "Полностью новое описание",
-                itemFromDb.details
+                itemFromDb.details,
             )
             assertEquals(
                 testItem.timestamp + 172800000L,
-                itemFromDb.timestamp
+                itemFromDb.timestamp,
             )
             assertEquals(0xFF0000FF.toInt(), itemFromDb.colorTag)
             assertEquals(
                 DisplayOption.YEAR_MONTH_DAY,
-                itemFromDb.displayOption
+                itemFromDb.displayOption,
             )
         }
     }
@@ -303,29 +314,32 @@ class CreateEditScreenViewModelIntegrationTest {
     fun whenCreateMultipleItems_thenAllItemsSavedInDatabase() {
         runTest {
             val savedStateHandle = SavedStateHandle()
-            val item1 = Item(
-                id = 0L,
-                title = "Событие 1",
-                details = "Описание 1",
-                timestamp = System.currentTimeMillis(),
-                colorTag = null,
-                displayOption = DisplayOption.DAY,
-            )
-            val item2 = Item(
-                id = 0L,
-                title = "Событие 2",
-                details = "Описание 2",
-                timestamp = System.currentTimeMillis() - 86400000L,
-                colorTag = 0xFFFF0000.toInt(),
-                displayOption = DisplayOption.MONTH_DAY,
-            )
+            val item1 =
+                Item(
+                    id = 0L,
+                    title = "Событие 1",
+                    details = "Описание 1",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = null,
+                    displayOption = DisplayOption.DAY,
+                )
+            val item2 =
+                Item(
+                    id = 0L,
+                    title = "Событие 2",
+                    details = "Описание 2",
+                    timestamp = System.currentTimeMillis() - 86400000L,
+                    colorTag = 0xFFFF0000.toInt(),
+                    displayOption = DisplayOption.MONTH_DAY,
+                )
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -334,12 +348,13 @@ class CreateEditScreenViewModelIntegrationTest {
             viewModel.createItem(item1)
 
             val savedStateHandle2 = SavedStateHandle()
-            val viewModel2 = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle2,
-            )
+            val viewModel2 =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle2,
+                )
 
             backgroundScope.launch {
                 viewModel2.uiState.collect {}
@@ -351,11 +366,11 @@ class CreateEditScreenViewModelIntegrationTest {
             assertEquals(2, allItems.size)
             assertTrue(
                 "Первый элемент должен существовать",
-                allItems.any { it.title == "Событие 1" }
+                allItems.any { it.title == "Событие 1" },
             )
             assertTrue(
                 "Второй элемент должен существовать",
-                allItems.any { it.title == "Событие 2" }
+                allItems.any { it.title == "Событие 2" },
             )
         }
     }
@@ -369,12 +384,13 @@ class CreateEditScreenViewModelIntegrationTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
             val updatedItem = uniqueTestItem.copy(id = insertedId, title = "Обновленное название")
 
-            val viewModel1 = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            val viewModel1 =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel1.uiState.collect {}
@@ -382,12 +398,13 @@ class CreateEditScreenViewModelIntegrationTest {
 
             viewModel1.updateItem(updatedItem)
 
-            val viewModel2 = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            val viewModel2 =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel2.uiState.collect {}
@@ -398,11 +415,11 @@ class CreateEditScreenViewModelIntegrationTest {
             val successState = uiState as CreateEditScreenState.Success
             assertEquals(
                 "Обновленное название",
-                successState.item.title
+                successState.item.title,
             )
             assertEquals(
                 updatedItem,
-                viewModel2.originalItem.value
+                viewModel2.originalItem.value,
             )
             assertFalse("Изменений не должно быть", viewModel2.hasChanges.value)
         }
@@ -412,18 +429,20 @@ class CreateEditScreenViewModelIntegrationTest {
     @Test
     fun whenCheckHasChangesWithColorTagFromValueToNull_thenDetectsChanges() {
         runTest {
-            val itemWithoutColor = testItem.copy(
-                colorTag = null,
-            )
+            val itemWithoutColor =
+                testItem.copy(
+                    colorTag = null,
+                )
             val insertedId = repository.insertItem(itemWithoutColor)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -445,18 +464,20 @@ class CreateEditScreenViewModelIntegrationTest {
     @Test
     fun whenCheckHasChangesWithColorTagFromValueToNull_thenDetectsChanges2() {
         runTest {
-            val itemWithColor = testItem.copy(
-                colorTag = 0xFFFF0000.toInt(),
-            )
+            val itemWithColor =
+                testItem.copy(
+                    colorTag = 0xFFFF0000.toInt(),
+                )
             val insertedId = repository.insertItem(itemWithColor)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -481,12 +502,13 @@ class CreateEditScreenViewModelIntegrationTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
-            viewModel = CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
-                savedStateHandle,
-            )
+            viewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
 
             backgroundScope.launch {
                 viewModel.uiState.collect {}
@@ -508,7 +530,10 @@ class CreateEditScreenViewModelIntegrationTest {
     }
 
     private class FakeResourceProvider : ResourceProvider {
-        override fun getString(resId: Int, vararg formatArgs: Any): String =
+        override fun getString(
+            resId: Int,
+            vararg formatArgs: Any,
+        ): String =
             when (resId) {
                 ResourceIds.EVENT_NOT_FOUND -> "Событие не найдено"
                 ResourceIds.ERROR_CREATING_EVENT -> "Ошибка создания события: ${formatArgs.joinToString()}"
@@ -517,7 +542,10 @@ class CreateEditScreenViewModelIntegrationTest {
                 else -> "Строка по умолчанию"
             }
 
-        override fun getQuantityString(resId: Int, quantity: Int, vararg formatArgs: Any): String =
-            "$quantity"
+        override fun getQuantityString(
+            resId: Int,
+            quantity: Int,
+            vararg formatArgs: Any,
+        ): String = "$quantity"
     }
 }

@@ -117,7 +117,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 "День рождения",
                 successState.items[0].title,
-                "Должен быть правильный элемент"
+                "Должен быть правильный элемент",
             )
         }
     }
@@ -199,7 +199,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 SortOrder.ASCENDING,
                 viewModel.sortOrder.value,
-                "Порядок сортировки должен обновиться"
+                "Порядок сортировки должен обновиться",
             )
         }
     }
@@ -268,7 +268,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 0,
                 viewModel.itemsCount.value,
-                "Количество элементов в ViewModel должно быть 0"
+                "Количество элементов в ViewModel должно быть 0",
             )
         }
     }

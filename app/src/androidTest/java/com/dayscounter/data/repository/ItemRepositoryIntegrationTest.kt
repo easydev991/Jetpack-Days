@@ -42,7 +42,7 @@ class ItemRepositoryIntegrationTest {
     }
 
     @Test
-    fun `fullCycle_createReadUpdateDelete_thenWorksCorrectly`() =
+    fun fullCycle_createReadUpdateDelete_thenWorksCorrectly() =
         runBlocking {
             // Given - Create
             val item =
@@ -88,7 +88,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `searchItems_whenMultipleItems_thenReturnsMatchingItems`() =
+    fun searchItems_whenMultipleItems_thenReturnsMatchingItems() =
         runBlocking {
             // Given
             repository.insertItem(Item(title = "День рождения", timestamp = 1000000000000L))
@@ -105,7 +105,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `getAllItems_thenReturnsAllItemsSorted`() =
+    fun getAllItems_thenReturnsAllItemsSorted() =
         runBlocking {
             // Given
             repository.insertItem(Item(title = "Событие 1", timestamp = 1000000000000L))
@@ -124,7 +124,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `deleteAllItems_thenAllItemsAreRemoved`() =
+    fun deleteAllItems_thenAllItemsAreRemoved() =
         runBlocking {
             // Given
             repository.insertItem(Item(title = "Событие 1", timestamp = 1000000000000L))
@@ -141,7 +141,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `getItemsCount_whenEmpty_thenReturnsZero`() =
+    fun getItemsCount_whenEmpty_thenReturnsZero() =
         runBlocking {
             // When
             val count = repository.getItemsCount()
@@ -151,7 +151,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `getItemsCount_whenItemsExist_thenReturnsCorrectCount`() =
+    fun getItemsCount_whenItemsExist_thenReturnsCorrectCount() =
         runBlocking {
             // Given
             repository.insertItem(Item(title = "Событие 1", timestamp = 1000000000000L))
@@ -165,7 +165,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `conversionBetweenEntityAndDomain_preservesAllFields`() =
+    fun conversionBetweenEntityAndDomain_preservesAllFields() =
         runBlocking {
             // Given
             // Будет автогенерирован
@@ -194,7 +194,7 @@ class ItemRepositoryIntegrationTest {
         }
 
     @Test
-    fun `conversionWithNullColorTag_preservesNull`() =
+    fun conversionWithNullColorTag_preservesNull() =
         runBlocking {
             // Given
             val item =

@@ -93,7 +93,7 @@ class CreateEditScreenViewModelTest {
             assertEquals("", successState.item.details, "Описание должно быть пустым")
             assertEquals(
                 DisplayOption.DAY,
-                successState.item.displayOption
+                successState.item.displayOption,
             )
             assertNull(newViewModel.originalItem.value, "Оригинальный элемент должен быть null")
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
@@ -126,7 +126,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 testItem,
                 newViewModel.originalItem.value,
-                "Оригинальный элемент должен быть сохранен"
+                "Оригинальный элемент должен быть сохранен",
             )
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
         }
@@ -155,7 +155,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 "Событие не найдено",
                 errorState.message,
-                "Сообщение об ошибке должно быть корректным"
+                "Сообщение об ошибке должно быть корректным",
             )
         }
     }
@@ -197,7 +197,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 DisplayOption.MONTH_DAY,
                 successState.item.displayOption,
-                "Опция отображения должна совпадать"
+                "Опция отображения должна совпадать",
             )
             assertTrue(repository.insertItemCalled, "Метод insertItem должен быть вызван")
         }
@@ -277,12 +277,12 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 "Обновленное название",
                 successState.item.title,
-                "Название должно быть обновлено"
+                "Название должно быть обновлено",
             )
             assertEquals(
                 "Обновленное описание",
                 successState.item.details,
-                "Описание должно быть обновлено"
+                "Описание должно быть обновлено",
             )
             assertEquals(
                 DisplayOption.YEAR_MONTH_DAY,
@@ -589,7 +589,7 @@ class CreateEditScreenViewModelTest {
             var uiState = newViewModel.uiState.value
             assertTrue(
                 uiState is CreateEditScreenState.Loading,
-                "Сначала должно быть состояние Loading"
+                "Сначала должно быть состояние Loading",
             )
 
             // After delay - должно стать Success
@@ -597,7 +597,7 @@ class CreateEditScreenViewModelTest {
             uiState = newViewModel.uiState.value
             assertTrue(
                 uiState is CreateEditScreenState.Success,
-                "После загрузки должно быть состояние Success"
+                "После загрузки должно быть состояние Success",
             )
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
@@ -625,8 +625,7 @@ class CreateEditScreenViewModelTest {
         override fun getAllItems(): Flow<List<Item>> = flowOf(emptyList())
 
         @Suppress("MaxLineLength")
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
-            flowOf(emptyList())
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = flowOf(emptyList())
 
         override suspend fun getItemById(id: Long): Item? {
             if (loadingDelayMs > 0) {
