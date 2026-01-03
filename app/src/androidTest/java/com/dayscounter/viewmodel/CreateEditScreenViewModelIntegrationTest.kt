@@ -11,21 +11,20 @@ import com.dayscounter.data.formatter.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.util.NoOpLogger
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 /**
  * Интеграционные тесты для CreateEditScreenViewModel.
@@ -40,9 +39,6 @@ class CreateEditScreenViewModelIntegrationTest {
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var context: Context
 
-    @TempDir
-    lateinit var tempDir: File
-
     private val testItem =
         Item(
             id = 1L,
@@ -53,7 +49,7 @@ class CreateEditScreenViewModelIntegrationTest {
             displayOption = DisplayOption.DAY,
         )
 
-    @BeforeEach
+    @Before
     fun setUp() {
         testDispatcher = StandardTestDispatcher()
         kotlinx.coroutines.Dispatchers.setMain(testDispatcher)
@@ -72,7 +68,7 @@ class CreateEditScreenViewModelIntegrationTest {
         resourceProvider = FakeResourceProvider()
     }
 
-    @AfterEach
+    @After
     fun tearDown() {
         database.close()
     }
@@ -95,6 +91,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
 
@@ -104,11 +101,11 @@ class CreateEditScreenViewModelIntegrationTest {
 
             // Then - Элемент должен быть в базе данных
             val allItems = repository.getAllItems().first()
-            assertEquals(1, allItems.size, "Должен быть один элемент в базе данных")
-            assertEquals("Новое событие", allItems[0].title, "Название должно совпадать")
-            assertEquals("Новое описание", allItems[0].details, "Описание должно совпадать")
-            assertEquals(DisplayOption.MONTH_DAY, allItems[0].displayOption, "Опция отображения должна совпадать")
-            assertNotNull(allItems[0].colorTag, "Цвет должен быть установлен")
+            assertEquals("Должен быть один элемент в базе данных", 1, allItems.size)
+            assertEquals("Название должно совпадать", "Новое событие", allItems[0].title)
+            assertEquals("Описание должно совпадать", "Новое описание", allItems[0].details)
+            assertEquals("Опция отображения должна совпадать", DisplayOption.MONTH_DAY, allItems[0].displayOption)
+            assertNotNull("Цвет должен быть установлен", allItems[0].colorTag)
         }
     }
 
@@ -133,6 +130,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -141,11 +139,11 @@ class CreateEditScreenViewModelIntegrationTest {
 
             // Then - Элемент должен быть обновлен в базе данных
             val itemFromDb = repository.getItemById(insertedId)
-            assertNotNull(itemFromDb, "Элемент должен существовать в базе данных")
-            assertEquals("Обновленное название", itemFromDb!!.title, "Название должно быть обновлено")
-            assertEquals("Обновленное описание", itemFromDb.details, "Описание должно быть обновлено")
-            assertEquals(DisplayOption.YEAR_MONTH_DAY, itemFromDb.displayOption, "Опция отображения должна быть обновлена")
-            assertEquals(0xFF00FF00.toInt(), itemFromDb.colorTag, "Цвет должен быть обновлен")
+            assertNotNull("Элемент должен существовать в базе данных", itemFromDb)
+            assertEquals("Название должно быть обновлено", "Обновленное название", itemFromDb!!.title)
+            assertEquals("Описание должно быть обновлено", "Обновленное описание", itemFromDb.details)
+            assertEquals("Опция отображения должна быть обновлена", DisplayOption.YEAR_MONTH_DAY, itemFromDb.displayOption)
+            assertEquals("Цвет должен быть обновлен", 0xFF00FF00.toInt(), itemFromDb.colorTag)
         }
     }
 
@@ -161,18 +159,19 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
 
             // Then - Элемент должен быть загружен
             testDispatcher.scheduler.advanceUntilIdle()
             val uiState = viewModel.uiState.value
-            assertTrue(uiState is CreateEditScreenState.Success, "Должно быть состояние Success")
+            assertTrue("Должно быть состояние Success", uiState is CreateEditScreenState.Success)
             val successState = uiState as CreateEditScreenState.Success
-            assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
-            assertEquals("Описание события", successState.item.details, "Описание должно совпадать")
-            assertEquals(testItem.timestamp, successState.item.timestamp, "Дата должна совпадать")
-            assertEquals(DisplayOption.DAY, successState.item.displayOption, "Опция отображения должна совпадать")
+            assertEquals("Название должно совпадать", "Тестовое событие", successState.item.title)
+            assertEquals("Описание должно совпадать", "Описание события", successState.item.details)
+            assertEquals("Дата должна совпадать", testItem.timestamp, successState.item.timestamp)
+            assertEquals("Опция отображения должна совпадать", DisplayOption.DAY, successState.item.displayOption)
         }
     }
 
@@ -187,15 +186,16 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
 
             // Then - Должно быть состояние Error
             testDispatcher.scheduler.advanceUntilIdle()
             val uiState = viewModel.uiState.value
-            assertTrue(uiState is CreateEditScreenState.Error, "Должно быть состояние Error")
+            assertTrue("Должно быть состояние Error", uiState is CreateEditScreenState.Error)
             val errorState = uiState as CreateEditScreenState.Error
-            assertEquals("Событие не найдено", errorState.message, "Сообщение об ошибке должно быть корректным")
+            assertEquals("Сообщение об ошибке должно быть корректным", "Событие не найдено", errorState.message)
         }
     }
 
@@ -209,6 +209,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -223,7 +224,7 @@ class CreateEditScreenViewModelIntegrationTest {
             )
 
             // Then - Изменения должны быть обнаружены
-            assertTrue(viewModel.hasChanges.value, "Изменения должны быть обнаружены")
+            assertTrue("Изменения должны быть обнаружены", viewModel.hasChanges.value)
         }
     }
 
@@ -249,6 +250,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -257,12 +259,12 @@ class CreateEditScreenViewModelIntegrationTest {
 
             // Then - Все изменения должны быть сохранены
             val itemFromDb = repository.getItemById(insertedId)
-            assertNotNull(itemFromDb, "Элемент должен существовать")
-            assertEquals("Полностью новое название", itemFromDb!!.title, "Название должно быть обновлено")
-            assertEquals("Полностью новое описание", itemFromDb.details, "Описание должно быть обновлено")
-            assertEquals(testItem.timestamp + 172800000L, itemFromDb.timestamp, "Дата должна быть обновлена")
-            assertEquals(0xFF0000FF.toInt(), itemFromDb.colorTag, "Цвет должен быть обновлен")
-            assertEquals(DisplayOption.YEAR_MONTH_DAY, itemFromDb.displayOption, "Опция отображения должна быть обновлена")
+            assertNotNull("Элемент должен существовать", itemFromDb)
+            assertEquals("Название должно быть обновлено", "Полностью новое название", itemFromDb!!.title)
+            assertEquals("Описание должно быть обновлено", "Полностью новое описание", itemFromDb.details)
+            assertEquals("Дата должна быть обновлена", testItem.timestamp + 172800000L, itemFromDb.timestamp)
+            assertEquals("Цвет должен быть обновлен", 0xFF0000FF.toInt(), itemFromDb.colorTag)
+            assertEquals("Опция отображения должна быть обновлена", DisplayOption.YEAR_MONTH_DAY, itemFromDb.displayOption)
         }
     }
 
@@ -275,6 +277,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
 
@@ -306,6 +309,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             viewModel2.createItem(item2)
@@ -313,9 +317,9 @@ class CreateEditScreenViewModelIntegrationTest {
 
             // Then - Все элементы должны быть в базе данных
             val allItems = repository.getAllItems().first()
-            assertEquals(2, allItems.size, "Должны быть два элемента в базе данных")
-            assertTrue(allItems.any { it.title == "Событие 1" }, "Первый элемент должен существовать")
-            assertTrue(allItems.any { it.title == "Событие 2" }, "Второй элемент должен существовать")
+            assertEquals("Должны быть два элемента в базе данных", 2, allItems.size)
+            assertTrue("Первый элемент должен существовать", allItems.any { it.title == "Событие 1" })
+            assertTrue("Второй элемент должен существовать", allItems.any { it.title == "Событие 2" })
         }
     }
 
@@ -335,6 +339,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -346,17 +351,18 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
 
             // Then - Изменения должны быть сохранены
             testDispatcher.scheduler.advanceUntilIdle()
             val uiState = viewModel2.uiState.value
-            assertTrue(uiState is CreateEditScreenState.Success, "Должно быть состояние Success")
+            assertTrue("Должно быть состояние Success", uiState is CreateEditScreenState.Success)
             val successState = uiState as CreateEditScreenState.Success
-            assertEquals("Обновленное название", successState.item.title, "Название должно быть обновленным")
-            assertEquals(updatedItem, viewModel2.originalItem.value, "Оригинальный элемент должен быть обновленным")
-            assertFalse(viewModel2.hasChanges.value, "Изменений не должно быть при загрузке обновленного элемента")
+            assertEquals("Название должно быть обновленным", "Обновленное название", successState.item.title)
+            assertEquals("Оригинальный элемент должен быть обновленным", updatedItem, viewModel2.originalItem.value)
+            assertFalse("Изменений не должно быть при загрузке обновленного элемента", viewModel2.hasChanges.value)
         }
     }
 
@@ -374,6 +380,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -388,7 +395,7 @@ class CreateEditScreenViewModelIntegrationTest {
             )
 
             // Then - Изменения должны быть обнаружены
-            assertTrue(viewModel.hasChanges.value, "Изменения должны быть обнаружены при установке цвета")
+            assertTrue("Изменения должны быть обнаружены при установке цвета", viewModel.hasChanges.value)
         }
     }
 
@@ -406,6 +413,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -420,7 +428,7 @@ class CreateEditScreenViewModelIntegrationTest {
             )
 
             // Then - Изменения должны быть обнаружены
-            assertTrue(viewModel.hasChanges.value, "Изменения должны быть обнаружены при удалении цвета")
+            assertTrue("Изменения должны быть обнаружены при удалении цвета", viewModel.hasChanges.value)
         }
     }
 
@@ -434,6 +442,7 @@ class CreateEditScreenViewModelIntegrationTest {
                 CreateEditScreenViewModel(
                     repository,
                     resourceProvider,
+                    NoOpLogger(),
                     savedStateHandle,
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -444,13 +453,13 @@ class CreateEditScreenViewModelIntegrationTest {
                 colorTag = testItem.colorTag,
                 displayOption = testItem.displayOption,
             )
-            assertTrue(viewModel.hasChanges.value, "Изменения должны быть обнаружены")
+            assertTrue("Изменения должны быть обнаружены", viewModel.hasChanges.value)
 
             // When - Сбрасываем изменения
             viewModel.resetHasChanges()
 
             // Then - Флаг изменений должен быть сброшен
-            assertFalse(viewModel.hasChanges.value, "Флаг изменений должен быть сброшен")
+            assertFalse("Флаг изменений должен быть сброшен", viewModel.hasChanges.value)
         }
     }
 
