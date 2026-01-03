@@ -77,6 +77,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.android)
+    androidTestImplementation(libs.kotlinx.coroutines.android)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
     // Testing
     testImplementation(libs.junit)
