@@ -43,10 +43,11 @@ Root Screen является основным экраном приложени�
 
 Все тесты реализованы и активны:
 
-- **`RootScreenViewModelTest.kt`** - тесты ViewModel (4 теста)
+- **`RootScreenViewModelTest.kt`** - unit-тесты ViewModel (4 теста) с MockK
 - **`RootScreenStateTest.kt`** - тесты UI State
 - **`ScreenTest.kt`** - тесты sealed class Screen (2 теста)
-- **`RootScreenViewModelIntegrationTest.kt`** - интеграционные тесты
+
+**Важно:** Подробные правила тестирования см. в `.cursor/rules/testing.mdc`
 
 ---
 

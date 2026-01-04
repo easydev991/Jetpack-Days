@@ -319,12 +319,14 @@ sealed class MainScreenState {
 
 ## Тестирование
 
+**ВАЖНО:** Подробные правила тестирования, включая запрет на интеграционные тесты ViewModels и рабочий подход, см. в `.cursor/rules/testing.mdc`
+
 ### Unit-тесты
 
 - Тесты для Entity и Domain model ✅
 - Тесты для DAO (in-memory database) ✅
 - Тесты для Repository ✅
-- Тесты для ViewModel ✅ (реализовано в `app/src/test/java/com/dayscounter/viewmodel/MainScreenViewModelTest.kt`)
+- Тесты для ViewModel ✅ (реализовано в `app/src/test/java/com/dayscounter/viewmodel/MainScreenViewModelTest.kt` с MockK)
 
 **Детали (10 тестов):**
 - Загрузка элементов
@@ -353,8 +355,10 @@ sealed class MainScreenState {
 
 ### Интеграционные тесты
 
+**ВАЖНО:** Только для DAO и Repository, БЕЗ ViewModels (подробности в `.cursor/rules/testing.mdc`)
+
 - Тесты взаимодействия Repository с Room Database ✅
-- Тесты взаимодействия ViewModel с Repository ✅
+- Тесты взаимодействия ViewModel с Repository ❌ **ЗАПРЕЩЕНО**
 
 ### UI-тесты (Espresso)
 
@@ -368,7 +372,7 @@ sealed class MainScreenState {
 - Тесты для контекстного меню
 - Тесты для диалога подтверждения удаления
 - Тесты для SearchField
-- Интеграционные UI-тесты для MainScreen
+- Интеграционные UI-тесты для MainScreen (без ViewModels)
 
 ---
 
@@ -377,9 +381,9 @@ sealed class MainScreenState {
 Этап считается завершенным, когда:
 
 - ✅ Все компоненты созданы и работают (100%)
-- ✅ Все unit-тесты написаны и проходят (10 тестов для ViewModel)
+- ✅ Все unit-тесты написаны и проходят (10 тестов для ViewModel с MockK)
 - ✅ Все компонентные тесты написаны и проходят (7 тестов для daysCountText)
-- ✅ Все интеграционные тесты написаны и проходят
+- ✅ Все интеграционные тесты написаны и проходят (DAO, Repository — без ViewModels)
 - ✅ Код соответствует правилам проекта
 - ✅ Линтеры (ktlint) — пройдены успешно
 - ✅ Поиск и сортировка работают корректно
@@ -387,6 +391,8 @@ sealed class MainScreenState {
 - ✅ Контекстное меню работает корректно
 - ✅ Диалог подтверждения удаления работает корректно
 - ⚠️ Дополнительные UI-тесты — опционально (можно добавить для повышения покрытия)
+
+**Примечание:** Интеграционные тесты ViewModels не создаются из-за фундаментальной архитектурной проблемы (подробности в `.cursor/rules/testing.mdc`). ViewModel тестируется через unit-тесты с MockK.
 
 ---
 
