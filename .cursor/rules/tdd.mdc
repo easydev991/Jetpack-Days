@@ -6,14 +6,14 @@ alwaysApply: true
 
 ## Порядок разработки
 
-**КРИТИЧЕСКИ ВАЖНО:** Строго соблюдать порядок:
+**Важно:** Строго соблюдать порядок:
 
-1. Тесты → 2. Логика → 3. UI
+**1.** Тесты → **2.** Логика → **3.** UI
 
-1. Писать модульные тесты для бизнес-логики перед реализацией
-2. Реализовывать функциональность слоя домена и данных перед UI
-3. Проверять бизнес-логику тестами перед разработкой UI
-4. Создавать Compose UI только после тестирования логики
+**1.** Писать модульные тесты для бизнес-логики перед реализацией
+**2.** Реализовывать функциональность слоя домена и данных перед UI
+**3.** Проверять бизнес-логику тестами перед разработкой UI
+**4.** Создавать Compose UI только после тестирования логики
 
 ## Пирамида тестирования
 
@@ -25,7 +25,7 @@ alwaysApply: true
 
 ```kotlin
 @Test
-fun `functionName_whenCondition_thenExpectedResult`() {
+fun functionName_whenCondition_thenExpectedResult() {
     // Given
     // When
     // Then
@@ -37,7 +37,7 @@ fun `functionName_whenCondition_thenExpectedResult`() {
 ```kotlin
 class DaysCalculatorTest {
     @Test
-    fun `calculateDaysDifference_whenSameDay_thenReturnsZero`() {
+    fun calculateDaysDifference_whenSameDay_thenReturnsZero() {
         // Given
         val date = LocalDate.now()
 
@@ -52,9 +52,9 @@ class DaysCalculatorTest {
 
 ## Цикл TDD
 
-1. **Red**: Написать падающий тест
-2. **Green**: Написать минимальный код для прохождения теста
-3. **Refactor**: Улучшить код, сохраняя тесты зелеными
+**1. Red**: Написать падающий тест
+**2. Green**: Написать минимальный код для прохождения теста
+**3. Refactor**: Улучшить код, сохраняя тесты зелеными
 
 ## Принципы
 
@@ -62,3 +62,5 @@ class DaysCalculatorTest {
 - Один тест - одна проверка
 - Тесты независимы друг от друга
 - Тесты быстрые и читаемые
+
+**Важно:** Подробные правила тестирования, включая запрет на интеграционные тесты ViewModels и рабочий подход, см. в `.cursor/rules/testing.mdc`
