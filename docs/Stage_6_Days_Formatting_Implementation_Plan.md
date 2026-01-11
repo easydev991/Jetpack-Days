@@ -47,21 +47,27 @@
 ## Реализованные компоненты ✅
 
 ### Domain Layer ✅
+
 Модели (`TimePeriod`, `DaysDifference`), Use Cases (вычисление разницы дат, форматирование текста), тесты.
 
 ### Data Layer ✅
+
 `DaysFormatter`, `ResourceProvider` с реализациями, тесты.
 
 ### Dependency Injection ✅
+
 `FormatterModule`, `AppModule` — ручной DI.
 
 ### Presentation Layer ✅
+
 ViewModels (`DaysCalculatorViewModel`), UI Components (`DaysCountText`, стили), все экраны (`RootScreen`, `MainScreen`, `DetailScreen`, `CreateEditScreen`), тесты.
 
 ### UI Ресурсы ✅
+
 `dimens.xml`, `colors.xml`, `NumberFormattingUtils.kt`, локализация (ru + en), все локальные константы удалены.
 
 ### Интеграция ✅
+
 `MainScreenViewModel` — использует `Item.makeDaysCount()`, интеграция выполнена во всех экранах.
 
 ---
@@ -110,6 +116,7 @@ ViewModels (`DaysCalculatorViewModel`), UI Components (`DaysCountText`, стил
 ### 10.2 Автоматизированное тестирование ❌ НЕ ВЫПОЛНЕНО
 
 **UI тесты (Espresso/Compose Testing):**
+
 - ❌ Тест на главном экране
 - ❌ Тест на экране деталей
 - ❌ Тест на экране настроек (изменение DisplayOption)
@@ -120,12 +127,15 @@ ViewModels (`DaysCalculatorViewModel`), UI Components (`DaysCountText`, стил
 ## Этап 11: Оптимизация и улучшения
 
 ### 11.1 Производительность ❌ НЕ НАЧАТО
+
 Кэширование, `remember` в Compose, оптимизация для больших списков.
 
 ### 11.2 Обработка ошибок ✅ ВЫПОЛНЕНО
+
 Валидация timestamp, обработка некорректных дат, fallback на "Today".
 
 ### 11.3 Логирование ✅ ВЫПОЛНЕНО ЧАСТИЧНО
+
 Логи в `CalculateDaysDifferenceUseCase` и `DaysCalculatorViewModel`.
 
 ---
@@ -133,9 +143,11 @@ ViewModels (`DaysCalculatorViewModel`), UI Components (`DaysCountText`, стил
 ## Порядок выполнения
 
 ### Выполнено (Фазы 1-4) ✅
+
 Domain + Data слои, DI + ViewModel, UI (компоненты, экраны, навигация, тесты), ресурсы, документация, рефакторинг UI ресурсов.
 
 ### Осталось (Фаза 5) ⚠️
+
 - Ручное тестирование на устройстве/симуляторе
 - Дополнительные UI тесты (при необходимости)
 - Профилирование и оптимизация производительности
@@ -147,6 +159,7 @@ Domain + Data слои, DI + ViewModel, UI (компоненты, экраны, 
 ## Критерии завершения
 
 **Выполнено:**
+
 - ✅ Unit-тесты (Domain + Data + ViewModel)
 - ✅ Compose тесты для DaysCountText
 - ✅ UI ресурсы и константы
@@ -154,6 +167,7 @@ Domain + Data слои, DI + ViewModel, UI (компоненты, экраны, 
 - ✅ Локализация (ru + en), три опции отображения, документация
 
 **Осталось:**
+
 - ⚠️ Ручное тестирование по сценариям (требует запуска приложения)
 - ⚠️ Совместимость с iOS (требует проверки)
 

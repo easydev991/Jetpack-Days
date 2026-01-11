@@ -8,6 +8,7 @@
 2. Ошибка `android.util.Log` not mocked
 
 Всего было **6 отключенных тестов**:
+
 - 5 тестов в `DaysCalculatorViewModelTest`
 - 1 тест в `DisplayOptionConverterTest`
 
@@ -35,6 +36,7 @@ interface Logger {
 ```
 
 **Реализации:**
+
 - `AndroidLogger` — для продакшена, использует `android.util.Log`
 - `NoOpLogger` — для тестов, не выполняет никаких действий
 

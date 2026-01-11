@@ -29,6 +29,7 @@ Presentation (UI, ViewModel)
 **Ручной DI через factory методы** - проект не использует Hilt или другие DI-фреймворки.
 
 **Почему ручной DI:**
+
 - Проект небольшой, простой граф зависимостей
 - Factory методы в `FormatterModule` решают все задачи
 - Быстрее компиляция (нет KSP обработки аннотаций)
@@ -40,6 +41,7 @@ Presentation (UI, ViewModel)
 **DI модуль:** `app/src/main/java/com/dayscounter/di/FormatterModule.kt`
 
 Содержит factory методы для создания зависимостей:
+
 - `createResourceProvider(context: Context)`
 - `createDaysFormatter()`
 - `createCalculateDaysDifferenceUseCase()`
@@ -49,6 +51,7 @@ Presentation (UI, ViewModel)
 ### Использование
 
 **В ViewModel:**
+
 ```kotlin
 class MyViewModel : ViewModel() {
     private val useCase = FormatterModule.createCalculateDaysDifferenceUseCase()
@@ -57,6 +60,7 @@ class MyViewModel : ViewModel() {
 ```
 
 **В тестах:**
+
 ```kotlin
 @Before
 fun setUp() {
@@ -77,13 +81,16 @@ fun setUp() {
 ## Слои
 
 ### Data
+
 - Room: сущности, DAO, миграции, индексы
 - Repository: абстракция источников, только локальные данные
 
 ### Domain
+
 - Use Cases: бизнес-логика, один use case - одна ответственность
 - Entities: data классы, неизменяемые
 
 ### Presentation
+
 - ViewModel: состояние UI, `viewModelScope` для корутин
 - UI State: data классы, sealed классы для состояний (Loading/Success/Error)

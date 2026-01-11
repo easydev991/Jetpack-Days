@@ -1,6 +1,7 @@
 # План настройки Hilt для Jetpack Days
 
 ## Статус
+
 **Текущее состояние:** Hilt временно отключен из-за проблем с версиями  
 **Дата создания плана:** 2025-01-XX  
 **Приоритет:** СРЕДНИЙ (ручной DI работает, но Hilt упростит управление зависимостями)
@@ -10,18 +11,21 @@
 ## Анализ необходимости Hilt
 
 ### Текущая ситуация
+
 - ✅ Ручной DI через `FormatterModule` работает
 - ✅ Все зависимости создаются через factory методы
 - ✅ Тесты работают без Hilt
 - ⚠️ Hilt упростит управление зависимостями при росте проекта
 
 ### Преимущества Hilt
+
 1. **Автоматическое управление зависимостями** - не нужно вручную создавать экземпляры
 2. **Интеграция с ViewModel** - `@HiltViewModel` упрощает создание ViewModel
 3. **Тестирование** - `@HiltAndroidTest` упрощает интеграционные тесты
 4. **Масштабируемость** - легче добавлять новые зависимости
 
 ### Недостатки Hilt
+
 1. **Дополнительная зависимость** - увеличивает размер APK
 2. **Сложность настройки** - требует настройки плагинов и аннотаций
 3. **Время компиляции** - KSP обработка аннотаций замедляет сборку
@@ -34,12 +38,14 @@
 **НЕ ОБЯЗАТЕЛЬНО** использовать Hilt на данном этапе проекта.
 
 **Причины:**
+
 1. Проект небольшой, ручной DI через `FormatterModule` работает хорошо
 2. Все зависимости простые, нет сложных графов зависимостей
 3. Тесты работают без Hilt
 4. Нет критической необходимости в автоматическом DI
 
 **Когда стоит рассмотреть Hilt:**
+
 - Когда проект вырастет до 10+ ViewModel
 - Когда появятся сложные графы зависимостей
 - Когда потребуется интеграционное тестирование с DI
@@ -67,6 +73,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
 **Проверка совместимости:**
+
 - Hilt 2.52 совместим с Kotlin 2.0.21 ✅
 - Hilt 2.52 совместим с KSP 2.0.21-1.0.25 ✅
 - Hilt 2.52 совместим с AGP 8.13.2 ✅
@@ -274,22 +281,28 @@ class DaysCalculatorViewModelIntegrationTest {
 ## Проблемы и решения
 
 ### Проблема 1: Конфликты версий
+
 **Симптомы:** Ошибки компиляции, конфликты зависимостей  
-**Решение:** 
+**Решение:**
+
 - Проверить совместимость версий Hilt с Kotlin, KSP, AGP
 - Обновить все зависимости до совместимых версий
 - Использовать `./gradlew :app:dependencies` для проверки
 
 ### Проблема 2: KSP не генерирует код
+
 **Симптомы:** Ошибки "Cannot find symbol" для сгенерированных классов  
 **Решение:**
+
 - Очистить проект: `./gradlew clean`
 - Пересобрать: `./gradlew build`
 - Проверить настройки KSP в `build.gradle.kts`
 
 ### Проблема 3: Циклические зависимости
+
 **Симптомы:** Ошибки компиляции о циклических зависимостях  
 **Решение:**
+
 - Проверить граф зависимостей
 - Использовать `@Singleton` для общих зависимостей
 - Разделить модули на более мелкие
@@ -315,18 +328,21 @@ class DaysCalculatorViewModelIntegrationTest {
 ## Альтернативы Hilt
 
 ### 1. Ручной DI (текущий подход)
+
 - ✅ Простота
 - ✅ Нет дополнительных зависимостей
 - ✅ Быстрая компиляция
 - ❌ Ручное управление зависимостями
 
 ### 2. Koin
+
 - ✅ Проще, чем Hilt
 - ✅ Легче настраивается
 - ✅ Меньше зависимостей
 - ❌ Медленнее Hilt в runtime
 
 ### 3. Kodein
+
 - ✅ Легковесный
 - ✅ Простой синтаксис
 - ❌ Менее популярный
@@ -338,6 +354,7 @@ class DaysCalculatorViewModelIntegrationTest {
 **Рекомендация:** Продолжить использовать ручной DI через `FormatterModule` до тех пор, пока проект не вырастет или не появятся сложные графы зависимостей.
 
 **Если все же решим использовать Hilt:**
+
 1. Следовать плану выше
 2. Тестировать на отдельной ветке
 3. Убедиться, что все тесты проходят
@@ -348,6 +365,7 @@ class DaysCalculatorViewModelIntegrationTest {
 ## План полного отказа от Hilt
 
 ### Статус
+
 **Решение:** Hilt не используется в проекте и будет удален из зависимостей  
 **Дата принятия решения:** 2024-12-30  
 **Причина:** Ручной DI через `FormatterModule` полностью удовлетворяет потребности проекта
@@ -372,6 +390,7 @@ class DaysCalculatorViewModelIntegrationTest {
 **Файл:** `gradle/libs.versions.toml`
 
 **Удалить:**
+
 ```toml
 hilt = "2.52"  # Удалить из секции [versions]
 
@@ -391,6 +410,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 **Файл:** `app/build.gradle.kts`
 
 **Удалить:**
+
 ```kotlin
 // Удалить из секции plugins
 // ВРЕМЕННО ОТКЛЮЧЕН Hilt из-за проблем с версиями
@@ -410,6 +430,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 **Файл:** `app/src/main/java/com/dayscounter/di/FormatterModule.kt`
 
 **Заменить:**
+
 ```kotlin
 /**
  * DI модуль для форматирования количества дней.
@@ -422,6 +443,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
 **На:**
+
 ```kotlin
 /**
  * DI модуль для форматирования количества дней.
@@ -440,6 +462,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 **Файл:** `app/src/main/java/com/dayscounter/DaysCounterApplication.kt`
 
 **Заменить:**
+
 ```kotlin
 /**
  * Класс Application для приложения Days Counter.
@@ -450,6 +473,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
 **На:**
+
 ```kotlin
 /**
  * Класс Application для приложения Days Counter.
@@ -466,6 +490,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 **Файл:** `app/src/main/java/com/dayscounter/MainActivity.kt`
 
 **Заменить:**
+
 ```kotlin
 /**
  * Главная Activity приложения.
@@ -476,6 +501,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
 **На:**
+
 ```kotlin
 /**
  * Главная Activity приложения.
@@ -492,6 +518,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 **Файл:** `app/src/test/java/com/dayscounter/viewmodel/DaysCalculatorViewModelTest.kt`
 
 **Заменить:**
+
 ```kotlin
 /**
  * Unit-тесты для [DaysCalculatorViewModel].
@@ -504,6 +531,7 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
 **На:**
+
 ```kotlin
 /**
  * Unit-тесты для [DaysCalculatorViewModel].
@@ -532,25 +560,31 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 После выполнения всех шагов необходимо проверить:
 
 1. **Сборка проекта:**
+
    ```bash
    ./gradlew clean build
    ```
 
 2. **Запуск тестов:**
+
    ```bash
    ./gradlew test
    ```
 
 3. **Проверка отсутствия Hilt в зависимостях:**
+
    ```bash
    ./gradlew :app:dependencies | grep -i hilt
    ```
+
    *Должен вернуть пустой результат*
 
 4. **Поиск остатков Hilt в коде:**
+
    ```bash
    grep -r "hilt\|Hilt\|@Hilt\|@Inject\|@AndroidEntryPoint\|@HiltAndroidApp" app/src/
    ```
+
    *Должен вернуть только комментарии или этот документ*
 
 ---
@@ -583,4 +617,3 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 - [Hilt Documentation](https://developer.android.com/training/dependency-injection/hilt-android)
 - [Hilt Migration Guide](https://developer.android.com/training/dependency-injection/hilt-migration)
 - [Hilt Version Compatibility](https://github.com/google/dagger/releases)
-

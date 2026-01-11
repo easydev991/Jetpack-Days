@@ -15,11 +15,13 @@
 ## 2. Технологический стек
 
 ### Язык и среда выполнения
+
 - **Kotlin** 2.3.0
 - **Android Gradle Plugin** 9.0.0
 - **KSP** 2.3.2 (Kotlin Symbol Processing)
 
 ### Основные библиотеки
+
 | Категория | Библиотека | Версия |
 |-----------|------------|--------|
 | UI | Jetpack Compose BOM | 2026.01.00 |
@@ -38,7 +40,9 @@
 | Автоматизация | Screengrab (fastlane) | 2.1.1 |
 
 ### Управление зависимостями
+
 Версии библиотек централизованно определены в файле:
+
 ```
 gradle/libs.versions.toml
 ```
@@ -76,11 +80,13 @@ app/src/main/java/com/dayscounter/
 ```
 
 ### Принципы архитектуры
+
 - **Однонаправленный поток данных:** UI → ViewModel → Use Case → Repository → Data Source
 - **Разделение ответственности:** каждый слой отвечает за свой уровень абстракции
 - **Отсутствие сетевого слоя:** все данные хранятся локально (Room, DataStore)
 
 ### Экраны приложения
+
 | Экран | Маршрут | Назначение |
 |-------|---------|------------|
 | RootScreen | — | Контейнер с навигацией (Events, More) |
@@ -138,6 +144,7 @@ app/src/main/java/com/dayscounter/
 ```
 
 ### Сборка APK
+
 - **Debug:** `app/build/outputs/apk/debug/app-debug.apk`
 - **Release:** Требует настройки signing config в `app/build.gradle.kts`
 
@@ -156,18 +163,22 @@ app/src/main/java/com/dayscounter/
 | Тесты | `FunctionName_whenCondition_thenExpectedResult` |
 
 ### Комментирование
+
 - **KDoc** для публичных API и Use Cases
 - **Объяснять «почему»**, не «что»
 - **Логи на русском языке** по умолчанию
 - Избегать избыточных комментариев для очевидного кода
 
 ### Безопасность кода
+
 - **НЕ использовать оператор `!!`** — безопасно разворачивать опционалы
 - Всегда обрабатывать `null` явным образом
 - Валидировать пользовательский ввод
 
 ### Структура тестов
+
 Тесты располагаются зеркально структуре кода:
+
 ```
 app/src/test/java/com/dayscounter/     # Unit-тесты
 app/src/androidTest/java/com/dayscounter/  # Integration/UI-тесты
@@ -176,13 +187,15 @@ app/src/androidTest/java/com/dayscounter/  # Integration/UI-тесты
 ### Подход к разработке (TDD)
 
 **Критически важный порядок:**
+
 1. **Тесты** → 2. **Логика** → 3. **UI**
 
 1. Писать модульные тесты для бизнес-логики перед реализацией
-2. Реализовывать функциональность слоя домена и данных перед UI
-3. Создавать Compose UI только после тестирования логики
+1. Реализовывать функциональность слоя домена и данных перед UI
+1. Создавать Compose UI только после тестирования логики
 
 **Пирамида тестирования:**
+
 - **Unit-тесты (70%)** — изолированное тестирование функций и классов
 - **Интеграционные тесты (20%)** — взаимодействие между компонентами
 - **UI-тесты (10%)** — критические пользовательские сценарии
@@ -217,13 +230,16 @@ fun calculateDaysDifference_whenSameDay_thenReturnsZero() {
 | **detekt** | С автоисправлением | `./gradlew detekt -Pdetekt.autoCorrect=true` |
 
 ### Конфигурация detekt
+
 Файл конфигурации: `config/detekt/detekt.yml`
 
 **Специфические настройки проекта:**
+
 - `maxIssues: 10` — допускается до 10 ошибок перед падением сборки
 - Для Composable функций разрешён `camelCase` (`functionPattern: '[a-z][a-zA-Z0-9]*'`)
 
 ### Требования к качеству
+
 - Все замечания устраняются перед коммитом
 - Автоисправления применяются регулярно
 - Новый код не должен добавлять новых проблем
@@ -233,10 +249,12 @@ fun calculateDaysDifference_whenSameDay_thenReturnsZero() {
 ## 7. Локализация
 
 ### Поддерживаемые языки
+
 - **Русский (ru)** — `res/values-ru/strings.xml`
 - **Английский (en)** — `res/values-en/strings.xml`
 
 ### Правила локализации
+
 - Использовать описательные ключи для строк
 - Поддерживать множественное число (plural resources)
 - Строки форматирования — через ресурсы, не хардкод
@@ -305,6 +323,7 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 ## 9. Резервное копирование и синхронизация
 
 ### Формат JSON (совместим с iOS)
+
 ```json
 [
   {
@@ -318,6 +337,7 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 ```
 
 ### Правила импорта/экспорта
+
 - **Экспорт:** JSON, метаданные версии, обработка ошибок
 - **Импорт:** валидация JSON, проверка версии, предотвращение дубликатов
 - **Совместимость:** формат идентичен iOS-приложению
@@ -327,6 +347,7 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 ## 10. Производительность
 
 ### Рекомендации
+
 - **Compose:** использовать `remember`/`rememberSaveable` для состояния
 - **Списки:** применять `key()` для стабильной идентификации, Lazy loading
 - **База данных:** создавать индексы для часто запрашиваемых полей
@@ -354,12 +375,14 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 ## 12. Работа с проектом
 
 ### Начало работы
+
 1. Клонировать репозиторий
 2. Открыть в Android Studio
 3. Дождаться синхронизации Gradle
 4. Запустить `./gradlew build` для проверки
 
 ### Добавление новой функциональности
+
 1. Создать/обновить тесты (unit → integration)
 2. Реализовать доменную логику (Use Cases, Entities)
 3. Реализовать слой данных (Repository, Data Source)
@@ -371,6 +394,7 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 9. Собрать проект: `make build`
 
 ### Типичные сценарии
+
 | Задача | Действие |
 |--------|----------|
 | Добавить новый экран | Создать папку в `ui/screen/`, добавить маршрут в `navigation/Screen.kt` |
@@ -412,6 +436,7 @@ FirebaseAnalyticsHelper.logEvent(context, "item_created", Bundle().apply {
 | UI | `app/src/androidTest/` | Compose Testing | 10% |
 
 ### Запуск тестов
+
 ```bash
 make test              # Только unit-тесты
 make android-test      # Только интеграционные

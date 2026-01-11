@@ -16,6 +16,7 @@
 ## Структура локализации в Android
 
 ### Файлы ресурсов
+
 - `app/src/main/res/values/strings.xml` — строки по умолчанию (английский)
 - `app/src/main/res/values-ru/strings.xml` — русские переводы
 
@@ -36,10 +37,12 @@
 ### Общие строки
 
 #### Навигация и вкладки
+
 - `events` — "Events" / "События"
 - `more` — "More" / "Ещё"
 
 #### Кнопки действий
+
 - `add_item` — "Add Item" / "Добавить запись"
 - `save` — "Save" / "Сохранить"
 - `cancel` — "Cancel" / "Отмена"
@@ -50,6 +53,7 @@
 - `done` — "Done" / "Готово"
 
 #### Заголовки экранов
+
 - `events` — "Events" / "События"
 - `more` — "More" / "Ещё"
 - `new_item` — "New Item" / "Новая запись"
@@ -62,10 +66,12 @@
 ### Экран Main Screen
 
 #### Заголовки и описания
+
 - `what_should_we_remember` — "What should we remember?" / "Что нужно запомнить?"
 - `create_your_first_item` — "Create your first item" / "Сделайте вашу первую запись"
 
 #### Сортировка
+
 - `sort` — "Sort" / "Сортировка"
 - `sort_order` — "Sort Order" / "Порядок сортировки"
 - `old_first` — "Old first" / "Сначала старые"
@@ -76,6 +82,7 @@
 ### Экран Item Screen (Просмотр записи)
 
 #### Заголовки секций
+
 - `title` — "Title" / "Название"
 - `details` — "Details" / "Детали"
 - `date` — "Date" / "Дата"
@@ -83,6 +90,7 @@
 - `display_format` — "Display format" / "Формат отображения"
 
 #### Специальные значения
+
 - `today` — "Today" / "Сегодня"
 
 ---
@@ -90,16 +98,19 @@
 ### Экран Create/Edit Item Screen
 
 #### Заголовки полей
+
 - `title` — "Title" / "Название"
 - `details` — "Details" / "Детали"
 - `title_for_the_item` — "Title for the Item" / "Название для записи"
 - `details_for_the_item` — "Details for the Item" / "Подробное описание"
 
 #### Цветовая метка
+
 - `add_color_tag` — "Add color tag" / "Добавить цветовой тег"
 - `color_tag` — "Color tag" / "Цветовой тег"
 
 #### Опции отображения дней
+
 - `display_format` — "Display format" / "Формат отображения"
 - `days_only` — "Days only" / "Только дни"
 - `months_and_days` — "Months and days" / "Месяцы и дни"
@@ -110,12 +121,14 @@
 ### Экран More Screen
 
 #### Кнопки
+
 - `send_feedback` — "Send feedback" / "Отправить обратную связь"
 - `rate_the_app` — "Rate app" / "Оценить приложение"
 - `share_the_app` — "Share the app" / "Поделиться приложением"
 - `github_page` — "GitHub page" / "Ссылка на GitHub"
 
 #### Версия приложения
+
 - `app_version` — "App version: %1$s" / "Версия приложения: %1$s"
   - Формат: строка с параметром для подстановки версии
 
@@ -124,15 +137,18 @@
 ### Экран Theme and Icon Screen
 
 #### Заголовки секций
+
 - `app_theme` — "App theme" / "Тема приложения"
 - `app_icon` — "App Icon" / "Иконка приложения"
 
 #### Опции темы
+
 - `light` — "Light" / "Светлая"
 - `dark` — "Dark" / "Тёмная"
 - `system` — "System" / "Системная"
 
 #### Иконки
+
 - `primary_icon` — "Primary icon" / "Основная иконка"
 - `variant` — "Variant %1$d" / "Вариант %1$d"
   - Формат: строка с параметром для номера варианта
@@ -144,14 +160,17 @@
 ### Экран App Data Screen
 
 #### Кнопки действий
+
 - `create_a_backup` — "Create a backup" / "Создать резервную копию"
 - `restore_from_backup` — "Restore from backup" / "Восстановить из резервной копии"
 - `delete_all_data` — "Delete all data" / "Удалить все данные"
 
 #### Диалоги подтверждения
+
 - `do_you_want_to_delete_all_data_permanently` — "Do you want to delete all data permanently?" / "Вы хотите навсегда удалить все данные?"
 
 #### Сообщения результатов операций
+
 - `backup_data_saved` — "Backup data saved" / "Резервная копия данных сохранена"
 - `data_restored_from_backup` — "Data restored from backup" / "Данные восстановлены из резервной копии"
 - `all_data_deleted` — "All data deleted" / "Все данные удалены"
@@ -164,18 +183,22 @@
 ### UI состояния и сообщения
 
 ##### Загрузка и навигация
+
 - `loading` — "Loading" / "Загрузка..."
 - `back` — "Back" / "Назад"
 
 ##### Поля формы
+
 - `select_date` — "Select date" / "Выбрать дату"
 
 ##### Предпросмотр
+
 - `preview` — "Preview" / "Предпросмотр"
 - `elapsed` — "elapsed" / "прошло"
 - `remaining` — "remaining" / "осталось"
 
 ##### Сообщения об ошибках
+
 - `event_not_found` — "Event not found" / "Событие не найдено"
 - `error_loading_event` — "Error loading event: %1$s" / "Ошибка загрузки события: %1$s"
 - `error_creating_event` — "Error creating event: %1$s" / "Ошибка создания события: %1$s"
@@ -229,6 +252,7 @@
 **Статус:** ✅ Выполнен
 
 **Выполнено:**
+
 - ✅ Удалена неиспользуемая функция `applyAbbreviation()`
 - ✅ Удалён неиспользуемый параметр `resourceProvider` из `formatComponents()`
 - ✅ Удалён неиспользуемый тест с противоречащей логикой
@@ -245,11 +269,13 @@
 ##### 8.1 Установка симулятора с разными локалями
 
 Для тестирования локализации необходимо:
+
 1. Создать два AVD (Android Virtual Device) с разными языками:
    - AVD #1: English (United States) - locale=en_US
    - AVD #2: Russian (Russia) - locale=ru_RU
 
 2. Или использовать один AVD и менять локаль:
+
    ```bash
    # Настройка локали через adb
    adb shell "setprop persist.sys.locale en-US"
@@ -259,6 +285,7 @@
 ##### 8.2 Инструменты для проверки
 
 Для автоматизированной проверки локализации можно использовать:
+
 - **Android Lint** - проверка отсутствующих переводов
 - **MissingTranslation** - lint-правило для обнаружения отсутствующих переводов
 - **PluralsCandidate** - lint-правило для проверки plurals
@@ -270,12 +297,14 @@
 Этап локализации считается завершенным, когда:
 
 ### Базовая локализация (шаги 1-6)
+
 - ✅ Файлы ресурсов созданы, все строки из iOS перенесены
 - ✅ Хардкод-строки заменены на ресурсы
 - ✅ Локализация в ViewModel'ах реализована через DI с `ResourceProvider`
 - ✅ `StubResourceProvider` используется только в тестах
 
 ### Локализация форматирования (шаг 7)
+
 - ✅ Plurals и сокращения определены корректно для обоих языков
 - ✅ Форматирование дат использует локаль устройства
 - ✅ Тексты статусов локализованы через stringResource
@@ -283,6 +312,7 @@
 - ✅ `NumberFormattingUtils` удалён
 
 ### Тестирование (шаг 8)
+
 - ✅ Локализация протестирована на английском языке (en-US)
 - ✅ Локализация протестирована на русском языке (ru-RU)
 - ✅ Все экраны протестированы на обоих языках
