@@ -46,15 +46,25 @@ test-all:
 	@echo "Интеграционные: app/build/reports/androidTests/connected/debug/index.html"
 
 # Анализ кода
-## lint: Запуск ktlint и detekt (проверка)
+## lint: Запуск ktlint, detekt и markdownlint (проверка)
 lint:
 	./gradlew ktlintCheck
 	./gradlew app:detekt
+	@if command -v markdownlint >/dev/null 2>&1; then \
+		markdownlint "**/*.md" ".cursor/rules/*.mdc"; \
+	else \
+		echo "$(YELLOW)markdownlint-cli не установлен. Для установки: npm install -g markdownlint-cli$(RESET)"; \
+	fi
 
-## format: Форматирование кода (ktlint + detekt с исправлениями)
+## format: Форматирование кода (ktlint + detekt с исправлениями) и Markdown-файлов
 format:
 	./gradlew ktlintFormat
 	./gradlew app:detekt -Pdetekt.autoCorrect=true
+	@if command -v markdownlint >/dev/null 2>&1; then \
+		markdownlint --fix "**/*.md" ".cursor/rules/*.mdc"; \
+	else \
+		echo "$(YELLOW)markdownlint-cli не установлен. Для установки: npm install -g markdownlint-cli$(RESET)"; \
+	fi
 
 # Сборка и запуск всех проверок
 ## check: Полная проверка (сборка + тесты + линтер)
@@ -67,6 +77,28 @@ check: build
 install:
 	./gradlew installDebug
 
+# Настройка окружения
+## setup: Установка и настройка инструментов для локальной разработки (markdownlint-cli)
+setup:
+	@echo "$(YELLOW)Установка инструментов для локальной разработки...$(RESET)"
+	@if ! command -v npm >/dev/null 2>&1; then \
+		echo "$(RED)Ошибка: Node.js/npm не установлен. Установите Node.js с https://nodejs.org/$(RESET)"; \
+		exit 1; \
+	fi
+	@if ! command -v markdownlint >/dev/null 2>&1; then \
+		echo "Установка markdownlint-cli..."; \
+		npm install -g markdownlint-cli; \
+	fi
+	@echo "$(GREEN)Установка завершена!$(RESET)"
+	@echo ""
+	@echo "$(BOLD)Установленные инструменты:$(RESET)"
+	@echo "  - Gradle: $(shell ./gradlew --version 2>/dev/null | head -1 || echo 'не определен')"
+	@echo "  - npm: $(shell npm --version 2>/dev/null || echo 'не определен')"
+	@echo "  - markdownlint: $(shell markdownlint --version 2>/dev/null | head -1 || echo 'не установлен')"
+	@echo ""
+	@echo "$(YELLOW)Далее выполните для первой сборки:$(RESET)"
+	@echo "  make build"
+
 # Дополнительно
 ## android-test-report: Открыть HTML отчет интеграционных тестов в браузере
 android-test-report:
@@ -77,7 +109,7 @@ android-test-report:
 	fi
 
 # Запуск всех задач
-## all: Полный цикл: проверка + установка
+## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report help
+.PHONY: build clean test lint format check install all android-test test-all android-test-report setup help
