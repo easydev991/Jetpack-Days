@@ -26,6 +26,11 @@ sealed class Screen(
         titleResId = R.string.more,
     )
 
+    object ThemeIcon : Screen(
+        route = "theme_icon",
+        titleResId = R.string.app_theme_and_icon,
+    )
+
     object ItemDetail : Screen(
         route = "item_detail/{itemId}",
     ) {

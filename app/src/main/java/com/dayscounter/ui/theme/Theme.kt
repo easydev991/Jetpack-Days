@@ -10,6 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.dayscounter.domain.model.AppTheme
 
 private val DarkColorScheme =
     darkColorScheme(
@@ -37,22 +38,30 @@ private val LightColorScheme =
 @Composable
 fun jetpackDaysTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    appTheme: AppTheme? = null,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val useDarkTheme =
+        when (appTheme) {
+            AppTheme.LIGHT -> false
+            AppTheme.DARK -> true
+            AppTheme.SYSTEM, null -> darkTheme
+        }
+
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 // Использование динамических цветов Material 3 с учетом темы
-                if (darkTheme) {
+                if (useDarkTheme) {
                     dynamicDarkColorScheme(LocalContext.current)
                 } else {
                     dynamicLightColorScheme(LocalContext.current)
                 }
             }
 
-            darkTheme -> DarkColorScheme
+            useDarkTheme -> DarkColorScheme
             else -> LightColorScheme
         }
 

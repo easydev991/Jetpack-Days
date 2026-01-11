@@ -32,15 +32,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 import com.dayscounter.BuildConfig
 import com.dayscounter.R
+import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.util.AppConstants
 
 /** Экран с дополнительными функциями и настройками приложения. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun moreScreen() {
+fun moreScreen(navController: NavHostController? = null) {
     val context = LocalContext.current
 
     Scaffold(
@@ -66,7 +68,7 @@ fun moreScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Кнопки настроек
-            settingsButtons()
+            settingsButtons(navController)
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
@@ -83,11 +85,15 @@ fun moreScreen() {
 
 /** Кнопки настроек (заглушки). */
 @Composable
-private fun settingsButtons() {
-    // Кнопка "Тема и иконка" - заглушка
+private fun settingsButtons(navController: NavHostController?) {
+    // Кнопка "Тема и иконка"
     moreButton(
         text = stringResource(R.string.app_theme_and_icon),
-        onClick = { Log.d("MoreScreen", "TODO: открыть экран ThemeIcon Screen") },
+        onClick = {
+            navController?.navigate(Screen.ThemeIcon.route) {
+                popUpTo(Screen.More.route)
+            }
+        },
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
@@ -268,5 +274,5 @@ private fun openGitHub(context: Context) {
 @Preview(showBackground = true, name = "More Screen")
 @Composable
 fun moreScreenPreview() {
-    jetpackDaysTheme { moreScreen() }
+    jetpackDaysTheme { moreScreen(null) }
 }

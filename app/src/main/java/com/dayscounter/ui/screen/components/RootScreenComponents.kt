@@ -21,12 +21,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.dayscounter.data.database.DaysDatabase
+import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.screen.mainScreen
+import com.dayscounter.ui.screen.themeIconScreen
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.RootScreenViewModel
+import com.dayscounter.viewmodel.ThemeIconViewModel
 
 /**
  * Навигационная панель.
@@ -157,10 +160,29 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
 /**
  * Навигационное назначение для экрана настроек.
  */
-private fun androidx.navigation.NavGraphBuilder.moreScreenDestination() {
+private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navController: NavHostController) {
     composable(Screen.More.route) {
         com.dayscounter.ui.screen
-            .moreScreen()
+            .moreScreen(navController)
+    }
+}
+
+/**
+ * Навигационное назначение для экрана темы и иконки.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
+    navController: NavHostController,
+    dataStore: AppSettingsDataStore,
+    application: android.app.Application,
+) {
+    composable(Screen.ThemeIcon.route) {
+        val viewModel: ThemeIconViewModel =
+            viewModel(factory = ThemeIconViewModel.factory(dataStore, application))
+        themeIconScreen(
+            viewModel = viewModel,
+            onBackClick = { navController.popBackStack() },
+        )
     }
 }
 
@@ -180,6 +202,7 @@ internal fun navHostContent(
     val database = DaysDatabase.getDatabase(context)
     val repository = AppModule.createItemRepository(database)
     val resourceProvider = AppModule.resourceProvider
+    val dataStore = AppModule.createAppSettingsDataStore(context)
 
     NavHost(
         navController = navController,
@@ -189,7 +212,12 @@ internal fun navHostContent(
         this.mainScreenDestination(navController)
         this.detailScreenDestination(repository, navController)
         this.createEditScreenDestination(repository, resourceProvider, navController)
-        this.moreScreenDestination()
+        this.moreScreenDestination(navController)
+        this.themeIconScreenDestination(
+            navController,
+            dataStore,
+            context as android.app.Application,
+        )
     }
 }
 
