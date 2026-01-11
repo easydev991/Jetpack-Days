@@ -1,11 +1,15 @@
 package com.dayscounter.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme =
     darkColorScheme(
@@ -19,15 +23,15 @@ private val LightColorScheme =
         primary = Color(0xFF6200EE),
         secondary = Color(0xFF03DAC6),
         tertiary = Color(0xFF3700B3),
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-     */
+        /* Other default colors to override
+        background = Color(0xFFFFFBFE),
+        surface = Color(0xFFFFFBFE),
+        onPrimary = Color.White,
+        onSecondary = Color.White,
+        onTertiary = Color.White,
+        onBackground = Color(0xFF1C1B1F),
+        onSurface = Color(0xFF1C1B1F),
+         */
     )
 
 @Composable
@@ -39,10 +43,15 @@ fun jetpackDaysTheme(
 ) {
     val colorScheme =
         when {
-            dynamicColor && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S -> {
-                // Replace with dynamic colors from Material 3
-                LightColorScheme
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                // Использование динамических цветов Material 3 с учетом темы
+                if (darkTheme) {
+                    dynamicDarkColorScheme(LocalContext.current)
+                } else {
+                    dynamicLightColorScheme(LocalContext.current)
+                }
             }
+
             darkTheme -> DarkColorScheme
             else -> LightColorScheme
         }
