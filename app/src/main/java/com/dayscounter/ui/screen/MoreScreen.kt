@@ -138,9 +138,10 @@ private fun actionButtons(context: Context) {
 private fun appVersionText() {
     Text(
         text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.spacing_medium)),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(R.dimen.spacing_medium)),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         textAlign = TextAlign.Center,
