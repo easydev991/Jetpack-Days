@@ -1,24 +1,17 @@
 package com.dayscounter.ui.screen.components
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -27,12 +20,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.dayscounter.R
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.screen.mainScreen
-import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.RootScreenViewModel
@@ -168,7 +159,8 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
  */
 private fun androidx.navigation.NavGraphBuilder.moreScreenDestination() {
     composable(Screen.More.route) {
-        moreScreenContent()
+        com.dayscounter.ui.screen
+            .moreScreen()
     }
 }
 
@@ -224,33 +216,6 @@ internal fun eventsScreenContent(navController: NavHostController) {
 }
 
 /**
- * Контент для экрана настроек.
- */
-@Composable
-internal fun moreScreenContent() {
-    // Заглушка для экрана настроек
-    Log.d("RootScreen", "Экран настроек не реализован")
-    Surface(
-        modifier =
-            Modifier
-                .fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface,
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.spacing_extra_large)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "Экран настроек не реализован",
-            )
-        }
-    }
-}
-
-/**
  * Обновление вкладки на основе маршрута.
  */
 @Composable
@@ -275,15 +240,5 @@ internal fun updateTabBasedOnRoute(
                 viewModel.switchTab(Screen.More)
             }
         }
-    }
-}
-
-// ==================== PREVIEWS ====================
-
-@Preview(showBackground = true, name = "Экран настроек")
-@Composable
-fun moreScreenContentPreview() {
-    jetpackDaysTheme {
-        moreScreenContent()
     }
 }

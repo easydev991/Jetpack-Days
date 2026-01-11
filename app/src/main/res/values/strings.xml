@@ -69,8 +69,11 @@
 
     <!-- More Screen -->
     <string name="send_feedback">Send feedback</string>
+    <string name="feedback_subject">Feedback about JetpackDays</string>
     <string name="rate_the_app">Rate app</string>
     <string name="share_the_app">Share app</string>
+    <string name="share_chooser_title">Share app</string>
+    <string name="share_text">JetpackDays - days tracking app</string>
     <string name="github_page">GitHub page</string>
     <string name="app_version">App version: %1$s</string>
 
