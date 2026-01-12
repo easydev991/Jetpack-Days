@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Jetpack-Days</string>
+    <string name="app_name">JetpackDays</string>
+    <string name="events_tab">События</string>
+    <string name="more_tab">Ещё</string>
 </resources>

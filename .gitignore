@@ -1,4 +1,7 @@
+# Android
 *.iml
+*.iml~
+*.iws
 .gradle
 /local.properties
 /.idea/caches
@@ -7,9 +10,149 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/modules
+/.idea/assetWizardSettings.xml
+/.idea/compiler.xml
+/.idea/deploymentTargetDropDown.xml
+/.idea/jarRepositories.xml
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/runConfigurations
+/.idea/vcs.xml
+/.idea/inspectionProfiles/Project_Default.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# IntelliJ IDEA
+.idea/
+
+# Android Studio
+*.keystore
+*.jks
+*.p12
+*.pem
+*.pfx
+*.p7b
+*.p7c
+*.der
+*.crt
+*.cer
+*.crl
+*.sst
+*.csr
+*.key
+*.pem
+*.p12
+*.pfx
+*.p7b
+*.p7c
+*.der
+*.crt
+*.cer
+*.crl
+*.sst
+*.csr
+
+# Log files
+*.log
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Debug
+debug.keystore
+debug.jks
+
+# Release
+release.keystore
+release.jks
+
+# APKs
+*.apk
+*.ap_
+*.apks
+
+# Generated files
+gen/
+generated/
+
+# Ignore gradle wrapper if not needed in your project
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Coverage
+coverage/
+*.ec
+
+# Android Lint
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/reports/
+
+# Proguard
+proguard/
+
+# Dex
+.dex
+
+# Local checkouts
+*/.checkouts
+
+# Android cache
+.cache/
+
+# Android build cache
+.android/build-cache/
+.android/caches/
+
+# Android Studio profiler
+*.hprof
+
+# Android Studio navigation editor
+.navigation/
+
+# Android Studio device manager
+*.avd/
+
+# Android Studio emulator
+*.qemu_pipe
+
+# Android Studio screenshot
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.tif
+
+# Android Studio backup
+*.bak
+
+# Android Studio temporary files
+*.tmp
+
+# Android Studio crash reports
+*.hprof
+*.crash
+
+# Android Studio logs
+*.log
+
+# Android Studio metadata
+*.iml
+*.iws
+*.ipr
+
+# Android Studio caches
+*.swp
+*.swo
+*~
+
+# Documentation
+/.qwen
