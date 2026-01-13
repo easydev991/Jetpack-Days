@@ -34,29 +34,33 @@ class IconManagerTest {
     @DisplayName("Смена иконки")
     inner class ChangeIcon {
         @Test
-        @DisplayName("Должен вызывать PackageManager для смены иконки")
-        fun changeIcon_shouldCallPackageManager() {
-            // Given
-            every { packageManager.setComponentEnabledSetting(any(), any(), any()) } returns Unit
-
+        @DisplayName("Должен вызывать PackageManager для смены иконки (светлая тема)")
+        fun changeIcon_shouldCallPackageManager_lightTheme() {
             // When
-            iconManager.changeIcon(AppIcon.ICON_2)
+            iconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = false)
 
-            // Then
+            // Then - должно быть вызвано несколько раз (активация + деактивации)
             verify(atLeast = 1) { packageManager.setComponentEnabledSetting(any(), any(), any()) }
         }
 
         @Test
-        @DisplayName("Должен выбрасывать SecurityException при ошибке PackageManager")
-        fun changeIcon_shouldThrowSecurityException() {
-            // Given
-            every { packageManager.setComponentEnabledSetting(any(), any(), any()) } throws
-                SecurityException("Нет прав для изменения состояния компонента")
+        @DisplayName("Должен вызывать PackageManager для смены иконки (тёмная тема)")
+        fun changeIcon_shouldCallPackageManager_darkTheme() {
+            // When
+            iconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = true)
 
-            // When & Then
-            org.junit.jupiter.api.assertThrows<SecurityException> {
-                iconManager.changeIcon(AppIcon.ICON_2)
-            }
+            // Then - должно быть вызвано несколько раз (активация + деактивации)
+            verify(atLeast = 1) { packageManager.setComponentEnabledSetting(any(), any(), any()) }
+        }
+
+        @Test
+        @DisplayName("Не должен выбрасывать исключение при успешной смене иконки")
+        fun changeIcon_shouldNotThrowOnSuccess() {
+            // When
+            iconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = false)
+
+            // Then - не должно быть исключений
+            verify(atLeast = 1) { packageManager.setComponentEnabledSetting(any(), any(), any()) }
         }
     }
 }

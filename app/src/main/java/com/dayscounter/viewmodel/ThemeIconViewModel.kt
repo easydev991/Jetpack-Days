@@ -84,19 +84,24 @@ class ThemeIconViewModel(
 
     /**
      * Обновляет иконку приложения. Сохраняет выбор в DataStore и применяет через PackageManager.
+     * Поддерживает светлую и тёмную тему.
      *
      * @param icon Новая иконка приложения
      */
     fun updateIcon(icon: AppIcon) {
         viewModelScope.launch {
             try {
+                // Получаем текущую тему
+                val currentTheme = uiState.value.theme
+
                 // Сохраняем выбор в DataStore
                 dataStore.setIcon(icon)
 
-                // Применяем иконку через PackageManager
-                iconManager.changeIcon(icon)
+                // Применяем иконку через PackageManager с учётом текущей темы
+                val isDarkTheme = iconManager.isDarkThemeForIcon(currentTheme)
+                iconManager.changeIcon(icon, isDarkTheme)
 
-                logger.d(TAG, "Иконка успешно изменена на ${icon.name}")
+                logger.d(TAG, "Иконка успешно изменена на ${icon.name} (тёмная тема: $isDarkTheme)")
             } catch (e: SecurityException) {
                 logger.e(TAG, "Ошибка безопасности при смене иконки", e)
                 // Продолжаем работу, даже если смена иконки не удалась

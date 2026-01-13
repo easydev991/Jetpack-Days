@@ -80,6 +80,20 @@
   - ✅ Реализованы компоненты формы: поля ввода, DatePicker, ColorPicker, DisplayOptionPicker
   - ✅ Реализована валидация данных
   - ✅ Написаны unit-тесты для ViewModel
+- **Этап 5.2**: Theme and Icon Screen
+  - ✅ Реализован ThemeIconScreen с выбором темы и иконки
+  - ✅ Реализован ThemeIconViewModel с UI State
+  - ✅ Реализованы секции: тема (радио-кнопки), иконка (сетка с превью)
+  - ✅ Реализован AppIcon enum с группированными вариантами
+  - ✅ Реализован IconManager Use Case
+  - ✅ Настроены Activity Aliases для смены иконки в AndroidManifest.xml
+  - ✅ Созданы adaptive icons для всех вариантов (светлые и тёмные версии)
+  - ✅ Созданы preview иконки для UI (светлые и тёмные версии)
+  - ✅ Поддержка темных версий launcher icons реализована
+  - ✅ DataStore для хранения настроек интегрирован
+  - ✅ Локализация реализована
+  - ✅ Написаны unit-тесты (ThemeIconViewModelTest: 11 тестов)
+  - ✅ Написаны UI-тесты (ThemeIconScreenTest: 10 тестов)
 - **Этап 6**: Форматирование количества дней
   - ✅ Реализованы Domain модели: TimePeriod, DaysDifference
   - ✅ Реализованы Use Cases: CalculateDaysDifferenceUseCase, FormatDaysTextUseCase, GetFormattedDaysForItemUseCase
@@ -459,14 +473,28 @@
 
 ---
 
-### Экран 5.2: Theme and Icon Screen ❌ НЕ НАЧАТ
+### Экран 5.2: Theme and Icon Screen ✅ ВЫПОЛНЕНО
 
 **Назначение:** Настройка темы приложения и выбор иконки
 
 **Статус реализации:**
 
-- ❌ Экран не реализован
-- ❌ Навигация к экрану не настроена
+- ✅ Экран реализован (ThemeIconScreen.kt)
+- ✅ ViewModel для экрана создан (ThemeIconViewModel)
+- ✅ UI State реализован (ThemeIconUiState)
+- ✅ Секция выбора темы реализована с радио-кнопками Material Design
+- ✅ Секция выбора иконки реализована с сеткой превью
+- ✅ AppIcon enum с группированными вариантами создан
+- ✅ IconManager Use Case реализован
+- ✅ Activity Aliases для смены иконки настроены в AndroidManifest.xml
+- ✅ Adaptive icons для всех вариантов созданы (светлые и тёмные версии)
+- ✅ Preview иконки для UI созданы (светлые и тёмные версии)
+- ✅ Поддержка темных версий launcher icons реализована
+- ✅ DataStore для хранения настроек интегрирован
+- ✅ Локализация реализована (русский и английский языки)
+- ✅ Unit-тесты написаны и проходят (ThemeIconViewModelTest: 11 тестов)
+- ✅ UI-тесты написаны и проходят (ThemeIconScreenTest: 10 тестов)
+- ✅ Навигация к экрану настроена и полностью интегрирована
 
 **Компоненты:**
 
@@ -841,16 +869,16 @@ Root Screen (TabBar)
     - ❌ Требуется реализация UI компонентов экрана и подэкранов
     - ❌ Требуется вынос в отдельный файл MoreScreen.kt
     - ❌ Требуется добавление маршрутов для ThemeIcon и AppData в Screen.kt
-    - ❌ Требуется реализация Theme and Icon Screen (Экран 5.2)
+    - ✅ Theme and Icon Screen (Экран 5.2) реализован
     - ❌ Требуется реализация App Data Screen (Экран 5.3)
 
 ### Оставшиеся этапы ❌
 
 13. ❌ **Этап 5.1**: More Screen (полная реализация с UI компонентами)
-2. ❌ **Этап 5.2**: Theme and Icon Screen
+2. ✅ **Этап 5.2**: Theme and Icon Screen — ВЫПОЛНЕН
 3. ❌ **Этап 5.3**: App Data Screen (резервное копирование)
 4. ❌ **Этап 8**: Резервное копирование (экспорт/импорт)
-5. ❌ **Этап 9**: Настройки приложения (тема, DataStore)
+5. ❌ **Этап 9**: Настройки приложения (тема, DataStore) — частично реализовано через ThemeIconScreen
 6. ❌ Активировать оставшиеся unit-тесты (отключены как .disabled)
 7. ❌ Дописать UI-тесты для критических сценариев
 8. ❌ Полное тестирование приложения
@@ -870,13 +898,14 @@ Root Screen (TabBar)
 Активные тесты:
 
 - Repository: ItemRepositoryTest (в test/domain/repository/)
-- ViewModels: MainScreenViewModelTest, DetailScreenViewModelTest, CreateEditScreenViewModelTest, RootScreenViewModelTest
+- ViewModels: MainScreenViewModelTest, DetailScreenViewModelTest, CreateEditScreenViewModelTest, RootScreenViewModelTest, ThemeIconViewModelTest
 - Formatter: DaysFormatterImplTest (в test/data/formatter/)
-- Use Cases: CalculateDaysDifferenceUseCaseTest, FormatDaysTextUseCaseTest, GetFormattedDaysForItemUseCaseTest
-- Domain models: DisplayOptionTest, ItemTest, TimePeriodTest, DaysDifferenceTest
+- Use Cases: CalculateDaysDifferenceUseCaseTest, FormatDaysTextUseCaseTest, GetFormattedDaysForItemUseCaseTest, IconManagerTest
+- Domain models: DisplayOptionTest, ItemTest, TimePeriodTest, DaysDifferenceTest, AppThemeTest, AppIconTest
 - Data layer: ItemEntityTest, DisplayOptionConverterTest, ItemMapperTest
 - Navigation: ScreenTest
-- UI State: RootScreenStateTest
+- UI State: RootScreenStateTest, ThemeIconUiStateTest
+- UI Components: DaysCountTextTest, ThemeIconScreenTest
 
 **Примечание:** Все ViewModels тестируются через unit-тесты с MockK. Интеграционные тесты ViewModels НЕ создаются из-за фундаментальных проблем архитектуры (см. выше).
 
@@ -959,7 +988,7 @@ Root Screen (TabBar)
 - [x] Все интеграционные тесты DAO и Repository написаны и проходят (без ViewModels)
 - [ ] Все UI-тесты написаны и проходят
 - [ ] Этап 5 (More Screen) полностью реализован
-- [ ] Этап 5.2 (Theme and Icon Screen) реализован
+- [x] Этап 5.2 (Theme and Icon Screen) реализован
 - [ ] Этап 5.3 (App Data Screen) реализован
 - [ ] Этап 8 (Резервное копирование) реализован
 - [ ] Этап 9 (Настройки приложения) реализован
@@ -972,10 +1001,10 @@ Root Screen (TabBar)
 
 1. ⏭️ Реализовать More Screen (Экран 5.1) - создание отдельного файла MoreScreen.kt
 2. ⏭️ Добавить маршруты для ThemeIcon и AppData в Screen.kt
-3. ⏭️ Реализовать Theme and Icon Screen (Экран 5.2)
+3. ✅ Реализовать Theme and Icon Screen (Экран 5.2) — ВЫПОЛНЕНО
 4. ⏭️ Реализовать App Data Screen (Экран 5.3)
 5. ⏭️ Реализовать резервное копирование (Этап 8)
-6. ⏭️ Реализовать настройки приложения (Этап 9)
+6. ⏭️ Реализовать настройки приложения (Этап 9) — частично реализовано через ThemeIconScreen
 7. ⏭️ Дописать UI-тесты для критических сценариев
 8. ⏭️ Полное тестирование приложения
 

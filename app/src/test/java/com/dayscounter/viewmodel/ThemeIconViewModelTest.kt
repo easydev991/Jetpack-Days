@@ -106,7 +106,8 @@ class ThemeIconViewModelTest {
     fun updateIcon_shouldSaveIconToDataStoreAndCallIconManager() =
         runTest(testDispatcher) {
             // Given
-            every { mockIconManager.changeIcon(any()) } just runs
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns false
+            every { mockIconManager.changeIcon(any(), any()) } just runs
             coEvery { mockDataStore.setIcon(any()) } coAnswers { }
             coEvery { mockDataStore.theme } returns flowOf(AppTheme.SYSTEM)
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
@@ -118,7 +119,8 @@ class ThemeIconViewModelTest {
 
             // Then
             coVerify { mockDataStore.setIcon(AppIcon.ICON_2) }
-            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_2) }
+            verify { mockIconManager.isDarkThemeForIcon(AppTheme.SYSTEM) }
+            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = false) }
         }
 
     @Test
@@ -126,7 +128,8 @@ class ThemeIconViewModelTest {
     fun updateIcon_shouldUpdateAllIcons() =
         runTest(testDispatcher) {
             // Given
-            every { mockIconManager.changeIcon(any()) } just runs
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns false
+            every { mockIconManager.changeIcon(any(), any()) } just runs
             val icons =
                 listOf(
                     AppIcon.DEFAULT,
@@ -151,8 +154,50 @@ class ThemeIconViewModelTest {
             // Then
             icons.forEach { icon ->
                 coVerify { mockDataStore.setIcon(icon) }
-                verify(atLeast = 1) { mockIconManager.changeIcon(icon) }
+                verify(atLeast = 1) { mockIconManager.changeIcon(icon, isDarkTheme = false) }
             }
+        }
+
+    @Test
+    @DisplayName("updateIcon для DARK темы должен использовать темную иконку")
+    fun updateIcon_forDarkTheme_shouldUseDarkIcon() =
+        runTest(testDispatcher) {
+            // Given
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns true
+            every { mockIconManager.changeIcon(any(), any()) } just runs
+            coEvery { mockDataStore.setIcon(any()) } coAnswers { }
+            coEvery { mockDataStore.theme } returns flowOf(AppTheme.DARK)
+            coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
+
+            // When
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel.updateIcon(AppIcon.ICON_2)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then
+            coVerify { mockDataStore.setIcon(AppIcon.ICON_2) }
+            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = true) }
+        }
+
+    @Test
+    @DisplayName("updateIcon для LIGHT темы должен использовать светлую иконку")
+    fun updateIcon_forLightTheme_shouldUseLightIcon() =
+        runTest(testDispatcher) {
+            // Given
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns false
+            every { mockIconManager.changeIcon(any(), any()) } just runs
+            coEvery { mockDataStore.setIcon(any()) } coAnswers { }
+            coEvery { mockDataStore.theme } returns flowOf(AppTheme.LIGHT)
+            coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
+
+            // When
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel.updateIcon(AppIcon.ICON_2)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then
+            coVerify { mockDataStore.setIcon(AppIcon.ICON_2) }
+            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_2, isDarkTheme = false) }
         }
 
     @Test
@@ -214,7 +259,8 @@ class ThemeIconViewModelTest {
     fun updateMethods_shouldWorkCorrectly() =
         runTest(testDispatcher) {
             // Given
-            every { mockIconManager.changeIcon(any()) } just runs
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns false
+            every { mockIconManager.changeIcon(any(), any()) } just runs
             coEvery { mockDataStore.setTheme(any()) } coAnswers { }
             coEvery { mockDataStore.setIcon(any()) } coAnswers { }
             coEvery { mockDataStore.theme } returns flowOf(AppTheme.SYSTEM)
@@ -229,6 +275,27 @@ class ThemeIconViewModelTest {
             // Then
             coVerify { mockDataStore.setTheme(AppTheme.LIGHT) }
             coVerify { mockDataStore.setIcon(AppIcon.ICON_3) }
-            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_3) }
+            verify(atLeast = 1) { mockIconManager.changeIcon(AppIcon.ICON_3, isDarkTheme = false) }
+        }
+
+    @Test
+    @DisplayName("updateIcon должен сохранять иконку в DataStore")
+    fun updateIcon_shouldSaveIconToDataStore() =
+        runTest(testDispatcher) {
+            // Given
+            every { mockIconManager.isDarkThemeForIcon(any()) } returns false
+            every { mockIconManager.changeIcon(any(), any()) } just runs
+            coEvery { mockDataStore.setIcon(any()) } coAnswers { }
+            coEvery { mockDataStore.theme } returns flowOf(AppTheme.SYSTEM)
+            coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
+
+            // When
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel.updateIcon(AppIcon.ICON_2)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then
+            coVerify { mockDataStore.setIcon(AppIcon.ICON_2) }
+            verify(atLeast = 1) { mockIconManager.changeIcon(any(), any()) }
         }
 }
