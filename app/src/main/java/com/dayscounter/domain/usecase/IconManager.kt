@@ -75,6 +75,8 @@ class IconManager(
                 throw e
             }
         }
+
+        logger.d(TAG, "Иконка изменена на ${icon.name}")
     }
 }
 
@@ -91,7 +93,7 @@ private fun getIconComponentName(
 ): android.content.ComponentName {
     val className =
         when (icon) {
-            AppIcon.DEFAULT -> "com.dayscounter.MainActivityAlias"
+            AppIcon.DEFAULT -> "com.dayscounter.MainActivityAliasIcon1"
             AppIcon.ICON_2 -> "com.dayscounter.MainActivityIcon2"
             AppIcon.ICON_3 -> "com.dayscounter.MainActivityIcon3"
             AppIcon.ICON_4 -> "com.dayscounter.MainActivityIcon4"
