@@ -3,6 +3,7 @@ package com.dayscounter.data.preferences
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -59,12 +60,8 @@ class AppSettingsDataStoreTest {
     @DisplayName("AppTheme.valueOf должен выбрасывать исключение при некорректном значении")
     fun appTheme_valueOf_shouldThrowExceptionForInvalidValue() {
         // Given & When & Then
-        try {
+        assertThrows(IllegalArgumentException::class.java) {
             AppTheme.valueOf("INVALID_THEME")
-            assert(false) { "Должно выбросить IllegalArgumentException" }
-        } catch (e: IllegalArgumentException) {
-            // Expected
-            assert(true)
         }
     }
 
@@ -72,12 +69,8 @@ class AppSettingsDataStoreTest {
     @DisplayName("AppIcon.valueOf должен выбрасывать исключение при некорректном значении")
     fun appIcon_valueOf_shouldThrowExceptionForInvalidValue() {
         // Given & When & Then
-        try {
+        assertThrows(IllegalArgumentException::class.java) {
             AppIcon.valueOf("INVALID_ICON")
-            assert(false) { "Должно выбросить IllegalArgumentException" }
-        } catch (e: IllegalArgumentException) {
-            // Expected
-            assert(true)
         }
     }
 

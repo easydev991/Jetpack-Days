@@ -19,6 +19,7 @@ import com.dayscounter.util.ThemeUtils
  * @property context Контекст приложения
  * @property logger Logger для логирования (по умолчанию AndroidLogger)
  */
+@Suppress("TooGenericExceptionCaught")
 class IconManager(
     private val context: Context,
     private val logger: Logger = AndroidLogger(),
@@ -133,6 +134,9 @@ class IconManager(
             // Не выбрасываем исключение - продолжаем деактивацию остальных
         } catch (e: IllegalArgumentException) {
             logger.e(TAG, "Неверный аргумент при деактивации иконки", e)
+            // Не выбрасываем исключение - продолжаем деактивацию остальных
+        } catch (e: IllegalStateException) {
+            logger.e(TAG, "Неожиданная ошибка при деактивации иконки", e)
             // Не выбрасываем исключение - продолжаем деактивацию остальных
         } catch (e: Exception) {
             logger.e(TAG, "Неожиданная ошибка при деактивации иконки", e)

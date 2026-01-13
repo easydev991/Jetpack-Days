@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
@@ -107,6 +108,7 @@ private fun itemDaysBadge(
         daysCountText(
             formattedText = formattedDaysText,
             textStyle = DaysCountTextStyle.NORMAL,
+            textAlign = TextAlign.End,
         )
     }
 }

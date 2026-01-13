@@ -24,8 +24,10 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
+import com.dayscounter.ui.screen.appDataScreen
 import com.dayscounter.ui.screen.mainScreen
 import com.dayscounter.ui.screen.themeIconScreen
+import com.dayscounter.viewmodel.AppDataScreenViewModel
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
 import com.dayscounter.viewmodel.RootScreenViewModel
@@ -187,6 +189,25 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
 }
 
 /**
+ * Навигационное назначение для экрана данных приложения.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
+    navController: NavHostController,
+    repository: com.dayscounter.domain.repository.ItemRepository,
+    application: android.app.Application,
+) {
+    composable(Screen.AppData.route) {
+        val viewModel: AppDataScreenViewModel =
+            viewModel(factory = AppDataScreenViewModel.factory(repository, application))
+        appDataScreen(
+            viewModel = viewModel,
+            onBackClick = { navController.popBackStack() },
+        )
+    }
+}
+
+/**
  * NavHost с маршрутами.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,6 +237,11 @@ internal fun navHostContent(
         this.themeIconScreenDestination(
             navController,
             dataStore,
+            context as android.app.Application,
+        )
+        this.appDataScreenDestination(
+            navController,
+            repository,
             context as android.app.Application,
         )
     }

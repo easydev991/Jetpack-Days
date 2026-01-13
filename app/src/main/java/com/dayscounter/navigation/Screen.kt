@@ -48,4 +48,9 @@ sealed class Screen(
         /** Создает маршрут для экрана редактирования с указанным itemId */
         fun createRoute(itemId: Long) = "edit_item/$itemId"
     }
+
+    object AppData : Screen(
+        route = "app_data",
+        titleResId = R.string.app_data,
+    )
 }

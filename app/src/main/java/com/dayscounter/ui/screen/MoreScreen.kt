@@ -98,10 +98,14 @@ private fun settingsButtons(navController: NavHostController?) {
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
-    // Кнопка "Данные приложения" - заглушка
+    // Кнопка "Данные приложения"
     moreButton(
         text = stringResource(R.string.app_data),
-        onClick = { Log.d("MoreScreen", "TODO: открыть экран AppData Screen") },
+        onClick = {
+            navController?.navigate(Screen.AppData.route) {
+                popUpTo(Screen.More.route)
+            }
+        },
     )
 }
 

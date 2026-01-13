@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.ui.theme.jetpackDaysTheme
@@ -78,7 +79,9 @@ private fun getSecondaryStyle(
  * @param textStyle Стиль отображения текста
  * @param customStyle Кастомный TextStyle (переопределяет textStyle)
  * @param color Цвет текста (переопределяет тему)
+ * @param textAlign Горизонтальное выравнивание текста
  */
+@Suppress("LongParameterList")
 @Composable
 fun daysCountText(
     formattedText: String,
@@ -86,6 +89,7 @@ fun daysCountText(
     textStyle: DaysCountTextStyle = DaysCountTextStyle.NORMAL,
     customStyle: TextStyle? = null,
     color: Color = Color.Unspecified,
+    textAlign: TextAlign? = null,
 ) {
     val resolvedStyle =
         when (textStyle) {
@@ -106,6 +110,7 @@ fun daysCountText(
         modifier = modifier,
         style = resolvedStyle,
         color = contentColor,
+        textAlign = textAlign,
     )
 }
 
