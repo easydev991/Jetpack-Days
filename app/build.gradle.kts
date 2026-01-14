@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,6 +11,13 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
+// Чтение секретов из .secrets/secrets.properties
+val secretsProperties = Properties()
+val secretsPropertiesFile = rootProject.file(".secrets/secrets.properties")
+if (secretsPropertiesFile.exists()) {
+    secretsPropertiesFile.inputStream().use { secretsProperties.load(it) }
+}
+
 android {
     namespace = "com.dayscounter"
     compileSdk = 36
@@ -18,10 +26,24 @@ android {
         applicationId = "com.dayscounter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = project.findProperty("VERSION_CODE")?.toString()?.toInt() ?: 1
+        versionName = project.findProperty("VERSION_NAME")?.toString() ?: "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystoreFile = secretsProperties["KEYSTORE_FILE"] as? String ?: ".secrets/keystore/dayscounter-release.keystore"
+            val keystorePassword = secretsProperties["KEYSTORE_PASSWORD"] as? String ?: ""
+            val keyAlias = secretsProperties["KEY_ALIAS"] as? String ?: "upload"
+            val keyPassword = secretsProperties["KEY_PASSWORD"] as? String ?: ""
+
+            storeFile = rootProject.file(keystoreFile)
+            storePassword = keystorePassword
+            this.keyAlias = keyAlias
+            this.keyPassword = keyPassword
+        }
     }
 
     buildTypes {
@@ -31,6 +53,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

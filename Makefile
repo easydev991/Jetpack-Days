@@ -1,11 +1,11 @@
 # Makefile для проекта JetpackDays
 
 # Цвета и шрифт для вывода в консоль
-YELLOW=\033[1;33m
-GREEN=\033[1;32m
-RED=\033[1;31m
-BOLD=\033[1m
-RESET=\033[0m
+YELLOW=\\033[1;33m
+GREEN=\\033[1;32m
+RED=\\033[1;31m
+BOLD=\\033[1m
+RESET=\\033[0m
 
 ## help: Показать это справочное сообщение
 help:
@@ -108,8 +108,37 @@ android-test-report:
 		echo "Отчет не найден. Сначала запустите: make android-test"; \
 	fi
 
+# Подготовка к публикации
+## release: Создать подписанную AAB-сборку для публикации (аналог testflight в iOS)
+release:
+	@echo "$(YELLOW)Проверка секретов для подписи...$(RESET)"
+	@if [ ! -d ".secrets" ]; then \
+		echo "$(YELLOW)Загрузка секретов из репозитория android-secrets...$(RESET)"; \
+		if [ -d "../android-secrets/jetpackdays" ]; then \
+			mkdir -p ".secrets"; \
+			cp -r ../android-secrets/jetpackdays/* .secrets/; \
+			sed -i.tmp 's|^KEYSTORE_FILE=.*|KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore|' .secrets/secrets.properties && rm -f .secrets/secrets.properties.tmp; \
+			echo "$(GREEN)Секреты загружены успешно$(RESET)"; \
+		else \
+			echo "$(RED)Ошибка: репозиторий android-secrets не найден в ../android-secrets/jetpackdays$(RESET)"; \
+			echo "$(YELLOW)Проверьте, что репозиторий android-secrets склонирован в нужное место$(RESET)"; \
+			exit 1; \
+		fi \
+	fi
+	@echo "$(YELLOW)Увеличиваю VERSION_CODE...$(RESET)"
+	@CURRENT_VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
+	NEW_VERSION_CODE=$$((CURRENT_VERSION_CODE + 1)); \
+	sed -i.tmp "s/^VERSION_CODE=.*/VERSION_CODE=$$NEW_VERSION_CODE/" gradle.properties && rm -f gradle.properties.tmp; \
+	echo "$(GREEN)VERSION_CODE обновлен с $$CURRENT_VERSION_CODE на $$NEW_VERSION_CODE$(RESET)"
+	@echo "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)"
+	@./gradlew bundleRelease
+	@cp app/build/outputs/bundle/release/app-release.aab dayscounter.aab
+	@echo "$(GREEN)AAB создан: dayscounter.aab$(RESET)"
+	@echo "$(YELLOW)Версия для публикации: $$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2) (build $$NEW_VERSION_CODE)$(RESET)"
+	@echo "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)"
+
 # Запуск всех задач
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report setup help
+.PHONY: build clean test lint format check install all android-test test-all android-test-report setup help release

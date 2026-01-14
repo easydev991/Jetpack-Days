@@ -51,6 +51,12 @@ local.properties
 
 # Local configuration file (sdk path, etc)
 
+# Secrets folder (loaded from secrets repository)
+.secrets/
+
+# Release builds (AAB files)
+*.aab
+
 # Debug
 debug.keystore
 debug.jks
