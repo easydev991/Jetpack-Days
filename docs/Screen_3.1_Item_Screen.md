@@ -24,23 +24,16 @@ Item Screen предназначен для просмотра полной ин
 
 ### Выполнено
 
-- ✅ Навигация настроена (маршрут ItemDetail, интеграция в RootScreenComponents.kt)
-- ✅ ViewModel создана (DetailScreenViewModel с factory методом для DI)
-- ✅ UI State реализован (DetailScreenState: Loading, Success, Error)
-- ✅ Все UI компоненты созданы:
-  - ✅ DetailScreen.kt — главный экран детализации
-  - ✅ DetailScreenParams.kt — параметры экрана для передачи зависимостей
-  - ✅ DetailAppBar.kt — TopAppBar с кнопками редактирования и удаления
-  - ✅ DetailContent.kt — контент экрана (секции, цветовая метка, дни)
-  - ✅ DetailContentPreviews.kt — preview для секций (colorTag, title, details, displayOption)
-  - ✅ DetailStates.kt — состояния загрузки и ошибки
-- ✅ Навигация из Main Screen работает
-- ✅ Навигация к Edit Screen работает
-- ✅ Функциональность удаления с диалогом подтверждения
+- ✅ Навигация настроена
+- ✅ ViewModel создана
+- ✅ UI State реализован
+- ✅ Все UI компоненты созданы (DetailScreen, DetailAppBar, DetailContent, DetailStates)
+- ✅ Навигация из Main и к Edit Screen работает
+- ✅ Функциональность удаления с диалогом
 - ✅ Локализация реализована
-- ✅ Preview для TopAppBar реализован
-- ✅ Unit-тесты для ViewModel реализованы
-- ✅ Unit-тесты для UI State реализованы
+- ✅ Preview реализованы
+- ✅ Unit-тесты для ViewModel и UI State
+- ✅ Исправлено отображение отрицательного количества дней (параметр showMinus)
 
 ### Осталось (опционально, не требуется для завершения)
 
@@ -69,91 +62,19 @@ Item Screen предназначен для просмотра полной ин
 
 ---
 
-### Шаг 1: Подготовка навигации ✅
-
-#### 1.1. Добавление маршрута ✅
-
-**Выполнено:** Маршрут ItemDetail в Screen.kt с методом createRoute(itemId: Long)
-
----
-
-#### 1.2. Настройка навигации в RootScreen ✅
-
-**Выполнено:** NavHost с передачей itemId, навигация из Main Screen настроена
-
----
-
-### Шаг 2: Подготовка слоя домена (Domain Layer) ✅
-
-#### 2.1. Использование ItemRepository для получения записи ✅
-
-**Выполнено:** ItemRepository.getItemFlow используется в ViewModel для загрузки записи
-
----
-
-### Шаг 3: Подготовка слоя представления (Presentation Layer) ✅
-
-#### 3.1. UI State ✅
-
-**Выполнено:** Sealed class DetailScreenState (Loading, Success, Error) создан
-
----
-
-#### 3.2. ViewModel ✅
-
-**Выполнено:** DetailScreenViewModel с factory методом для DI, загрузка через SavedStateHandle, удаление с диалогом
-
----
-
-### Шаг 4: Реализация UI компонентов ✅
-
-#### 4.1. Компоненты секций и состояний ✅
+### Шаг 1-6: Подготовка и реализация ✅
 
 **Выполнено:**
 
-- DetailContent.kt — все секции: colorTagSection, titleSection, dateSection, daysCountSection, detailsSection, displayOptionInfoSection
-- DetailStates.kt — состояния: loadingContent, errorContent, deletedContent
-- DetailContentPreviews.kt — preview для секций: colorTagSection, titleSection, detailsSection, displayOptionInfoSection
-
----
-
-#### 4.2. TopAppBar ✅
-
-**Выполнено:** DetailAppBar с кнопками "Назад", "Редактировать", "Удалить" и preview
-
----
-
-#### 4.3. Главный экран DetailScreen ✅
-
-**Выполнено:** detailScreen с Scaffold, ViewModel, DetailScreenParams, всеми секциями, диалогом удаления, интеграция с навигацией
-
----
-
-### Шаг 5: Интеграция с навигацией ✅
-
-#### 5.1. Навигация из Main Screen ✅
-
-**Выполнено:** Навигация из Main Screen с передачей itemId настроена
-
----
-
-#### 5.2. Навигация к экрану редактирования ✅
-
-**Выполнено:** Навигация к Edit Screen с передачей itemId и обновление через Flow настроены
-
----
-
-### Шаг 6: Дополнительные функции ✅
-
-#### 6.1. Обработка ошибок ✅
-
-**Выполнено:** errorContent с кнопкой "Назад"
-
----
-
-#### 6.2. Локализация ✅
-
-**Выполнено:** Все строковые ресурсы из Localization_Plan.md использованы
+1. ✅ Навигация: маршрут ItemDetail с createRoute(itemId), NavHost настроен
+2. ✅ Domain: ItemRepository.getItemFlow используется в ViewModel
+3. ✅ UI State: DetailScreenState (Loading, Success, Error)
+4. ✅ UI компоненты: DetailContent (все секции), DetailStates, DetailContentPreviews
+5. ✅ TopAppBar: DetailAppBar с кнопками и preview
+6. ✅ DetailScreen: Scaffold, ViewModel, DetailScreenParams, все секции, диалог удаления
+7. ✅ Навигация: из Main Screen к Edit Screen с передачей itemId
+8. ✅ Обработка ошибок: errorContent с кнопкой "Назад"
+9. ✅ Локализация: все строковые ресурсы
 
 ---
 
@@ -178,14 +99,7 @@ Item Screen предназначен для просмотра полной ин
 
 ## Реализация ✅
 
-- DetailScreen.kt с Scaffold и DetailScreenParams для передачи зависимостей
-- Column с verticalScroll для прокрутки
-- Все секции в DetailContent.kt: colorTagSection, titleSection, dateSection, daysCountSection, detailsSection, displayOptionInfoSection
-- Preview для секций в DetailContentPreviews.kt
-- Состояния в DetailStates.kt: loadingContent, errorContent, deletedContent
-- DetailAppBar с кнопками "Назад", "Редактировать", "Удалить" и preview
-- detailScreen с Scaffold, ViewModel, DetailScreenParams, всеми секциями, диалогом удаления
-- Material Design 3, тема с темным режимом, Material Icons
+DetailScreen.kt с Scaffold и DetailScreenParams, DetailContent (все секции), DetailStates, DetailAppBar с кнопками, Material Design 3.
 
 **Архитектура:** Clean Architecture, ItemRepository.getItemFlow, Flow для реактивности, SavedStateHandle, Factory метод для DI
 
@@ -280,5 +194,7 @@ Item Screen предназначен для просмотра полной ин
 ## История изменений
 
 - 2025-01-01: Первоначальный план создания Item Screen
-- 2026-01-01: Полная реализация функционала (навигация, ViewModel, UI компоненты, тесты)
-- 2026-01-11: Актуализация плана - весь функционал реализован (100%)
+- 2026-01-01: Полная реализация функционала
+- 2026-01-11: Актуализация плана (100% готовности)
+- 2026-01-15: Добавление краткого анализа дней под датой
+- 2026-01-15: Исправлен баг с отображением отрицательного количества дней (параметр `showMinus`)
