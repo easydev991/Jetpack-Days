@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.ui.screen.components.createedit.CreateEditFormParams
 import com.dayscounter.ui.screen.components.createedit.createEditFormContent
@@ -86,6 +87,23 @@ private fun createEditScreenContent(
         datePickerDialogSection(
             selectedDate = uiStates.selectedDate,
             showDatePicker = showDatePicker,
+            onDateSelected = {
+                if (itemId != null) {
+                    val timestamp =
+                        uiStates.selectedDate.value
+                            ?.atStartOfDay(java.time.ZoneId.systemDefault())
+                            ?.toInstant()
+                            ?.toEpochMilli() ?: 0L
+
+                    viewModel.checkHasChanges(
+                        title = uiStates.title.value,
+                        details = uiStates.details.value,
+                        timestamp = timestamp,
+                        colorTag = uiStates.selectedColor.value?.toArgb(),
+                        displayOption = uiStates.selectedDisplayOption.value,
+                    )
+                }
+            },
         )
     }
 }

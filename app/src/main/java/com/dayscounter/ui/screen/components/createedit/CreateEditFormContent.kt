@@ -90,7 +90,6 @@ private fun mainFormSections(
     dateSection(
         selectedDate = params.uiStates.selectedDate,
         showDatePicker = params.showDatePicker,
-        onValueChange = onValueChange,
     )
 }
 
@@ -219,7 +218,6 @@ internal fun detailsSection(
 internal fun dateSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
-    onValueChange: () -> Unit = {},
 ) {
     val formatter =
         java.time.format.DateTimeFormatter
@@ -236,7 +234,6 @@ internal fun dateSection(
             IconButton(
                 onClick = {
                     showDatePicker.value = true
-                    onValueChange()
                 },
             ) {
                 Icon(

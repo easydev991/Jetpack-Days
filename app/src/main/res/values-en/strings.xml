@@ -2,6 +2,8 @@
 <resources>
     <!-- App name -->
     <string name="app_name">JetpackDays</string>
+    <!-- App display name for launcher -->
+    <string name="app_display_name">Days counter</string>
 
     <!-- Navigation and tabs -->
     <string name="events">Events</string>

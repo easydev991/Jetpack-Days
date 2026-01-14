@@ -535,6 +535,80 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
+    fun whenCheckHasChangesWithSameTimestamp_thenHasChangesIsFalse() {
+        runTest {
+            // Given - ViewModel с загруженным элементом с конкретным timestamp
+            val fixedTimestamp = 1704067200000L // 2024-01-01 00:00:00
+            val itemWithFixedTimestamp =
+                testItem.copy(timestamp = fixedTimestamp)
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
+            repository.setItemForGetById(itemWithFixedTimestamp)
+
+            // When - Создаем ViewModel и проверяем тот же timestamp
+            val newViewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            newViewModel.checkHasChanges(
+                title = itemWithFixedTimestamp.title,
+                details = itemWithFixedTimestamp.details,
+                timestamp = fixedTimestamp, // Тот же самый timestamp
+                colorTag = itemWithFixedTimestamp.colorTag,
+                displayOption = itemWithFixedTimestamp.displayOption,
+            )
+
+            // Then - Изменений не должно быть обнаружено
+            assertFalse(
+                newViewModel.hasChanges.value,
+                "При том же timestamp изменения не должны быть обнаружены",
+            )
+        }
+    }
+
+    @Test
+    fun whenCheckHasChangesWithTimestampOneDayLater_thenHasChangesIsTrue() {
+        runTest {
+            // Given - ViewModel с загруженным элементом с конкретным timestamp
+            val fixedTimestamp = 1704067200000L // 2024-01-01 00:00:00
+            val itemWithFixedTimestamp =
+                testItem.copy(timestamp = fixedTimestamp)
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
+            repository.setItemForGetById(itemWithFixedTimestamp)
+
+            // When - Создаем ViewModel и проверяем timestamp на 1 день позже
+            val newViewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            val nextDayTimestamp =
+                fixedTimestamp + (24 * 60 * 60 * 1000) // +1 день (86400000 мс)
+            newViewModel.checkHasChanges(
+                title = itemWithFixedTimestamp.title,
+                details = itemWithFixedTimestamp.details,
+                timestamp = nextDayTimestamp, // На 1 день позже
+                colorTag = itemWithFixedTimestamp.colorTag,
+                displayOption = itemWithFixedTimestamp.displayOption,
+            )
+
+            // Then - Изменения должны быть обнаружены
+            assertTrue(
+                newViewModel.hasChanges.value,
+                "При изменении timestamp на 1 день изменения должны быть обнаружены",
+            )
+        }
+    }
+
+    @Test
     fun whenResetHasChanges_thenHasChangesIsFalse() {
         runTest {
             // Given - ViewModel с загруженным элементом и обнаруженными изменениями

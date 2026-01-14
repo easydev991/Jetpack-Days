@@ -125,6 +125,7 @@ internal fun saveButton(
 internal fun datePickerDialogSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
+    onDateSelected: () -> Unit = {},
 ) {
     if (showDatePicker.value) {
         val datePickerState =
@@ -149,13 +150,19 @@ internal fun datePickerDialogSection(
                                     .toLocalDate()
                         }
                         showDatePicker.value = false
+                        onDateSelected()
                     },
                 ) {
                     Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker.value = false }) {
+                TextButton(
+                    onClick = {
+                        showDatePicker.value = false
+                        onDateSelected()
+                    },
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
