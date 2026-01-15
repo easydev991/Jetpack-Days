@@ -83,11 +83,11 @@ class DaysFormatterImpl : DaysFormatter {
             }
 
             DisplayOption.MONTH_DAY -> {
-                formatMonthDay(period, resourceProvider)
+                formatMonthDay(period, resourceProvider, showMinus, totalDays)
             }
 
             DisplayOption.YEAR_MONTH_DAY -> {
-                formatYearMonthDay(period, resourceProvider)
+                formatYearMonthDay(period, resourceProvider, showMinus, totalDays)
             }
         }
 
@@ -96,20 +96,38 @@ class DaysFormatterImpl : DaysFormatter {
      *
      * Для MONTH_DAY конвертирует годы в месяцы, так же как в iOS-приложении
      * (DateComponentsFormatter с allowedUnits = [.month, .day]).
+     *
+     * @param period Период времени (годы, месяцы, дни)
+     * @param resourceProvider Провайдер строковых ресурсов
+     * @param showMinus Показывать ли минус для будущих дат
+     * @param totalDays Общее количество дней (используется для определения будущего)
      */
     private fun formatMonthDay(
         period: TimePeriod,
         resourceProvider: ResourceProvider,
+        showMinus: Boolean,
+        totalDays: Int,
     ): String {
         // Конвертируем годы в месяцы для MONTH_DAY (как в iOS)
         val totalMonths = period.years * MONTHS_IN_YEAR + period.months
 
+        // Для будущих дат с showMinus = false используем абсолютные значения
+        // Если дата в будущем (totalDays < 0) и showMinus = false, формируем текст без минуса
+        val (monthsValue, daysValue) =
+            if (totalDays < 0 && !showMinus) {
+                // Будущее без минуса - используем абсолютные значения
+                Pair(kotlin.math.abs(totalMonths), kotlin.math.abs(period.days))
+            } else {
+                // Прошлое или разрешен минус - используем вычисленные значения
+                Pair(totalMonths, period.days)
+            }
+
         val timeComponents =
             TimeComponents(
-                showMonths = totalMonths != 0,
-                monthsValue = totalMonths,
-                showDays = period.days != 0,
-                daysValue = period.days,
+                showMonths = monthsValue != 0,
+                monthsValue = monthsValue,
+                showDays = daysValue != 0,
+                daysValue = daysValue,
             )
 
         val components = buildComponentsList(timeComponents, resourceProvider)
@@ -119,19 +137,37 @@ class DaysFormatterImpl : DaysFormatter {
 
     /**
      * Форматирует годы, месяцы и дни.
+     *
+     * @param period Период времени (годы, месяцы, дни)
+     * @param resourceProvider Провайдер строковых ресурсов
+     * @param showMinus Показывать ли минус для будущих дат
+     * @param totalDays Общее количество дней (используется для определения будущего)
      */
     private fun formatYearMonthDay(
         period: TimePeriod,
         resourceProvider: ResourceProvider,
+        showMinus: Boolean,
+        totalDays: Int,
     ): String {
+        // Для будущих дат с showMinus = false используем абсолютные значения
+        // Если дата в будущем (totalDays < 0) и showMinus = false, формируем текст без минуса
+        val (yearsValue, monthsValue, daysValue) =
+            if (totalDays < 0 && !showMinus) {
+                // Будущее без минуса - используем абсолютные значения
+                Triple(kotlin.math.abs(period.years), kotlin.math.abs(period.months), kotlin.math.abs(period.days))
+            } else {
+                // Прошлое или разрешен минус - используем вычисленные значения
+                Triple(period.years, period.months, period.days)
+            }
+
         val timeComponents =
             TimeComponents(
-                showYears = period.years != 0,
-                yearsValue = period.years,
-                showMonths = period.months != 0,
-                monthsValue = period.months,
-                showDays = period.days != 0,
-                daysValue = period.days,
+                showYears = yearsValue != 0,
+                yearsValue = yearsValue,
+                showMonths = monthsValue != 0,
+                monthsValue = monthsValue,
+                showDays = daysValue != 0,
+                daysValue = daysValue,
             )
 
         val components = buildComponentsList(timeComponents, resourceProvider)

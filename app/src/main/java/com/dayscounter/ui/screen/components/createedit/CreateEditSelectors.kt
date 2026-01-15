@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.ui.screen.components.common.daysRadioButton
 import com.dayscounter.ui.theme.jetpackDaysTheme
 
 /**
@@ -122,41 +123,8 @@ internal fun displayOptionSelector(
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
 
-    DisplayOption.entries.forEach { option ->
-        displayOptionSurface(
-            option = option,
-            selectedDisplayOption = selectedDisplayOption,
-            onValueChange = onValueChange,
-        )
-    }
-}
-
-/**
- * Поверхность для опции отображения.
- */
-@Composable
-internal fun displayOptionSurface(
-    option: DisplayOption,
-    selectedDisplayOption: MutableState<DisplayOption>,
-    onValueChange: () -> Unit = {},
-) {
-    Surface(
-        onClick = {
-            selectedDisplayOption.value = option
-            onValueChange()
-        },
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = dimensionResource(R.dimen.spacing_xxsmall)),
-        color = MaterialTheme.colorScheme.surface,
-        shape = MaterialTheme.shapes.small,
-    ) {
-        Row(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_xsmall)),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val isSelected = selectedDisplayOption.value == option
+    Column(modifier = Modifier.selectableGroup()) {
+        DisplayOption.entries.forEach { option ->
             val text =
                 when (option) {
                     DisplayOption.DAY -> stringResource(R.string.days_only)
@@ -168,20 +136,14 @@ internal fun displayOptionSurface(
                         stringResource(R.string.days_only)
                 }
 
-            Text(
+            daysRadioButton(
                 text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
+                selected = selectedDisplayOption.value == option,
+                onClick = {
+                    selectedDisplayOption.value = option
+                    onValueChange()
+                },
             )
-
-            if (isSelected) {
-                Text(
-                    text = "✓",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
         }
     }
 }

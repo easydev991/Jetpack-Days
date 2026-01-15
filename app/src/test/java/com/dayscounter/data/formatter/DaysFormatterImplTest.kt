@@ -531,4 +531,146 @@ class DaysFormatterImplTest {
         // Then
         assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
     }
+
+    // Тесты для будущих дат с showMinus = false (исправление бага)
+
+    @Test
+    fun `formatComposite when MONTH_DAY option with future date and showMinus false then shows no minus`() {
+        // Given - будущая дата (через 1 месяц 2 дня)
+        val period = TimePeriod(years = 0, months = -1, days = -2)
+        val totalDays = -30
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 1,
+            )
+        } returns "1 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 2,
+            )
+        } returns "2 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = false,
+            )
+
+        // Then - не должно быть минуса, используется абсолютные значения
+        assertEquals("1 мес. 2 дн.", result, "Не должно быть минуса для будущей даты с showMinus = false")
+    }
+
+    @Test
+    fun `formatComposite when YEAR_MONTH_DAY option with future date and showMinus false then shows no minus`() {
+        // Given - будущая дата (через 1 год 2 месяца 5 дней)
+        val period = TimePeriod(years = -1, months = -2, days = -5)
+        val totalDays = -400
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 1,
+            )
+        } returns "1 г."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 2,
+            )
+        } returns "2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 5,
+            )
+        } returns "5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = false,
+            )
+
+        // Then - не должно быть минуса, используется абсолютные значения
+        assertEquals("1 г. 2 мес. 5 дн.", result, "Не должно быть минуса для будущей даты с showMinus = false")
+    }
+
+    @Test
+    fun `formatComposite when MONTH_DAY option with future date and showMinus true then shows minus`() {
+        // Given - будущая дата (через 1 месяц 2 дня)
+        val period = TimePeriod(years = 0, months = -1, days = -2)
+        val totalDays = -30
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = -1,
+            )
+        } returns "-1 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = -2,
+            )
+        } returns "-2 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then - должен быть минус для будущей даты с showMinus = true
+        assertEquals("-1 мес. -2 дн.", result, "Должен быть минус для будущей даты с showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when YEAR_MONTH_DAY option with future date and showMinus true then shows minus`() {
+        // Given - будущая дата (через 1 год 2 месяца 5 дней)
+        val period = TimePeriod(years = -1, months = -2, days = -5)
+        val totalDays = -400
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = -1,
+            )
+        } returns "-1 г."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = -2,
+            )
+        } returns "-2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = -5,
+            )
+        } returns "-5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then - должен быть минус для будущей даты с showMinus = true
+        assertEquals("-1 г. -2 мес. -5 дн.", result, "Должен быть минус для будущей даты с showMinus = true")
+    }
 }

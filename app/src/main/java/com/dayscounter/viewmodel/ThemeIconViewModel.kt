@@ -60,10 +60,12 @@ class ThemeIconViewModel(
     val uiState: StateFlow<ThemeIconUiState> =
         combine(
             dataStore.theme,
+            dataStore.useDynamicColors,
             dataStore.icon,
-        ) { theme, icon ->
+        ) { theme, useDynamicColors, icon ->
             ThemeIconUiState(
                 theme = theme,
+                useDynamicColors = useDynamicColors,
                 icon = icon,
                 isLoading = false,
             )
@@ -80,6 +82,18 @@ class ThemeIconViewModel(
      */
     fun updateTheme(theme: AppTheme) {
         viewModelScope.launch { dataStore.setTheme(theme) }
+    }
+
+    /**
+     * Обновляет настройку использования динамических цветов. Сохраняет выбор в DataStore.
+     *
+     * @param useDynamicColors Использовать динамические цвета
+     */
+    fun updateDynamicColors(useDynamicColors: Boolean) {
+        viewModelScope.launch {
+            dataStore.setUseDynamicColors(useDynamicColors)
+            logger.d(TAG, "Динамические цвета: $useDynamicColors")
+        }
     }
 
     /**

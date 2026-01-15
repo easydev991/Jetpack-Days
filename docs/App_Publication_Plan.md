@@ -130,6 +130,38 @@ make init
 - Путь к keystore обновляется для корректного разрешения относительно корня проекта
 - Используется ключ загрузки `upload` для подписи AAB-файла
 
+```kotlin
+import java.util.Properties
+
+val secretsProperties = Properties()
+val secretsPropertiesFile = rootProject.file(".secrets/secrets.properties")
+if (secretsPropertiesFile.exists()) {
+    secretsPropertiesFile.inputStream().use { secretsProperties.load(it) }
+}
+
+android {
+    signingConfigs {
+        create("release") {
+            val keystoreFile = secretsProperties["KEYSTORE_FILE"] as? String ?: ".secrets/keystore/dayscounter-release.keystore"
+            val keystorePassword = secretsProperties["KEYSTORE_PASSWORD"] as? String ?: ""
+            val keyAlias = secretsProperties["KEY_ALIAS"] as? String ?: "upload"
+            val keyPassword = secretsProperties["KEY_PASSWORD"] as? String ?: ""
+
+            storeFile = rootProject.file(keystoreFile)
+            storePassword = keystorePassword
+            this.keyAlias = keyAlias
+            this.keyPassword = keyPassword
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+```
+
 #### Загрузка подписи в RuStore ✅
 
 **Выполнено:** Подпись загружена в RuStore Консоль.
@@ -146,7 +178,7 @@ make init
 - ✅ Секреты подготовлены в репозитории (keystore, сертификаты, secrets.properties с реальными паролями)
 - ✅ build.gradle.kts настроен для чтения секретов из `.secrets/secrets.properties`
 - ✅ Папка `.secrets/` добавлена в `.gitignore` проекта JetpackDays
-- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter.aab`)
+- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter{VERSION_CODE}.aab`)
 - ✅ Подпись загружена в RuStore Консоль (для RuStore)
 
 ### Шаг 2.2: Добавить команды в Makefile для создания сборок ✅
@@ -154,7 +186,7 @@ make init
 **Выполнено:** Команда `make release` добавлена в Makefile.
 
 ```makefile
-## release: Создать подписанную AAB-сборку для публикации (аналог testflight в iOS)
+## release: Создать подписанную AAB-сборку для публикации (аналог testflight в iOS). Файл: dayscounter{VERSION_CODE}.aab
 release:
     @echo "$(YELLOW)Проверка секретов для подписи...$(RESET)"
     @if [ ! -d ".secrets" ]; then \
@@ -172,15 +204,32 @@ release:
         fi \
     fi
     @echo "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)"
-    @./gradlew bundleRelease
-    @cp app/build/outputs/bundle/release/app-release.aab dayscounter.aab
-    @echo "$(GREEN)AAB создан: dayscounter.aab$(RESET)"
-    @echo "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)"
+    @./gradlew bundleRelease uploadCrashlyticsMappingFileRelease
+    @VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
+    OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+    cp app/build/outputs/bundle/release/app-release.aab "$$OUTPUT_FILE"; \
+    echo "$(GREEN)AAB создан и mapping files загружены в Firebase: $$OUTPUT_FILE$(RESET)"
 ```
 
 ### Примечания
 
-- Команда `make release` создает файл `dayscounter.aab` для загрузки в RuStore и Google Play Store
+**Формат названия AAB-файла:**
+
+Название файла сборки включает номер сборки (VERSION_CODE) для лучшей идентификации:
+
+- Формат: `dayscounter{VERSION_CODE}.aab`
+- Примеры: `dayscounter1.aab`, `dayscounter2.aab`, `dayscounter10.aab`
+
+Это позволяет легко различать разные сборки и отслеживать их версии.
+
+**Логика VERSION_CODE:**
+
+- `VERSION_CODE` увеличивается на 1 при каждом вызове `make release`
+- `VERSION_CODE` никогда не сбрасывается при повышении основной версии приложения
+- Это стандартная практика в Android - монотонно возрастающий номер сборки
+- `VERSION_CODE` уникален для каждой сборки и служит идентификатором в магазинах приложений
+
+- Команда `make release` создает файл `dayscounter{VERSION_CODE}.aab` для загрузки в RuStore и Google Play Store
 - Команда автоматически загружает секреты из `../android-secrets/jetpackdays/` если папка `.secrets/` не существует
 - RuStore поддерживает AAB-файлы (до 5 Гб), необходимо загрузить подпись для публикации через RuStore Консоль
 - Файл создается в корне проекта (после копирования из `app/build/outputs/bundle/release/`)
@@ -190,101 +239,9 @@ release:
 
 - ✅ Команда release добавлена в Makefile
 - ✅ Сборка release AAB работает корректно
-- ✅ Файл сборки создается в ожидаемом месте (`dayscounter.aab`)
+- ✅ Файл сборки создается в ожидаемом месте (`dayscounter{VERSION_CODE}.aab`)
 - ✅ Размер AAB-файла не превышает 5 Гб
 - ✅ Автоматическое копирование секретов из репозитория `android-secrets` работает
-
----
-
-## Часть 2.3: Проверка размера APK-файлов (рекомендуется)
-
-### Необходимые действия
-
-Для проверки, что APK-файлы, сформированные из AAB, соответствуют требованию RuStore (не более 5 Гб), можно использовать официальное утилиту Google BundleTool:
-
-**1. Скачать BundleTool**
-
-Скачайте bundletool с официальной страницы Google.
-
-**2. Генерация APK-файлов из AAB**
-
-```bash
-java -jar bundletool-all-1.18.1.jar build-apks --bundle=app/build/outputs/bundle/release/app-release.aab --output-format=DIRECTORY --output=temp_apks/ --mode=universal
-```
-
-**3. Проверка размера APK-файлов**
-
-После выполнения в указанной папке будут созданы APK-файлы. Убедитесь, что размер любого из них не превышает 5 Гб.
-
-Это особенно важно для крупных игр и приложений, использующих большой объём ресурсов.
-
-### Критерии готовности
-
-- ⏳ BundleTool скачан
-- ⏳ APK-файлы успешно сгенерированы из AAB
-- ⏳ Размер APK-файлов не превышает 5 Гб
-
----
-
-## Часть 2.4: Безопасность работы с подписями через приватный репозиторий ✅
-
-### Обзор безопасности
-
-Поскольку проект находится в публичном GitHub-репозитории, все чувствительные данные (ключи подписи, сертификаты, пароли) надежно защищены через приватный репозиторий `android-secrets`.
-
-### Основные принципы безопасности
-
-1. **Никогда не коммитить чувствительные данные** в основной репозиторий JetpackDays
-2. **Использовать .gitignore** для исключения локальной папки `.secrets/`
-3. **Хранить секреты в приватном репозитории** `android-secrets`
-4. **Использовать переменные окружения** в build.gradle.kts для безопасного чтения секретов
-5. **Резервировать секреты** через git в приватном репозитории
-
-### Структура защищенных файлов
-
-**ВАЖНО:** Все секреты хранятся в приватном репозитории `android-secrets`, а локально в проекте JetpackDays создается временная папка `.secrets/` (игнорируется гитом).
-
-**Структура секретов в приватном репозитории:**
-
-```
-android-secrets/
-├── README.md
-└── jetpackdays/
-    ├── keystore/
-    │   └── dayscounter-release.keystore
-    ├── certificates/
-    │   ├── pepk_out.zip
-    │   └── uploadcert.pem
-    ├── tools/
-    │   └── pepk.jar
-    └── secrets.properties
-        ├── KEYSTORE_FILE=keystore/dayscounter-release.keystore
-        ├── KEYSTORE_PASSWORD=***
-        ├── KEY_ALIAS=upload
-        └── KEY_PASSWORD=***
-```
-
-**Временная структура в проекте JetpackDays:**
-
-```
-JetpackDays/
-├── .secrets/                      (папка для секретов, игнорируется гитом)
-│   ├── keystore/                   (keystore файлы)
-│   │   └── dayscounter-release.keystore
-│   ├── certificates/               (сертификаты для RuStore)
-│   │   ├── pepk_out.zip          (ZIP-архив с подписью приложения)
-│   │   └── uploadcert.pem        (сертификат ключа загрузки)
-│   ├── tools/                      (инструменты для работы с подписями)
-│   │   └── pepk.jar              (инструмент PEPK)
-│   └── secrets.properties         (файл с секретами, игнорируется гитом)
-│       ├── KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore
-│       ├── KEYSTORE_PASSWORD=***
-│       ├── KEY_ALIAS=upload
-│       └── KEY_PASSWORD=***
-├── .gitignore                      (исключает папку .secrets)
-├── dayscounter.aab                 (AAB-файл для публикации)
-└── Makefile
-```
 
 ### Правила .gitignore
 
@@ -326,94 +283,38 @@ debug.jks
 
 **ВАЖНО:** Основная защита - папка `.secrets/` в корне проекта. Остальные правила - для защиты от случайных файлов.
 
-### Использование Makefile-автоматизации ✅
+---
 
-**Подход аналогичный iOS-проекту:** все операции выполняются через одну команду `make release`, которая автоматически загружает секреты из приватного репозитория.
+## Часть 2.3: Проверка размера APK-файлов (рекомендуется)
 
-#### Команда release (сборка AAB) ✅
+### Необходимые действия
 
-Makefile содержит единственную команду для создания релизной сборки:
+Для проверки, что APK-файлы, сформированные из AAB, соответствуют требованию RuStore (не более 5 Гб), можно использовать официальное утилиту Google BundleTool:
 
-```bash
-make release
-```
+**1. Скачать BundleTool**
 
-**Эта команда автоматически:**
+Скачайте bundletool с официальной страницы Google.
 
-1. Проверяет наличие папки `.secrets/` в проекте
-2. Если папки нет - копирует секреты из `../android-secrets/jetpackdays/` в `.secrets/`
-3. Выполняет сборку AAB с подписью
-4. Сохраняет результат в `dayscounter.aab` в корне проекта
-
-**Пример использования:**
+**2. Генерация APK-файлов из AAB**
 
 ```bash
-# В корне проекта JetpackDays
-make release
-
-# Результат:
-# dayscounter.aab - файл для публикации в RuStore и Google Play Store
+# В директории с AAB файлом (используйте актуальное имя файла, например dayscounter10.aab)
+java -jar bundletool-all-1.18.1.jar build-apks --bundle=dayscounter10.aab --output-format=DIRECTORY --output=temp_apks/ --mode=universal
 ```
 
-#### Настройка секретов в приватном репозитории ✅
+Примечание: Используйте актуальное имя файла сборки (например, `dayscounter10.aab` для сборки № 10)
 
-Все секреты хранятся в приватном репозитории `android-secrets`. Структура репозитория:
+**3. Проверка размера APK-файлов**
 
-```
-android-secrets/
-├── README.md
-└── jetpackdays/
-    ├── keystore/
-    │   └── dayscounter-release.keystore
-    ├── certificates/
-    │   ├── pepk_out.zip
-    │   └── uploadcert.pem
-    ├── tools/
-    │   └── pepk.jar
-    └── secrets.properties
-        ├── KEYSTORE_FILE=keystore/dayscounter-release.keystore
-        ├── KEYSTORE_PASSWORD=***
-        ├── KEY_ALIAS=upload
-        └── KEY_PASSWORD=***
-```
+После выполнения в указанной папке будут созданы APK-файлы. Убедитесь, что размер любого из них не превышает 5 Гб.
 
-**ВАЖНО:** В репозитории `android-secrets` файл `secrets.properties` содержит реальные пароли. Репозиторий должен быть приватным.
+Это особенно важно для крупных игр и приложений, использующих большой объём ресурсов.
 
-#### Интеграция с build.gradle.kts ✅
+### Критерии готовности
 
-`app/build.gradle.kts` настроен для чтения секретов из `.secrets/secrets.properties`:
-
-```kotlin
-import java.util.Properties
-
-val secretsProperties = Properties()
-val secretsPropertiesFile = rootProject.file(".secrets/secrets.properties")
-if (secretsPropertiesFile.exists()) {
-    secretsPropertiesFile.inputStream().use { secretsProperties.load(it) }
-}
-
-android {
-    signingConfigs {
-        create("release") {
-            val keystoreFile = secretsProperties["KEYSTORE_FILE"] as? String ?: ".secrets/keystore/dayscounter-release.keystore"
-            val keystorePassword = secretsProperties["KEYSTORE_PASSWORD"] as? String ?: ""
-            val keyAlias = secretsProperties["KEY_ALIAS"] as? String ?: "upload"
-            val keyPassword = secretsProperties["KEY_PASSWORD"] as? String ?: ""
-
-            storeFile = rootProject.file(keystoreFile)
-            storePassword = keystorePassword
-            this.keyAlias = keyAlias
-            this.keyPassword = keyPassword
-        }
-    }
-
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-}
-```
+- ⏳ BundleTool скачан
+- ⏳ APK-файлы успешно сгенерированы из AAB
+- ⏳ Размер APK-файлов не превышает 5 Гб
 
 ---
 
@@ -1080,7 +981,7 @@ fastlane supply
 - ✅ Получены ZIP-архив с подписью и сертификат PEM для RuStore
 - ✅ Настроен build.gradle.kts для чтения секретов из `.secrets/secrets.properties`
 - ✅ Папка `.secrets/` добавлена в `.gitignore` проекта JetpackDays
-- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter.aab`)
+- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter{VERSION_CODE}.aab`)
 - ✅ Подпись загружена в RuStore Консоль (обязательно перед загрузкой AAB)
 
 ### Приоритет 3: Автоматизация скриншотов с fastlane (важно)
@@ -1106,26 +1007,13 @@ fastlane supply
 ### Обязательные критерии
 
 - ✅ **Часть 1: Настройка названия приложения** - выполнено
-- ✅ Название приложения локализовано (русский и английский) - проверка при смене языка устройства
 - ✅ **Часть 2: Подготовка к публикации** - выполнено
-- ✅ **Часть 2.1: Настройка подписания AAB** - выполнено
-- ✅ **Часть 2.2: Добавить команды в Makefile** - выполнено
-- ✅ **Часть 2.4: Безопасность работы с подписями через приватный репозиторий** - выполнено
-- ✅ Приватный репозиторий `android-secrets` создан на GitHub
-- ✅ Структура папок для JetpackDays создана в репозитории
-- ✅ README.md с инструкцией по работе с репозиторием секретов добавлен
-- ✅ Ключ загрузки (upload) создан
-- ✅ ZIP-архив с подписью приложения получен (< 100 KB)
-- ✅ Сертификат ключа загрузки в формате PEM получен (< 100 KB)
-- ✅ Инструмент PEPK загружен в репозиторий `android-secrets/jetpackdays/tools/pepk.jar`
-- ✅ Файл `jetpackdays/secrets.properties` создан с реальными паролями
-- ✅ build.gradle.kts настроен для чтения секретов из `.secrets/secrets.properties`
-- ✅ Папка `.secrets/` добавлена в `.gitignore` проекта JetpackDays
-- ✅ Команда `make release` работает (автоматически загружает секреты из `../android-secrets/jetpackdays/` и создает подписанную AAB-сборку)
-- ✅ Release-сборка (AAB) создается корректно (`dayscounter.aab`)
-- ✅ Размер AAB-файла не превышает 5 Гб
-- ✅ Подпись загружена в RuStore Консоль
-- ⏳ Метаданные подготовлены для обоих магазинов
+  - ✅ **Часть 2.1: Настройка подписания AAB** - выполнено
+  - ✅ **Часть 2.2: Добавить команды в Makefile** - выполнено
+  - ✅ Секреты настроены через приватный репозиторий `android-secrets`
+  - ✅ Команда `make release` работает (создает файл `dayscounter{VERSION_CODE}.aab` с номером сборки)
+  - ✅ Подпись загружена в RuStore Консоль
+
 - ⏳ fastlane и screengrab установлены
 - ⏳ Зависимость `screengrab` добавлена в build.gradle.kts
 - ⏳ Разрешения добавлены в AndroidManifest.xml
@@ -1139,6 +1027,7 @@ fastlane supply
 - ⏳ Скриншоты сгенерированы для обоих магазинов
 - ⏳ Скриншоты подготовлены для RuStore
 - ⏳ Скриншоты можно загрузить в Google Play Store через `make upload-screenshots`
+- ⏳ Метаданные подготовлены для обоих магазинов
 
 ### Результат
 
@@ -1147,7 +1036,7 @@ fastlane supply
 - Публиковать приложение в RuStore и Google Play Store
 - Использовать Makefile для создания релиз-сборок
 - Создавать AAB-файл для обоих магазинов одной командой `make release`
-- Использовать созданный файл сборки `dayscounter.aab` напрямую для публикации
+- Использовать созданный файл сборки `dayscounter{VERSION_CODE}.aab` напрямую для публикации
 - Генерировать локализованные скриншоты командой `make screenshots` (через fastlane screengrab)
 - Генерировать скриншоты для конкретного языка командой `make screenshots-ru` или `make screenshots-en`
 - Загружать скриншоты в Google Play Store командой `make upload-screenshots` или `make screenshots-full`

@@ -547,5 +547,9 @@ class CreateEditScreenViewModelIntegrationTest {
             quantity: Int,
             vararg formatArgs: Any,
         ): String = "$quantity"
+
+        override fun getYearsString(quantity: Int): String = "$quantity лет"
+
+        override fun getMonthsString(quantity: Int): String = "$quantity месяцев"
     }
 }

@@ -30,8 +30,10 @@ class ThemeIconScreenTest {
 
     private fun setContent(
         theme: AppTheme = AppTheme.SYSTEM,
+        useDynamicColors: Boolean = true,
         icon: AppIcon = AppIcon.DEFAULT,
         onThemeChange: (AppTheme) -> Unit = {},
+        onDynamicColorsChange: (Boolean) -> Unit = {},
         onIconChange: (AppIcon) -> Unit = {},
         onBackClick: () -> Unit = {},
     ) {
@@ -39,8 +41,10 @@ class ThemeIconScreenTest {
             jetpackDaysTheme {
                 themeIconScreenContent(
                     theme = theme,
+                    useDynamicColors = useDynamicColors,
                     icon = icon,
                     onThemeChange = onThemeChange,
+                    onDynamicColorsChange = onDynamicColorsChange,
                     onIconChange = onIconChange,
                     onBackClick = onBackClick,
                 )

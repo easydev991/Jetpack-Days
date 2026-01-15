@@ -36,20 +36,14 @@ class FormatDaysTextUseCase(
             }
 
             is DaysDifference.Calculated -> {
-                // Определяем totalDays для форматирования
-                val totalDaysToFormat =
-                    if (showMinus) {
-                        difference.totalDays
-                    } else {
-                        kotlin.math.abs(difference.totalDays)
-                    }
-
                 // Форматируем период согласно опции отображения
+                // Передаем оригинальное totalDays, чтобы форматировщик мог
+                // правильно определить будущее (totalDays < 0)
                 daysFormatter.formatComposite(
                     period = difference.period,
                     displayOption = displayOption,
                     resourceProvider = resourceProvider,
-                    totalDays = totalDaysToFormat,
+                    totalDays = difference.totalDays,
                     showMinus = showMinus,
                 )
             }

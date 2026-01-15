@@ -82,6 +82,9 @@
 
     <!-- Theme and Icon Screen -->
     <string name="app_theme">Тема приложения</string>
+    <string name="dynamic_colors">Динамические цвета</string>
+    <string name="use_dynamic_colors">Использовать динамические цвета</string>
+    <string name="dynamic_colors_hint">При включении этой настройки будут использоваться системные цвета Android 12+ на основе обоев устройства</string>
     <string name="app_icon">Иконка приложения</string>
     <string name="light">Светлая</string>
     <string name="dark">Тёмная</string>

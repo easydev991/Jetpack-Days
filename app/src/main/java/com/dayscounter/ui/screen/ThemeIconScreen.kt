@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,8 +18,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -31,14 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
+import com.dayscounter.ui.screen.components.common.daysRadioButton
 import com.dayscounter.ui.screen.themeicon.iconPreviewItem
+import com.dayscounter.ui.theme.DynamicColors
 import com.dayscounter.viewmodel.ThemeIconViewModel
 
 /**
@@ -54,8 +51,10 @@ fun themeIconScreen(
 
     themeIconScreenContent(
         theme = uiState.theme,
+        useDynamicColors = uiState.useDynamicColors,
         icon = uiState.icon,
         onThemeChange = { viewModel.updateTheme(it) },
+        onDynamicColorsChange = { viewModel.updateDynamicColors(it) },
         onIconChange = { viewModel.updateIcon(it) },
         onBackClick = onBackClick,
     )
@@ -70,8 +69,10 @@ fun themeIconScreen(
 @Composable
 internal fun themeIconScreenContent(
     theme: AppTheme = AppTheme.SYSTEM,
+    useDynamicColors: Boolean = true,
     icon: AppIcon = AppIcon.DEFAULT,
     onThemeChange: (AppTheme) -> Unit = {},
+    onDynamicColorsChange: (Boolean) -> Unit = {},
     onIconChange: (AppIcon) -> Unit = {},
     onBackClick: () -> Unit = {},
 ) {
@@ -107,6 +108,13 @@ internal fun themeIconScreenContent(
 
             HorizontalDivider()
 
+            dynamicColorsSection(
+                useDynamicColors = useDynamicColors,
+                onDynamicColorsChange = onDynamicColorsChange,
+            )
+
+            HorizontalDivider()
+
             iconSection(
                 theme = theme,
                 icon = icon,
@@ -132,7 +140,7 @@ private fun themeSection(
 
     Column(modifier = Modifier.selectableGroup()) {
         // Светлая тема
-        themeRadioButton(
+        daysRadioButton(
             text = stringResource(R.string.light),
             selected = theme == AppTheme.LIGHT,
             onClick = { onThemeChange(AppTheme.LIGHT) },
@@ -140,7 +148,7 @@ private fun themeSection(
         )
 
         // Тёмная тема
-        themeRadioButton(
+        daysRadioButton(
             text = stringResource(R.string.dark),
             selected = theme == AppTheme.DARK,
             onClick = { onThemeChange(AppTheme.DARK) },
@@ -148,12 +156,55 @@ private fun themeSection(
         )
 
         // Системная тема
-        themeRadioButton(
+        daysRadioButton(
             text = stringResource(R.string.system),
             selected = theme == AppTheme.SYSTEM,
             onClick = { onThemeChange(AppTheme.SYSTEM) },
             onClickable = theme != AppTheme.SYSTEM,
         )
+    }
+}
+
+/**
+ * Секция выбора динамических цветов.
+ */
+@Composable
+private fun dynamicColorsSection(
+    useDynamicColors: Boolean,
+    onDynamicColorsChange: (Boolean) -> Unit,
+) {
+    // Секция отображается только если доступны динамические цвета (Android 12+)
+    val dynamicColorAvailable = DynamicColors.isDynamicColorAvailable()
+
+    if (dynamicColorAvailable) {
+        Text(
+            text = stringResource(R.string.dynamic_colors),
+            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.use_dynamic_colors),
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(
+                    checked = useDynamicColors,
+                    onCheckedChange = onDynamicColorsChange,
+                )
+            }
+            Text(
+                text = stringResource(R.string.dynamic_colors_hint),
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -220,46 +271,5 @@ private fun iconGrid(
                 )
             }
         }
-    }
-}
-
-/**
- * Radio button для выбора темы.
- */
-@Composable
-private fun themeRadioButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    onClickable: Boolean = true,
-) {
-    val rowModifier =
-        if (onClickable) {
-            Modifier.selectable(
-                selected = selected,
-                onClick = onClick,
-                role = Role.RadioButton,
-            )
-        } else {
-            Modifier
-        }
-
-    Row(
-        modifier =
-            rowModifier
-                .fillMaxWidth()
-                .height(56.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = null, // null recommended for accessibility with screen readers
-        )
-        Text(
-            text = text,
-            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 16.dp),
-            textAlign = TextAlign.Start,
-        )
     }
 }

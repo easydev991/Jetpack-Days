@@ -109,7 +109,7 @@ android-test-report:
 	fi
 
 # Подготовка к публикации
-## release: Создать подписанную AAB-сборку для публикации (аналог testflight в iOS)
+## release: Создать подписанную AAB-сборку для публикации (аналог testflight в iOS). Файл: dayscounter{VERSION_CODE}.aab
 release:
 	@echo "$(YELLOW)Проверка секретов для подписи...$(RESET)"
 	@if [ ! -d ".secrets" ]; then \
@@ -132,8 +132,10 @@ release:
 	echo "$(GREEN)VERSION_CODE обновлен с $$CURRENT_VERSION_CODE на $$NEW_VERSION_CODE$(RESET)"
 	@echo "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)"
 	@./gradlew bundleRelease uploadCrashlyticsMappingFileRelease
-	@cp app/build/outputs/bundle/release/app-release.aab dayscounter.aab
-	@echo "$(GREEN)AAB создан и mapping files загружены в Firebase: dayscounter.aab$(RESET)"
+	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
+	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	cp app/build/outputs/bundle/release/app-release.aab "$$OUTPUT_FILE"; \
+	echo "$(GREEN)AAB создан и mapping files загружены в Firebase: $$OUTPUT_FILE$(RESET)"
 	@echo "$(YELLOW)Версия для публикации: $$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2) (build $$NEW_VERSION_CODE)$(RESET)"
 	@echo "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)"
 

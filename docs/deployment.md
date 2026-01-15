@@ -12,7 +12,7 @@ make release
 
 1. Загружает секреты для подписи из репозитория `android-secrets`
 2. Увеличивает номер сборки (`VERSION_CODE`) на 1
-3. Создает подписанную AAB-сборку: `dayscounter.aab`
+3. Создает подписанную AAB-сборку: `dayscounter{VERSION_CODE}.aab` (например, `dayscounter1.aab`, `dayscounter2.aab`)
 4. Отображает версию и номер сборки
 
 ## Управление версией
@@ -44,9 +44,12 @@ VERSION_CODE=1
 Пример:
 
 ```
-VERSION_NAME=1.0, VERSION_CODE=1 → make release → VERSION_CODE=2 → AAB: 1.0 (build 2)
-VERSION_NAME=1.0, VERSION_CODE=2 → make release → VERSION_CODE=3 → AAB: 1.0 (build 3)
+VERSION_NAME=1.0, VERSION_CODE=1 → make release → VERSION_CODE=2 → AAB: dayscounter2.aab (1.0 build 2)
+VERSION_NAME=1.0, VERSION_CODE=2 → make release → VERSION_CODE=3 → AAB: dayscounter3.aab (1.0 build 3)
+VERSION_NAME=1.1, VERSION_CODE=3 → make release → VERSION_CODE=4 → AAB: dayscounter4.aab (1.1 build 4)
 ```
+
+**Примечание:** Номер сборки (VERSION_CODE) никогда не сбрасывается при повышении версии приложения, поэтому он всегда уникален и монотонно возрастает.
 
 ## Публикация
 

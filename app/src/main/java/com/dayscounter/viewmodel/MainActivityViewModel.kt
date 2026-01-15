@@ -44,4 +44,15 @@ class MainActivityViewModel(
             started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
             initialValue = AppTheme.SYSTEM,
         )
+
+    /**
+     * Настройка использования динамических цветов. Подписывается на изменения из DataStore.
+     * При первом запуске возвращает значение по умолчанию (true).
+     */
+    val useDynamicColors: StateFlow<Boolean> =
+        dataStore.useDynamicColors.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
+            initialValue = true,
+        )
 }

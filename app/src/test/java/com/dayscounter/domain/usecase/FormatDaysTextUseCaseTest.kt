@@ -169,12 +169,14 @@ class FormatDaysTextUseCaseTest {
                 totalDays = -7,
                 timestamp = 1234567890000L,
             )
+        // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
+        // а DaysFormatterImpl сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                totalDays = 7,
+                totalDays = -7,
                 showMinus = false,
             )
         } returns "7 дней"
@@ -235,12 +237,14 @@ class FormatDaysTextUseCaseTest {
                 totalDays = -40,
                 timestamp = 1234567890000L,
             )
+        // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
+        // а DaysFormatterImpl сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
-                totalDays = 40,
+                totalDays = -40,
                 showMinus = false,
             )
         } returns "40 дней"
@@ -301,12 +305,14 @@ class FormatDaysTextUseCaseTest {
                 totalDays = -800,
                 timestamp = 1234567890000L,
             )
+        // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
+        // а DaysFormatterImpl сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
-                totalDays = 800,
+                totalDays = -800,
                 showMinus = false,
             )
         } returns "800 дней"

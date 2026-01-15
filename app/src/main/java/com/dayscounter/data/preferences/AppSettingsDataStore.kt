@@ -25,6 +25,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  */
 private object PreferencesKeys {
     val THEME_KEY = stringPreferencesKey("theme")
+    val USE_DYNAMIC_COLORS_KEY = stringPreferencesKey("use_dynamic_colors")
     val ICON_KEY = stringPreferencesKey("icon")
     val SORT_ORDER_KEY = stringPreferencesKey("sort_order")
 }
@@ -43,6 +44,17 @@ class AppSettingsDataStore(
     suspend fun setTheme(theme: AppTheme) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME_KEY] = theme.name
+        }
+    }
+
+    /**
+     * Сохраняет настройку использования динамических цветов.
+     *
+     * @param useDynamicColors Использовать динамические цвета
+     */
+    suspend fun setUseDynamicColors(useDynamicColors: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_DYNAMIC_COLORS_KEY] = useDynamicColors.toString()
         }
     }
 
@@ -83,6 +95,23 @@ class AppSettingsDataStore(
                         AppTheme.SYSTEM
                     }
                 } ?: AppTheme.SYSTEM
+            }
+
+    /**
+     * Flow для отслеживания настройки использования динамических цветов.
+     * При первом запуске возвращает значение по умолчанию (true).
+     */
+    val useDynamicColors: Flow<Boolean> =
+        context.dataStore.data
+            .map { preferences ->
+                @Suppress("SwallowedException")
+                preferences[PreferencesKeys.USE_DYNAMIC_COLORS_KEY]?.let { useDynamic ->
+                    try {
+                        useDynamic.toBoolean()
+                    } catch (e: IllegalArgumentException) {
+                        true
+                    }
+                } ?: true
             }
 
     /**
