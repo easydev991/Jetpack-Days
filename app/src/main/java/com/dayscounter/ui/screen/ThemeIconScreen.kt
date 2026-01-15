@@ -179,7 +179,7 @@ private fun iconSection(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = dimensionResource(R.dimen.spacing_large)),
+                .padding(bottom = dimensionResource(R.dimen.spacing_small)),
     )
 
     iconGrid(

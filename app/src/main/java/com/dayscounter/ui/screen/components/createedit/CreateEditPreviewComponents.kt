@@ -172,13 +172,13 @@ internal fun previewDaysContentInner(
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_extra_large)),
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_regular)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             previewHeader()
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
             previewDays(daysText)
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
             previewFooter(daysBetween)
         }
     }

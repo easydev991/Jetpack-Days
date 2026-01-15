@@ -42,7 +42,7 @@ internal fun errorContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(dimensionResource(R.dimen.spacing_huge)),
+                .padding(dimensionResource(R.dimen.spacing_large)),
         contentAlignment = Alignment.Center,
     ) {
         Text(

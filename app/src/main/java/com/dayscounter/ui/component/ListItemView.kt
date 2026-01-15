@@ -54,7 +54,7 @@ private fun itemColorTag(colorTag: Int) {
                 .clip(CircleShape)
                 .background(color = Color(colorTag)),
     )
-    Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_extra_large)))
+    Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_regular)))
 }
 
 /**
@@ -80,7 +80,7 @@ private fun itemTitleAndDetails(
 
         // Описание события (до 2 строк)
         if (item.details.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
             Text(
                 text = item.details,
                 style = MaterialTheme.typography.bodySmall,
@@ -161,7 +161,7 @@ fun listItemView(
                             onTap = { params.onClick(params.item) },
                         )
                     }
-                }.padding(dimensionResource(R.dimen.spacing_extra_large)),
+                }.padding(dimensionResource(R.dimen.spacing_regular)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (params.item.colorTag != null) {

@@ -182,11 +182,11 @@ private fun appDataScreenBody(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(paddingValues)
-                .padding(dimensionResource(R.dimen.spacing_medium)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
+                .padding(dimensionResource(R.dimen.spacing_xsmall)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xxsmall)),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
         if (params.uiState.hasItems) {
             appDataScreenExportButton(params)

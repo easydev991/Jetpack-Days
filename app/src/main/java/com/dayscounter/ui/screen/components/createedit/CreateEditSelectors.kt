@@ -54,7 +54,7 @@ internal fun colorSelector(
         color = MaterialTheme.colorScheme.onSurface,
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -120,7 +120,7 @@ internal fun displayOptionSelector(
         color = MaterialTheme.colorScheme.onSurface,
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
 
     DisplayOption.entries.forEach { option ->
         displayOptionSurface(

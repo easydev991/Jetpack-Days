@@ -99,7 +99,7 @@ internal fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(dimensionResource(R.dimen.spacing_huge)),
+                .padding(dimensionResource(R.dimen.spacing_large)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -110,7 +110,7 @@ internal fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
 
         Text(
             text = stringResource(R.string.create_your_first_item),
@@ -131,7 +131,7 @@ internal fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(dimensionResource(R.dimen.spacing_huge)),
+                .padding(dimensionResource(R.dimen.spacing_large)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -142,7 +142,7 @@ internal fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
 
         Text(
             text = stringResource(R.string.try_different_search_terms),
@@ -182,7 +182,7 @@ internal fun errorContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(dimensionResource(R.dimen.spacing_huge)),
+                .padding(dimensionResource(R.dimen.spacing_large)),
         contentAlignment = Alignment.Center,
     ) {
         Text(

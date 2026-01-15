@@ -81,12 +81,12 @@ private fun mainFormSections(
         title = params.uiStates.title,
         onValueChange = { onValueChange() },
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     detailsSection(
         details = params.uiStates.details,
         onValueChange = { onValueChange() },
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     dateSection(
         selectedDate = params.uiStates.selectedDate,
         showDatePicker = params.showDatePicker,
@@ -105,7 +105,7 @@ private fun colorAndDisplayOptionSection(
         selectedColor = params.uiStates.selectedColor,
         onValueChange = onValueChange,
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     displayOptionSelector(
         selectedDisplayOption = params.uiStates.selectedDisplayOption,
         onValueChange = onValueChange,
@@ -145,10 +145,10 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
                 .fillMaxSize()
                 .padding(params.paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(dimensionResource(R.dimen.spacing_extra_large)),
+                .padding(dimensionResource(R.dimen.spacing_regular)),
     ) {
         mainFormSections(params, onValueChange)
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
 
         // Предпросмотр дней (закомментировано)
         // if (params.uiStates.selectedDate.value != null) {
@@ -156,18 +156,18 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
         //         selectedDate = params.uiStates.selectedDate.value!!,
         //         displayOption = params.uiStates.selectedDisplayOption.value,
         //     )
-        //     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        //     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
         // }
 
         colorAndDisplayOptionSection(params, onValueChange)
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
         buttonsSection(
             uiStates = params.uiStates,
             itemId = params.itemId,
             viewModel = params.viewModel,
             onBackClick = params.onBackClick,
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     }
 }
 

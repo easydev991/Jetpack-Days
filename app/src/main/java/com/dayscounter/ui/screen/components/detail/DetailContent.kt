@@ -82,38 +82,38 @@ internal fun detailContentInner(
             modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(dimensionResource(R.dimen.spacing_huge)),
+                .padding(dimensionResource(R.dimen.spacing_large)),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
 
         // Цветовая метка
         if (item.colorTag != null) {
             colorTagSection(item.colorTag)
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
         }
 
         // Заголовок события
         titleSection(item.title)
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_extra_large)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
 
         // Дата события
         dateSection(item.timestamp, formatter)
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_massive)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xlarge)))
 
         // Количество дней
         daysCountSection(item, getFormattedDaysForItemUseCase)
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_massive)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xlarge)))
 
         // Детали события (если есть)
         if (item.details.isNotEmpty()) {
             detailsSection(item.details)
         }
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_huge)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
 
         // Информация об опции отображения
         displayOptionInfoSection(item.displayOption)
@@ -194,7 +194,7 @@ fun daysCountSection(
             textStyle = DaysCountTextStyle.EMPHASIZED,
         )
 
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
 
         Text(
             text = stringResource(R.string.elapsed),
@@ -240,7 +240,7 @@ fun detailsSection(details: String) {
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_extra_large)),
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_regular)),
         ) {
             Text(
                 text = stringResource(R.string.details),
@@ -248,7 +248,7 @@ fun detailsSection(details: String) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
 
             Text(
                 text = details,

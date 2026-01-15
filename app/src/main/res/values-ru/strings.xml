@@ -76,7 +76,7 @@
     <string name="rate_the_app">Оценить приложение</string>
     <string name="share_the_app">Поделиться приложением</string>
     <string name="share_chooser_title">Поделиться приложением</string>
-    <string name="share_text">JetpackDays - приложение для отслеживания дней</string>
+    <string name="share_text">%1$s - приложение для отслеживания дней</string>
     <string name="github_page">Ссылка на GitHub</string>
     <string name="app_version">Версия приложения: %1$s</string>
 

@@ -21,7 +21,7 @@ fun previewDaysContentTodayPreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.spacing_extra_large)),
+                    .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
             previewDaysContentInner(java.time.LocalDate.now())
@@ -37,7 +37,7 @@ fun previewDaysContentPastPreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.spacing_extra_large)),
+                    .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
             previewDaysContentInner(
@@ -57,7 +57,7 @@ fun previewDaysContentFuturePreview() {
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.spacing_extra_large)),
+                    .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
             previewDaysContentInner(

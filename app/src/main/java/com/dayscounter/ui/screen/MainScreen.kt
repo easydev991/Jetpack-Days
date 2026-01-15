@@ -367,7 +367,7 @@ private fun itemsListContent(params: ItemsListParams) {
         modifier = Modifier.fillMaxSize(),
         state = params.listState,
         contentPadding = params.paddingValues,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
     ) {
         items(
             items = params.items,

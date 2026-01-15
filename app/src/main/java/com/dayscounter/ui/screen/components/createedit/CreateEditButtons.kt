@@ -48,7 +48,7 @@ internal fun buttonsSection(
     // Кнопки
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
     ) {
         OutlinedButton(onClick = onBackClick) {
             Text(stringResource(R.string.cancel))

@@ -64,13 +64,13 @@ fun moreScreen(navController: NavHostController? = null) {
                     .fillMaxSize()
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
-                    .padding(dimensionResource(R.dimen.spacing_medium)),
+                    .padding(dimensionResource(R.dimen.spacing_xsmall)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Кнопки настроек
             settingsButtons(navController)
 
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
             // Кнопки действий
             actionButtons(context)
@@ -96,7 +96,7 @@ private fun settingsButtons(navController: NavHostController?) {
         },
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Данные приложения"
     moreButton(
@@ -118,7 +118,7 @@ private fun actionButtons(context: Context) {
         onClick = { sendFeedback(context) },
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Оценить приложение"
     moreButton(
@@ -126,7 +126,7 @@ private fun actionButtons(context: Context) {
         onClick = { rateApp(context) },
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Поделиться приложением"
     moreButton(
@@ -134,7 +134,7 @@ private fun actionButtons(context: Context) {
         onClick = { shareApp(context) },
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Страница на GitHub"
     moreButton(
@@ -151,7 +151,7 @@ private fun appVersionText() {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.spacing_medium)),
+                .padding(dimensionResource(R.dimen.spacing_xsmall)),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         textAlign = TextAlign.Center,
@@ -241,7 +241,10 @@ private fun shareApp(context: Context) {
             type = "text/plain"
             putExtra(
                 Intent.EXTRA_TEXT,
-                "${context.getString(R.string.share_text)}\n${AppConstants.APP_SHARE_URL}",
+                context.getString(
+                    R.string.share_text,
+                    context.getString(R.string.app_display_name),
+                ) + "\n" + AppConstants.APP_SHARE_URL,
             )
             putExtra(Intent.EXTRA_TITLE, context.getString(R.string.share_chooser_title))
         }
