@@ -20,6 +20,9 @@ kotlinxSerialization = "1.8.0"
 junitJupiter = "6.0.1"
 mockk = "1.14.7"
 material = "1.7.8"
+firebase-bom = "34.7.0"
+google-services = "4.4.4"
+firebase-crashlytics-gradle = "3.0.3"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -53,6 +56,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -60,4 +65,6 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version = "2.3.0" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
 

@@ -1,17 +1,14 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.TimePeriod
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-/**
- * Use case для вычисления разницы между датами.
- *
- * Вычисляет период времени между датой события и текущей датой,
- * разлагая его на годы, месяцы и дни.
- */
 @Suppress("TooGenericExceptionCaught")
 class CalculateDaysDifferenceUseCase {
     /**
@@ -27,7 +24,12 @@ class CalculateDaysDifferenceUseCase {
     ): DaysDifference {
         return try {
             // Конвертируем timestamp в LocalDate
-            val eventDate = LocalDateTimeUtil.fromTimestamp(eventTimestamp).toLocalDate()
+            val eventDate =
+                LocalDateTime
+                    .ofInstant(
+                        Instant.ofEpochMilli(eventTimestamp),
+                        ZoneId.systemDefault(),
+                    ).toLocalDate()
 
             // Вычисляем разницу в днях
             val totalDays = ChronoUnit.DAYS.between(eventDate, currentDate).toInt()
@@ -46,12 +48,12 @@ class CalculateDaysDifferenceUseCase {
                 timestamp = eventTimestamp,
             )
         } catch (e: Exception) {
-            // Логируем ошибку и возвращаем Today как fallback
-            android.util.Log.e(
-                "CalculateDaysDifferenceUseCase",
-                "Ошибка при вычислении разницы дат: ${e.message}",
+            // Логируем критическую ошибку в Crashlytics
+            CrashlyticsHelper.logException(
                 e,
+                "Ошибка при вычислении разницы дат: $eventTimestamp - $currentDate",
             )
+            // Возвращаем Today как fallback
             DaysDifference.Today(timestamp = eventTimestamp)
         }
     }
@@ -107,16 +109,5 @@ class CalculateDaysDifferenceUseCase {
             months = months,
             days = days,
         )
-    }
-
-    /**
-     * Вспомогательный объект для работы с датами.
-     */
-    private object LocalDateTimeUtil {
-        fun fromTimestamp(timestamp: Long) =
-            java.time.LocalDateTime.ofInstant(
-                java.time.Instant.ofEpochMilli(timestamp),
-                ZoneId.systemDefault(),
-            )
     }
 }

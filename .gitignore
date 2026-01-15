@@ -54,6 +54,9 @@ local.properties
 # Secrets folder (loaded from secrets repository)
 .secrets/
 
+# Firebase configuration
+app/google-services.json
+
 # Release builds (AAB files)
 *.aab
 

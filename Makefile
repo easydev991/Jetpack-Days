@@ -131,9 +131,9 @@ release:
 	sed -i.tmp "s/^VERSION_CODE=.*/VERSION_CODE=$$NEW_VERSION_CODE/" gradle.properties && rm -f gradle.properties.tmp; \
 	echo "$(GREEN)VERSION_CODE обновлен с $$CURRENT_VERSION_CODE на $$NEW_VERSION_CODE$(RESET)"
 	@echo "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)"
-	@./gradlew bundleRelease
+	@./gradlew bundleRelease uploadCrashlyticsMappingFileRelease
 	@cp app/build/outputs/bundle/release/app-release.aab dayscounter.aab
-	@echo "$(GREEN)AAB создан: dayscounter.aab$(RESET)"
+	@echo "$(GREEN)AAB создан и mapping files загружены в Firebase: dayscounter.aab$(RESET)"
 	@echo "$(YELLOW)Версия для публикации: $$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2) (build $$NEW_VERSION_CODE)$(RESET)"
 	@echo "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)"
 

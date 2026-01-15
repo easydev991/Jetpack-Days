@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
@@ -47,13 +49,26 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Отключаем Crashlytics в debug сборках
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
+        }
         release {
-            isMinifyEnabled = false
+            // Включаем Crashlytics в release сборках
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
+
+            // Включаем обфускацию для лучшей работы Crashlytics
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
+
+            // Автоматическая загрузка mapping files в Firebase
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = true
+            }
         }
     }
     compileOptions {
@@ -107,6 +122,12 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.android)
     androidTestImplementation(libs.kotlinx.coroutines.android)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+
+    // Firebase BOM (Bill of Materials) - управляет версиями всех Firebase библиотек
+    implementation(platform(libs.firebase.bom))
+
+    // Firebase Crashlytics - версия берется из BOM
+    implementation(libs.firebase.crashlytics)
 
     // Testing
     testImplementation(libs.junit)

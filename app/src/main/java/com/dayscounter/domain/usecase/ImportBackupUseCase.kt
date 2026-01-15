@@ -5,6 +5,7 @@ import android.net.Uri
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -29,12 +30,18 @@ class ImportBackupUseCase(
     private val context: Context,
     private val logger: Logger = com.dayscounter.util.AndroidLogger(),
 ) {
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+        }
+
     /**
      * Импортирует записи из файла.
      *
      * @param uri URI файла для импорта
      * @return Result с количеством импортированных записей или ошибкой
      */
+    @OptIn(ExperimentalSerializationApi::class)
     suspend operator fun invoke(uri: Uri): Result<Int> =
         try {
             logger.d(TAG, "Начало импорта данных")
@@ -50,7 +57,7 @@ class ImportBackupUseCase(
             // Читаем JSON из файла
             val backupItems: List<BackupItem> =
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    Json { ignoreUnknownKeys = true }.decodeFromStream(inputStream)
+                    json.decodeFromStream(inputStream)
                 } ?: throw BackupException("Не удалось открыть InputStream для чтения")
 
             logger.d(TAG, "В файле ${backupItems.size} записей")
