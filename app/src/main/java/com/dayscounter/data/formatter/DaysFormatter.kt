@@ -53,12 +53,14 @@ interface DaysFormatter {
      * @param displayOption Опция отображения
      * @param resourceProvider Провайдер строковых ресурсов
      * @param totalDays Общее количество дней (используется для DisplayOption.DAY)
+     * @param showMinus Показывать ли минус для отрицательных чисел
      * @return Отформатированная строка согласно опции отображения
      */
     fun formatComposite(
         period: TimePeriod,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
-        totalDays: Int = 0,
+        totalDays: Int,
+        showMinus: Boolean,
     ): String
 }

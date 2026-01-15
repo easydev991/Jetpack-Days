@@ -31,12 +31,14 @@ class GetFormattedDaysForItemUseCase(
      * @param item Элемент для которого нужно получить форматированный текст
      * @param currentDate Текущая дата (опционально, для тестирования)
      * @param defaultDisplayOption Опция отображения по умолчанию (если item.displayOption == DEFAULT)
+     * @param showMinus Показывать ли минус для отрицательных чисел (по умолчанию true)
      * @return Форматированная строка с количеством дней (например, "5 дней", "1 год 2 месяца")
      */
     operator fun invoke(
         item: Item,
         currentDate: LocalDate? = null,
         defaultDisplayOption: DisplayOption = DisplayOption.DAY,
+        showMinus: Boolean,
     ): String {
         // Определяем опцию отображения
         val displayOption =
@@ -60,6 +62,7 @@ class GetFormattedDaysForItemUseCase(
                 difference = difference,
                 displayOption = displayOption,
                 resourceProvider = resourceProvider,
+                showMinus = showMinus,
             )
         } catch (e: Exception) {
             // Обрабатываем исключения при форматировании

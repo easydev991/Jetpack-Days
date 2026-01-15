@@ -1,8 +1,8 @@
 package com.dayscounter.domain.model
 
-import com.dayscounter.domain.model.DisplayOption.DAY
-import com.dayscounter.domain.model.DisplayOption.MONTH_DAY
-import com.dayscounter.domain.model.DisplayOption.YEAR_MONTH_DAY
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.dayscounter.R
 
 /**
  * Опция отображения дней для события.
@@ -63,5 +63,20 @@ enum class DisplayOption {
             DAY -> "day"
             MONTH_DAY -> "monthDay"
             YEAR_MONTH_DAY -> "yearMonthDay"
+            DEFAULT -> "day"
+        }
+
+    /**
+     * Возвращает локализованное название опции отображения.
+     *
+     * @return Локализованная строка с названием опции
+     */
+    @Composable
+    fun getLocalizedTitle(): String =
+        when (this) {
+            DAY -> stringResource(R.string.days_only)
+            MONTH_DAY -> stringResource(R.string.months_and_days)
+            YEAR_MONTH_DAY -> stringResource(R.string.years_months_and_days)
+            DEFAULT -> stringResource(R.string.days_only)
         }
 }

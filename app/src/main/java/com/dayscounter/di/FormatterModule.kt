@@ -8,6 +8,7 @@ import com.dayscounter.data.formatter.ResourceProviderImpl
 import com.dayscounter.data.formatter.StubResourceProvider
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
+import com.dayscounter.domain.usecase.GetDaysAnalysisTextUseCase
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 
 /**
@@ -56,5 +57,25 @@ object FormatterModule {
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
             resourceProvider,
+        )
+
+    /**
+     * Создает [GetDaysAnalysisTextUseCase].
+     *
+     * @param calculateDaysDifferenceUseCase Use case для вычисления разницы дат
+     * @param getFormattedDaysForItemUseCase Use case для получения форматированного текста
+     * @param resourceProvider Провайдер строковых ресурсов для локализации
+     * @return Экземпляр GetDaysAnalysisTextUseCase
+     */
+    @Suppress("MaxLineLength")
+    fun createGetDaysAnalysisTextUseCase(
+        calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
+        getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
+        resourceProvider: ResourceProvider,
+    ): GetDaysAnalysisTextUseCase =
+        GetDaysAnalysisTextUseCase(
+            calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+            getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+            resourceProvider = resourceProvider,
         )
 }

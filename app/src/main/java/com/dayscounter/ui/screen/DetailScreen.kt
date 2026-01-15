@@ -11,9 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
+import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.ui.screen.components.detail.detailContentByState
 import com.dayscounter.ui.screen.components.detail.detailTopAppBar
 import com.dayscounter.viewmodel.DetailScreenState
@@ -40,36 +43,38 @@ fun detailScreen(
     onBackClick: () -> Unit = {},
     onEditClick: (Long) -> Unit = {},
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
-
-    // Создаем use case для форматирования с учетом displayOption
+    val context = LocalContext.current
+    // Создаем use cases для форматирования
     val resourceProvider =
-        com.dayscounter.di.FormatterModule.createResourceProvider(
-            context =
-                androidx.compose.ui.platform.LocalContext.current,
-        )
-    val calculateDaysDifferenceUseCase =
         com.dayscounter.di.FormatterModule
-            .createCalculateDaysDifferenceUseCase()
+            .createResourceProvider(context)
     val daysFormatter =
         com.dayscounter.di.FormatterModule
             .createDaysFormatter()
-    val formatDaysTextUseCase =
-        com.dayscounter.di.FormatterModule
-            .createFormatDaysTextUseCase(daysFormatter)
+    val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
+    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
     val getFormattedDaysForItemUseCase =
-        com.dayscounter.di.FormatterModule.createGetFormattedDaysForItemUseCase(
-            calculateDaysDifferenceUseCase,
-            formatDaysTextUseCase,
-            resourceProvider,
-        )
+        com.dayscounter.di.FormatterModule
+            .createGetFormattedDaysForItemUseCase(
+                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                formatDaysTextUseCase = formatDaysTextUseCase,
+                resourceProvider = resourceProvider,
+            )
+    val getDaysAnalysisTextUseCase =
+        com.dayscounter.di.FormatterModule
+            .createGetDaysAnalysisTextUseCase(
+                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+                resourceProvider = resourceProvider,
+            )
+
+    val uiState by viewModel.uiState.collectAsState()
+    val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
     detailScreenContent(
         params =
             DetailScreenParams(
                 itemId = itemId,
-                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
                 onBackClick = onBackClick,
                 onEditClick = onEditClick,
                 onDeleteClick = {
@@ -83,6 +88,7 @@ fun detailScreen(
                 onCancelDelete = {
                     viewModel.cancelDelete()
                 },
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
             ),
         modifier = modifier,
         uiState = uiState,
@@ -115,8 +121,8 @@ private fun detailScreenContent(
     ) { paddingValues ->
         detailContentByState(
             uiState = uiState,
+            getDaysAnalysisTextUseCase = params.getDaysAnalysisTextUseCase,
             modifier = Modifier.padding(paddingValues),
-            getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
         )
     }
 

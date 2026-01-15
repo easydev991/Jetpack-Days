@@ -113,7 +113,14 @@ class DaysFormatterImplTest {
         } returns "365 дней"
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.DAY, resourceProvider, totalDays)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("365 дней", result, "Ожидались только дни для опции DAY")
@@ -137,7 +144,14 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("2 мес. 5 дн.", result, "Ожидался сокращённый формат")
@@ -161,7 +175,14 @@ class DaysFormatterImplTest {
         } returns "10 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("48 мес. 10 дн.", result, "Ожидалась конвертация лет в месяцы для MONTH_DAY (сокращённый формат)")
@@ -188,7 +209,14 @@ class DaysFormatterImplTest {
         every { resourceProvider.getString(ResourceIds.DAYS_ABBREVIATED) } returns "дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("14 мес. 3 дн.", result, "Ожидалась сумма лет и месяцев для MONTH_DAY")
@@ -206,7 +234,14 @@ class DaysFormatterImplTest {
         } returns "2 месяца"
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("2 месяца", result, "Ожидался полный формат")
@@ -236,7 +271,14 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат")
@@ -260,7 +302,14 @@ class DaysFormatterImplTest {
         } returns "5 дн."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("2 мес. 5 дн.", result, "Ожидался краткий формат (сокращённый)")
@@ -278,9 +327,208 @@ class DaysFormatterImplTest {
         } returns "1 г."
 
         // When
-        val result = formatter.formatComposite(period, DisplayOption.YEAR_MONTH_DAY, resourceProvider, totalDays = 0)
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = false,
+            )
 
         // Then
         assertEquals("1 г.", result, "Ожидался полный формат")
+    }
+
+    // Тесты с showMinus = true
+
+    @Test
+    fun `formatComposite when DAY option and showMinus true with positive days then returns positive days`() {
+        // Given
+        val period = TimePeriod(years = 0, months = 0, days = 10)
+        val totalDays = 10
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 10,
+            )
+        } returns "10 дней"
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("10 дней", result, "Ожидались 10 дней для showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when DAY option and showMinus true with negative days then returns negative days`() {
+        // Given
+        val period = TimePeriod(years = 0, months = 0, days = 7)
+        val totalDays = -7
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = -7,
+            )
+        } returns "-7 дней"
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("-7 дней", result, "Ожидались -7 дней для showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when MONTH_DAY option and showMinus true with positive values`() {
+        // Given
+        val period = TimePeriod(years = 0, months = 2, days = 5)
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 2,
+            )
+        } returns "2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 5,
+            )
+        } returns "5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when MONTH_DAY option and showMinus true with negative values`() {
+        // Given
+        val period = TimePeriod(years = 0, months = 2, days = 5)
+        val totalDays = -65
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 2,
+            )
+        } returns "2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 5,
+            )
+        } returns "5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when YEAR_MONTH_DAY option and showMinus true with positive values`() {
+        // Given
+        val period = TimePeriod(years = 1, months = 2, days = 5)
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 1,
+            )
+        } returns "1 г."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 2,
+            )
+        } returns "2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 5,
+            )
+        } returns "5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays = 0,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
+    }
+
+    @Test
+    fun `formatComposite when YEAR_MONTH_DAY option and showMinus true with negative values`() {
+        // Given
+        val period = TimePeriod(years = 1, months = 2, days = 5)
+        val totalDays = -800
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 1,
+            )
+        } returns "1 г."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.months_count,
+                quantity = 2,
+            )
+        } returns "2 мес."
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.days_count,
+                quantity = 5,
+            )
+        } returns "5 дн."
+
+        // When
+        val result =
+            formatter.formatComposite(
+                period,
+                DisplayOption.YEAR_MONTH_DAY,
+                resourceProvider,
+                totalDays,
+                showMinus = true,
+            )
+
+        // Then
+        assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
     }
 }

@@ -5,32 +5,45 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.exception.ItemException.UpdateFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+private const val STATE_TIMEOUT_MS = 5000L
+private const val TAG = "MainScreenViewModel"
 
 /**
  * ViewModel для управления состоянием главного экрана со списком событий.
  *
  * Отвечает за загрузку, управление и отображение списка событий.
+ * Порядок сортировки сохраняется в DataStore для сохранения выбора пользователя.
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MainScreenViewModel(
     private val repository: ItemRepository,
+    private val dataStore: AppSettingsDataStore,
+    private val logger: Logger = AndroidLogger(),
 ) : ViewModel() {
     companion object {
-        fun factory(repository: ItemRepository): ViewModelProvider.Factory =
+        fun factory(
+            repository: ItemRepository,
+            dataStore: AppSettingsDataStore,
+        ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    MainScreenViewModel(repository)
+                    MainScreenViewModel(repository, dataStore)
                 }
             }
     }
@@ -48,10 +61,16 @@ class MainScreenViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     /**
-     * Порядок сортировки.
+     * Порядок сортировки (читается из DataStore).
      */
-    private val _sortOrder = MutableStateFlow(SortOrder.DESCENDING)
-    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
+    val sortOrder: StateFlow<SortOrder> =
+        dataStore.sortOrder.stateIn(
+            scope = viewModelScope,
+            started =
+                kotlinx.coroutines.flow.SharingStarted
+                    .WhileSubscribed(STATE_TIMEOUT_MS),
+            initialValue = SortOrder.DESCENDING,
+        )
 
     /**
      * Количество элементов (для отображения кнопки сортировки).
@@ -79,10 +98,10 @@ class MainScreenViewModel(
     private fun observeItems() {
         viewModelScope.launch {
             combine(
-                _sortOrder.flatMapLatest { sortOrder -> repository.getAllItems(sortOrder) },
+                sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
                 _searchQuery,
             ) { items, query ->
-                println("Обновление списка: количество элементов=${items.size}, запрос поиска='$query'")
+                logger.d(TAG, "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\'")
                 if (query.isEmpty()) {
                     items
                 } else {
@@ -90,20 +109,21 @@ class MainScreenViewModel(
                         items.filter { item ->
                             val titleContains = item.title.contains(query, ignoreCase = true)
                             val detailsContains = item.details.contains(query, ignoreCase = true)
-                            println(
-                                "Фильтрация: элемент='${item.title}', " +
-                                    "детали='${item.details}', " +
-                                    "запрос='$query', " +
+                            logger.d(
+                                TAG,
+                                "Фильтрация: элемент=\'${item.title}\', " +
+                                    "детали=\'${item.details}\', " +
+                                    "запрос=\'$query\', " +
                                     "titleContains=$titleContains, " +
                                     "detailsContains=$detailsContains",
                             )
                             titleContains || detailsContains
                         }
-                    println("После фильтрации: ${filteredItems.size} элементов")
+                    logger.d(TAG, "После фильтрации: ${filteredItems.size} элементов")
                     filteredItems
                 }
             }.collect { items ->
-                println("Обновление UI: количество элементов=${items.size}")
+                logger.d(TAG, "Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
                 _uiState.value = MainScreenState.Success(items)
             }
@@ -125,8 +145,10 @@ class MainScreenViewModel(
      * @param order Новый порядок сортировки
      */
     fun updateSortOrder(order: SortOrder) {
-        _sortOrder.value = order
-        println("MainScreenViewModel: Порядок сортировки обновлен: $order")
+        viewModelScope.launch {
+            dataStore.setSortOrder(order)
+            logger.d(TAG, "Порядок сортировки обновлен и сохранен: $order")
+        }
     }
 
     /**
@@ -138,11 +160,10 @@ class MainScreenViewModel(
         viewModelScope.launch {
             try {
                 repository.deleteItem(item)
-                println("MainScreenViewModel: Событие удалено: ${item.title}")
+                logger.d(TAG, "Событие удалено: ${item.title}")
             } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
-                println("MainScreenViewModel: $message")
-                e.printStackTrace()
+                logger.e(TAG, message, e)
                 _uiState.value = MainScreenState.Error(message)
             }
         }
@@ -155,7 +176,7 @@ class MainScreenViewModel(
      */
     fun requestDelete(item: Item) {
         _showDeleteDialog.value = item
-        println("MainScreenViewModel: Запрос на удаление: ${item.title}")
+        logger.d(TAG, "Запрос на удаление: ${item.title}")
     }
 
     /**
@@ -164,7 +185,7 @@ class MainScreenViewModel(
     fun confirmDelete() {
         _showDeleteDialog.value?.let { item ->
             deleteItem(item)
-            println("MainScreenViewModel: Удаление подтверждено: ${item.title}")
+            logger.d(TAG, "Удаление подтверждено: ${item.title}")
         }
         _showDeleteDialog.value = null
     }
@@ -174,7 +195,7 @@ class MainScreenViewModel(
      */
     fun cancelDelete() {
         _showDeleteDialog.value = null
-        println("MainScreenViewModel: Удаление отменено")
+        logger.d(TAG, "Удаление отменено")
     }
 
     /**
@@ -186,11 +207,10 @@ class MainScreenViewModel(
         viewModelScope.launch {
             try {
                 repository.updateItem(item)
-                println("MainScreenViewModel: Событие обновлено: ${item.title}")
+                logger.d(TAG, "Событие обновлено: ${item.title}")
             } catch (e: UpdateFailed) {
                 val message = "Ошибка обновления события: ${e.message}"
-                println("MainScreenViewModel: $message")
-                e.printStackTrace()
+                logger.e(TAG, message, e)
                 _uiState.value = MainScreenState.Error(message)
             }
         }

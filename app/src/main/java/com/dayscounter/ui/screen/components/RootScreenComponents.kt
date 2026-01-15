@@ -242,7 +242,7 @@ internal fun navHostContent(
         this.appDataScreenDestination(
             navController,
             repository,
-            context as android.app.Application,
+            context,
         )
     }
 }

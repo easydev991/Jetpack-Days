@@ -72,12 +72,14 @@ class DaysFormatterImpl : DaysFormatter {
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
         totalDays: Int,
+        showMinus: Boolean,
     ): String =
         when (displayOption) {
             DisplayOption.DAY -> {
                 // Для DisplayOption.DAY используем общее количество дней
                 // period.days может быть меньше (остаток после вычета лет и месяцев)
-                format(totalDays, resourceProvider)
+                val daysToShow = if (showMinus) totalDays else kotlin.math.abs(totalDays)
+                format(daysToShow, resourceProvider)
             }
 
             DisplayOption.MONTH_DAY -> {

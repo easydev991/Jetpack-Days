@@ -23,7 +23,6 @@ class CreateEditUiStateTest {
                 title = mutableStateOf(""),
                 details = mutableStateOf(""),
                 selectedDate = mutableStateOf(null),
-                showDatePicker = mutableStateOf(false),
                 selectedColor = mutableStateOf(null),
                 selectedDisplayOption = mutableStateOf(DisplayOption.DAY),
             )
@@ -37,7 +36,6 @@ class CreateEditUiStateTest {
         assertEquals("", uiState.title.value, "Название должно быть пустым")
         assertEquals("", uiState.details.value, "Описание должно быть пустым")
         assertNull(uiState.selectedDate.value, "Дата должна быть null")
-        assertEquals(false, uiState.showDatePicker.value, "DatePicker должен быть скрыт")
         assertNull(uiState.selectedColor.value, "Цвет должен быть null")
         assertEquals(DisplayOption.DAY, uiState.selectedDisplayOption.value, "Опция отображения должна быть DAY")
     }
@@ -74,23 +72,6 @@ class CreateEditUiStateTest {
 
         // Then - Дата должна быть обновлена
         assertEquals(testDate, uiState.selectedDate.value, "Дата должна быть обновлена")
-    }
-
-    @Test
-    fun whenShowDatePickerChanged_thenUpdatesDatePickerState() {
-        // Given - UiState с скрытым DatePicker
-
-        // When - Показываем DatePicker
-        uiState.showDatePicker.value = true
-
-        // Then - DatePicker должен быть показан
-        assertEquals(true, uiState.showDatePicker.value, "DatePicker должен быть показан")
-
-        // When - Скрываем DatePicker
-        uiState.showDatePicker.value = false
-
-        // Then - DatePicker должен быть скрыт
-        assertEquals(false, uiState.showDatePicker.value, "DatePicker должен быть скрыт")
     }
 
     @Test
@@ -142,7 +123,6 @@ class CreateEditUiStateTest {
         uiState.title.value = "Тестовое событие"
         uiState.details.value = "Тестовое описание"
         uiState.selectedDate.value = testDate
-        uiState.showDatePicker.value = true
         uiState.selectedColor.value = testColor
         uiState.selectedDisplayOption.value = DisplayOption.YEAR_MONTH_DAY
 
@@ -150,7 +130,6 @@ class CreateEditUiStateTest {
         assertEquals("Тестовое событие", uiState.title.value, "Название должно быть обновлено")
         assertEquals("Тестовое описание", uiState.details.value, "Описание должно быть обновлено")
         assertEquals(testDate, uiState.selectedDate.value, "Дата должна быть обновлена")
-        assertEquals(true, uiState.showDatePicker.value, "DatePicker должен быть показан")
         assertEquals(testColor, uiState.selectedColor.value, "Цвет должен быть обновлен")
         assertEquals(
             DisplayOption.YEAR_MONTH_DAY,
@@ -174,7 +153,6 @@ class CreateEditUiStateTest {
                 title = mutableStateOf(initialTitle),
                 details = mutableStateOf(initialDetails),
                 selectedDate = mutableStateOf(initialDate),
-                showDatePicker = mutableStateOf(false),
                 selectedColor = mutableStateOf(initialColor),
                 selectedDisplayOption = mutableStateOf(initialDisplayOption),
             )
@@ -199,7 +177,6 @@ class CreateEditUiStateTest {
         uiState.title.value = "Модифицированное название"
         uiState.details.value = "Модифицированное описание"
         uiState.selectedDate.value = LocalDate.now()
-        uiState.showDatePicker.value = true
         uiState.selectedColor.value = Color.Yellow
         uiState.selectedDisplayOption.value = DisplayOption.YEAR_MONTH_DAY
 

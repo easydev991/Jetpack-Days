@@ -104,6 +104,7 @@ private fun formatPreviewDaysText(
                 item = item,
                 currentDate = currentDate,
                 defaultDisplayOption = displayOption,
+                showMinus = false,
             )
     }
 

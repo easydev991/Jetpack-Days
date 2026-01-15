@@ -2,6 +2,7 @@ package com.dayscounter.data.preferences
 
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
+import com.dayscounter.domain.model.SortOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DisplayName
@@ -93,5 +94,39 @@ class AppSettingsDataStoreTest {
         assertEquals("ICON_4", AppIcon.ICON_4.name)
         assertEquals("ICON_5", AppIcon.ICON_5.name)
         assertEquals("ICON_6", AppIcon.ICON_6.name)
+    }
+
+    @Test
+    @DisplayName("SortOrder enum должен содержать все необходимые значения")
+    fun sortOrder_shouldContainAllValues() {
+        // Given & When & Then
+        assertEquals(2, SortOrder.entries.size, "Должны быть 2 значения сортировки")
+        assert(SortOrder.entries.contains(SortOrder.ASCENDING)) { "Должно содержать ASCENDING" }
+        assert(SortOrder.entries.contains(SortOrder.DESCENDING)) { "Должно содержать DESCENDING" }
+    }
+
+    @Test
+    @DisplayName("SortOrder.valueOf должен корректно парсить значения")
+    fun sortOrder_valueOf_shouldParseCorrectly() {
+        // Given & When & Then
+        assertEquals(SortOrder.ASCENDING, SortOrder.valueOf("ASCENDING"))
+        assertEquals(SortOrder.DESCENDING, SortOrder.valueOf("DESCENDING"))
+    }
+
+    @Test
+    @DisplayName("SortOrder.valueOf должен выбрасывать исключение при некорректном значении")
+    fun sortOrder_valueOf_shouldThrowExceptionForInvalidValue() {
+        // Given & When & Then
+        assertThrows(IllegalArgumentException::class.java) {
+            SortOrder.valueOf("INVALID_SORT")
+        }
+    }
+
+    @Test
+    @DisplayName("SortOrder.name должен возвращать корректное строковое представление")
+    fun sortOrder_name_shouldReturnCorrectStringRepresentation() {
+        // Given & When & Then
+        assertEquals("ASCENDING", SortOrder.ASCENDING.name)
+        assertEquals("DESCENDING", SortOrder.DESCENDING.name)
     }
 }

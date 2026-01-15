@@ -6,38 +6,43 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
-import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
-import com.dayscounter.ui.component.DaysCountTextStyle
-import com.dayscounter.ui.component.daysCountText
+import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.usecase.GetDaysAnalysisTextUseCase
 import com.dayscounter.viewmodel.DetailScreenState
-import java.time.LocalDate
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Контент по состоянию.
+ *
+ * @param uiState Состояние экрана
+ * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
+ * @param modifier Modifier для компонента
  */
 @Composable
 fun detailContentByState(
     uiState: DetailScreenState,
+    getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
     when (uiState) {
         is DetailScreenState.Loading -> {
@@ -47,8 +52,8 @@ fun detailContentByState(
         is DetailScreenState.Success -> {
             detailContentInner(
                 item = uiState.item,
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
                 modifier = modifier,
-                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
             )
         }
 
@@ -63,60 +68,56 @@ fun detailContentByState(
 
 /**
  * Внутренний компонент контента деталей.
+ * Структура аналогична iOS (VStack с выравниванием по левому краю).
+ *
+ * @param item Элемент для отображения
+ * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
+ * @param modifier Modifier для компонента
  */
 @Composable
 internal fun detailContentInner(
-    item: com.dayscounter.domain.model.Item,
+    item: Item,
+    getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
 ) {
-    val scrollState = rememberScrollState()
-    // Используем локализованное форматирование дат согласно локали устройства
-    val formatter =
-        java.time.format.DateTimeFormatter.ofLocalizedDate(
-            java.time.format.FormatStyle.MEDIUM,
-        )
-
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(dimensionResource(R.dimen.spacing_large)),
-        horizontalAlignment = Alignment.CenterHorizontally,
+                .verticalScroll(rememberScrollState())
+                .padding(dimensionResource(R.dimen.spacing_regular)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
     ) {
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
-
-        // Цветовая метка
-        if (item.colorTag != null) {
-            colorTagSection(item.colorTag)
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
-        }
-
-        // Заголовок события
-        titleSection(item.title)
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
-
-        // Дата события
-        dateSection(item.timestamp, formatter)
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xlarge)))
-
-        // Количество дней
-        daysCountSection(item, getFormattedDaysForItemUseCase)
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xlarge)))
-
-        // Детали события (если есть)
+        readSectionView(
+            headerText = stringResource(R.string.title),
+            bodyText = item.title,
+        )
         if (item.details.isNotEmpty()) {
-            detailsSection(item.details)
+            readSectionView(
+                headerText = stringResource(R.string.details),
+                bodyText = item.details,
+            )
         }
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
-
-        // Информация об опции отображения
-        displayOptionInfoSection(item.displayOption)
+        if (item.colorTag != null) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.color_tag),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                )
+                colorTagSection(item.colorTag)
+            }
+        }
+        detailDatePicker(
+            item = item,
+            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+        )
+        detailDisplayOptionPicker(displayOption = item.displayOption)
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -126,7 +127,7 @@ internal fun detailContentInner(
 @Composable
 fun colorTagSection(colorTag: Int) {
     Surface(
-        modifier = Modifier.size(dimensionResource(R.dimen.size_large)),
+        modifier = Modifier.size(dimensionResource(R.dimen.color_tag_size_small)),
         shape = CircleShape,
         color =
             androidx.compose.ui.graphics
@@ -135,165 +136,130 @@ fun colorTagSection(colorTag: Int) {
 }
 
 /**
- * Секция с заголовком.
+ * Компонент readSectionView - аналог iOS ReadSectionView.
+ * Отображает заголовок и текст секции с выравниванием по левому краю.
+ *
+ * @param headerText Заголовок секции
+ * @param bodyText Текст секции
+ * @param modifier Modifier для компонента
  */
 @Composable
-fun titleSection(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center,
-    )
-}
-
-/**
- * Секция с датой.
- */
-@Composable
-internal fun dateSection(
-    timestamp: Long,
-    formatter: java.time.format.DateTimeFormatter,
+fun readSectionView(
+    headerText: String,
+    bodyText: String,
+    modifier: Modifier = Modifier,
 ) {
-    val eventDate =
-        java.time.Instant
-            .ofEpochMilli(timestamp)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-
-    Text(
-        text = eventDate.format(formatter),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-    )
-}
-
-/**
- * Секция с количеством дней.
- */
-@Composable
-fun daysCountSection(
-    item: com.dayscounter.domain.model.Item,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase? = null,
-) {
-    val daysText: String =
-        if (getFormattedDaysForItemUseCase != null) {
-            // Используем use case для форматирования с учетом displayOption
-            getFormattedDaysForItemUseCase(item = item)
-        } else {
-            // Fallback: простое форматирование по количеству дней (для preview)
-            calculateDaysTextFallback(item.timestamp)
-        }
-
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
     ) {
-        daysCountText(
-            formattedText = daysText,
-            textStyle = DaysCountTextStyle.EMPHASIZED,
-        )
-
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
-
         Text(
-            text = stringResource(R.string.elapsed),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = headerText,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = bodyText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
 /**
- * Вычисляет текст с количеством дней для preview (fallback).
- * Использует Android plurals для локализации.
+ * Компонент detailDatePicker - аналог iOS ItemDatePicker.
+ * Отображает дату в формате DatePicker, отключенный для редактирования,
+ * с дополнительным полем для краткого анализа дней.
+ *
+ * @param item Элемент для отображения (содержит timestamp и displayOption)
+ * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
+ * @param modifier Modifier для компонента
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun calculateDaysTextFallback(timestamp: Long): String {
-    val eventDate =
-        java.time.Instant
-            .ofEpochMilli(timestamp)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toLocalDate()
-    val currentDate = LocalDate.now()
+fun detailDatePicker(
+    item: Item,
+    getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
+    modifier: Modifier = Modifier,
+) {
+    val formatter =
+        remember {
+            DateTimeFormatter.ofPattern("MMM d, yyyy")
+        }
+    val formattedDate =
+        remember(item.timestamp) {
+            Instant
+                .ofEpochMilli(item.timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(formatter)
+        }
 
-    return if (eventDate == currentDate) {
-        stringResource(R.string.today)
-    } else {
-        val totalDays =
-            java.time.temporal.ChronoUnit.DAYS
-                .between(eventDate, currentDate)
-                .toInt()
-        // Используем Android plurals для локализации
-        pluralStringResource(R.plurals.days_count, totalDays, totalDays)
+    // Используем новый use case для получения полного текста анализа
+    val daysAnalysisText = getDaysAnalysisTextUseCase(item = item)
+
+    // Для режима только для чтения отображаем как Text вместо DatePicker
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
+    ) {
+        Text(
+            text = stringResource(R.string.date),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = formattedDate,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = daysAnalysisText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
 /**
- * Секция с деталями события.
+ * Компонент detailDisplayOptionPicker - аналог iOS ItemDisplayOptionPicker.
+ * Отображает выбранную опцию отображения, отключенный для редактирования.
+ *
+ * @param displayOption Опция отображения
+ * @param modifier Modifier для компонента
  */
 @Composable
-fun detailsSection(details: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium,
+fun detailDisplayOptionPicker(
+    displayOption: DisplayOption,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
     ) {
-        Column(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_regular)),
-        ) {
-            Text(
-                text = stringResource(R.string.details),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Text(
+            text = stringResource(R.string.display_format),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text =
+                when (displayOption) {
+                    DisplayOption.DAY -> stringResource(R.string.days_only)
+                    DisplayOption.MONTH_DAY -> stringResource(R.string.months_and_days)
+                    DisplayOption.YEAR_MONTH_DAY ->
+                        stringResource(R.string.years_months_and_days)
 
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
-
-            Text(
-                text = details,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-}
-
-/**
- * Информация об опции отображения.
- */
-@Composable
-fun displayOptionInfoSection(displayOption: DisplayOption) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.small,
-    ) {
-        Row(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_large)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.display_format),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Text(
-                text =
-                    when (displayOption) {
-                        DisplayOption.DAY -> stringResource(R.string.days_only)
-                        DisplayOption.MONTH_DAY -> stringResource(R.string.months_and_days)
-                        DisplayOption.YEAR_MONTH_DAY ->
-                            stringResource(R.string.years_months_and_days)
-
-                        DisplayOption.DEFAULT ->
-                            stringResource(R.string.days_only)
-                    },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
+                    DisplayOption.DEFAULT ->
+                        stringResource(R.string.days_only)
+                },
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }

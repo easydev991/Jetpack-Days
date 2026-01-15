@@ -50,4 +50,10 @@ object ResourceIds {
 
     /** Идентификатор строкового ресурса "Ошибка форматирования: %1$s" */
     val ERROR_FORMATTING_DETAILS = R.string.error_formatting_details
+
+    /** Ресурс для строки "осталось" */
+    val REMAINING = R.string.remaining
+
+    /** Ресурс для строки "прошло" */
+    val ELAPSED = R.string.elapsed
 }

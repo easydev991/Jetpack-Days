@@ -8,11 +8,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
+import com.dayscounter.domain.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * DataStore для хранения настроек приложения (тема и иконка).
+ * DataStore для хранения настроек приложения (тема, иконка и порядок сортировки).
  *
  * Настройки сохраняются постоянно, чтобы при каждом запуске приложения
  * выбор пользователя не сбрасывался.
@@ -25,6 +26,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 private object PreferencesKeys {
     val THEME_KEY = stringPreferencesKey("theme")
     val ICON_KEY = stringPreferencesKey("icon")
+    val SORT_ORDER_KEY = stringPreferencesKey("sort_order")
 }
 
 /**
@@ -52,6 +54,17 @@ class AppSettingsDataStore(
     suspend fun setIcon(icon: AppIcon) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.ICON_KEY] = icon.name
+        }
+    }
+
+    /**
+     * Сохраняет выбранный порядок сортировки.
+     *
+     * @param sortOrder Выбранный порядок сортировки
+     */
+    suspend fun setSortOrder(sortOrder: SortOrder) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SORT_ORDER_KEY] = sortOrder.name
         }
     }
 
@@ -87,6 +100,23 @@ class AppSettingsDataStore(
                         AppIcon.DEFAULT
                     }
                 } ?: AppIcon.DEFAULT
+            }
+
+    /**
+     * Flow для отслеживания выбранного порядка сортировки.
+     * При первом запуске возвращает значение по умолчанию (DESCENDING).
+     */
+    val sortOrder: Flow<SortOrder> =
+        context.dataStore.data
+            .map { preferences ->
+                @Suppress("SwallowedException")
+                preferences[PreferencesKeys.SORT_ORDER_KEY]?.let { orderName ->
+                    try {
+                        SortOrder.valueOf(orderName)
+                    } catch (e: IllegalArgumentException) {
+                        SortOrder.DESCENDING
+                    }
+                } ?: SortOrder.DESCENDING
             }
 }
 

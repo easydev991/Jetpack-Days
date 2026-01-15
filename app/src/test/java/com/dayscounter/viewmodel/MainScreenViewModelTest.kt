@@ -1,10 +1,18 @@
 package com.dayscounter.viewmodel
 
+import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.Logger
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -26,8 +34,12 @@ import org.junit.jupiter.api.Test
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MainScreenViewModelTest {
     private lateinit var repository: FakeItemRepository
+    private lateinit var sortOrderFlow: kotlinx.coroutines.flow.MutableStateFlow<SortOrder>
+    private lateinit var dataStore: AppSettingsDataStore
+    private lateinit var logger: Logger
     private lateinit var viewModel: MainScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
+    private val sortOrderSlot = slot<SortOrder>()
 
     @BeforeEach
     fun setUp() {
@@ -35,7 +47,17 @@ class MainScreenViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeItemRepository()
-        viewModel = MainScreenViewModel(repository)
+        sortOrderFlow = kotlinx.coroutines.flow.MutableStateFlow(SortOrder.DESCENDING)
+        dataStore = mockk(relaxed = true)
+        logger = mockk(relaxed = true)
+
+        // Настраиваем dataStore для возврата и обновления sortOrder
+        every { dataStore.sortOrder } returns sortOrderFlow
+        coEvery { dataStore.setSortOrder(capture(sortOrderSlot)) } answers {
+            sortOrderFlow.value = sortOrderSlot.captured
+        }
+
+        viewModel = MainScreenViewModel(repository, dataStore, logger)
     }
 
     @AfterEach
@@ -201,6 +223,7 @@ class MainScreenViewModelTest {
                 viewModel.sortOrder.value,
                 "Порядок сортировки должен обновиться",
             )
+            coVerify { dataStore.setSortOrder(SortOrder.ASCENDING) }
         }
     }
 

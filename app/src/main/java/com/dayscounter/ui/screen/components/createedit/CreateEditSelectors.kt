@@ -58,7 +58,7 @@ internal fun colorSelector(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_large)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
     ) {
         colors.forEach { color ->
             colorOptionSurface(
@@ -91,7 +91,7 @@ internal fun colorOptionSurface(
         modifier =
             Modifier
                 .size(dimensionResource(R.dimen.color_tag_size))
-                .padding(dimensionResource(R.dimen.spacing_small)),
+                .padding(dimensionResource(R.dimen.spacing_xxsmall)),
         shape = CircleShape,
         color = color,
         border =
@@ -148,12 +148,12 @@ internal fun displayOptionSurface(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = dimensionResource(R.dimen.spacing_small)),
+                .padding(vertical = dimensionResource(R.dimen.spacing_xxsmall)),
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.small,
     ) {
         Row(
-            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_large)),
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_xsmall)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val isSelected = selectedDisplayOption.value == option

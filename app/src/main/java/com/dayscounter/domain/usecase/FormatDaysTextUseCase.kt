@@ -20,12 +20,14 @@ class FormatDaysTextUseCase(
      * @param difference Результат вычисления разницы дат
      * @param displayOption Опция отображения
      * @param resourceProvider Провайдер строковых ресурсов
+     * @param showMinus Показывать ли минус для отрицательных чисел (по умолчанию true)
      * @return Отформатированная строка
      */
     operator fun invoke(
         difference: DaysDifference,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
+        showMinus: Boolean,
     ): String =
         when (difference) {
             is DaysDifference.Today -> {
@@ -34,12 +36,21 @@ class FormatDaysTextUseCase(
             }
 
             is DaysDifference.Calculated -> {
+                // Определяем totalDays для форматирования
+                val totalDaysToFormat =
+                    if (showMinus) {
+                        difference.totalDays
+                    } else {
+                        kotlin.math.abs(difference.totalDays)
+                    }
+
                 // Форматируем период согласно опции отображения
                 daysFormatter.formatComposite(
                     period = difference.period,
                     displayOption = displayOption,
                     resourceProvider = resourceProvider,
-                    totalDays = difference.totalDays,
+                    totalDays = totalDaysToFormat,
+                    showMinus = showMinus,
                 )
             }
         }

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
+import com.dayscounter.data.preferences.createAppSettingsDataStore
 import com.dayscounter.di.AppModule.createItemRepository
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
@@ -88,6 +89,7 @@ fun mainScreen(
                             context.applicationContext,
                         ),
                     ),
+                    createAppSettingsDataStore(context.applicationContext),
                 ),
         )
     // Создаем use cases для форматирования
@@ -373,7 +375,7 @@ private fun itemsListContent(params: ItemsListParams) {
             items = params.items,
             key = { it.id },
         ) { item ->
-            val formattedDaysText = params.getFormattedDaysForItemUseCase(item = item)
+            val formattedDaysText = params.getFormattedDaysForItemUseCase(item = item, showMinus = true)
             listItemWrapper(
                 item = item,
                 formattedDaysText = formattedDaysText,

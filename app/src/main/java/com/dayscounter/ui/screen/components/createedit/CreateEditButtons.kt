@@ -17,8 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -27,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
-import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.ui.theme.jetpackDaysTheme
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.ui.screen.CreateEditUiState as ScreenCreateEditUiState
@@ -181,15 +178,6 @@ internal fun datePickerDialogSection(
 @Composable
 fun createEditButtonsNewPreview() {
     jetpackDaysTheme {
-        ScreenCreateEditUiState(
-            title = remember { mutableStateOf("Название") },
-            details = remember { mutableStateOf("Описание") },
-            selectedDate = remember { mutableStateOf(java.time.LocalDate.now()) },
-            showDatePicker = remember { mutableStateOf(false) },
-            selectedColor = remember { mutableStateOf(null) },
-            selectedDisplayOption = remember { mutableStateOf(DisplayOption.DAY) },
-        )
-
         Column(
             modifier =
                 Modifier

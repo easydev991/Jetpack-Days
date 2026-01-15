@@ -13,15 +13,18 @@ import java.time.LocalDate
  * @param useCase Use case для форматирования дней
  * @param currentDate Текущая дата (опционально, для тестирования)
  * @param defaultDisplayOption Опция отображения по умолчанию
+ * @param showMinus Показывать ли минус для отрицательных чисел (по умолчанию true)
  * @return Форматированная строка с количеством дней (например, "5 дней", "1 год 2 месяца")
  */
 fun Item.makeDaysCount(
     useCase: GetFormattedDaysForItemUseCase,
     currentDate: LocalDate? = null,
     defaultDisplayOption: DisplayOption = DisplayOption.DAY,
+    showMinus: Boolean = true,
 ): String =
     useCase(
         item = this,
         currentDate = currentDate,
         defaultDisplayOption = defaultDisplayOption,
+        showMinus = showMinus,
     )

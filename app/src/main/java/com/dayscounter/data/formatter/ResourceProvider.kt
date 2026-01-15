@@ -4,7 +4,7 @@ package com.dayscounter.data.formatter
  * Абстракция над Context.getString() для обеспечения тестируемости.
  *
  * Позволяет мокировать предоставление строковых ресурсов в тестах
- * и разрывает зависимость от Android Context.
+ * и разрывает зависимость от Android Context в domain/data слоях.
  */
 interface ResourceProvider {
     /**
@@ -20,9 +20,9 @@ interface ResourceProvider {
     ): String
 
     /**
-     * Возвращает строковый ресурс для множественного числа.
+     * Возвращает строковый ресурс для множественного числа дней.
      *
-     * @param resId Идентификатор ресурса множественного числа
+     * @param resId Идентификатор ресурса множественного числа (R.plurals.days_count)
      * @param quantity Количество для выбора правильной формы
      * @param formatArgs Аргументы для форматирования строки
      * @return Форматированная строка с правильной формой множественного числа
@@ -32,4 +32,20 @@ interface ResourceProvider {
         quantity: Int,
         vararg formatArgs: Any,
     ): String
+
+    /**
+     * Возвращает строковый ресурс для множественного числа лет.
+     *
+     * @param quantity Количество лет
+     * @return Форматированная строка (год/года/лет)
+     */
+    fun getYearsString(quantity: Int): String
+
+    /**
+     * Возвращает строковый ресурс для множественного числа месяцев.
+     *
+     * @param quantity Количество месяцев
+     * @return Форматированная строка (месяц/месяца/месяцев)
+     */
+    fun getMonthsString(quantity: Int): String
 }
