@@ -20,6 +20,7 @@
 /.idea/runConfigurations
 /.idea/vcs.xml
 /.idea/inspectionProfiles/Project_Default.xml
+/.idea/appInsightsSettings.xml
 .DS_Store
 /build
 /captures

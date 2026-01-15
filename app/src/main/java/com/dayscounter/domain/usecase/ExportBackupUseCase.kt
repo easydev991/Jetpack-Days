@@ -27,6 +27,11 @@ class ExportBackupUseCase(
     private val context: Context,
     private val logger: Logger = com.dayscounter.util.AndroidLogger(),
 ) {
+    private val json =
+        Json {
+            prettyPrint = true
+        }
+
     /**
      * Экспортирует все записи в файл.
      *
@@ -48,11 +53,11 @@ class ExportBackupUseCase(
 
             // Конвертируем в формат JSON, совместимый с iOS
             val backupItems = items.map { it.toBackupItem() }
-            val json = Json { prettyPrint = true }.encodeToString(backupItems)
+            val jsonString = json.encodeToString(backupItems)
 
             // Записываем в файл
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(json.toByteArray())
+                outputStream.write(jsonString.toByteArray())
             } ?: throw BackupException("Не удалось открыть OutputStream для записи")
 
             logger.d(TAG, "Экспорт завершен успешно, экспортировано ${items.size} записей")
