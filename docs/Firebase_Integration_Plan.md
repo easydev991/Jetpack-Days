@@ -23,128 +23,28 @@
 
 - ✅ **Crashlytics** - сбор крашей с полными стек-трейсами
 - ✅ **Данные о девайсе** - модель, версия ОС (собираются автоматически)
-- ❌ **Analytics** - НЕ используется на первой итерации
+- ✅ **Breadcrumb logs** - логи пользовательских действий перед крашем (требует Analytics)
 - ❌ Настраиваемые события - НЕ используются на первой итерации
 
 ---
 
 ## План настройки Crashlytics
 
-### Этап 1-5: Базовая интеграция ✅
+### Выполнено ✅
 
-**Выполнено:**
+**Базовая интеграция (Этапы 1-5)**: зависимости, плагины, проект собирается без ошибок.
 
-1. ✅ Обновлены зависимости в `gradle/libs.versions.toml`:
-   - Firebase BOM 34.7.0
-   - google-services 4.4.4
-   - firebase-crashlytics-gradle 3.0.3
+**Логика (Этапы 6-8.5)**: CrashlyticsHelper, build types, ProGuard, автоматическая загрузка mapping files. Crashlytics отключен в debug, включен в release.
 
-2. ✅ Настроены плагины в `build.gradle.kts` (root) и `app/build.gradle.kts`
+**Breadcrumb logs (Этапы 6.5, 9)**: Firebase Analytics для отладки крашей, автоматический сбор `screen_view` через Navigation Compose для всех экранов.
 
-3. ✅ Добавлены зависимости через Firebase BOM
+**Интеграция с кодом (Этап 10)**: логирование через `CrashlyticsHelper.logException()` в Repository и Use Cases.
 
-4. ✅ Файл `app/google-services.json` добавлен в `.gitignore`
-
-**Для разработчиков:**
-
-1. Скачать `google-services.json` из Firebase Console
-2. Поместить в `app/google-services.json`
-
-Проект собирается без ошибок и конфликтов зависимостей.
+**Тестирование (Этап 11)**: unit-тесты для проверки безопасности логирования.
 
 ---
 
-## Реализация логики (без UI)
-
-### Этап 6: Crashlytics helper ✅
-
-**Создан файл:** `app/src/main/java/com/dayscounter/crash/CrashlyticsHelper.kt`
-
-**Функционал:**
-
-- `logException(exception: Throwable, message: String? = null)` - безопасное логирование исключений
-- Защита от бесконечного цикла при ошибках отправки
-- Автоматический сбор метрик девайса Firebase (модель, версия Android и т.д.)
-
----
-
-## Настройка для Production
-
-### Этап 7: Конфигурация build types ✅
-
-**Настроено в `app/build.gradle.kts`:**
-
-- ✅ Debug: Crashlytics отключен
-- ✅ Release: Crashlytics включен, обфускация включена, автоматическая загрузка mapping files
-
-**Файл:** `app/src/main/AndroidManifest.xml`
-
-- ✅ Добавлен meta-data для управления сбором крашей
-
-### Этап 8: ProGuard для Crashlytics ✅
-
-**Настроено в `app/proguard-rules.pro`:**
-
-- ✅ Правила для сохранения стек-трейсов
-- ✅ Правила для Crashlytics
-
-### Этап 8.5: Автоматическая загрузка mapping files ✅
-
-**Настроено:**
-
-- ✅ `mappingFileUploadEnabled = true` в `app/build.gradle.kts`
-- ✅ Makefile автоматически загружает mapping files при `make release`
-- ✅ Декодирование обфусцированных стек-трейсов
-
----
-
-## Интеграция с существующим кодом
-
-### Этап 9: Логирование критических ошибок ✅
-
-**Добавлено в Repository:**
-
-```kotlin
-// ItemRepositoryImpl.getItemById()
-catch (e: Exception) {
-    CrashlyticsHelper.logException(
-        e,
-        "Ошибка при получении элемента с id: $id"
-    )
-    Result.failure(e)
-}
-```
-
-**Добавлено в Use Cases:**
-
-```kotlin
-// CalculateDaysDifferenceUseCase
-catch (e: Exception) {
-    CrashlyticsHelper.logException(
-        e,
-        "Ошибка при вычислении разницы дат: $startDate - $endDate"
-    )
-    Result.failure(e)
-}
-```
-
----
-
-## Тестирование
-
-### Этап 10: Тестирование CrashlyticsHelper ✅
-
-**Создан файл:** `app/src/test/java/com/dayscounter/crash/CrashlyticsHelperTest.kt`
-
-**Тест проверяет:**
-
-- `logException_whenValidException_thenDoesNotCrash()` - отсутствие исключений при логировании
-
-Примечание: Unit-тесты не могут реально отправить данные в Firebase, поэтому проверяется только отсутствие исключений.
-
----
-
-### Этап 11: Проверка работы Crashlytics в production
+### Этап 12: Проверка работы Crashlytics в production
 
 **Варианты проверки:**
 
@@ -182,42 +82,35 @@ catch (e: Exception) {
 - ✅ Версия приложения
 - ✅ Дата и время краша
 
+**Проверка breadcrumb logs:**
+
+Во вкладке **Logs** убедитесь, что присутствуют:
+
+- ✅ `screen_view` события - список экранов, просмотренных перед крашем
+- ✅ `firebase_screen_class` параметр в каждом screen_view
+- ✅ Пользовательские события (если логируются вручную)
+- ✅ Параметры событий для понимания контекста действий пользователя
+
 ---
 
 ## Чеклист внедрения Crashlytics
 
-### Базовая интеграция ✅
+### Выполнено ✅
 
-- [x] Добавлены зависимости в `libs.versions.toml` (включая firebase-crashlytics-gradle)
-- [x] Добавлен плагин `google-services` в `build.gradle.kts` (root)
-- [x] Добавлен плагин `google-services` в `app/build.gradle.kts`
-- [x] Добавлен плагин `firebase-crashlytics` в `app/build.gradle.kts`
-- [x] Добавлены зависимости Firebase (BOM, Crashlytics)
-- [x] Добавлен `app/google-services.json` (игнорируется git)
-- [x] Проект синхронизирован и собирается без ошибок
-
-### Логика и инфраструктура ✅
-
-- [x] Создан `CrashlyticsHelper` для безопасного логирования
-- [x] Настроены build types (debug - отключено, release - включено)
-- [x] Добавлен meta-data в `AndroidManifest.xml`
-- [x] Настроены ProGuard правила для Crashlytics
-- [x] Включена автоматическая загрузка mapping files (`mappingFileUploadEnabled = true`)
-- [x] Обновлен Makefile для автоматической загрузки (`make release` загружает mapping files)
-
-### Интеграция с кодом ✅
-
-- [x] Добавлено логирование критических ошибок в Repository
-- [x] Добавлено логирование критических ошибок в Use Cases
-- [x] Написаны unit-тесты для `CrashlyticsHelper`
-
-### Тестирование и валидация ⏳
-
+- [x] Базовая интеграция: зависимости, плагины, google-services.json
+- [x] Breadcrumb logs (Analytics): автоматический сбор `screen_view` через Navigation Compose
+- [x] Логика и инфраструктура: CrashlyticsHelper, build types, ProGuard, mapping files
+- [x] Интеграция с кодом: логирование в Repository и Use Cases
+- [x] Unit-тесты: проверка безопасности логирования
 - [x] Проект собирается: `./gradlew build`
 - [x] Тесты проходят: `./gradlew test`
+
+### Валидация в production ⏳
+
 - [ ] Crashlytics настроен корректно (Android Emulator или beta-тестирование)
 - [ ] Firebase Console показывает ошибки (при наличии крашей)
 - [ ] В каждом краше есть стек-трейс, модель девайса, версия Android
+- [ ] Breadcrumb logs показывают экраны и действия перед крашем
 - [ ] Размер APK увеличен приемлемо (< 200 КБ)
 
 ---
@@ -266,54 +159,9 @@ catch (e: Exception) {
 
 ## Безопасность и конфиденциальность
 
-### Рекомендации
+**✅ ДОПУСТИМО:** логировать типы исключений и действий, названия экранов, контекст действий без персональных данных, использовать breadcrumb logs.
 
-✅ **ДОПУСТИМО:**
-
-- Логировать типы исключений
-- Логировать сообщения об ошибках (без чувствительных данных)
-- Crashlytics автоматически собирает данные о девайсе (модель, версия Android)
-
-❌ **НЕДОПУСТИМО:**
-
-- Логировать персональную информацию (имена, email, телефон)
-- Логировать пароли, токены, ключи шифрования
-- Логировать содержимое пользовательских данных
-- Логировать location данные
-
-### Примеры безопасного логирования
-
-**✅ Правильно:**
-
-```kotlin
-// Логируем тип ошибки
-CrashlyticsHelper.logException(
-    DatabaseException("Failed to load items"),
-    "Ошибка загрузки элементов"
-)
-
-// Логируем контекст без персональных данных
-CrashlyticsHelper.logException(
-    e,
-    "Ошибка при загрузке списка элементов"
-)
-```
-
-**❌ Неправильно:**
-
-```kotlin
-// НЕ логируем персональные данные
-CrashlyticsHelper.logException(
-    e,
-    "Ошибка для пользователя: ${user.name}, email: ${user.email}"
-)
-
-// НЕ логируем чувствительные данные
-CrashlyticsHelper.logException(
-    e,
-    "Ошибка: данные пользователя = $userData"
-)
-```
+**❌ НЕДОПУСТИМО:** логировать персональную информацию, пароли, токены, ключи шифрования, содержимое пользовательских данных, location данные, локацию пользователя, уникальные идентификаторы.
 
 ---
 
@@ -330,11 +178,8 @@ CrashlyticsHelper.logException(
 
 **Статус внедрения:**
 
-1. ✅ Базовая интеграция выполнена (Этапы 1-5)
-2. ✅ Логика и инфраструктура настроены (Этапы 6-8.5)
-3. ✅ Интеграция с кодом завершена (Этап 9)
-4. ✅ Unit-тесты написаны (Этап 10)
-5. ⏳ Проверка в production ожидается (Этап 11)
+1. ✅ Все этапы интеграции выполнены (Этапы 1-11)
+2. ⏳ Проверка в production ожидается (Этап 12)
 
 ---
 
@@ -342,10 +187,10 @@ CrashlyticsHelper.logException(
 
 ### Обновить README.md
 
-Добавить секцию "Настройка Crashlytics":
+Добавить секцию "Настройка Firebase":
 
 ```markdown
-## Настройка Crashlytics
+## Настройка Firebase
 
 Файл `app/google-services.json` добавлен в `.gitignore` и не хранится в репозитории.
 
@@ -368,6 +213,13 @@ CrashlyticsHelper.logException(
 - Логирует критические ошибки и ANR
 - Автоматически собирает данные о девайсе (модель, версия Android)
 - Не содержит персональных данных пользователей
+
+### Analytics (для breadcrumb logs)
+
+- Включен для работы breadcrumb logs в Crashlytics
+- Автоматически собирает screen_view события через Navigation Compose
+- Позволяет видеть последовательность действий пользователя перед крашем
+- Не содержит персональных данных пользователей
 ```
 
 ### Обновить `.cursor/rules/tech-stack.mdc`
@@ -384,6 +236,7 @@ CrashlyticsHelper.logException(
 - **DataStore** - простое хранение
 - **Coroutines** - асинхронность
 - **Firebase Crashlytics** - сбор ошибок (только release)
+- **Firebase Analytics** - breadcrumb logs для отладки крашей
 - **JUnit 5** - unit-тесты
 - **MockK** - мокирование
 - **Espresso** - UI тесты
@@ -395,5 +248,6 @@ CrashlyticsHelper.logException(
 
 - [Firebase Android Setup](https://firebase.google.com/docs/android/setup)
 - [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics)
+- [Customize crash reports for Android](https://firebase.google.com/docs/crashlytics/android/customize-crash-reports#get-breadcrumb-logs)
 - [Firebase BOM](https://firebase.google.com/docs/android/learn-more#bom)
 - [Firebase Security Guidelines](https://firebase.google.com/support/guides/security)

@@ -105,7 +105,7 @@ DetailScreen.kt с Scaffold и DetailScreenParams, DetailContent (все сек�
 - ✅ Писать интеграционные тесты только для DAO и Repository (без ViewModels)
 - ✅ Писать UI-тесты для Compose компонентов (без ViewModels)
 
-Подробнее см. в документе `Instrumented_Tests_Fix_Plan.md`
+Подробнее см. в документе `Testing_Status_Plan.md`
 
 ### Unit-тесты
 
