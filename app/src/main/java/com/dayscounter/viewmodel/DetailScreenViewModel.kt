@@ -88,10 +88,10 @@ class DetailScreenViewModel(
     fun deleteItem() {
         viewModelScope.launch {
             try {
-                val currentState = uiState.value
-                if (currentState is DetailScreenState.Success) {
-                    repository.deleteItem(currentState.item)
-                    logger.d("DetailScreenViewModel", "Событие удалено: ${currentState.item.title}")
+                val item = repository.getItemById(itemId)
+                if (item != null) {
+                    repository.deleteItem(item)
+                    logger.d("DetailScreenViewModel", "Событие удалено: ${item.title} (id=${item.id})")
                 }
             } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"
