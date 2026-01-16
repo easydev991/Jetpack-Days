@@ -22,11 +22,11 @@ alwaysApply: true
 
 ## Версии
 
-- AGP: 9.2.1
+- AGP: 9.0.0
 - Kotlin: 2.3.0
 - Compile SDK: 36
 - Target SDK: 35
 - Min SDK: 26
-- KSP: 2.3.0 (KSP2)
+- KSP: 2.3.2 (KSP2)
 
 Зависимости: `gradle/libs.versions.toml`
