@@ -1,160 +1,21 @@
-# План публикации приложения в магазины приложений
+# План автоматизации создания скриншотов
 
 ## Обзор
 
-Документ описывает процесс настройки и автоматизации публикации приложения "Счётчик дней" (Android) в магазины приложений.
+Документ описывает процесс настройки автоматизации создания локализованных скриншотов для публикации приложения "Счётчик дней" (Android) в магазины приложений (RuStore и Google Play Store).
 
-## Порядок публикации
-
-1. **RuStore** - российский магазин приложений (первичная публикация)
-2. **Google Play Store** - международный магазин приложений
+**Примечание:** Подпись и публикация сборок в RuStore уже настроены через приватный репозиторий `android-secrets`. Команда `make release` создает подписанный AAB-файл для загрузки в магазины.
 
 ## Цели
 
-1. Настроить локализованное название приложения для отображения на устройствах пользователей
-2. Настроить создание сборок для публикации в магазинах приложений
-3. Подготовить скриншоты и метаданные для магазинов приложений
-
-## Форматы сборок
-
-- **AAB (Android App Bundle)** - формат для RuStore и Google Play Store (актуальный)
-  - RuStore поддерживает загрузку AAB-файлов (до 5 Гб)
-  - Google Play Store требует AAB-формат
-  - RuStore формирует APK из AAB и подписывает их самостоятельно
-- **APK** - опциональный формат для альтернативных магазинов (не нужен для RuStore и Google Play)
-
-## Требования RuStore для AAB
-
-- Размер файла AAB - не более 5 Гб
-- Размер каждого APK-файла, сформированного из AAB - не более 5 Гб
-- Java версии 11 или выше для работы с ключами подписи
-- Ключ подписи приложения: RSA размером не менее 2048 бит
-
-## Процесс подписи AAB для RuStore
-
-RuStore использует двухуровневую систему подписи:
-
-1. **Ключ подписи приложения (App Signing Key)** - используется RuStore для подписи APK-файлов
-2. **Ключ загрузки (Upload Key)** - используется разработчиком для подписи AAB-файла
-
-Процесс:
-
-- Разработчик подписывает файл AAB ключом загрузки и загружает сборку в RuStore
-- RuStore подтверждает личность разработчика с помощью сертификата ключа загрузки
-- RuStore формирует набор APK-файлов из AAB-файла и подписывает каждый APK ключом подписи приложения
-- Пользователи загружают из RuStore подписанные APK-файлы
+- Настроить автоматическую генерацию локализованных скриншотов
+- Подготовить скриншоты для RuStore и Google Play Store
+- Подготовить метаданные для магазинов приложений
+- Загрузка скриншотов в магазины выполняется вручную
 
 ---
 
-## Часть 1: Настройка названия приложения ✅
-
-Выполнено. Созданы локализованные строковые ресурсы `app_display_name` (ru, en), обновлен `AndroidManifest.xml`.
-
----
-
-## Часть 2: Подготовка к публикации в магазинах приложений ✅
-
-### Шаг 2.1: Настройка подписания AAB ✅
-
-Выполнено через приватный репозиторий `android-secrets`. Используется упрощенный подход с одним ключом подписи `upload` (используется для подписи AAB и RuStore для APK). Keystore, сертификаты (ZIP и PEM) загружены в RuStore Консоль, статус подписи - "Активна".
-
-### Критерии готовности
-
-- ✅ Приватный репозиторий `android-secrets` создан на GitHub
-- ✅ Структура папок для JetpackDays, README.md, секреты (keystore, сертификаты, secrets.properties) подготовлены
-- ✅ `build.gradle.kts` настроен для чтения секретов из `.secrets/secrets.properties`
-- ✅ Папка `.secrets/` добавлена в `.gitignore`
-- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter{VERSION_CODE}.aab`)
-- ✅ Подпись загружена в RuStore Консоль
-
-### Шаг 2.2: Добавить команды в Makefile для создания сборок ✅
-
-Команда `make release` добавлена в Makefile. Создает файл `dayscounter{VERSION_CODE}.aab` (формируется на основе VERSION_CODE из `gradle.properties`), автоматически загружает секреты из `../android-secrets/jetpackdays/`.
-
-### Критерии готовности
-
-- ✅ Команда release добавлена в Makefile
-- ✅ Сборка release AAB работает корректно
-- ✅ Файл сборки создается в ожидаемом месте (`dayscounter{VERSION_CODE}.aab`)
-- ✅ Размер AAB-файла не превышает 5 Гб
-- ✅ Автоматическое копирование секретов из репозитория `android-secrets` работает
-
-### Правила .gitignore
-
-Следующие правила добавлены в `.gitignore`:
-
-```gitignore
-# Папка с секретами (все секреты хранятся здесь)
-.secrets/
-
-# Ключи подписи и сертификаты (на случай, если попадут в другие места)
-*.keystore
-*.jks
-*.p12
-*.pem
-*.pfx
-*.p7b
-*.p7c
-*.der
-*.crt
-*.cer
-*.crl
-*.sst
-*.csr
-*.key
-
-# ZIP-архивы с подписями (для RuStore)
-*pepk*.zip
-*pepk_out.zip
-
-# Локальные конфигурации
-local.properties
-release.properties
-secrets.properties
-
-# Отладочные keystore
-debug.keystore
-debug.jks
-```
-
-**ВАЖНО:** Основная защита - папка `.secrets/` в корне проекта.
-
----
-
-## Часть 2.3: Проверка размера APK-файлов (рекомендуется)
-
-### Необходимые действия
-
-Для проверки, что APK-файлы, сформированные из AAB, соответствуют требованию RuStore (не более 5 Гб), можно использовать официальное утилиту Google BundleTool:
-
-**1. Скачать BundleTool**
-
-Скачайте bundletool с официальной страницы Google.
-
-**2. Генерация APK-файлов из AAB**
-
-```bash
-# В директории с AAB файлом (используйте актуальное имя файла, например dayscounter10.aab)
-java -jar bundletool-all-1.18.1.jar build-apks --bundle=dayscounter10.aab --output-format=DIRECTORY --output=temp_apks/ --mode=universal
-```
-
-Примечание: Используйте актуальное имя файла сборки (например, `dayscounter10.aab` для сборки № 10)
-
-**3. Проверка размера APK-файлов**
-
-После выполнения в указанной папке будут созданы APK-файлы. Убедитесь, что размер любого из них не превышает 5 Гб.
-
-Это особенно важно для крупных игр и приложений, использующих большой объём ресурсов.
-
-### Критерии готовности
-
-- ⏳ BundleTool скачан
-- ⏳ APK-файлы успешно сгенерированы из AAB
-- ⏳ Размер APK-файлов не превышает 5 Гб
-
----
-
-## Часть 3: Автоматизация создания скриншотов с fastlane
+## Часть 1: Автоматизация создания скриншотов с fastlane
 
 ### Обзор подхода
 
@@ -180,88 +41,136 @@ java -jar bundletool-all-1.18.1.jar build-apks --bundle=dayscounter10.aab --outp
 
 ---
 
-## Часть 3.1: Установка и настройка fastlane
+## Часть 1.1: Установка и настройка fastlane
 
 ### Необходимые действия
 
-#### Шаг 3.1.1: Установить fastlane и screengrab
+#### Шаг 1.1.1: Установить fastlane и screengrab ✅
 
-**Команда для установки:**
+**Реализовано:**
 
-```bash
-# Через RubyGems
-sudo gem install fastlane -NV
-sudo gem install screengrab
+- fastlane 2.228.0 установлен через Gemfile (соответствует iOS-проекту)
+- screengrab 2.1.1 установлен через Gradle (см. Шаг 1.1.2)
 
-# Или через Homebrew
-brew install fastlane
-```
+#### Шаг 1.1.2: Добавить зависимость screengrab в Gradle ✅
 
-#### Шаг 3.1.2: Добавить зависимость screengrab в Gradle
+**Реализовано:**
 
-**Файл:** `app/build.gradle.kts`
+- Зависимость `screengrab` 2.1.1 добавлена в `app/build.gradle.kts` через version catalog
 
-Добавить зависимость для instrumentation тестов:
+- Версия указана в `gradle/libs.versions.toml`
 
-```kotlin
-dependencies {
-    // ... другие зависимости
-    androidTestImplementation("tools.fastlane:screengrab:2.1.0")
-}
-```
+#### Шаг 1.1.3: Настроить разрешения в AndroidManifest ✅
 
-**Последняя версия:** см. [Maven Central](https://mvnrepository.com/artifact/tools.fastlane/screengrab)
+**Реализовано:**
 
-#### Шаг 3.1.3: Настроить разрешения в AndroidManifest
+- Создан файл `app/src/debug/AndroidManifest.xml`
 
-**Файл:** `app/src/debug/AndroidManifest.xml`
+- Добавлены разрешения для screengrab: DISABLE_KEYGUARD, WAKE_LOCK, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, CHANGE_CONFIGURATION
 
-Добавить необходимые разрешения для screengrab:
+#### Шаг 1.1.4: Инициализировать fastlane в проекте ✅
 
-```xml
-<!-- Разрешает разблокировку устройства и активацию экрана для UI тестов -->
-<uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
-<uses-permission android:name="android.permission.WAKE_LOCK"/>
+**Реализовано:**
 
-<!-- Разрешает сохранение и загрузку скриншотов -->
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+- fastlane инициализирован в проекте
 
-<!-- Разрешает смену локали -->
-<uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
-```
+- Созданы файлы: `fastlane/Appfile`, `fastlane/Fastfile`, `fastlane/README.md`
 
-#### Шаг 3.1.4: Инициализировать fastlane в проекте
+- В Gemfile добавлена версия fastlane `~> 2.228.0`
 
-**Команда:**
+- Makefile содержит команду `make fastlane` для запуска меню fastlane
 
-```bash
-cd JetpackDays
-fastlane init
-```
-
-Это создаст структуру:
-
-```
-JetpackDays/
-├── fastlane/
-│   ├── Appfile
-│   ├── Fastfile
-│   ├── Screengrabfile
-│   └── metadata/
-│       └── android/
-```
+- `Screengrabfile` будет создан в шаге 1.3.1
 
 ### Критерии готовности
 
-- ⏳ fastlane и screengrab установлены
-- ⏳ Зависимость `screengrab` добавлена в build.gradle.kts
-- ⏳ Разрешения добавлены в AndroidManifest.xml
-- ⏳ fastlane инициализирован в проекте
+✅ Все шаги Части 1.1 и 1.2 выполнены.
 
 ---
 
-## Часть 3.2: Создание Screengrabfile
+## Часть 1.2: Настройка rbenv и обновление Makefile ✅
+
+### Обзор
+
+Для согласования с iOS-проектом настроено:
+
+- rbenv для управления версиями Ruby
+- Gemfile для Ruby-зависимостей fastlane
+- .ruby-version для фиксирования версии Ruby (создаётся автоматически)
+- Обёртки в Makefile для вызова fastlane через `bundle exec`
+- Команда `make setup` для автоматической настройки всего окружения
+
+### Реализовано
+
+#### Шаг 1.2.1: Обновить Makefile ✅
+
+**Добавлены переменные:**
+
+```makefile
+RUBY_VERSION=3.2.2
+SHELL := /bin/bash
+.ONESHELL:
+BUNDLE_EXEC := RBENV_VERSION=$(RUBY_VERSION) bundle exec
+```
+
+**Обновлена команда `make setup`:**
+
+- Автоматическая установка rbenv, Ruby 3.2.2, Bundler, fastlane, markdownlint
+
+- Создание `.ruby-version`
+
+- Выполнение `bundle install`
+
+- Разбита на переиспользуемые части по аналогии с iOS-проектом
+
+**Добавлены команды:**
+
+- `make setup_fastlane` — инициализация fastlane
+
+- `make update_fastlane` — обновление fastlane
+
+- `make fastlane` — запуск меню fastlane
+
+- `make screenshots` — генерация скриншотов (через `$(BUNDLE_EXEC)`)
+
+#### Шаг 1.2.2: Обновить .gitignore ✅
+
+Добавлены правила для Ruby и fastlane артефактов:
+
+- `.rbenv-version`, `.ruby-gemset`, `*.gem`
+
+- `vendor/bundle/`, `.bundle/`
+
+- `fastlane/report.xml`, `fastlane/Preview.html`, `fastlane/test_output/`
+
+**Примечание:** `.ruby-version` и скриншоты коммитятся.
+
+### Критерии готовности
+
+- ✅ Makefile обновлён с переменными `RUBY_VERSION` и `BUNDLE_EXEC`
+- ✅ Команда `make setup` автоматически настраивает rbenv, Ruby, Bundler, fastlane и markdownlint
+- ✅ Команда `make setup_fastlane` инициализирует fastlane
+- ✅ Команда `make update_fastlane` обновляет fastlane
+- ✅ Команда `make fastlane` запускает меню fastlane
+- ✅ Файл `.gitignore` обновлён
+- ✅ fastlane версии 2.228.0 установлен (соответует iOS-проекту)
+- ✅ Bundler версии 2.6.5 установлен (соответует Gemfile.lock)
+- ✅ Отсутствуют предупреждения multipart-post при запуске fastlane
+
+### Аналогия с iOS-проектом
+
+| iOS (SwiftUI-Days) | Android (JetpackDays) |
+|-------------------|----------------------|
+| `.ruby-version` с версией 3.2.2 | `.ruby-version` с версией 3.2.2 |
+| `BUNDLE_EXEC := RBENV_VERSION=$(RUBY_VERSION) bundle exec` | `BUNDLE_EXEC := RBENV_VERSION=$(RUBY_VERSION) bundle exec` |
+| `make setup` настраивает всё | `make setup` настраивает всё |
+| `make setup_fastlane` инициализирует fastlane | `make setup_fastlane` инициализирует fastlane |
+| `make update_fastlane` обновляет fastlane | `make update_fastlane` обновляет fastlane |
+| `make screenshots` использует `$(BUNDLE_EXEC)` | `make screenshots` использует `$(BUNDLE_EXEC)` |
+
+---
+
+## Часть 1.3: Создание Screengrabfile
 
 ### Обзор
 
@@ -274,7 +183,7 @@ Screengrabfile - это конфигурационный файл для screeng
 
 ### Необходимые действия
 
-#### Шаг 3.2.1: Создать Screengrabfile
+#### Шаг 1.3.1: Создать Screengrabfile
 
 **Файл:** `fastlane/Screengrabfile`
 
@@ -301,13 +210,14 @@ screengrab_path '../fastlane/metadata/android'
 ### Критерии готовности
 
 - ⏳ Screengrabfile создан
-- ⏳ Пакет приложения указан правильно
+- ⏳ Пакет приложения указан правильно (com.dayscounter)
+- ⏳ Пакет тестов указан правильно (com.dayscounter.test)
 - ⏳ Локали настроены (ru-RU, en-US)
-- ⏳ Путь к скриншотам настроен
+- ⏳ Путь к скриншотам настроен (fastlane/metadata/android)
 
 ---
 
-## Часть 3.3: Написание UI тестов с Espresso и screengrab
+## Часть 1.4: Написание UI тестов с Espresso и screengrab
 
 ### Обзор
 
@@ -319,9 +229,17 @@ UI тесты с Espresso автоматически выполняются scre
 - `Screengrab.screenshot()` - захват скриншота
 - Espresso UI тесты - навигация по приложению
 
+**Сценарий теста (аналогично iOS-проекту, 5 скриншотов):**
+
+1. **1-demoList** — демо-список записей на главном экране
+2. **2-chooseDate** — выбор даты при создании новой записи
+3. **3-chooseDisplayOption** — выбор displayOption (в Android это радио-кнопки, а не меню как в iOS)
+4. **4-beforeSave** — перед сохранением новой записи
+5. **5-sortByDate** — нажатая кнопка сортировки на главном экране после сохранения новой записи
+
 ### Необходимые действия
 
-#### Шаг 3.3.1: Создать тестовый класс для скриншотов
+#### Шаг 1.4.1: Создать тестовый класс для скриншотов
 
 **Файл:** `app/src/androidTest/java/com/dayscounter/ScreenshotsTest.kt`
 
@@ -353,34 +271,51 @@ class ScreenshotsTest {
 
     @Test
     fun testScreenshots() {
-        // Скриншот 1: Главный экран с демо-списком
-        Screengrab.screenshot("1_main_screen")
+        // Скриншот 1: Демо-список на главном экране
+        Screengrab.screenshot("1-demoList")
 
         // Нажать кнопку добавления
-        // Espresso onView(withId(R.id.fab)).perform(click())
-
-        // Скриншот 2: Экран создания события
-        Screengrab.screenshot("2_create_item_screen")
+        // Espresso.onView(withId(R.id.fab)).perform(click())
 
         // Ввести название
-        // Espresso onView(withId(R.id.title_input)).perform(typeText("New Event"))
+        // Espresso.onView(withId(R.id.title_input)).perform(typeText("Название события"))
 
         // Выбрать дату
-        // Espresso onView(withId(R.id.date_button)).perform(click())
+        // Espresso.onView(withId(R.id.date_button)).perform(click())
 
-        // Скриншот 3: Выбор даты
-        Screengrab.screenshot("3_date_picker")
+        // Скриншот 2: Выбор даты при создании новой записи
+        Screengrab.screenshot("2-chooseDate")
+
+        // Закрыть диалог выбора даты
+        // Espresso.onView(withId(R.id.confirm_button)).perform(click())
+
+        // Выбрать displayOption (радио-кнопки)
+        // Espresso.onView(withId(R.id.display_option_radio_group))
+        //     .check(matches(isDisplayed()))
+        //     .perform(click())
+
+        // Скриншот 3: Выбор displayOption (радио-кнопки)
+        Screengrab.screenshot("3-chooseDisplayOption")
+
+        // Выбрать конкретный displayOption
+        // Espresso.onView(withId(R.id.display_option_day)).perform(click())
+
+        // Скриншот 4: Перед сохранением новой записи
+        Screengrab.screenshot("4-beforeSave")
 
         // Сохранить
-        // Espresso onView(withId(R.id.save_button)).perform(click())
+        // Espresso.onView(withId(R.id.save_button)).perform(click())
 
-        // Скриншот 4: Главный экран после сохранения
-        Screengrab.screenshot("4_after_save")
+        // Нажать кнопку сортировки
+        // Espresso.onView(withId(R.id.sort_nav_button)).perform(click())
+
+        // Скриншот 5: Нажатая  кнопка сортировки нажата на главном экране после сохранения
+        Screengrab.screenshot("5-sortByDate")
     }
 }
 ```
 
-#### Шаг 3.3.2: Оптимизировать стратегию захвата
+#### Шаг 1.4.2: Оптимизировать стратегию захвата
 
 Для улучшения качества скриншотов (тени, тени Material UI, диалоги) использовать UI Automator:
 
@@ -410,13 +345,18 @@ class ScreenshotsTest {
 
 - ⏳ Тестовый класс ScreenshotsTest создан
 - ⏳ LocaleTestRule добавлен для автоматического переключения локалей
-- ⏳ Espresso тесты реализованы
+- ⏳ Espresso тесты реализованы (5 скриншотов)
+- ⏳ Скриншот 1 (1-demoList): демо-список на главном экране
+- ⏳ Скриншот 2 (2-chooseDate): выбор даты при создании новой записи
+- ⏳ Скриншот 3 (3-chooseDisplayOption): выбор displayOption (радио-кнопки)
+- ⏳ Скриншот 4 (4-beforeSave): перед сохранением новой записи
+- ⏳ Скриншот 5 (5-sortByDate): нажатая кнопка сортировки на главном экране после сохранения
 - ⏳ Screengrab.screenshot() вызывается на каждом шаге
 - ⏳ UI Automator стратегия включена (опционально)
 
 ---
 
-## Часть 3.4: Создание lanes в Fastfile
+## Часть 1.5: Создание lanes в Fastfile
 
 ### Обзор
 
@@ -424,7 +364,7 @@ Fastfile содержит lanes (команды) для автоматизаци
 
 ### Необходимые действия
 
-#### Шаг 3.4.1: Создать lane для генерации скриншотов
+#### Шаг 1.5.1: Создать lane для генерации скриншотов
 
 **Файл:** `fastlane/Fastfile`
 
@@ -452,35 +392,9 @@ lane :screenshots_en do
     clear_previous_screenshots: true
   )
 end
-
-# Загрузка скриншотов в Google Play Store
-lane :upload_screenshots do
-  upload_to_play_store(
-    skip_upload_metadata: true,
-    skip_upload_images: true,
-    skip_upload_screenshots: false,
-    skip_upload_apk: true,
-    skip_upload_aab: true
-  )
-end
-
-# Полный процесс: генерация и загрузка
-lane :screenshots_and_upload do
-  capture_android_screenshots(
-    locales: ['ru-RU', 'en-US'],
-    clear_previous_screenshots: true
-  )
-  upload_to_play_store(
-    skip_upload_metadata: true,
-    skip_upload_images: true,
-    skip_upload_screenshots: false,
-    skip_upload_apk: true,
-    skip_upload_aab: true
-  )
-end
 ```
 
-#### Шаг 3.4.2: Добавить команды в Makefile
+#### Шаг 1.5.2: Добавить команды в Makefile
 
 **Файл:** `Makefile`
 
@@ -502,29 +416,18 @@ screenshots-en:
     @echo "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)"
     fastlane screenshots_en
     @echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
-
-## upload-screenshots: Загрузить скриншоты в Google Play Store
-upload-screenshots:
-    @echo "$(YELLOW)Загружаю скриншоты в Google Play Store...$(RESET)"
-    fastlane upload_screenshots
-    @echo "$(GREEN)Скриншоты загружены$(RESET)"
-
-## screenshots-full: Генерировать и загрузить скриншоты
-screenshots-full:
-    @echo "$(YELLOW)Генерирую и загружаю скриншоты...$(RESET)"
-    fastlane screenshots_and_upload
-    @echo "$(GREEN)Скриншоты готовы и загружены$(RESET)"
 ```
 
 ### Критерии готовности
 
-- ⏳ Lanes в Fastfile созданы
+- ⏳ Lanes в Fastfile созданы (screenshots, screenshots_ru, screenshots_en)
 - ⏳ Команды в Makefile добавлены
 - ⏳ Локали настроены правильно (ru-RU, en-US)
+- ⏳ Генерирует 5 скриншотов по сценарию iOS-проекта
 
 ---
 
-## Часть 3.5: Интеграция с RuStore
+## Часть 1.6: Интеграция с RuStore
 
 ### Обзор
 
@@ -532,7 +435,7 @@ screenshots-full:
 
 ### Необходимые действия
 
-#### Шаг 3.5.1: Подготовить скриншоты для RuStore
+#### Шаг 1.6.1: Подготовить скриншоты для RuStore
 
 **Где находятся скриншоты:** `fastlane/metadata/android/`
 
@@ -542,14 +445,18 @@ screenshots-full:
 fastlane/metadata/android/
   ru-RU/
     phoneScreenshots/
-      1_main_screen.png
-      2_create_item_screen.png
-      ...
+      1-demoList.png
+      2-chooseDate.png
+      3-chooseDisplayOption.png
+      4-beforeSave.png
+      5-sortByDate.png
   en-US/
     phoneScreenshots/
-      1_main_screen.png
-      2_create_item_screen.png
-      ...
+      1-demoList.png
+      2-chooseDate.png
+      3-chooseDisplayOption.png
+      4-beforeSave.png
+      5-sortByDate.png
 ```
 
 **Для RuStore нужно:**
@@ -557,7 +464,7 @@ fastlane/metadata/android/
 1. Скопировать скриншоты из `fastlane/metadata/android/ru-RU/phoneScreenshots/` в папку для загрузки в RuStore
 2. Скопировать скриншоты из `fastlane/metadata/android/en-US/phoneScreenshots/` в папку для RuStore (английская версия)
 
-#### Шаг 3.5.2: Создать команду для RuStore
+#### Шаг 1.6.2: Создать команду для RuStore
 
 **Файл:** `Makefile`
 
@@ -593,11 +500,12 @@ prepare-rustore-screenshots:
 
 ### Порядок реализации
 
-1. Установить и настроить fastlane (Часть 3.1)
-2. Создать Screengrabfile (Часть 3.2)
-3. Написать UI тесты с Espresso (Часть 3.3)
-4. Создать lanes в Fastfile (Часть 3.4)
-5. Интеграция с RuStore (Часть 3.5)
+1. ✅ Установить и настроить fastlane (Часть 1.1)
+2. ✅ Настроить rbenv и обновить Makefile (Часть 1.2)
+3. Создать Screengrabfile (Часть 1.3)
+4. Написать UI тесты с Espresso (Часть 1.4)
+5. Создать lanes в Fastfile (Часть 1.5)
+6. Интеграция с RuStore (Часть 1.6)
 
 ### Использование
 
@@ -608,19 +516,15 @@ make screenshots
 make screenshots-ru
 # Только английский
 make screenshots-en
-# Загрузка в Google Play Store
-make upload-screenshots
-# Генерация и загрузка
-make screenshots-full
 # Подготовка для RuStore
 make prepare-rustore-screenshots
 ```
 
 ---
 
-## Часть 4: Подготовка метаданных для магазинов
+## Часть 2: Подготовка метаданных для магазинов
 
-### Шаг 4.1: Подготовить метаданные для RuStore
+### Шаг 2.1: Подготовить метаданные для RuStore
 
 Создать файлы описания для RuStore:
 
@@ -635,7 +539,7 @@ make prepare-rustore-screenshots
 
 Используйте команду `make prepare-rustore-screenshots` для подготовки скриншотов из `fastlane/metadata/android/ru-RU/phoneScreenshots/` и `en-US/phoneScreenshots/`.
 
-### Шаг 4.2: Подготовить метаданные для Google Play Store
+### Шаг 2.2: Подготовить метаданные для Google Play Store
 
 #### Структура папок метаданных
 
@@ -734,38 +638,25 @@ fastlane supply
 
 ## Порядок выполнения
 
-### Приоритет 1: Название приложения (обязательно) ✅
+### Приоритет 1: Автоматизация скриншотов с fastlane (важно)
 
-Созданы локализованные названия для русского и английского языков.
+1. Установить fastlane и screengrab (Часть 1.1) ✅
+2. Настроить rbenv и обновить Makefile (Часть 1.2) ✅
+3. Создать Screengrabfile (Часть 1.3)
+4. Написать UI тесты с Espresso (Часть 1.4)
+5. Создать lanes в Fastfile (Часть 1.5)
+6. Интеграция с RuStore (Часть 1.6)
+6. Сгенерировать скриншоты для магазинов приложений (`make screenshots`)
 
-### Приоритет 2: Подготовка к публикации в магазинах (обязательно) ✅
+### Приоритет 2: Подготовка метаданных (важно)
 
-**ВЫПОЛНЕНО:** Секреты настроены через приватный репозиторий `android-secrets`.
+7. Подготовить метаданные для RuStore и Google Play Store (Часть 2)
 
-- ✅ Создан репозиторий `android-secrets` на GitHub
-- ✅ Подготовлена структура секретов для JetpackDays в репозитории
-- ✅ Создан keystore и ключи подписи в репозитории (ключ `upload`)
-- ✅ Получены ZIP-архив с подписью и сертификат PEM для RuStore
-- ✅ Настроен build.gradle.kts для чтения секретов из `.secrets/secrets.properties`
-- ✅ Папка `.secrets/` добавлена в `.gitignore` проекта JetpackDays
-- ✅ Команда `make release` работает (создает подписанную AAB-сборку `dayscounter{VERSION_CODE}.aab`)
-- ✅ Подпись загружена в RuStore Консоль (обязательно перед загрузкой AAB)
+### Приоритет 3: Публикация (обязательно)
 
-### Приоритет 3: Автоматизация скриншотов с fastlane (важно)
-
-11. Установить fastlane и screengrab (Часть 3.1)
-12. Создать Screengrabfile (Часть 3.2)
-13. Написать UI тесты с Espresso (Часть 3.3)
-14. Создать lanes в Fastfile (Часть 3.4)
-15. Интеграция с RuStore (Часть 3.5)
-16. Сгенерировать скриншоты для магазинов приложений (`make screenshots`)
-
-### Приоритет 4: Публикация (обязательно)
-
-16. Создать AAB-файл командой `make release` ✅
-17. Загрузить подпись в RuStore Консоль ✅
-18. Загрузить AAB и метаданные в RuStore
-19. Загрузить AAB и метаданные в Google Play Store
+8. Создать AAB-файл командой `make release`
+9. Загрузить AAB и метаданные в RuStore
+10. Загрузить AAB и метаданные в Google Play Store
 
 ---
 
@@ -773,25 +664,24 @@ fastlane supply
 
 ### Обязательные критерии
 
-- ✅ **Часть 1: Настройка названия приложения** - выполнено
-- ✅ **Часть 2: Подготовка к публикации** - выполнено
-  - ✅ Секреты настроены через приватный репозиторий `android-secrets`
-  - ✅ Команда `make release` работает (создает файл `dayscounter{VERSION_CODE}.aab`)
-  - ✅ Подпись загружена в RuStore Консоль
+**Выполнено (Части 1.1 и 1.2):**
 
-- ⏳ fastlane и screengrab установлены
-- ⏳ Зависимость `screengrab` добавлена в build.gradle.kts
-- ⏳ Разрешения добавлены в AndroidManifest.xml
-- ⏳ fastlane инициализирован в проекте
+- ✅ fastlane 2.228.0, screengrab 2.1.1, Ruby 3.2.2, Bundler 2.6.5 установлены
+
+- ✅ Makefile обновлён с rbenv интеграцией и командами setup/setup_fastlane/update_fastlane/fastlane/screenshots
+
+- ✅ .gitignore обновлён для Ruby и fastlane артефактов
+
+**Осталось выполнить:**
+
 - ⏳ Screengrabfile создан с конфигурацией
+
 - ⏳ UI тесты с Espresso написаны
-- ⏳ LocaleTestRule добавлен для автоматического переключения локалей
+
 - ⏳ Lanes в Fastfile созданы
-- ⏳ Команды в Makefile добавлены
-- ⏳ Команда `make screenshots` работает
+
 - ⏳ Скриншоты сгенерированы для обоих магазинов
-- ⏳ Скриншоты подготовлены для RuStore
-- ⏳ Скриншоты можно загрузить в Google Play Store через `make upload-screenshots`
+
 - ⏳ Метаданные подготовлены для обоих магазинов
 
 ### Результат
@@ -801,8 +691,8 @@ fastlane supply
 - Публиковать приложение в RuStore и Google Play Store
 - Создавать подписанный AAB-файл командой `make release` (файл `dayscounter{VERSION_CODE}.aab`)
 - Генерировать локализованные скриншоты командой `make screenshots`
-- Загружать скриншоты в Google Play Store командой `make upload-screenshots` или `make screenshots-full`
 - Подготавливать скриншоты для RuStore командой `make prepare-rustore-screenshots`
+- Загружать скриншоты в магазины вручную (RuStore Консоль, Google Play Console)
 
 ---
 
