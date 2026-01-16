@@ -204,7 +204,7 @@ private fun sendFeedback(context: Context) {
     val intent =
         Intent(
             Intent.ACTION_SENDTO,
-            Uri.fromParts("mailto", "easydev991@gmail.com", null),
+            Uri.fromParts("mailto", "easy_dev991@mail.ru", null),
         ).apply {
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, body)
