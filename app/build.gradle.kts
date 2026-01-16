@@ -129,6 +129,9 @@ dependencies {
     // Firebase Crashlytics - версия берется из BOM
     implementation(libs.firebase.crashlytics)
 
+    // Firebase Analytics - для работы breadcrumb logs в Crashlytics
+    implementation(libs.firebase.analytics)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)

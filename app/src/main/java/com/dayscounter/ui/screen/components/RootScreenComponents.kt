@@ -20,6 +20,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.dayscounter.analytics.FirebaseAnalyticsHelper
+import com.dayscounter.analytics.ScreenNames
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
@@ -83,6 +85,13 @@ internal fun navigationBarContent(
  */
 private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navController: NavHostController) {
     composable(Screen.Events.route) {
+        val context = LocalContext.current
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.EVENTS,
+            screenClass = "MainScreen",
+        )
         eventsScreenContent(navController)
     }
 }
@@ -104,7 +113,14 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
                 },
             ),
     ) { backStackEntry ->
+        val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.DETAIL,
+            screenClass = "DetailScreen",
+        )
         com.dayscounter.ui.screen.detailScreen(
             itemId = itemId,
             viewModel =
@@ -129,6 +145,13 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
     navController: NavHostController,
 ) {
     composable(Screen.CreateItem.route) {
+        val context = LocalContext.current
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.CREATE,
+            screenClass = "CreateEditScreen",
+        )
         com.dayscounter.ui.screen.createEditScreen(
             itemId = null,
             viewModel =
@@ -147,7 +170,14 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
                 },
             ),
     ) { backStackEntry ->
+        val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.CREATE,
+            screenClass = "CreateEditScreen",
+        )
         com.dayscounter.ui.screen.createEditScreen(
             itemId = itemId,
             viewModel =
@@ -164,6 +194,13 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
  */
 private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navController: NavHostController) {
     composable(Screen.More.route) {
+        val context = LocalContext.current
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.MORE,
+            screenClass = "MoreScreen",
+        )
         com.dayscounter.ui.screen
             .moreScreen(navController)
     }
@@ -179,8 +216,15 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
     application: android.app.Application,
 ) {
     composable(Screen.ThemeIcon.route) {
+        val context = LocalContext.current
         val viewModel: ThemeIconViewModel =
             viewModel(factory = ThemeIconViewModel.factory(dataStore, application))
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.THEME_ICON,
+            screenClass = "ThemeIconScreen",
+        )
         themeIconScreen(
             viewModel = viewModel,
             onBackClick = { navController.popBackStack() },
@@ -198,8 +242,15 @@ private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
     application: android.app.Application,
 ) {
     composable(Screen.AppData.route) {
+        val context = LocalContext.current
         val viewModel: AppDataScreenViewModel =
             viewModel(factory = AppDataScreenViewModel.factory(repository, application))
+        // Логируем screen_view событие для Analytics и breadcrumb logs
+        FirebaseAnalyticsHelper.logScreenView(
+            context = context,
+            screenName = ScreenNames.APP_DATA,
+            screenClass = "AppDataScreen",
+        )
         appDataScreen(
             viewModel = viewModel,
             onBackClick = { navController.popBackStack() },
