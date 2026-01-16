@@ -150,3 +150,15 @@ proguard/
 
 # Documentation
 /.qwen
+
+# Ruby
+.rbenv-version
+.ruby-gemset
+*.gem
+vendor/bundle/
+.bundle/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/

@@ -21,6 +21,7 @@ junitJupiter = "6.0.2"
 mockk = "1.14.7"
 material = "1.7.8"
 turbine = "1.1.0"
+screengrab = "2.1.1"
 firebase-bom = "34.8.0"
 google-services = "4.4.4"
 firebase-crashlytics-gradle = "3.0.6"
@@ -56,6 +57,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
