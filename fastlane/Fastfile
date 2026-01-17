@@ -42,7 +42,9 @@ platform :android do
   lane :screenshots do
     capture_android_screenshots(
       locales: ['ru-RU', 'en-US'],
-      clear_previous_screenshots: true
+      clear_previous_screenshots: true,
+      app_apk_path: File.expand_path('../app/build/outputs/apk/debug/app-debug.apk', __dir__),
+      tests_apk_path: File.expand_path('../app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk', __dir__)
     )
   end
 
@@ -50,7 +52,9 @@ platform :android do
   lane :screenshots_ru do
     capture_android_screenshots(
       locales: ['ru-RU'],
-      clear_previous_screenshots: true
+      clear_previous_screenshots: true,
+      app_apk_path: File.expand_path('../app/build/outputs/apk/debug/app-debug.apk', __dir__),
+      tests_apk_path: File.expand_path('../app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk', __dir__)
     )
   end
 
@@ -58,7 +62,9 @@ platform :android do
   lane :screenshots_en do
     capture_android_screenshots(
       locales: ['en-US'],
-      clear_previous_screenshots: true
+      clear_previous_screenshots: true,
+      app_apk_path: File.expand_path('../app/build/outputs/apk/debug/app-debug.apk', __dir__),
+      tests_apk_path: File.expand_path('../app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk', __dir__)
     )
   end
 end

@@ -205,7 +205,7 @@ clear_previous_screenshots true
 use_tests_in_packages ['com.dayscounter.screenshots']
 
 # Путь к сгенерированным скриншотам
-screengrab_path '../fastlane/metadata/android'
+output_directory '../fastlane/metadata/android'
 ```
 
 ### Критерии готовности

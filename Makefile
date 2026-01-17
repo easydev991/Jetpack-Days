@@ -229,21 +229,21 @@ fastlane:
 screenshots:
 	@echo "$(YELLOW)Генерирую скриншоты через fastlane...$(RESET)"
 	@$(MAKE) _ensure_fastlane
-	$(BUNDLE_EXEC) fastlane screenshots
+	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots
 	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
 
 ## screenshots-ru: Генерировать скриншоты только на русском
 screenshots-ru:
 	@echo "$(YELLOW)Генерирую скриншоты (русский)...$(RESET)"
 	@$(MAKE) _ensure_fastlane
-	$(BUNDLE_EXEC) fastlane screenshots_ru
+	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_ru
 	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
 
 ## screenshots-en: Генерировать скриншоты только на английском
 screenshots-en:
 	@echo "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)"
 	@$(MAKE) _ensure_fastlane
-	$(BUNDLE_EXEC) fastlane screenshots_en
+	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_en
 	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
 
 ## _ensure_fastlane: Проверить что fastlane готов к использованию

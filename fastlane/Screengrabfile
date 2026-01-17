@@ -10,9 +10,8 @@ locales ['ru-RU', 'en-US']
 # Очистить предыдущие скриншоты перед генерацией
 clear_previous_screenshots true
 
-# Пакет с тестами для скриншотов (будет создан в части 1.4)
-# UI-тесты для screengrab должны находиться в этом пакете
-use_tests_in_packages ['com.dayscounter.screenshots']
+# Использовать adb root для доступа к файлам на Android 11+ (снимает проблемы с правами доступа)
+use_adb_root true
 
-# Путь к сгенерированным скриншотам
-screengrab_path '../fastlane/metadata/android'
+# Путь к сгенерированным скриншотам (абсолютный путь)
+output_directory '/Users/Oleg991/Documents/GitHub/JetpackDays/fastlane/metadata/android'
