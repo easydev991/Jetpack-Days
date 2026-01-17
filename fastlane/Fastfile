@@ -35,4 +35,30 @@ platform :android do
     gradle(task: "clean assembleRelease")
     upload_to_play_store
   end
+
+  # Lanes для генерации скриншотов
+
+  desc "Создание скриншотов для всех локалей"
+  lane :screenshots do
+    capture_android_screenshots(
+      locales: ['ru-RU', 'en-US'],
+      clear_previous_screenshots: true
+    )
+  end
+
+  desc "Создание скриншотов только для русского"
+  lane :screenshots_ru do
+    capture_android_screenshots(
+      locales: ['ru-RU'],
+      clear_previous_screenshots: true
+    )
+  end
+
+  desc "Создание скриншотов только для английского"
+  lane :screenshots_en do
+    capture_android_screenshots(
+      locales: ['en-US'],
+      clear_previous_screenshots: true
+    )
+  end
 end

@@ -223,7 +223,7 @@ screengrab_path '../fastlane/metadata/android'
 
 ---
 
-## Часть 1.4: Написание UI тестов с Espresso и screengrab
+## ✅ Часть 1.4: Написание UI тестов с Espresso и screengrab (выполнено)
 
 ### Обзор
 
@@ -349,20 +349,42 @@ class ScreenshotsTest {
 
 ### Критерии готовности
 
-- ⏳ Тестовый класс ScreenshotsTest создан
-- ⏳ LocaleTestRule добавлен для автоматического переключения локалей
-- ⏳ Espresso тесты реализованы (5 скриншотов)
-- ⏳ Скриншот 1 (1-demoList): демо-список на главном экране
-- ⏳ Скриншот 2 (2-chooseDate): выбор даты при создании новой записи
-- ⏳ Скриншот 3 (3-chooseDisplayOption): выбор displayOption (радио-кнопки)
-- ⏳ Скриншот 4 (4-beforeSave): перед сохранением новой записи
-- ⏳ Скриншот 5 (5-sortByDate): нажатая кнопка сортировки на главном экране после сохранения
-- ⏳ Screengrab.screenshot() вызывается на каждом шаге
-- ⏳ UI Automator стратегия включена (опционально)
+- ✅ Тестовый класс ScreenshotsTest создан
+- ✅ LocaleTestRule добавлен для автоматического переключения локалей
+- ✅ Espresso тесты реализованы (5 скриншотов)
+- ✅ Скриншот 1 (1-demoList): демо-список на главном экране
+- ✅ Скриншот 2 (2-chooseDate): выбор даты при создании новой записи
+- ✅ Скриншот 3 (3-chooseDisplayOption): выбор displayOption (радио-кнопки)
+- ✅ Скриншот 4 (4-beforeSave): перед сохранением новой записи
+- ✅ Скриншот 5 (5-sortByDate): нажатая кнопка сортировки на главном экране после сохранения
+- ✅ Screengrab.screenshot() вызывается на каждом шаге
+- ⏸️ UI Automator стратегия включена (опционально - не включена, использует стандартную стратегию)
+
+### Реализация
+
+Создан тестовый класс `ScreenshotsTest.kt` в пакете `com.dayscounter.screenshots`:
+
+**Файл:** `app/src/androidTest/java/com/dayscounter/screenshots/ScreenshotsTest.kt`
+
+**Особенности реализации:**
+
+1. **Пакет тестов:** `com.dayscounter.screenshots` (соответствует Screengrabfile)
+2. **Правила теста:**
+   - `createAndroidComposeRule<MainActivity>()` - для доступа к Compose UI
+   - `LocaleTestRule()` - автоматическое переключение локалей (ru-RU, en-US)
+3. **Демо-данные:** Загружаются 3 тестовые записи перед тестом для демонстрации разных вариантов отображения
+4. **5 скриншотов:** Реализованы все сценарии из плана
+5. **Очистка данных:** База данных очищается до и после теста для идентичности результатов
+
+**Команда для запуска:**
+
+```bash
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.dayscounter.screenshots.ScreenshotsTest
+```
 
 ---
 
-## Часть 1.5: Создание lanes в Fastfile
+## ✅ Часть 1.5: Создание lanes в Fastfile (выполнено)
 
 ### Обзор
 
@@ -426,10 +448,48 @@ screenshots-en:
 
 ### Критерии готовности
 
-- ⏳ Lanes в Fastfile созданы (screenshots, screenshots_ru, screenshots_en)
-- ⏳ Команды в Makefile добавлены
-- ⏳ Локали настроены правильно (ru-RU, en-US)
-- ⏳ Генерирует 5 скриншотов по сценарию iOS-проекта
+- ✅ Lanes в Fastfile созданы (screenshots, screenshots_ru, screenshots_en)
+- ✅ Команды в Makefile добавлены
+- ✅ Локали настроены правильно (ru-RU, en-US)
+- ✅ Генерирует 5 скриншотов по сценарию iOS-проекта
+
+### Реализация
+
+**Fastfile добавлены lanes:**
+
+```ruby
+# Создание скриншотов для всех локалей
+lane :screenshots do
+  capture_android_screenshots(
+    locales: ['ru-RU', 'en-US'],
+    clear_previous_screenshots: true
+  )
+end
+
+# Создание скриншотов только для русского
+lane :screenshots_ru do
+  capture_android_screenshots(
+    locales: ['ru-RU'],
+    clear_previous_screenshots: true
+  )
+end
+
+# Создание скриншотов только для английского
+lane :screenshots_en do
+  capture_android_screenshots(
+    locales: ['en-US'],
+    clear_previous_screenshots: true
+  )
+end
+```
+
+**Makefile добавлены команды:**
+
+- `make screenshots` - генерировать скриншоты для всех локалей (ru-RU, en-US)
+- `make screenshots-ru` - генерировать скриншоты только для русского
+- `make screenshots-en` - генерировать скриншоты только для английского
+
+Все команды автоматически проверяют наличие fastlane и загружают скриншоты в `fastlane/metadata/android`.
 
 ---
 

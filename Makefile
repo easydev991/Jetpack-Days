@@ -225,6 +225,38 @@ fastlane:
 	@$(BUNDLE_EXEC) fastlane
 
 # Дополнительно
+## screenshots: Генерировать скриншоты для всех локалей через fastlane
+screenshots:
+	@echo "$(YELLOW)Генерирую скриншоты через fastlane...$(RESET)"
+	@$(MAKE) _ensure_fastlane
+	$(BUNDLE_EXEC) fastlane screenshots
+	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+
+## screenshots-ru: Генерировать скриншоты только на русском
+screenshots-ru:
+	@echo "$(YELLOW)Генерирую скриншоты (русский)...$(RESET)"
+	@$(MAKE) _ensure_fastlane
+	$(BUNDLE_EXEC) fastlane screenshots_ru
+	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+
+## screenshots-en: Генерировать скриншоты только на английском
+screenshots-en:
+	@echo "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)"
+	@$(MAKE) _ensure_fastlane
+	$(BUNDLE_EXEC) fastlane screenshots_en
+	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+
+## _ensure_fastlane: Проверить что fastlane готов к использованию
+_ensure_fastlane:
+	@if [ ! -d "fastlane" ] || [ ! -f "fastlane/Fastfile" ]; then \
+		printf "$(RED)fastlane не инициализирован в проекте$(RESET)\n"; \
+		exit 1; \
+	fi
+	@if ! command -v rbenv >/dev/null 2>&1; then \
+		printf "$(RED)rbenv не установлен. Запустите: make setup$(RESET)\n"; \
+		exit 1; \
+	fi
+
 ## android-test-report: Открыть HTML отчет интеграционных тестов в браузере
 android-test-report:
 	@if [ -f app/build/reports/androidTests/connected/debug/index.html ]; then \
@@ -268,4 +300,4 @@ release:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report setup setup_fastlane update_fastlane fastlane help release _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
