@@ -310,7 +310,7 @@ release:
 	cp app/build/outputs/bundle/release/app-release.aab "$$OUTPUT_FILE"; \
 	printf "$(GREEN)AAB создан и mapping files загружены в Firebase: $$OUTPUT_FILE$(RESET)\n"
 	@printf "$(YELLOW)Версия для публикации: $$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2) (build $$NEW_VERSION_CODE)$(RESET)\n"
-	@echo "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)"
+	@printf "$(YELLOW)Для публикации используйте этот файл в RuStore или Google Play Store$(RESET)\\n"
 
 # Запуск всех задач
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
