@@ -8,29 +8,33 @@ alwaysApply: true
 
 ### Память
 
-- Избегать утечек, правильная привязка к lifecycle
-- `remember`/`rememberSaveable` в Compose
+- `viewModelScope.launch` для корутин с автоматической отменой при очистке
+- `StateFlow` с `SharingStarted.WhileSubscribed` (таймаут 5000мс) в DetailScreenViewModel
+- `rememberSaveable` для сохранения состояния при реконфигурации
 
 ### БД
 
-- Индексы, оптимизация запросов, пагинация для больших списков
+- Room DAO с Flow для реактивных запросов
+- `searchItems` с LIKE без индексов (текущее состояние)
 
 ### UI
 
-- Избегать лишних рекомпозиций
-- `key()` для стабильной идентификации элементов списков
-- Lazy loading для списков
+- `LazyColumn` с `key = { it.id }` для стабильной идентификации (MainScreen.kt:376)
+- `rememberLazyListState()` для сохранения состояния прокрутки
+- `verticalScroll(rememberScrollState())` для форм
+- `rememberSaveable` для локального состояния (title, details, selectedDate, selectedColor)
 
 ## Безопасность
 
 ### Данные
 
-- Шифрование конфиденциальных данных
-- Проверка пользовательского ввода
-- Не хранить чувствительные данные открыто
+- `TextField` с `minLines` для ограничения ввода (detailsSection.kt:199)
+- Room для безопасного хранения данных
+- Безопасное разворачивание опционалов: `checkNotNull`, `?.let`, `?:`
 
 ### Файлы
 
-- Валидация содержимого импортируемых файлов
-- Ограничение размера файлов
-- Безопасная обработка ошибок
+- ImportBackupUseCase: обработка `FileNotFoundException`, `IOException`, `SerializationException`, `SQLException`
+- JSON с `ignoreUnknownKeys = true` для игнорирования неизвестных полей
+- Фильтрация дубликатов при импорте по title/details/timestamp/displayOption
+- `contentResolver.openInputStream()` с автоматическим закрытием через `use`

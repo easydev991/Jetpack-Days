@@ -24,73 +24,45 @@ Presentation (UI, ViewModel)
 
 ## Dependency Injection (DI)
 
-### Подход к DI
+**Ручной DI через factory методы** в `FormatterModule` и `AppModule`. Проект не использует Hilt.
 
-**Ручной DI через factory методы** - проект не использует Hilt или другие DI-фреймворки.
+**Причины:** простой граф зависимостей, быстрая компиляция, меньше зависимостей, простые тесты.
 
-**Почему ручной DI:**
+**DI модули:**
 
-- Проект небольшой, простой граф зависимостей
-- Factory методы в `FormatterModule` решают все задачи
-- Быстрее компиляция (нет KSP обработки аннотаций)
-- Меньше зависимостей (уменьшение размера APK)
-- Тесты работают без сложной настройки
+- `FormatterModule` - factory методы для форматирования и use cases
+- `AppModule` - factory методы для репозитория и DataStore
 
-### Структура DI
-
-**DI модуль:** `app/src/main/java/com/dayscounter/di/FormatterModule.kt`
-
-Содержит factory методы для создания зависимостей:
-
-- `createResourceProvider(context: Context)`
-- `createDaysFormatter()`
-- `createCalculateDaysDifferenceUseCase()`
-- `createFormatDaysTextUseCase(daysFormatter: DaysFormatter)`
-- `createGetFormattedDaysForItemUseCase(...)`
-
-### Использование
-
-**В ViewModel:**
-
-```kotlin
-class MyViewModel : ViewModel() {
-    private val useCase = FormatterModule.createCalculateDaysDifferenceUseCase()
-    // ...
-}
-```
-
-**В тестах:**
-
-```kotlin
-@Before
-fun setUp() {
-    val useCase = FormatterModule.createCalculateDaysDifferenceUseCase()
-    viewModel = MyViewModel(useCase)
-}
-```
-
-### Когда стоит рассмотреть Hilt
-
-- Когда проект вырастет до 10+ ViewModel
-- Когда появятся сложные графы зависимостей
-- Когда потребуется интеграционное тестирование с DI
-- Когда команда разработчиков вырастет и нужна стандартизация
-
-Подробнее см. `docs/Hilt_Setup_Plan.md`
+**Примечание:** Hilt стоит рассмотреть при росте проекта (>10 ViewModel, сложные графы зависимостей). См. `docs/Hilt_Setup_Plan.md`
 
 ## Слои
 
 ### Data
 
-- Room: сущности, DAO, миграции, индексы
-- Repository: абстракция источников, только локальные данные
+- **Room**: `ItemEntity`, `ItemDao`, `DaysDatabase`, конвертеры
+- **Repository**: `ItemRepositoryImpl` - реализация репозитория
+- **Formatter**: `DaysFormatter`, `ResourceProvider` - локализация
+- **Preferences**: `AppSettingsDataStore` - хранение настроек (тема, иконка, сортировка)
 
 ### Domain
 
-- Use Cases: бизнес-логика, один use case - одна ответственность
-- Entities: data классы, неизменяемые
+- **Use Cases**: бизнес-логика, один use case - одна ответственность:
+  - `CalculateDaysDifferenceUseCase`, `FormatDaysTextUseCase`, `GetFormattedDaysForItemUseCase`
+  - `GetDaysAnalysisTextUseCase`, `ExportBackupUseCase`, `ImportBackupUseCase`
+  - `IconManager` - смена иконки приложения
+- **Entities**: `Item`, `DaysDifference`, `DisplayOption`, `SortOrder`, `AppTheme`, `AppIcon`, `TimePeriod`
+- **Repository Interface**: `ItemRepository` - абстракция репозитория
 
 ### Presentation
 
-- ViewModel: состояние UI, `viewModelScope` для корутин
-- UI State: data классы, sealed классы для состояний (Loading/Success/Error)
+- **ViewModels**: `MainScreenViewModel`, `CreateEditScreenViewModel`, `DetailScreenViewModel`, `RootScreenViewModel`, `AppDataScreenViewModel`, `ThemeIconViewModel`, `MainActivityViewModel`
+- **UI State**: sealed классы (Loading/Success/Error), `AppDataUiState`, `RootScreenState`, `ThemeIconUiState`
+- **Screens**: Compose экраны в `ui/screen/`
+- **Navigation**: `navigation/Screen.kt`
+- **Theme**: тема в `ui/theme/`
+
+### Utilities
+
+- **Logger**: `Logger` интерфейс (`AndroidLogger`, `NoOpLogger`)
+- **Analytics**: `FirebaseAnalyticsHelper` - screen_view, события (только release)
+- **Crash**: `CrashlyticsHelper` - отчеты о крашах (только release)

@@ -19,13 +19,21 @@
 
 - **Jetpack Compose**: UI
 - **Navigation Compose**: навигация
+- **Material3 Adaptive Navigation Suite**: адаптивная навигация
 - **ViewModel**: управление состоянием UI
 - **Room**: локальная БД
-- **DataStore**: простое хранение
+- **DataStore**: простое хранение настроек
 - **Coroutines**: асинхронность
+- **Kotlinx Serialization**: JSON сериализация
 - **JUnit 5**: unit-тесты
 - **MockK**: мокирование
 - **Espresso**: UI тесты
+- **Compose Testing**: тестирование Compose UI
+- **Turbine**: тестирование Flow
+- **Robolectric**: локальные Android тесты
+- **Screengrab**: автоматизация скриншотов
+- **Firebase Crashlytics**: сбор ошибок (только release)
+- **Firebase Analytics**: breadcrumb logs для отладки крашей
 
 **ВАЖНО:** Сетевые библиотеки (Retrofit, OkHttp, Ktor) НЕ используются.
 
@@ -35,12 +43,12 @@
 
 ### Обновленная информация о проекте
 
-- **AGP (Android Gradle Plugin)**: 8.13.2
+- **AGP (Android Gradle Plugin)**: 9.0.0
 - **Kotlin**: 2.3.0
 - **Compile SDK**: 36
 - **Target SDK**: 35
 - **Min SDK**: 26
-- **KSP (Kotlin Symbol Processing)**: 2.3.0 (KSP2)
+- **KSP (Kotlin Symbol Processing)**: 2.3.2 (KSP2)
 
 ## Architecture
 
@@ -83,7 +91,7 @@ Presentation (UI, ViewModel)
 
 ```kotlin
 @Test
-fun `functionName_whenCondition_thenExpectedResult`() {
+fun functionName_whenCondition_thenExpectedResult() {
     // Given
     // When
     // Then
@@ -95,7 +103,7 @@ fun `functionName_whenCondition_thenExpectedResult`() {
 ```kotlin
 class DaysCalculatorTest {
     @Test
-    fun `calculateDaysDifference_whenSameDay_thenReturnsZero`() {
+    fun calculateDaysDifference_whenSameDay_thenReturnsZero() {
         // Given
         val date = LocalDate.now()
 
@@ -146,16 +154,8 @@ fun ComponentPreview() {
 }
 ```
 
-### Именование
-
-- Классы: `PascalCase`
-- Функции/переменные: `camelCase`
-- Константы: `UPPER_SNAKE_CASE`
-- Пакеты: `lowercase.with.dots`
-
 ### Комментарии
 
-- KDoc для публичных API
 - Объяснять "почему", не "что"
 - Логи на русском
 
@@ -214,15 +214,48 @@ fun ComponentPreview() {
 ### Пример структуры навигации
 
 ```kotlin
-sealed class Screen(val route: String) {
-    object Main : Screen("main")
-    object ItemDetails : Screen("item_details/{itemId}") {
-        fun createRoute(itemId: Long) = "item_details/$itemId"
+sealed class Screen(
+    val route: String,
+    val icon: ImageVector? = null,
+    val titleResId: Int? = null,
+) {
+    object Events : Screen(
+        route = "events",
+        icon = Icons.AutoMirrored.Filled.List,
+        titleResId = R.string.events,
+    )
+
+    object More : Screen(
+        route = "more",
+        icon = Icons.Filled.MoreVert,
+        titleResId = R.string.more,
+    )
+
+    object ThemeIcon : Screen(
+        route = "theme_icon",
+        titleResId = R.string.app_theme_and_icon,
+    )
+
+    object ItemDetail : Screen(
+        route = "item_detail/{itemId}",
+    ) {
+        fun createRoute(itemId: Long) = "item_detail/$itemId"
     }
-    object CreateEditItem : Screen("create_edit_item")
-    object More : Screen("more")
-    object ThemeIcon : Screen("theme_icon")
-    object AppData : Screen("app_data")
+
+    object CreateItem : Screen(
+        route = "create_item",
+    )
+
+    object EditItem : Screen(
+        route = "edit_item/{itemId}",
+    ) {
+        fun createRoute(itemId: Long) = "edit_item/$itemId"
+    }
+
+    object AppData : Screen(
+        route = "app_data",
+        titleResId = R.string.app_data,
+    )
 }
 ```
 
@@ -343,57 +376,169 @@ sealed class Result<out T> {
 
 ```
 app/src/main/java/com/dayscounter/
-├── data/
-│   ├── database/      # Room entities, DAO, DB
-│   ├── repository/    # Repository implementations
-│   └── local/         # Local data sources
-├── domain/
-│   ├── model/         # Domain entities
-│   ├── repository/    # Repository interfaces
-│   └── usecase/       # Use cases
-├── presentation/
-│   ├── ui/            # Compose screens
-│   ├── theme/         # App theme
-│   ├── navigation/    # Navigation routes
-│   └── viewmodel/     # ViewModels
-└── MainActivity.kt
+├── MainActivity.kt
+├── DaysCounterApplication.kt
+├── navigation/              # Навигация
+│   └── Screen.kt           # Определения экранов
+├── di/                     # Dependency Injection (ручной)
+│   ├── AppModule.kt
+│   └── FormatterModule.kt  # Factory методы для DI
+├── data/                   # Data layer
+│   ├── database/
+│   │   ├── DaysDatabase.kt
+│   │   ├── dao/
+│   │   ├── entity/
+│   │   ├── mapper/
+│   │   └── converters/
+│   ├── repository/
+│   │   └── ItemRepositoryImpl.kt
+│   ├── formatter/          # Форматирование дней
+│   ├── preferences/        # DataStore настройки
+│   └── local/
+├── domain/                 # Domain layer
+│   ├── model/             # Domain entities
+│   ├── repository/        # Repository interfaces
+│   ├── usecase/           # Use cases
+│   └── exception/         # Исключения
+├── ui/                    # UI layer (Compose)
+│   ├── theme/             # App theme
+│   ├── component/          # Переиспользуемые компоненты
+│   ├── screen/            # Экраны приложения
+│   │   ├── RootScreen.kt
+│   │   ├── MainScreen.kt
+│   │   ├── DetailScreen.kt
+│   │   ├── CreateEditScreen.kt
+│   │   ├── MoreScreen.kt
+│   │   ├── ThemeIconScreen.kt
+│   │   └── AppDataScreen.kt
+│   └── state/             # UI state классы
+├── viewmodel/             # ViewModels
+│   ├── MainActivityViewModel.kt
+│   ├── RootScreenViewModel.kt
+│   ├── MainScreenViewModel.kt
+│   ├── DetailScreenViewModel.kt
+│   ├── CreateEditScreenViewModel.kt
+│   ├── ThemeIconViewModel.kt
+│   └── AppDataScreenViewModel.kt
+├── analytics/             # Firebase Analytics
+├── crash/                 # Firebase Crashlytics
+└── util/                  # Утилиты
 ```
 
 ## Правила
 
-- Экран → папка в `presentation/ui/screen/`
-- ViewModel → рядом с экраном или в `presentation/viewmodel/`
+- Экран → файл в `ui/screen/`
+- Компоненты → файл в `ui/component/`
+- ViewModel → файл в `viewmodel/`
+- DI → factory методы в `di/FormatterModule.kt`
 - Тесты → `test/` (unit) и `androidTest/` (integration/UI)
 - Структура тестов зеркалит структуру кода
 
 ## Тестирование
 
-## Типы тестов
+### Типы тестов
 
 - **Unit**: бизнес-логика изолированно, MockK для зависимостей, AAA паттерн
-- **Integration**: взаимодействие слоев, реальные реализации
-- **UI**: критические сценарии, Espresso, навигация
+- **Integration**: взаимодействие слоев (DAO, Repository), реальные реализации БД
+- **UI**: критические сценарии, Compose Testing для компонентов
 
-## Инструменты
+### Инструменты
 
 - JUnit 5 - unit-тесты
 - MockK - мокирование
-- Espresso - UI тесты
+- Robolectric - локальные Android тесты
 - Compose Testing - Compose компоненты
+- Turbine - тестирование Flow
+- Screengrab - автоматизация скриншотов
 
-## Структура
+### Структура
 
-- `app/src/test/` - unit-тесты
-- `app/src/androidTest/` - integration/UI тесты
+- `app/src/test/` - unit-тесты (ViewModels, Use Cases, Domain models)
+- `app/src/androidTest/` - integration/UI тесты (DAO, Repository, UI компоненты)
 - Структура зеркалит код
 - Имена классов: `*Test`
 
-## Best Practices
+### Best Practices
+
+**Важно:** Не писать интеграционные тесты с ViewModels
+
+- ❌ **Запрещено:** Создавать интеграционные тесты с ViewModels (CreateEditScreenViewModelIntegrationTest, DetailScreenViewModelIntegrationTest)
+- ✅ **Допустимо:** Тестировать ViewModels только через unit-тесты с MockK
+- ✅ **Допустимо:** Тестировать DAO и Repository через интеграционные тесты без ViewModels
+
+**Причина:**
+
+- Конфликт между `runBlocking` и `viewModelScope.launch`
+- Flow репозитория не активируется корректно в тестах
+- Тесты зависают бесконечно или падают
+
+**Рабочий подход к тестированию:**
+
+**Unit-тесты ViewModels (с MockK):**
+
+```kotlin
+@Test
+fun loadItems_whenRepositoryReturnsData_thenSuccessState() {
+    // Given
+    val mockRepository = mockk<ItemRepository>()
+    every { mockRepository.getAllItems() } returns flowOf(listOf(item))
+    val viewModel = MainScreenViewModel(mockRepository)
+
+    // When
+    viewModel.loadItems()
+
+    // Then
+    assertEquals(MainScreenState.Success(listOf(item)), viewModel.uiState.value)
+}
+```
+
+**Интеграционные тесты DAO и Repository:**
+
+```kotlin
+@Test
+fun test() {
+    runBlocking {
+        repository.insertItem(item)
+        val result = repository.getItemById(id)
+        assertNotNull(result)
+    }
+}
+```
+
+- ✅ Прямые вызовы DAO/Repository
+- ✅ Синхронные операции с БД
+- ✅ Блокируют поток до завершения корутины
+- ✅ Не используют ViewModel
+- ✅ Используют только repository
+
+**UI-тесты Compose компонентов:**
+
+```kotlin
+@Test
+fun daysCountText_whenToday_thenShowsToday() {
+    composeTestRule.setContent {
+        DaysCountText(item)
+    }
+    composeTestRule.onNodeWithText("Сегодня").assertIsDisplayed()
+}
+```
+
+- ✅ Тестируют UI компоненты в изоляции
+- ✅ Используют Compose Testing
+- ✅ Быстрые и надежные
+- ✅ Не зависят от ViewModel
+
+**Общие практики:**
 
 - Быстрые и независимые тесты
 - Описательные имена
 - Один тест - одна проверка
 - Тестировать поведение, не реализацию
+- Интеграционные тесты только для DAO и Repository
+- Unit-тесты для ViewModels с моками
+- UI-тесты для Compose компонентов без бизнес-логики
+
+**Unit-тесты ViewModels (с MockK):**
 
 ## Рассмотрение CI/CD
 
@@ -413,14 +558,37 @@ app/src/main/java/com/dayscounter/
 
 Для удобства работы с проектом создан Makefile с командами:
 
-- `make build` - сборка проекта
+### Основные команды
+
+- `make build` - сборка APK для отладки
 - `make clean` - очистка кэша проекта
-- `make test` - запуск unit-тестов с отображением результатов
-- `make lint` - запуск линтера (ktlint и detekt) - только проверка без исправлений
-- `make format` - форматирование кода и удаление неиспользуемых импортов
-- `make check` - сборка, запуск тестов и линтера
-- `make install` - установка приложения на устройство/эмулятор
-- `make all` - выполнение всех проверок и установка приложения
+- `make test` - запуск unit-тестов (JVM, без устройства) с отображением результатов
+- `make android-test` - запуск интеграционных тестов на Android устройстве
+- `make test-all` - запуск всех тестов (unit + интеграционные)
+- `make lint` - запуск ktlint, detekt и markdownlint (проверка без исправлений)
+- `make format` - форматирование кода (ktlint + detekt с исправлениями) и Markdown-файлов
+- `make check` - полная проверка (сборка + тесты + линтер)
+- `make install` - установка APK на устройство
+- `make all` - полная проверка и установка приложения на устройство
+
+### Команды для публикации
+
+- `make apk` - создание подписанного APK для релизной конфигурации (без повышения версии). Файл: dayscounter{VERSION_CODE}.apk
+- `make release` - создание подписанной AAB-сборки для публикации (аналог testflight в iOS). Файл: dayscounter{VERSION_CODE}.aab
+
+### Команды для скриншотов
+
+- `make screenshots` - генерировать скриншоты для всех локалей через fastlane
+- `make screenshots-ru` - генерировать скриншоты только на русском
+- `make screenshots-en` - генерировать скриншоты только на английском
+- `make update_readme` - обновить таблицу со скриншотами в README.md
+- `make android-test-report` - открыть HTML отчет интеграционных тестов в браузере
+
+### Команды для настройки окружения
+
+- `make setup` - установка и настройка инструментов для локальной разработки (rbenv, Ruby, fastlane, markdownlint-cli)
+- `make fastlane` - запустить меню команд fastlane
+- `make update_fastlane` - проверить и установить обновления fastlane
 
 Для использования команд Makefile просто выполните их в корне проекта, например:
 

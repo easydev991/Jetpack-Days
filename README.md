@@ -4,6 +4,7 @@
 [<img alt="Android SDK" src="https://img.shields.io/badge/Android_SDK-35-green">](https://developer.android.com/)
 [<img alt="Min SDK" src="https://img.shields.io/badge/Min_SDK-26-informational">](https://developer.android.com/)
 [<img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.2.1-blue">](https://gradle.org/)
+[<img alt="AGP" src="https://img.shields.io/badge/AGP-9.0.0-green">](https://developer.android.com/tools/releases/gradle-plugin)
 [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/easydev991/Jetpack-Days)](https://gitmcp.io/easydev991/Jetpack-Days)
 
 - Идея приложения в том, чтобы было удобно запоминать события в указанные даты, а потом легко проверить, сколько прошло дней с момента события
@@ -30,6 +31,12 @@
 ```shell
 make help
 ```
+
+## Скриншоты
+
+| Список записей | Создание новой записи | Выбор опции отображения | Перед сохранением | Сортировка на главном экране |
+| --- | --- | --- | --- | --- |
+| <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/1-demoList_1768663402836.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/2-chooseDate_1768663408046.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/3-chooseDisplayOption_1768663408770.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/4-beforeSave_1768663410399.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/5-sortByDate_1768663412968.png" alt=""> |
 
 ### Релизный процесс
 

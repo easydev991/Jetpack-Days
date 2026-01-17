@@ -274,6 +274,17 @@ screenshots-en:
 	@PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_en
 	@$(MAKE) _cleanup_screenshots_apk
 
+
+## update_readme: Обновить таблицу со скриншотами в README.md
+update_readme:
+	@printf "$(YELLOW)Обновляю таблицу со скриншотами в README.md...$(RESET)\\n"
+	@if [ -f "scripts/update_readme.py" ]; then \
+		python3 scripts/update_readme.py; \
+	else \
+		printf "$(RED)Скрипт обновления не найден: scripts/update_readme.py$(RESET)\\n"; \
+		exit 1; \
+	fi
+
 ## _build_screenshots_apk: Подготовить APK для скриншотов (удаление старых и сборка новых)
 _build_screenshots_apk:
 	@printf "$(YELLOW)Удаляю старые APK артефакты...$(RESET)\n"
@@ -341,4 +352,4 @@ release:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release apk _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release apk _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint

@@ -12,6 +12,7 @@
 - **Instrumented-тесты**: тесты, требующие Android окружения (androidTest)
   - **Интеграционные тесты DAO/Repository**: взаимодействие с реальной БД
   - **UI-тесты**: Compose Testing для компонентов
+  - **Интеграционные тесты ViewModels**: ограниченная поддержка (только DetailScreenViewModel)
 
 ### Инструменты
 
@@ -35,41 +36,41 @@
 
 **Статус:** ✅ Все активны и работают
 
-|| Категория | Всего файлов | Статус |
-||-----------|--------------|--------|
-|| Domain Layer (Use Cases) | 3 | ✅ Завершено |
-|| Domain Layer (Models) | 4 | ✅ Завершено |
-|| Data Layer (Entities, Mappers) | 3 | ✅ Завершено |
-|| ViewModel Layer (unit с MockK) | 4 | ✅ Завершено |
-|| UI Layer (Navigation, UI State) | 2 | ✅ Завершено |
-|| **Итого** | **16** | **✅ Завершено** |
+| Категория | Всего тестовых методов | Статус |
+|-----------|----------------------|--------|
+| Domain Layer (Use Cases) | ~30 | ✅ Завершено |
+| Domain Layer (Models) | ~25 | ✅ Завершено |
+| Data Layer (Entities, Mappers, Converters) | ~40 | ✅ Завершено |
+| Data Layer (Formatters, Preferences) | ~45 | ✅ Завершено |
+| ViewModel Layer (unit с MockK) | ~80 | ✅ Завершено |
+| UI Layer (Navigation, UI State, Components) | ~44 | ✅ Завершено |
+| **Итого** | **264** | **✅ Завершено** |
+
+**Файлов тестов:** 31 файл
 
 #### Выполненные миграции на JUnit 5
 
-Все 16 unit-тестов перенесены на JUnit 5 (Use Cases, Domain Models, Data Layer, ViewModels, UI Layer) ✅
+Все 264 unit-теста перенесены на JUnit 5 (Use Cases, Domain Models, Data Layer, ViewModels, UI Layer) ✅
 
 ### Instrumented-тесты (app/src/androidTest/)
 
 **Статус:** ✅ Работающие тесты — активны, ⚠️ Частично исправленные тесты
 
-|| Категория | Тесты | Статус |
-||-----------|-------|--------|
-|| Базовый тест | ExampleInstrumentedTest (1) | ✅ Работает |
-|| DAO интеграционные тесты | ItemDaoTest (11) | ✅ Работает |
-|| Repository интеграционные тесты | ItemRepositoryIntegrationTest (8) | ✅ Работает |
-|| База данных | DaysDatabaseTest (2) | ✅ Работает |
-|| UI-тесты Compose | DaysCountTextTest (7) | ✅ Работает |
-|| ViewModel интеграционные тесты | CreateEditScreenViewModelIntegrationTest (11) | ⚠️ Отключены |
-|| ViewModel интеграционные тесты | DetailScreenViewModelIntegrationTest (9) | ✅ Работают |
-|| **Итого (активные)** | **37** | **✅ Работают** |
-|| **Итого (отключенные)** | **11** | **⚠️ Требуют решения** |
+| Категория | Тесты | Статус |
+|-----------|-------|--------|
+| Базовый тест | ExampleInstrumentedTest (1) | ✅ Работает |
+| DAO интеграционные тесты | ItemDaoTest (11) | ✅ Работает |
+| Repository интеграционные тесты | ItemRepositoryIntegrationTest (8) | ✅ Работает |
+| База данных | DaysDatabaseTest (2) | ✅ Работает |
+| UI-тесты Compose | DaysCountTextTest (7) | ✅ Работает |
+| UI-тесты Compose | MoreScreenTest (7) | ✅ Работают |
+| UI-тесты Compose | ThemeIconScreenTest (12) | ✅ Работают |
+| ViewModel интеграционные тесты | DetailScreenViewModelIntegrationTest (9) | ✅ Работают |
+| ViewModel интеграционные тесты | CreateEditScreenViewModelIntegrationTest (1 активный, 10 отключенных) | ⚠️ Требуют решения |
+| **Итого (активные)** | **57** | **✅ Работают** |
+| **Итого (отключенные)** | **10** | **⚠️ Требуют решения** |
 
-#### Активные инструментальные тесты (работают корректно)
-
-- ✅ `ItemDaoTest` (11 тестов) — интеграционные тесты Room DAO, все CRUD операции
-- ✅ `ItemRepositoryIntegrationTest` (8 тестов) — интеграционные тесты репозитория
-- ✅ `DaysDatabaseTest` (2 теста) — тесты структуры БД
-- ✅ `DaysCountTextTest` (7 тестов) — UI-тесты Compose компонента
+**Всего тестовых методов (@Test):** 67
 
 #### Исправленные тесты (DetailScreenViewModelIntegrationTest)
 
@@ -81,11 +82,22 @@
 
 **Работающие тесты (9 из 11):** загрузка элемента, обработка отсутствующего элемента, диалог удаления, отмена удаления, обновление через Flow, цветовая метка, несколько элементов, пустые детали, конкретный timestamp.
 
-**Удаленные тесты (2 из 11):** удаление из базы и из всех flows — покрыто в `ItemRepositoryIntegrationTest` и `ItemDaoTest`.
-
 #### Отключенные тесты (требуют решения)
 
-**CreateEditScreenViewModelIntegrationTest (11 тестов):** все тесты отключены через `@Ignore("Тест написан с ошибками")`, причина: конфликт между `runBlocking` и `viewModelScope.launch`
+**CreateEditScreenViewModelIntegrationTest (10 тестов отключены):** все тесты, кроме первого, отключены через `@Ignore("Тест написан с ошибками")`, причина: конфликт между `runBlocking` и `viewModelScope.launch`
+
+**Список отключенных тестов:**
+
+1. `whenUpdateItem_thenItemUpdatedInDatabase`
+2. `whenLoadExistingItem_thenItemLoadedFromDatabase`
+3. `whenLoadNonExistentItem_thenShowsError`
+4. `whenCheckHasChanges_thenCorrectlyDetectsChanges`
+5. `whenUpdateMultipleFields_thenAllChangesPersistedInDatabase`
+6. `whenCreateMultipleItems_thenAllItemsSavedInDatabase`
+7. `whenUpdateAndThenLoadItem_thenChangesPersisted`
+8. `whenCheckHasChangesWithColorTagFromValueToNull_thenDetectsChanges`
+9. `whenCheckHasChangesWithColorTagFromValueToNull_thenDetectsChanges2`
+10. `whenResetHasChanges_thenChangesFlagReset`
 
 ---
 
@@ -97,6 +109,7 @@
 
 - ❌ **Запрещено:** Создавать новые интеграционные тесты с ViewModels
 - ⚠️ **Временное решение:** Для существующих тестов использовать `runTest`, `MainDispatcherRule` и `Turbine`
+- ✅ **Рекомендуется:** Тестировать ViewModels через unit-тесты с MockK
 
 **Причина:**
 
@@ -186,9 +199,9 @@ class MainDispatcherRule(
 ### Рекомендации по улучшению покрытия
 
 1. **Добавить недостающие тесты:**
-   - Тесты для всех Use Cases
+   - Тесты для всех Use Cases (текущее покрытие ~30/50 методов)
    - Тесты для сложных сценариев (ошибки, исключения)
-   - Тесты для UI компонентов
+   - Тесты для UI компонентов (покрыто базовые сценарии)
 
 2. **Улучшить существующие тесты:**
    - Добавить assertions для edge cases
@@ -259,23 +272,36 @@ class MainDispatcherRule(
 
 ### Достижения
 
-- ✅ Миграция всех unit-тестов на JUnit 5 (17 файлов)
+- ✅ Миграция всех unit-тестов на JUnit 5 (264 теста)
 - ✅ Исправление интеграционных тестов ViewModels с использованием Turbine
 - ✅ Создание рабочей инфраструктуры для тестирования корутин
 - ✅ Рефакторинг `DetailScreenViewModel.deleteItem()`
-- ✅ Все тесты проходят (38 активных инструментальных тестов, 17 unit-тестов)
+- ✅ Все активные тесты проходят (57 instrumented тестов, 264 unit-теста)
+- ✅ Добавлены UI-тесты для экранов MoreScreen (7) и ThemeIconScreen (12)
 
 ### Покрытие кода тестами
 
-**Текущее покрытие:**
+**Всего тестов:** 321 (264 unit + 57 instrumented)
 
-- ✅ Unit-тесты: 17 файлов (ViewModels, Use Cases, Domain Models, Data Layer)
-- ✅ Интеграционные тесты: 38 тестов (DAO, Repository, Database, UI)
-- ✅ Интеграционные тесты ViewModels: 9 тестов (DetailScreenViewModel)
+**Unit-тесты (264):**
+
+- ✅ ViewModels, Use Cases, Domain Models, Data Layer
 - ✅ Бизнес-логика покрыта unit-тестами с MockK
+
+**Instrumented-тесты (57 активных):**
+
+- ✅ DAO, Repository, Database: 22 теста
+- ✅ UI-тесты Compose: 26 тестов (DaysCountText, MoreScreen, ThemeIconScreen)
+- ✅ Интеграционные тесты ViewModels: 9 тестов (DetailScreenViewModel)
 - ✅ Взаимодействие с БД покрыто интеграционными тестами
+
+**Отключенные тесты:**
+
+- ⚠️ CreateEditScreenViewModelIntegrationTest: 10 тестов (требуют решения)
 
 ### Следующие шаги
 
 1. Принять решение по CreateEditScreenViewModelIntegrationTest (исправить или удалить)
-2. Улучшить покрытие кода тестами
+2. Улучшить покрытие кода тестами до 70%+
+3. Добавить тесты для дополнительных UI компонентов
+4. Рассмотреть добавление скриншот-тестов для визуальной регрессии

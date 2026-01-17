@@ -12,6 +12,7 @@ alwaysApply: true
 - **Room** - локальная БД
 - **DataStore** - простое хранение
 - **Coroutines** - асинхронность
+- **kotlinx-serialization** - JSON для резервного копирования
 - **Firebase Crashlytics** - сбор ошибок (только release)
 - **Firebase Analytics** - breadcrumb logs для отладки крашей
 - **JUnit 5** - unit-тесты

@@ -7,24 +7,34 @@ alwaysApply: true
 ```
 app/src/main/java/com/dayscounter/
 ├── data/
-│   ├── database/      # Room entities, DAO, DB
-│   ├── repository/    # Repository implementations
-│   └── local/         # Local data sources
+│   ├── database/         # Room entities, DAO, DB, converters, mappers
+│   ├── formatter/        # DaysFormatter, ResourceProvider
+│   ├── preferences/      # AppSettingsDataStore
+│   └── repository/       # ItemRepositoryImpl
 ├── domain/
-│   ├── model/         # Domain entities
-│   ├── repository/    # Repository interfaces
-│   └── usecase/       # Use cases
-├── presentation/
-│   ├── ui/            # Compose screens
-│   ├── theme/         # App theme
-│   ├── navigation/    # Navigation routes
-│   └── viewmodel/     # ViewModels
+│   ├── exception/        # ItemException
+│   ├── model/            # Domain entities
+│   ├── repository/       # ItemRepository interface
+│   └── usecase/          # Use cases, IconManager, BackupException, BackupItem
+├── ui/
+│   ├── component/        # Reusable components
+│   ├── screen/           # Compose screens
+│   ├── state/            # UI state classes
+│   └── theme/            # App theme
+├── viewmodel/            # ViewModels
+├── navigation/           # Navigation routes
+├── analytics/            # FirebaseAnalyticsHelper
+├── crash/                # CrashlyticsHelper
+├── di/                   # AppModule, FormatterModule
+├── util/                 # AndroidLogger, AppConstants, Logger, NoOpLogger, ThemeUtils
+├── DaysCounterApplication.kt
 └── MainActivity.kt
 ```
 
 ## Правила
 
-- Экран → папка в `presentation/ui/screen/`
-- ViewModel → рядом с экраном или в `presentation/viewmodel/`
-- Тесты → `test/` (unit) и `androidTest/` (integration/UI)
-- Структура тестов зеркалит структуру кода
+- Экраны → `ui/screen/`
+- Компоненты UI → `ui/component/`
+- ViewModels → `viewmodel/` (отдельная папка)
+- UI State → `ui/state/`
+- Тесты → `test/` (unit), `androidTest/` (integration/UI), структура зеркалит код
