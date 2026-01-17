@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -63,7 +64,7 @@ class ScreenshotsTest {
         context = InstrumentationRegistry.getInstrumentation().targetContext
         database = DaysDatabase.getDatabase(context.applicationContext)
 
-// Устанавливаем стратегию скриншотов для Compose
+        // Устанавливаем стратегию скриншотов для Compose
         Screengrab.setDefaultScreenshotStrategy(UiAutomatorScreenshotStrategy())
 
         // Очищаем базу данных перед тестом
@@ -214,8 +215,10 @@ class ScreenshotsTest {
         try {
             // Проверяем, что кнопка доступна перед нажатием
             // Используем onFirst, чтобы выбрать конкретную кнопку, если их несколько
+            // Сначала скроллим к кнопке для маленьких экранов
             composeTestRule.onAllNodesWithText(activity.getString(R.string.save))
                 .onFirst()
+                .performScrollTo()
                 .assertExists()
                 .assertIsEnabled()
 
