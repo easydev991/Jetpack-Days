@@ -170,7 +170,7 @@ BUNDLE_EXEC := RBENV_VERSION=$(RUBY_VERSION) bundle exec
 
 ---
 
-## Часть 1.3: Создание Screengrabfile
+## ✅ Часть 1.3: Создание Screengrabfile (выполнено)
 
 ### Обзор
 
@@ -200,8 +200,9 @@ locales ['ru-RU', 'en-US']
 # Очистить предыдущие скриншоты перед генерацией
 clear_previous_screenshots true
 
-# Использовать UI Automator для захвата (лучшее качество)
-use_tests_in_packages ['com.dayscounter']
+# Пакет с тестами для скриншотов (будет создан в части 1.4)
+# UI-тесты для screengrab должны находиться в этом пакете
+use_tests_in_packages ['com.dayscounter.screenshots']
 
 # Путь к сгенерированным скриншотам
 screengrab_path '../fastlane/metadata/android'
@@ -209,11 +210,16 @@ screengrab_path '../fastlane/metadata/android'
 
 ### Критерии готовности
 
-- ⏳ Screengrabfile создан
-- ⏳ Пакет приложения указан правильно (com.dayscounter)
-- ⏳ Пакет тестов указан правильно (com.dayscounter.test)
-- ⏳ Локали настроены (ru-RU, en-US)
-- ⏳ Путь к скриншотам настроен (fastlane/metadata/android)
+- ✅ Screengrabfile создан
+- ✅ Пакет приложения указан правильно (com.dayscounter)
+- ✅ Пакет тестов указан правильно (com.dayscounter.test)
+- ✅ Локали настроены (ru-RU, en-US)
+- ✅ Путь к скриншотам настроен (fastlane/metadata/android)
+- ✅ Пакет для тестов скриншотов указан (com.dayscounter.screenshots)
+
+### Примечание
+
+Параметр `use_tests_in_packages` указывает на пакет `com.dayscounter.screenshots`, который будет создан в **части 1.4** при написании UI тестов для screengrab. Это соответствует рекомендациям fastlane и обеспечивает правильную организацию тестов скриншотов.
 
 ---
 
