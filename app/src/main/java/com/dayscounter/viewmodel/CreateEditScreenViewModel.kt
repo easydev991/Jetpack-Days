@@ -126,10 +126,13 @@ class CreateEditScreenViewModel(
      * Загружает событие из репозитория (для редактирования).
      */
     private fun loadItem() {
+        // itemId уже проверен в блоке init на null, но компилятор не может это доказать
+        val nonNullItemId = checkNotNull(itemId)
+
         viewModelScope.launch {
             try {
                 _uiState.value = CreateEditScreenState.Loading
-                val item = repository.getItemById(itemId!!)
+                val item = repository.getItemById(nonNullItemId)
 
                 if (item != null) {
                     _uiState.value = CreateEditScreenState.Success(item)
