@@ -85,6 +85,31 @@ check: build
 install:
 	./gradlew installDebug
 
+## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Файл: dayscounter{VERSION_CODE}.apk
+apk:
+	@printf "$(YELLOW)Проверка секретов для подписи...$(RESET)\n"
+	@if [ ! -d ".secrets" ]; then \
+		printf "$(YELLOW)Загрузка секретов из репозитория android-secrets...$(RESET)\n"; \
+		if [ -d "../android-secrets/jetpackdays" ]; then \
+			mkdir -p ".secrets"; \
+			cp -r ../android-secrets/jetpackdays/* .secrets/; \
+			sed -i.tmp 's|^KEYSTORE_FILE=.*|KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore|' .secrets/secrets.properties && rm -f .secrets/secrets.properties.tmp; \
+			printf "$(GREEN)Секреты загружены успешно$(RESET)\n"; \
+		else \
+			printf "$(RED)Ошибка: репозиторий android-secrets не найден в ../android-secrets/jetpackdays$(RESET)\n"; \
+			printf "$(YELLOW)Проверьте, что репозиторий android-secrets склонирован в нужное место$(RESET)\n"; \
+			exit 1; \
+		fi \
+	fi
+	@printf "$(YELLOW)Создаю релизный APK...$(RESET)\n"
+	@./gradlew assembleRelease
+	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
+	VERSION_NAME=$$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2); \
+	OUTPUT_FILE="dayscounter$$VERSION_CODE.apk"; \
+	cp app/build/outputs/apk/release/app-release.apk "$$OUTPUT_FILE"; \
+	printf "$(GREEN)APK создан: $$OUTPUT_FILE$(RESET)\n"; \
+	printf "$(YELLOW)Версия: $$VERSION_NAME (build $$VERSION_CODE)$(RESET)\n"
+
 # Настройка окружения
 ## setup: Установка и настройка инструментов для локальной разработки (rbenv, Ruby, fastlane, markdownlint-cli)
 setup:
@@ -316,4 +341,4 @@ release:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release apk _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
