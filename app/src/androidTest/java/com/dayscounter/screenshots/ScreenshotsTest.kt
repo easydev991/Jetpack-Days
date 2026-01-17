@@ -3,7 +3,6 @@ package com.dayscounter.screenshots
 
 import android.content.Context
 import android.util.Log
-import java.util.Locale
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -28,10 +27,7 @@ import org.junit.runner.RunWith
 import tools.fastlane.screengrab.Screengrab
 import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy
 import tools.fastlane.screengrab.locale.LocaleTestRule
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 
 /**
@@ -148,13 +144,13 @@ class ScreenshotsTest {
             // Продолжаем - Material 3 DatePicker может уже иметь выбранную дату
         }
 
-        Log.d("ScreenshotsTest", "Снимаем скриншот 2: DatePicker открыт")
-
-        Screengrab.screenshot("2-chooseDate")
-
         // Ждем выбора даты
         composeTestRule.waitForIdle()
         Thread.sleep(500)
+
+        Log.d("ScreenshotsTest", "Снимаем скриншот 2: DatePicker открыт")
+
+        Screengrab.screenshot("2-chooseDate")
 
         Log.d("ScreenshotsTest", "Закрываем DatePicker")
         // Закрываем DatePicker нажатием OK
@@ -164,19 +160,6 @@ class ScreenshotsTest {
         composeTestRule.waitForIdle()
 
         Thread.sleep(500)
-
-//        Log.d("ScreenshotsTest", "Выбираем опцию отображения")
-//        // Скриншот 3: Экран создания с выбранным displayOption
-//        // Выбираем опцию отображения "Months and days"
-//        composeTestRule
-//            .onAllNodesWithText(activity.getString(R.string.months_and_days))
-//            .onFirst()
-//            .performClick()
-//
-//        // Ждем выбора
-//        composeTestRule.waitForIdle()
-//
-//        Thread.sleep(500)
 
         Log.d("ScreenshotsTest", "Снимаем скриншот 3: Выбрана опция отображения")
 
@@ -260,15 +243,6 @@ class ScreenshotsTest {
         composeTestRule.waitForIdle()
 
         Thread.sleep(500)
-
-//        Log.d("ScreenshotsTest", "Выбираем 'сначала старые' для изменения порядка")
-
-//        composeTestRule.onNodeWithText(activity.getString(R.string.old_first)).performClick()
-
-//        // Ждем применения новой сортировки
-//        composeTestRule.waitForIdle()
-
-//        Thread.sleep(500)
 
         // Шаг 2: Снова открываем меню сортировки для скриншота
         Log.d("ScreenshotsTest", "Открываем меню сортировки для скриншота")
