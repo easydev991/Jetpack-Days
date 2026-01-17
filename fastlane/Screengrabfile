@@ -4,8 +4,14 @@ app_package_name 'com.dayscounter'
 # Имя пакета тестов
 tests_package_name 'com.dayscounter.test'
 
+# Запускать только тесты скриншотов из пакета
+use_tests_in_packages ['com.dayscounter.screenshots']
+
 # Локали для скриншотов
 locales ['ru-RU', 'en-US']
+
+# Вернуться к базовой локали после завершения тестов
+ending_locale 'ru-RU'
 
 # Очистить предыдущие скриншоты перед генерацией
 clear_previous_screenshots true

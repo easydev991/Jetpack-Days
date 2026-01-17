@@ -5,14 +5,10 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <!-- Разрешает сохранение и загрузку скриншотов -->
+    <!-- Разрешает сохранение, загрузку скриншотов и screengrab на внешнее хранилище -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Разрешает смену локали -->
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
-
-    <!-- Разрешает screengrab писать на внешнее хранилище -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>

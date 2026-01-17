@@ -227,24 +227,40 @@ fastlane:
 # Дополнительно
 ## screenshots: Генерировать скриншоты для всех локалей через fastlane
 screenshots:
-	@echo "$(YELLOW)Генерирую скриншоты через fastlane...$(RESET)"
+	@$(MAKE) _build_screenshots_apk
+	@printf "$(YELLOW)Генерирую скриншоты через fastlane...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
-	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots
-	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+	@PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots
+	@$(MAKE) _cleanup_screenshots_apk
 
 ## screenshots-ru: Генерировать скриншоты только на русском
 screenshots-ru:
-	@echo "$(YELLOW)Генерирую скриншоты (русский)...$(RESET)"
+	@$(MAKE) _build_screenshots_apk
+	@printf "$(YELLOW)Генерирую скриншоты (русский)...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
-	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_ru
-	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+	@PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_ru
+	@$(MAKE) _cleanup_screenshots_apk
 
 ## screenshots-en: Генерировать скриншоты только на английском
 screenshots-en:
-	@echo "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)"
+	@$(MAKE) _build_screenshots_apk
+	@printf "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
-	PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_en
-	@echo "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)"
+	@PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots_en
+	@$(MAKE) _cleanup_screenshots_apk
+
+## _build_screenshots_apk: Подготовить APK для скриншотов (удаление старых и сборка новых)
+_build_screenshots_apk:
+	@printf "$(YELLOW)Удаляю старые APK артефакты...$(RESET)\n"
+	@rm -rf app/build/outputs/apk
+	@printf "$(YELLOW)Собираю APK для скриншотов...$(RESET)\n"
+	@./gradlew assembleDebug assembleDebugAndroidTest --quiet
+
+## _cleanup_screenshots_apk: Удалить APK артефакты после генерации скриншотов
+_cleanup_screenshots_apk:
+	@printf "$(YELLOW)Удаляю APK артефакты после генерации...$(RESET)\n"
+	@rm -rf app/build/outputs/apk
+	@printf "$(GREEN)Скриншоты готовы: fastlane/metadata/android$(RESET)\n"
 
 ## _ensure_fastlane: Проверить что fastlane готов к использованию
 _ensure_fastlane:
@@ -300,4 +316,4 @@ release:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane setup setup_fastlane update_fastlane fastlane help release _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
