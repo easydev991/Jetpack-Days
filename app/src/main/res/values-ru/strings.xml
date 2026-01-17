@@ -166,8 +166,8 @@
     <plurals name="years_count">
         <item quantity="one">%d г.</item>
         <item quantity="few">%d г.</item>
-        <item quantity="many">%d г.</item>
-        <item quantity="other">%d г.</item>
+        <item quantity="many">%d л.</item>
+        <item quantity="other">%d л.</item>
     </plurals>
 </resources>
 

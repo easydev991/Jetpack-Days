@@ -101,6 +101,142 @@ class DaysFormatterImplTest {
     }
 
     @Test
+    fun `formatYears when quantity 2 then returns few form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 2,
+            )
+        } returns "2 года"
+
+        // When
+        val result = formatter.formatYears(2, resourceProvider)
+
+        // Then
+        assertEquals("2 года", result, "Ожидалась форма few (2 года)")
+    }
+
+    @Test
+    fun `formatYears when quantity 3 then returns few form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 3,
+            )
+        } returns "3 года"
+
+        // When
+        val result = formatter.formatYears(3, resourceProvider)
+
+        // Then
+        assertEquals("3 года", result, "Ожидалась форма few (3 года)")
+    }
+
+    @Test
+    fun `formatYears when quantity 4 then returns few form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 4,
+            )
+        } returns "4 года"
+
+        // When
+        val result = formatter.formatYears(4, resourceProvider)
+
+        // Then
+        assertEquals("4 года", result, "Ожидалась форма few (4 года)")
+    }
+
+    @Test
+    fun `formatYears when quantity 5 then returns many form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 5,
+            )
+        } returns "5 лет"
+
+        // When
+        val result = formatter.formatYears(5, resourceProvider)
+
+        // Then
+        assertEquals("5 лет", result, "Ожидалась форма many (5 лет)")
+    }
+
+    @Test
+    fun `formatYears when quantity 11 then returns many form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 11,
+            )
+        } returns "11 лет"
+
+        // When
+        val result = formatter.formatYears(11, resourceProvider)
+
+        // Then
+        assertEquals("11 лет", result, "Ожидалась форма many (11 лет - исключение для few)")
+    }
+
+    @Test
+    fun `formatYears when quantity 21 then returns one form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 21,
+            )
+        } returns "21 год"
+
+        // When
+        val result = formatter.formatYears(21, resourceProvider)
+
+        // Then
+        assertEquals("21 год", result, "Ожидалась форма one (21 год)")
+    }
+
+    @Test
+    fun `formatYears when quantity 22 then returns few form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 22,
+            )
+        } returns "22 года"
+
+        // When
+        val result = formatter.formatYears(22, resourceProvider)
+
+        // Then
+        assertEquals("22 года", result, "Ожидалась форма few (22 года)")
+    }
+
+    @Test
+    fun `formatYears when quantity 25 then returns many form`() {
+        // Given
+        every {
+            resourceProvider.getQuantityString(
+                resId = R.plurals.years_count,
+                quantity = 25,
+            )
+        } returns "25 лет"
+
+        // When
+        val result = formatter.formatYears(25, resourceProvider)
+
+        // Then
+        assertEquals("25 лет", result, "Ожидалась форма many (25 лет)")
+    }
+
+    @Test
     fun `formatComposite when DAY option then returns days only`() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 3)
