@@ -1,10 +1,13 @@
 package com.dayscounter.ui.screen.components.createedit
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -115,7 +118,7 @@ private fun colorAndDisplayOptionSection(
 /**
  * Контент формы создания/редактирования.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun createEditFormContent(params: CreateEditFormParams) {
     // Функция для отслеживания изменений
@@ -144,6 +147,8 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
             Modifier
                 .fillMaxSize()
                 .padding(params.paddingValues)
+                .imePadding()
+                .imeNestedScroll()
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_regular)),
     ) {
