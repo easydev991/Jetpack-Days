@@ -161,7 +161,8 @@ fun listItemView(
                             onTap = { params.onClick(params.item) },
                         )
                     }
-                }.padding(dimensionResource(R.dimen.spacing_regular)),
+                }
+                .padding(dimensionResource(R.dimen.spacing_regular)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (params.item.colorTag != null) {

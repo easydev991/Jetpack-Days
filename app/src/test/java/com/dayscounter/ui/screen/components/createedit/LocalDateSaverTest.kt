@@ -12,7 +12,7 @@ import java.time.ZoneId
  * Тесты для логики сохранения/восстановления LocalDate.
  */
 class LocalDateSaverTest {
-    private fun saveLocalDate(localDate: LocalDate?): Long? =
+    private fun saveLocalDate(localDate: LocalDate?): Long =
         localDate?.let {
             it
                 .atStartOfDay(ZoneId.systemDefault())

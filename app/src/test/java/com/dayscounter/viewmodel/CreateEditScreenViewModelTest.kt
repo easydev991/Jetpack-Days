@@ -699,7 +699,8 @@ class CreateEditScreenViewModelTest {
         override fun getAllItems(): Flow<List<Item>> = flowOf(emptyList())
 
         @Suppress("MaxLineLength")
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = flowOf(emptyList())
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
+            flowOf(emptyList())
 
         override suspend fun getItemById(id: Long): Item? {
             if (loadingDelayMs > 0) {

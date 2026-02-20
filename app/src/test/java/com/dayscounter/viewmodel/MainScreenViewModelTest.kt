@@ -12,7 +12,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.Test
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MainScreenViewModelTest {
     private lateinit var repository: FakeItemRepository
-    private lateinit var sortOrderFlow: kotlinx.coroutines.flow.MutableStateFlow<SortOrder>
+    private lateinit var sortOrderFlow: MutableStateFlow<SortOrder>
     private lateinit var dataStore: AppSettingsDataStore
     private lateinit var logger: Logger
     private lateinit var viewModel: MainScreenViewModel
@@ -47,7 +46,7 @@ class MainScreenViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeItemRepository()
-        sortOrderFlow = kotlinx.coroutines.flow.MutableStateFlow(SortOrder.DESCENDING)
+        sortOrderFlow = MutableStateFlow(SortOrder.DESCENDING)
         dataStore = mockk(relaxed = true)
         logger = mockk(relaxed = true)
 

@@ -154,7 +154,11 @@ class DaysFormatterImpl : DaysFormatter {
         val (yearsValue, monthsValue, daysValue) =
             if (totalDays < 0 && !showMinus) {
                 // Будущее без минуса - используем абсолютные значения
-                Triple(kotlin.math.abs(period.years), kotlin.math.abs(period.months), kotlin.math.abs(period.days))
+                Triple(
+                    kotlin.math.abs(period.years),
+                    kotlin.math.abs(period.months),
+                    kotlin.math.abs(period.days)
+                )
             } else {
                 // Прошлое или разрешен минус - используем вычисленные значения
                 Triple(period.years, period.months, period.days)
@@ -210,8 +214,10 @@ class DaysFormatterImpl : DaysFormatter {
         when (components.size) {
             MAX_COMPONENTS ->
                 components.joinToString(" ")
+
             TWO_COMPONENTS ->
                 components.joinToString(" ")
+
             1 -> components.firstOrNull() ?: ""
             else -> {
                 // Возвращаем пустую строку для остальных случаев

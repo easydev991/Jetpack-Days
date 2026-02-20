@@ -37,7 +37,11 @@ class CreateEditUiStateTest {
         assertEquals("", uiState.details.value, "Описание должно быть пустым")
         assertNull(uiState.selectedDate.value, "Дата должна быть null")
         assertNull(uiState.selectedColor.value, "Цвет должен быть null")
-        assertEquals(DisplayOption.DAY, uiState.selectedDisplayOption.value, "Опция отображения должна быть DAY")
+        assertEquals(
+            DisplayOption.DAY,
+            uiState.selectedDisplayOption.value,
+            "Опция отображения должна быть DAY"
+        )
     }
 
     @Test
@@ -159,9 +163,21 @@ class CreateEditUiStateTest {
 
         // Then - Значения должны быть сохранены
         assertEquals(initialTitle, uiStateWithValues.title.value, "Название должно быть сохранено")
-        assertEquals(initialDetails, uiStateWithValues.details.value, "Описание должно быть сохранено")
-        assertEquals(initialDate, uiStateWithValues.selectedDate.value, "Дата должна быть сохранена")
-        assertEquals(initialColor, uiStateWithValues.selectedColor.value, "Цвет должен быть сохранен")
+        assertEquals(
+            initialDetails,
+            uiStateWithValues.details.value,
+            "Описание должно быть сохранено"
+        )
+        assertEquals(
+            initialDate,
+            uiStateWithValues.selectedDate.value,
+            "Дата должна быть сохранена"
+        )
+        assertEquals(
+            initialColor,
+            uiStateWithValues.selectedColor.value,
+            "Цвет должен быть сохранен"
+        )
         assertEquals(
             initialDisplayOption,
             uiStateWithValues.selectedDisplayOption.value,

@@ -31,7 +31,8 @@ object AppModule {
      * @param database База данных Room
      * @return Экземпляр ItemRepository
      */
-    fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao())
+    fun createItemRepository(database: DaysDatabase): ItemRepository =
+        ItemRepositoryImpl(database.itemDao())
 
     /**
      * Создает DataStore для хранения настроек приложения.
@@ -39,5 +40,6 @@ object AppModule {
      * @param context Контекст приложения
      * @return Экземпляр AppSettingsDataStore
      */
-    fun createAppSettingsDataStore(context: Context): AppSettingsDataStore = AppSettingsDataStore(context)
+    fun createAppSettingsDataStore(context: Context): AppSettingsDataStore =
+        AppSettingsDataStore(context)
 }

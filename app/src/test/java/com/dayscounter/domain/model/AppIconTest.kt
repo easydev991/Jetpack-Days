@@ -28,7 +28,11 @@ class AppIconTest {
 
         // Then
         assertEquals(expectedValues.size, actualValues.size, "Количество иконок должно быть 6")
-        assertEquals(expectedValues, actualValues, "Список иконок должен соответствовать ожидаемому")
+        assertEquals(
+            expectedValues,
+            actualValues,
+            "Список иконок должен соответствовать ожидаемому"
+        )
     }
 
     @Test

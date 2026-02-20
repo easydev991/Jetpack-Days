@@ -23,13 +23,15 @@ class ItemRepositoryTest {
             object : ItemRepository {
                 override fun getAllItems(): Flow<List<Item>> = throw NotImplementedError()
 
-                override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> = throw NotImplementedError()
+                override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> =
+                    throw NotImplementedError()
 
                 override suspend fun getItemById(id: Long): Item = throw NotImplementedError()
 
                 override fun getItemFlow(id: Long): Flow<Item?> = throw NotImplementedError()
 
-                override fun searchItems(query: String): Flow<List<Item>> = throw NotImplementedError()
+                override fun searchItems(query: String): Flow<List<Item>> =
+                    throw NotImplementedError()
 
                 override suspend fun insertItem(item: Item): Long = throw NotImplementedError()
 

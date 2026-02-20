@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeNestedScroll
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -147,7 +146,6 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
             Modifier
                 .fillMaxSize()
                 .padding(params.paddingValues)
-                .imePadding()
                 .imeNestedScroll()
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_regular)),
@@ -155,14 +153,6 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
         mainFormSections(params, onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
         colorAndDisplayOptionSection(params, onValueChange)
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_large)))
-        buttonsSection(
-            uiStates = params.uiStates,
-            itemId = params.itemId,
-            viewModel = params.viewModel,
-            onBackClick = params.onBackClick,
-        )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     }
 }
 

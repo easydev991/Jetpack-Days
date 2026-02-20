@@ -375,7 +375,8 @@ private fun itemsListContent(params: ItemsListParams) {
             items = params.items,
             key = { it.id },
         ) { item ->
-            val formattedDaysText = params.getFormattedDaysForItemUseCase(item = item, showMinus = true)
+            val formattedDaysText =
+                params.getFormattedDaysForItemUseCase(item = item, showMinus = true)
             listItemWrapper(
                 item = item,
                 formattedDaysText = formattedDaysText,

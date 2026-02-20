@@ -78,7 +78,11 @@ class TimePeriodTest {
 
         // Then
         assertEquals(periodEmpty.isEmpty(), !emptyResult, "isNotEmpty должен быть обратным isEmpty")
-        assertEquals(periodNotEmpty.isEmpty(), !notEmptyResult, "isNotEmpty должен быть обратным isEmpty")
+        assertEquals(
+            periodNotEmpty.isEmpty(),
+            !notEmptyResult,
+            "isNotEmpty должен быть обратным isEmpty"
+        )
     }
 
     @Test

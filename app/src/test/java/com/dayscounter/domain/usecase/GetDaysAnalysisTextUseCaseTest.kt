@@ -98,7 +98,13 @@ class GetDaysAnalysisTextUseCaseTest {
             )
         } returns "1 месяц 5 дней"
 
-        every { getFormattedDaysForItemUseCase(any(), any(), showMinus = false) } returns "1 месяц 5 дней"
+        every {
+            getFormattedDaysForItemUseCase(
+                any(),
+                any(),
+                showMinus = false
+            )
+        } returns "1 месяц 5 дней"
 
         // When
         val result = useCase.invoke(item)
@@ -286,15 +292,14 @@ class GetDaysAnalysisTextUseCaseTest {
         // Given
         val now = LocalDate.now()
         val timestamp = now.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val item =
-            Item(
-                id = 1L,
-                title = "Сегодняшнее событие",
-                details = "",
-                timestamp = timestamp,
-                colorTag = null,
-                displayOption = DisplayOption.DAY,
-            )
+        Item(
+            id = 1L,
+            title = "Сегодняшнее событие",
+            details = "",
+            timestamp = timestamp,
+            colorTag = null,
+            displayOption = DisplayOption.DAY,
+        )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(

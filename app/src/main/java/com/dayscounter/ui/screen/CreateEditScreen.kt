@@ -1,8 +1,12 @@
 package com.dayscounter.ui.screen
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,14 +14,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dayscounter.R
+import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.screen.components.createedit.CreateEditFormParams
+import com.dayscounter.ui.screen.components.createedit.SaveButton
 import com.dayscounter.ui.screen.components.createedit.createEditFormContent
 import com.dayscounter.ui.screen.components.createedit.createEditTopAppBar
 import com.dayscounter.ui.screen.components.createedit.datePickerDialogSection
 import com.dayscounter.ui.screen.components.createedit.loadItemData
 import com.dayscounter.ui.screen.components.createedit.rememberCreateEditUiStates
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
+import java.time.ZoneId
 
 /**
  * Экран создания/редактирования события.
@@ -57,16 +67,51 @@ private fun createEditScreenContent(
     onBackClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val hasChanges by viewModel.hasChanges.collectAsState()
     val uiStates = rememberCreateEditUiStates()
     val showDatePicker = rememberSaveable { mutableStateOf(false) }
 
     // Загружаем данные при редактировании
     loadItemData(itemId, uiState, uiStates)
 
+    val isValidData = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null
+    val isEditing = itemId != null
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             createEditTopAppBar(itemId = itemId, onBackClick = onBackClick)
+        },
+        bottomBar = {
+            SaveButton(
+                enabled = if (isEditing) isValidData && hasChanges else isValidData,
+                onClick = {
+                    if (isValidData) {
+                        val timestamp =
+                            uiStates.selectedDate.value
+                                ?.atStartOfDay(ZoneId.systemDefault())
+                                ?.toInstant()
+                                ?.toEpochMilli() ?: System.currentTimeMillis()
+
+                        val item =
+                            Item(
+                                id = itemId ?: 0L,
+                                title = uiStates.title.value,
+                                details = uiStates.details.value,
+                                timestamp = timestamp,
+                                colorTag = uiStates.selectedColor.value?.toArgb(),
+                                displayOption = uiStates.selectedDisplayOption.value,
+                            )
+
+                        if (isEditing) {
+                            viewModel.updateItem(item.copy(id = itemId))
+                        } else {
+                            viewModel.createItem(item)
+                        }
+                        onBackClick()
+                    }
+                },
+            )
         },
     ) { paddingValues ->
         createEditFormContent(
@@ -91,7 +136,7 @@ private fun createEditScreenContent(
                 if (itemId != null) {
                     val timestamp =
                         uiStates.selectedDate.value
-                            ?.atStartOfDay(java.time.ZoneId.systemDefault())
+                            ?.atStartOfDay(ZoneId.systemDefault())
                             ?.toInstant()
                             ?.toEpochMilli() ?: 0L
 

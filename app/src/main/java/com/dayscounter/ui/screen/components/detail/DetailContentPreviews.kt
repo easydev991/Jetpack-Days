@@ -16,7 +16,6 @@ import com.dayscounter.R
 import com.dayscounter.di.FormatterModule
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
-import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.ui.theme.jetpackDaysTheme
 import java.time.Duration
 import java.time.Instant

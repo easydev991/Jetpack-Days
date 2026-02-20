@@ -54,7 +54,9 @@ fun iconPreviewItem(
         }
     val borderWidth = if (isSelected) 4.dp else 2.dp
     Box(
-        modifier = modifier.size(64.dp).clickable { onClick() },
+        modifier = modifier
+            .size(64.dp)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center,
     ) {
         // Иконка с закруглением и бордюром (аналог iOS overlay)

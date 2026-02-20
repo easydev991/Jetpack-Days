@@ -47,7 +47,11 @@ fun detailTopAppBar(
         },
         actions = {
             if (uiState is DetailScreenState.Success) {
-                detailActionButtons(onEditClick = onEditClick, onDeleteClick = onDeleteClick, itemId = itemId)
+                detailActionButtons(
+                    onEditClick = onEditClick,
+                    onDeleteClick = onDeleteClick,
+                    itemId = itemId
+                )
             }
         },
         colors =

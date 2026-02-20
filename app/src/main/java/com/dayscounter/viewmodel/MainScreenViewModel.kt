@@ -101,7 +101,10 @@ class MainScreenViewModel(
                 sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
                 _searchQuery,
             ) { items, query ->
-                logger.d(TAG, "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\'")
+                logger.d(
+                    TAG,
+                    "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\'"
+                )
                 if (query.isEmpty()) {
                     items
                 } else {

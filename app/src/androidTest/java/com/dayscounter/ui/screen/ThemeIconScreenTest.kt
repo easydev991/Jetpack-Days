@@ -10,7 +10,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.R
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
-import com.dayscounter.ui.screen.themeIconScreenContent
 import com.dayscounter.ui.theme.jetpackDaysTheme
 import org.junit.Rule
 import org.junit.Test

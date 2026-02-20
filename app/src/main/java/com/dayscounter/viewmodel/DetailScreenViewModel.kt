@@ -91,7 +91,10 @@ class DetailScreenViewModel(
                 val item = repository.getItemById(itemId)
                 if (item != null) {
                     repository.deleteItem(item)
-                    logger.d("DetailScreenViewModel", "Событие удалено: ${item.title} (id=${item.id})")
+                    logger.d(
+                        "DetailScreenViewModel",
+                        "Событие удалено: ${item.title} (id=${item.id})"
+                    )
                 }
             } catch (e: DeleteFailed) {
                 val message = "Ошибка удаления события: ${e.message}"

@@ -108,7 +108,8 @@ class AppDataScreenViewModel(
     fun exportBackup(uri: Uri) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isExporting = true, resultMessage = null, isError = false)
+                _uiState.value =
+                    _uiState.value.copy(isExporting = true, resultMessage = null, isError = false)
 
                 val result = exportBackupUseCase(uri)
 
@@ -153,7 +154,8 @@ class AppDataScreenViewModel(
     fun importBackup(uri: Uri) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isImporting = true, resultMessage = null, isError = false)
+                _uiState.value =
+                    _uiState.value.copy(isImporting = true, resultMessage = null, isError = false)
 
                 val result = importBackupUseCase(uri)
 
@@ -204,7 +206,8 @@ class AppDataScreenViewModel(
         viewModelScope.launch {
             try {
                 _showDeleteDialog.value = false
-                _uiState.value = _uiState.value.copy(isDeleting = true, resultMessage = null, isError = false)
+                _uiState.value =
+                    _uiState.value.copy(isDeleting = true, resultMessage = null, isError = false)
 
                 repository.deleteAllItems()
 

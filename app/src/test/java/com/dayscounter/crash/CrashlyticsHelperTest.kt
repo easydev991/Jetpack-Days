@@ -2,7 +2,6 @@ package com.dayscounter.crash
 
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.lang.Exception
 
 class CrashlyticsHelperTest {
     @Test

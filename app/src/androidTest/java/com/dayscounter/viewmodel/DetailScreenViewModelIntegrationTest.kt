@@ -16,15 +16,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -260,7 +256,7 @@ class DetailScreenViewModelIntegrationTest {
                 testItem.copy(title = "Событие 1", timestamp = 1000000000000L)
             val item2 =
                 testItem.copy(title = "Событие 2", timestamp = 2000000000000L)
-            val id1 = repository.insertItem(item1)
+            repository.insertItem(item1)
             val id2 = repository.insertItem(item2)
 
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to id2))

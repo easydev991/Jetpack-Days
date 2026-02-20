@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.dayscounter.BuildConfig
 import com.dayscounter.R
@@ -201,19 +203,16 @@ private fun sendFeedback(context: Context) {
             BuildConfig.VERSION_NAME,
         )
 
-    val intent =
-        Intent(
-            Intent.ACTION_SENDTO,
-            Uri.fromParts("mailto", "easy_dev991@mail.ru", null),
-        ).apply {
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, body)
-        }
+    val encodedSubject = Uri.encode(subject)
+    val encodedBody = Uri.encode(body)
+    val uri = "mailto:easy_dev991@mail.ru?subject=$encodedSubject&body=$encodedBody".toUri()
+    val intent = Intent(Intent.ACTION_SENDTO, uri)
 
     try {
         context.startActivity(intent)
     } catch (e: ActivityNotFoundException) {
-        Log.e("MoreScreen", "Почтовый клиент не найден: ${e.message}")
+        Log.e("MoreScreen", "Почтовый клиент не найден", e)
+        Toast.makeText(context, R.string.no_email_client, Toast.LENGTH_LONG).show()
     }
 }
 

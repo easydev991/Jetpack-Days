@@ -67,7 +67,10 @@ class GetFormattedDaysForItemUseCaseTest {
 
         // Then
         assertEquals("-7 дней", result)
-        assertTrue(result.contains("-"), "Минус должен присутствовать в результате для showMinus = true")
+        assertTrue(
+            result.contains("-"),
+            "Минус должен присутствовать в результате для showMinus = true"
+        )
     }
 
     @Test

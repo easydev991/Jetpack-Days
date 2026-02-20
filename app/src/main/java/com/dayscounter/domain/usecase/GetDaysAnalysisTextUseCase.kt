@@ -46,6 +46,7 @@ class GetDaysAnalysisTextUseCase(
             is DaysDifference.Today -> {
                 resourceProvider.getString(ResourceIds.TODAY)
             }
+
             is DaysDifference.Calculated -> {
                 if (difference.totalDays == 0) {
                     resourceProvider.getString(ResourceIds.TODAY)

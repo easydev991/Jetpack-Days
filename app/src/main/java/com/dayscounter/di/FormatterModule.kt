@@ -37,13 +37,15 @@ object FormatterModule {
     /**
      * Создает [CalculateDaysDifferenceUseCase].
      */
-    fun createCalculateDaysDifferenceUseCase(): CalculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+    fun createCalculateDaysDifferenceUseCase(): CalculateDaysDifferenceUseCase =
+        CalculateDaysDifferenceUseCase()
 
     /**
      * Создает [FormatDaysTextUseCase].
      */
     @Suppress("MaxLineLength")
-    fun createFormatDaysTextUseCase(daysFormatter: DaysFormatter): FormatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
+    fun createFormatDaysTextUseCase(daysFormatter: DaysFormatter): FormatDaysTextUseCase =
+        FormatDaysTextUseCase(daysFormatter)
 
     /**
      * Создает [GetFormattedDaysForItemUseCase].

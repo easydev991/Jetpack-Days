@@ -88,7 +88,7 @@ class StubResourceProvider : ResourceProvider {
             ResourceIds.DAYS_COUNT,
             ResourceIds.MONTHS_COUNT,
             ResourceIds.YEARS_COUNT,
-            -> "Заглушка"
+                -> "Заглушка"
 
             else -> "Заглушка"
         }

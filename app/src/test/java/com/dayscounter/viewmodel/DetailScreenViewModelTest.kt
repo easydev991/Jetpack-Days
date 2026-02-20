@@ -206,7 +206,8 @@ class DetailScreenViewModelTest {
 
         override fun getAllItems(): Flow<List<Item>> = items
 
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = items
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
+            items
 
         override suspend fun getItemById(id: Long): Item? {
             // Без задержки для тестов - getItemFlow используется для загрузки в ViewModel

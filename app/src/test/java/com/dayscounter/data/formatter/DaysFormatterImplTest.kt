@@ -321,7 +321,11 @@ class DaysFormatterImplTest {
             )
 
         // Then
-        assertEquals("48 мес. 10 дн.", result, "Ожидалась конвертация лет в месяцы для MONTH_DAY (сокращённый формат)")
+        assertEquals(
+            "48 мес. 10 дн.",
+            result,
+            "Ожидалась конвертация лет в месяцы для MONTH_DAY (сокращённый формат)"
+        )
     }
 
     @Test
@@ -627,7 +631,11 @@ class DaysFormatterImplTest {
             )
 
         // Then
-        assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
+        assertEquals(
+            "1 г. 2 мес. 5 дн.",
+            result,
+            "Ожидался сокращённый формат для showMinus = true"
+        )
     }
 
     @Test
@@ -665,7 +673,11 @@ class DaysFormatterImplTest {
             )
 
         // Then
-        assertEquals("1 г. 2 мес. 5 дн.", result, "Ожидался сокращённый формат для showMinus = true")
+        assertEquals(
+            "1 г. 2 мес. 5 дн.",
+            result,
+            "Ожидался сокращённый формат для showMinus = true"
+        )
     }
 
     // Тесты для будущих дат с showMinus = false (исправление бага)
@@ -699,7 +711,11 @@ class DaysFormatterImplTest {
             )
 
         // Then - не должно быть минуса, используется абсолютные значения
-        assertEquals("1 мес. 2 дн.", result, "Не должно быть минуса для будущей даты с showMinus = false")
+        assertEquals(
+            "1 мес. 2 дн.",
+            result,
+            "Не должно быть минуса для будущей даты с showMinus = false"
+        )
     }
 
     @Test
@@ -737,7 +753,11 @@ class DaysFormatterImplTest {
             )
 
         // Then - не должно быть минуса, используется абсолютные значения
-        assertEquals("1 г. 2 мес. 5 дн.", result, "Не должно быть минуса для будущей даты с showMinus = false")
+        assertEquals(
+            "1 г. 2 мес. 5 дн.",
+            result,
+            "Не должно быть минуса для будущей даты с showMinus = false"
+        )
     }
 
     @Test
@@ -769,7 +789,11 @@ class DaysFormatterImplTest {
             )
 
         // Then - должен быть минус для будущей даты с showMinus = true
-        assertEquals("-1 мес. -2 дн.", result, "Должен быть минус для будущей даты с showMinus = true")
+        assertEquals(
+            "-1 мес. -2 дн.",
+            result,
+            "Должен быть минус для будущей даты с showMinus = true"
+        )
     }
 
     @Test
@@ -807,6 +831,10 @@ class DaysFormatterImplTest {
             )
 
         // Then - должен быть минус для будущей даты с showMinus = true
-        assertEquals("-1 г. -2 мес. -5 дн.", result, "Должен быть минус для будущей даты с showMinus = true")
+        assertEquals(
+            "-1 г. -2 мес. -5 дн.",
+            result,
+            "Должен быть минус для будущей даты с showMinus = true"
+        )
     }
 }
