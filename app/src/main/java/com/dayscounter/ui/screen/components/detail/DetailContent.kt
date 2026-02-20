@@ -39,18 +39,18 @@ import java.time.format.DateTimeFormatter
  * @param modifier Modifier для компонента
  */
 @Composable
-fun detailContentByState(
+fun DetailContentByState(
     uiState: DetailScreenState,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier,
 ) {
     when (uiState) {
         is DetailScreenState.Loading -> {
-            loadingContent(modifier = modifier)
+            LoadingContent(modifier = modifier)
         }
 
         is DetailScreenState.Success -> {
-            detailContentInner(
+            DetailContentInner(
                 item = uiState.item,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
                 modifier = modifier,
@@ -58,7 +58,7 @@ fun detailContentByState(
         }
 
         is DetailScreenState.Error -> {
-            errorContent(
+            ErrorContent(
                 message = uiState.message,
                 modifier = modifier,
             )
@@ -75,7 +75,7 @@ fun detailContentByState(
  * @param modifier Modifier для компонента
  */
 @Composable
-internal fun detailContentInner(
+internal fun DetailContentInner(
     item: Item,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier,
@@ -88,12 +88,12 @@ internal fun detailContentInner(
                 .padding(dimensionResource(R.dimen.spacing_regular)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
     ) {
-        readSectionView(
+        ReadSectionView(
             headerText = stringResource(R.string.title),
             bodyText = item.title,
         )
         if (item.details.isNotEmpty()) {
-            readSectionView(
+            ReadSectionView(
                 headerText = stringResource(R.string.details),
                 bodyText = item.details,
             )
@@ -109,14 +109,14 @@ internal fun detailContentInner(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                 )
-                colorTagSection(item.colorTag)
+                ColorTagSection(item.colorTag)
             }
         }
-        detailDatePicker(
+        DetailDatePicker(
             item = item,
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
         )
-        detailDisplayOptionPicker(displayOption = item.displayOption)
+        DetailDisplayOptionPicker(displayOption = item.displayOption)
         Spacer(modifier = Modifier.weight(1f))
     }
 }
@@ -125,7 +125,7 @@ internal fun detailContentInner(
  * Секция с цветовой меткой.
  */
 @Composable
-fun colorTagSection(colorTag: Int) {
+fun ColorTagSection(colorTag: Int) {
     Surface(
         modifier = Modifier.size(dimensionResource(R.dimen.color_tag_size_small)),
         shape = CircleShape,
@@ -136,7 +136,7 @@ fun colorTagSection(colorTag: Int) {
 }
 
 /**
- * Компонент readSectionView - аналог iOS ReadSectionView.
+ * Компонент ReadSectionView - аналог iOS ReadSectionView.
  * Отображает заголовок и текст секции с выравниванием по левому краю.
  *
  * @param headerText Заголовок секции
@@ -144,7 +144,7 @@ fun colorTagSection(colorTag: Int) {
  * @param modifier Modifier для компонента
  */
 @Composable
-fun readSectionView(
+fun ReadSectionView(
     headerText: String,
     bodyText: String,
     modifier: Modifier = Modifier,
@@ -170,7 +170,7 @@ fun readSectionView(
 }
 
 /**
- * Компонент detailDatePicker - аналог iOS ItemDatePicker.
+ * Компонент DetailDatePicker - аналог iOS ItemDatePicker.
  * Отображает дату в формате DatePicker, отключенный для редактирования,
  * с дополнительным полем для краткого анализа дней.
  *
@@ -180,7 +180,7 @@ fun readSectionView(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun detailDatePicker(
+fun DetailDatePicker(
     item: Item,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier,
@@ -226,14 +226,14 @@ fun detailDatePicker(
 }
 
 /**
- * Компонент detailDisplayOptionPicker - аналог iOS ItemDisplayOptionPicker.
+ * Компонент DetailDisplayOptionPicker - аналог iOS ItemDisplayOptionPicker.
  * Отображает выбранную опцию отображения, отключенный для редактирования.
  *
  * @param displayOption Опция отображения
  * @param modifier Modifier для компонента
  */
 @Composable
-fun detailDisplayOptionPicker(
+fun DetailDisplayOptionPicker(
     displayOption: DisplayOption,
     modifier: Modifier = Modifier,
 ) {

@@ -9,14 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 
 // ==================== PREVIEWS ====================
 
 @Preview(showBackground = true, name = "Предпросмотр дней (сегодня)")
 @Composable
-fun previewDaysContentTodayPreview() {
-    jetpackDaysTheme {
+fun PreviewDaysContentTodayPreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -24,15 +24,15 @@ fun previewDaysContentTodayPreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            previewDaysContentInner(java.time.LocalDate.now())
+            PreviewDaysContentInner(java.time.LocalDate.now())
         }
     }
 }
 
 @Preview(showBackground = true, name = "Предпросмотр дней (прошедшее событие)")
 @Composable
-fun previewDaysContentPastPreview() {
-    jetpackDaysTheme {
+fun PreviewDaysContentPastPreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -40,7 +40,7 @@ fun previewDaysContentPastPreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            previewDaysContentInner(
+            PreviewDaysContentInner(
                 java.time.LocalDate
                     .now()
                     .minusDays(PreviewComponentsConstants.PREVIEW_PAST_DAYS),
@@ -51,8 +51,8 @@ fun previewDaysContentPastPreview() {
 
 @Preview(showBackground = true, name = "Предпросмотр дней (будущее событие)")
 @Composable
-fun previewDaysContentFuturePreview() {
-    jetpackDaysTheme {
+fun PreviewDaysContentFuturePreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -60,7 +60,7 @@ fun previewDaysContentFuturePreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            previewDaysContentInner(
+            PreviewDaysContentInner(
                 java.time.LocalDate
                     .now()
                     .plusDays(PreviewComponentsConstants.PREVIEW_FUTURE_DAYS),

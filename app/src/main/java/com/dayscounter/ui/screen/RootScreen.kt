@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dayscounter.navigation.Screen
-import com.dayscounter.ui.screen.components.navHostContent
-import com.dayscounter.ui.screen.components.navigationBarContent
-import com.dayscounter.ui.screen.components.updateTabBasedOnRoute
+import com.dayscounter.ui.screen.components.NavHostContent
+import com.dayscounter.ui.screen.components.NavigationBarContent
+import com.dayscounter.ui.screen.components.UpdateTabBasedOnRoute
 import com.dayscounter.viewmodel.RootScreenViewModel
 
 /**
@@ -21,13 +21,13 @@ import com.dayscounter.viewmodel.RootScreenViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun rootScreen(
+fun RootScreen(
     modifier: Modifier = Modifier,
     viewModel: RootScreenViewModel =
         androidx.lifecycle.viewmodel.compose
             .viewModel(),
 ) {
-    rootScreenContent(
+    RootScreenContent(
         modifier = modifier,
         viewModel = viewModel,
     )
@@ -38,7 +38,7 @@ fun rootScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun rootScreenContent(
+private fun RootScreenContent(
     modifier: Modifier = Modifier,
     viewModel: RootScreenViewModel,
 ) {
@@ -59,14 +59,14 @@ private fun rootScreenContent(
     val shouldShowNavigationBar = currentRoute in listOf(Screen.Events.route, Screen.More.route)
 
     // Обновляем вкладку при изменении маршрута
-    updateTabBasedOnRoute(navController, viewModel)
+    UpdateTabBasedOnRoute(navController, viewModel)
 
     Scaffold(
         modifier = modifier,
         bottomBar = {
             // Навигационная панель (только на главных экранах)
             if (shouldShowNavigationBar) {
-                navigationBarContent(
+                NavigationBarContent(
                     items = items,
                     viewModel = viewModel,
                     navController = navController,
@@ -78,7 +78,7 @@ private fun rootScreenContent(
                 .WindowInsets(0, 0, 0, 0),
     ) { paddingValues ->
         // Основной контент с навигацией
-        navHostContent(
+        NavHostContent(
             navController = navController,
             paddingValues = paddingValues,
         )

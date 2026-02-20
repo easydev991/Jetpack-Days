@@ -26,9 +26,9 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
-import com.dayscounter.ui.screen.appDataScreen
-import com.dayscounter.ui.screen.mainScreen
-import com.dayscounter.ui.screen.themeIconScreen
+import com.dayscounter.ui.screen.AppDataScreen
+import com.dayscounter.ui.screen.MainScreen
+import com.dayscounter.ui.screen.ThemeIconScreen
 import com.dayscounter.viewmodel.AppDataScreenViewModel
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
 import com.dayscounter.viewmodel.DetailScreenViewModel
@@ -40,7 +40,7 @@ import com.dayscounter.viewmodel.ThemeIconViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun navigationBarContent(
+internal fun NavigationBarContent(
     items: List<Screen>,
     viewModel: RootScreenViewModel,
     navController: NavHostController,
@@ -92,7 +92,7 @@ private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navControl
             screenName = ScreenNames.EVENTS,
             screenClass = "MainScreen",
         )
-        eventsScreenContent(navController)
+        EventsScreenContent(navController)
     }
 }
 
@@ -121,7 +121,7 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
             screenName = ScreenNames.DETAIL,
             screenClass = "DetailScreen",
         )
-        com.dayscounter.ui.screen.detailScreen(
+        com.dayscounter.ui.screen.DetailScreen(
             itemId = itemId,
             viewModel =
                 viewModel(
@@ -152,7 +152,7 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
             screenName = ScreenNames.CREATE,
             screenClass = "CreateEditScreen",
         )
-        com.dayscounter.ui.screen.createEditScreen(
+        com.dayscounter.ui.screen.CreateEditScreen(
             itemId = null,
             viewModel =
                 viewModel(
@@ -178,7 +178,7 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
             screenName = ScreenNames.CREATE,
             screenClass = "CreateEditScreen",
         )
-        com.dayscounter.ui.screen.createEditScreen(
+        com.dayscounter.ui.screen.CreateEditScreen(
             itemId = itemId,
             viewModel =
                 viewModel(
@@ -202,7 +202,7 @@ private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navControl
             screenClass = "MoreScreen",
         )
         com.dayscounter.ui.screen
-            .moreScreen(navController)
+            .MoreScreen(navController)
     }
 }
 
@@ -225,7 +225,7 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
             screenName = ScreenNames.THEME_ICON,
             screenClass = "ThemeIconScreen",
         )
-        themeIconScreen(
+        ThemeIconScreen(
             viewModel = viewModel,
             onBackClick = { navController.popBackStack() },
         )
@@ -251,7 +251,7 @@ private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
             screenName = ScreenNames.APP_DATA,
             screenClass = "AppDataScreen",
         )
-        appDataScreen(
+        AppDataScreen(
             viewModel = viewModel,
             onBackClick = { navController.popBackStack() },
         )
@@ -263,7 +263,7 @@ private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun navHostContent(
+internal fun NavHostContent(
     navController: NavHostController,
     paddingValues: androidx.compose.foundation.layout.PaddingValues =
         androidx.compose.foundation.layout
@@ -302,9 +302,9 @@ internal fun navHostContent(
  * Контент для экрана событий.
  */
 @Composable
-internal fun eventsScreenContent(navController: NavHostController) {
+internal fun EventsScreenContent(navController: NavHostController) {
     Log.d("RootScreen", "Отображение экрана событий")
-    mainScreen(
+    MainScreen(
         onItemClick = { itemId ->
             Log.d("RootScreen", "Навигация к экрану деталей: $itemId")
             navController.navigate(Screen.ItemDetail.createRoute(itemId))
@@ -324,7 +324,7 @@ internal fun eventsScreenContent(navController: NavHostController) {
  * Обновление вкладки на основе маршрута.
  */
 @Composable
-internal fun updateTabBasedOnRoute(
+internal fun UpdateTabBasedOnRoute(
     navController: NavHostController,
     viewModel: RootScreenViewModel,
 ) {

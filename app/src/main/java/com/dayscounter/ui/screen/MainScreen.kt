@@ -54,7 +54,7 @@ import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
-import com.dayscounter.ui.component.listItemView
+import com.dayscounter.ui.component.ListItemView
 import com.dayscounter.viewmodel.MainScreenState
 import com.dayscounter.viewmodel.MainScreenViewModel
 
@@ -73,7 +73,7 @@ private const val MIN_ITEMS_FOR_SEARCH = 5
  * @param onCreateClick Обработчик клика на создание новой записи
  */
 @Composable
-fun mainScreen(
+fun MainScreen(
     modifier: Modifier = Modifier,
     onItemClick: (Long) -> Unit = {},
     onEditClick: (Long) -> Unit = {},
@@ -108,7 +108,7 @@ fun mainScreen(
             resourceProvider = resourceProvider,
         )
 
-    mainScreenContent(
+    MainScreenContent(
         params =
             MainScreenParams(
                 viewModel = viewModel,
@@ -126,12 +126,12 @@ fun mainScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun screenHeader(
+private fun ScreenHeader(
     itemsCount: Int,
     sortOrder: SortOrder,
     onSortOrderChange: (SortOrder) -> Unit,
 ) {
-    mainScreenTopBar(
+    MainScreenTopBar(
         state =
             MainScreenTopBarState(
                 itemsCount = itemsCount,
@@ -145,7 +145,7 @@ private fun screenHeader(
  * Тело экрана со списком и полем поиска.
  */
 @Composable
-private fun screenBody(
+private fun ScreenBody(
     searchQuery: String,
     itemsCount: Int,
     paddingValues: PaddingValues,
@@ -155,7 +155,7 @@ private fun screenBody(
     Column(modifier = Modifier.fillMaxSize()) {
         val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
         if (showSearchField) {
-            searchField(
+            SearchField(
                 searchQuery = searchQuery,
                 onSearchQueryChange = onSearchQueryChange,
                 modifier =
@@ -165,7 +165,7 @@ private fun screenBody(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
             )
         }
-        mainScreenContentByState(
+        MainScreenContentByState(
             state = state,
             paddingValues =
                 PaddingValues(
@@ -182,7 +182,7 @@ private fun screenBody(
  * Диалог подтверждения удаления.
  */
 @Composable
-private fun deleteDialog(
+private fun DeleteDialog(
     item: com.dayscounter.domain.model.Item,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
@@ -214,7 +214,7 @@ private fun deleteDialog(
  * Основной контент экрана.
  */
 @Composable
-private fun mainScreenContent(
+private fun MainScreenContent(
     params: MainScreenParams,
     modifier: Modifier = Modifier,
 ) {
@@ -228,7 +228,7 @@ private fun mainScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            screenHeader(
+            ScreenHeader(
                 itemsCount = itemsCount,
                 sortOrder = sortOrder,
                 onSortOrderChange = { params.viewModel.updateSortOrder(it) },
@@ -245,7 +245,7 @@ private fun mainScreenContent(
             }
         },
     ) { paddingValues ->
-        screenBody(
+        ScreenBody(
             searchQuery = searchQuery,
             itemsCount = itemsCount,
             paddingValues = paddingValues,
@@ -264,7 +264,7 @@ private fun mainScreenContent(
     }
 
     showDeleteDialog?.let { item ->
-        deleteDialog(
+        DeleteDialog(
             item = item,
             onConfirm = { params.viewModel.confirmDelete() },
             onCancel = { params.viewModel.cancelDelete() },
@@ -276,7 +276,7 @@ private fun mainScreenContent(
  * Обертка для элемента списка с позиционированием.
  */
 @Composable
-private fun listItemWrapper(
+private fun ListItemWrapper(
     item: com.dayscounter.domain.model.Item,
     formattedDaysText: String,
     onItemClick: (Long) -> Unit,
@@ -291,7 +291,7 @@ private fun listItemWrapper(
                     itemPosition = coordinates.positionInRoot()
                 },
     ) {
-        listItemView(
+        ListItemView(
             params =
                 com.dayscounter.ui.component.ListItemParams(
                     item = item,
@@ -308,7 +308,7 @@ private fun listItemWrapper(
  * Контекстное меню для элемента списка.
  */
 @Composable
-private fun contextMenu(params: ContextMenuParams) {
+private fun ContextMenu(params: ContextMenuParams) {
     DropdownMenu(
         expanded = true,
         onDismissRequest = params.onDismiss,
@@ -360,7 +360,7 @@ private fun contextMenu(params: ContextMenuParams) {
  * Контент со списком записей.
  */
 @Composable
-private fun itemsListContent(params: ItemsListParams) {
+private fun ItemsListContent(params: ItemsListParams) {
     var contextMenuItem by remember { mutableStateOf<com.dayscounter.domain.model.Item?>(null) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
     val density = LocalDensity.current
@@ -377,7 +377,7 @@ private fun itemsListContent(params: ItemsListParams) {
         ) { item ->
             val formattedDaysText =
                 params.getFormattedDaysForItemUseCase(item = item, showMinus = true)
-            listItemWrapper(
+            ListItemWrapper(
                 item = item,
                 formattedDaysText = formattedDaysText,
                 onItemClick = params.onItemClick,
@@ -397,7 +397,7 @@ private fun itemsListContent(params: ItemsListParams) {
     }
 
     contextMenuItem?.let { item ->
-        contextMenu(
+        ContextMenu(
             params =
                 ContextMenuParams(
                     item = item,
@@ -425,12 +425,12 @@ private data class MainScreenTopBarState(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun mainScreenTopBar(state: MainScreenTopBarState) {
+private fun MainScreenTopBar(state: MainScreenTopBarState) {
     TopAppBar(
         title = { Text(stringResource(R.string.events)) },
         navigationIcon = {
             if (state.itemsCount > 1) {
-                sortMenu(
+                SortMenu(
                     sortOrder = state.sortOrder,
                     onSortOrderChange = state.onSortOrderChange,
                 )
@@ -461,24 +461,24 @@ private data class MainScreenContentState(
  * Displays content based on UI state.
  */
 @Composable
-private fun mainScreenContentByState(
+private fun MainScreenContentByState(
     state: MainScreenContentState,
     paddingValues: PaddingValues,
 ) {
     when (val uiState = state.uiState) {
         is MainScreenState.Loading -> {
-            loadingContent(modifier = Modifier.padding(paddingValues))
+            LoadingContent(modifier = Modifier.padding(paddingValues))
         }
 
         is MainScreenState.Success -> {
             if (uiState.items.isEmpty()) {
                 if (state.searchQuery.isNotEmpty()) {
-                    emptySearchContent(paddingValues)
+                    EmptySearchContent(paddingValues)
                 } else {
-                    emptyContent(paddingValues)
+                    EmptyContent(paddingValues)
                 }
             } else {
-                itemsListContent(
+                ItemsListContent(
                     params =
                         ItemsListParams(
                             items = uiState.items,
@@ -494,7 +494,7 @@ private fun mainScreenContentByState(
         }
 
         is MainScreenState.Error -> {
-            errorContent(
+            ErrorContent(
                 message = uiState.message,
                 modifier = Modifier.padding(paddingValues),
             )

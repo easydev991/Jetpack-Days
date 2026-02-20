@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 
 /**
  * Вспомогательная функция для получения стиля для обычного отображения.
@@ -83,7 +83,7 @@ private fun getSecondaryStyle(
  */
 @Suppress("LongParameterList")
 @Composable
-fun daysCountText(
+fun DaysCountText(
     formattedText: String,
     modifier: Modifier = Modifier,
     textStyle: DaysCountTextStyle = DaysCountTextStyle.NORMAL,
@@ -115,13 +115,13 @@ fun daysCountText(
 }
 
 /**
- * Предпросмотры компонента daysCountText.
+ * Предпросмотры компонента DaysCountText.
  */
 @Preview(showBackground = true)
 @Composable
-fun daysCountTextPreview() {
-    jetpackDaysTheme {
-        daysCountText(
+fun DaysCountTextPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
             formattedText = "5 дней",
             modifier = Modifier.padding(16.dp),
         )
@@ -130,9 +130,9 @@ fun daysCountTextPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun daysCountTextTodayPreview() {
-    jetpackDaysTheme {
-        daysCountText(
+fun DaysCountTextTodayPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
             formattedText = "Сегодня",
             modifier = Modifier.padding(16.dp),
         )
@@ -141,9 +141,9 @@ fun daysCountTextTodayPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun daysCountTextEmphasizedPreview() {
-    jetpackDaysTheme {
-        daysCountText(
+fun DaysCountTextEmphasizedPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
             formattedText = "1 год 2 месяца 5 дней",
             modifier = Modifier.padding(16.dp),
             textStyle = DaysCountTextStyle.EMPHASIZED,
@@ -153,9 +153,9 @@ fun daysCountTextEmphasizedPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun daysCountTextSecondaryPreview() {
-    jetpackDaysTheme {
-        daysCountText(
+fun DaysCountTextSecondaryPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
             formattedText = "2 мес. 5 дн.",
             modifier = Modifier.padding(16.dp),
             textStyle = DaysCountTextStyle.SECONDARY,
@@ -165,9 +165,9 @@ fun daysCountTextSecondaryPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun daysCountTextFullFormatPreview() {
-    jetpackDaysTheme {
-        daysCountText(
+fun DaysCountTextFullFormatPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
             formattedText = "1 год 2 месяца 5 дней",
             modifier = Modifier.padding(16.dp),
         )

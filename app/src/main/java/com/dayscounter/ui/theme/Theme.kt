@@ -108,7 +108,7 @@ val unspecified_scheme =
     )
 
 @Composable
-fun jetpackDaysTheme(
+fun JetpackDaysTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     appTheme: AppTheme? = null,
     // Dynamic color is available on Android 12+

@@ -10,7 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.R
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,8 +37,8 @@ class ThemeIconScreenTest {
         onBackClick: () -> Unit = {},
     ) {
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                themeIconScreenContent(
+            JetpackDaysTheme {
+                ThemeIconScreenContent(
                     theme = theme,
                     useDynamicColors = useDynamicColors,
                     icon = icon,

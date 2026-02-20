@@ -17,8 +17,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
-import com.dayscounter.ui.screen.components.detail.detailContentByState
-import com.dayscounter.ui.screen.components.detail.detailTopAppBar
+import com.dayscounter.ui.screen.components.detail.DetailContentByState
+import com.dayscounter.ui.screen.components.detail.DetailTopAppBar
 import com.dayscounter.viewmodel.DetailScreenState
 import com.dayscounter.viewmodel.DetailScreenViewModel
 
@@ -36,7 +36,7 @@ import com.dayscounter.viewmodel.DetailScreenViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun detailScreen(
+fun DetailScreen(
     itemId: Long,
     modifier: Modifier = Modifier,
     viewModel: DetailScreenViewModel = viewModel(),
@@ -71,7 +71,7 @@ fun detailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
 
-    detailScreenContent(
+    DetailScreenContent(
         params =
             DetailScreenParams(
                 itemId = itemId,
@@ -100,7 +100,7 @@ fun detailScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun detailScreenContent(
+private fun DetailScreenContent(
     params: DetailScreenParams,
     modifier: Modifier = Modifier,
     uiState: DetailScreenState,
@@ -110,7 +110,7 @@ private fun detailScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            detailTopAppBar(
+            DetailTopAppBar(
                 uiState = uiState,
                 onBackClick = params.onBackClick,
                 onEditClick = params.onEditClick,
@@ -119,7 +119,7 @@ private fun detailScreenContent(
             )
         },
     ) { paddingValues ->
-        detailContentByState(
+        DetailContentByState(
             uiState = uiState,
             getDaysAnalysisTextUseCase = params.getDaysAnalysisTextUseCase,
             modifier = Modifier.padding(paddingValues),

@@ -1,12 +1,8 @@
 package com.dayscounter.ui.screen
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,16 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dayscounter.R
 import com.dayscounter.domain.model.Item
+import com.dayscounter.ui.screen.components.createedit.CreateEditFormContent
 import com.dayscounter.ui.screen.components.createedit.CreateEditFormParams
+import com.dayscounter.ui.screen.components.createedit.CreateEditTopAppBar
+import com.dayscounter.ui.screen.components.createedit.DatePickerDialogSection
 import com.dayscounter.ui.screen.components.createedit.SaveButton
-import com.dayscounter.ui.screen.components.createedit.createEditFormContent
-import com.dayscounter.ui.screen.components.createedit.createEditTopAppBar
-import com.dayscounter.ui.screen.components.createedit.datePickerDialogSection
 import com.dayscounter.ui.screen.components.createedit.loadItemData
 import com.dayscounter.ui.screen.components.createedit.rememberCreateEditUiStates
 import com.dayscounter.viewmodel.CreateEditScreenViewModel
@@ -41,13 +34,13 @@ import java.time.ZoneId
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun createEditScreen(
+fun CreateEditScreen(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel = viewModel(),
     onBackClick: () -> Unit = {},
 ) {
-    createEditScreenContent(
+    CreateEditScreenContent(
         itemId = itemId,
         modifier = modifier,
         viewModel = viewModel,
@@ -60,7 +53,7 @@ fun createEditScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun createEditScreenContent(
+private fun CreateEditScreenContent(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel,
@@ -80,7 +73,7 @@ private fun createEditScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            createEditTopAppBar(itemId = itemId, onBackClick = onBackClick)
+            CreateEditTopAppBar(itemId = itemId, onBackClick = onBackClick)
         },
         bottomBar = {
             SaveButton(
@@ -114,7 +107,7 @@ private fun createEditScreenContent(
             )
         },
     ) { paddingValues ->
-        createEditFormContent(
+        CreateEditFormContent(
             params =
                 CreateEditFormParams(
                     itemId = itemId,
@@ -129,7 +122,7 @@ private fun createEditScreenContent(
 
     // DatePicker Dialog
     if (showDatePicker.value) {
-        datePickerDialogSection(
+        DatePickerDialogSection(
             selectedDate = uiStates.selectedDate,
             showDatePicker = showDatePicker,
             onDateSelected = {

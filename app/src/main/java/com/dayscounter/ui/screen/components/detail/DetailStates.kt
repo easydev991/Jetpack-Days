@@ -17,7 +17,7 @@ import com.dayscounter.R
  * Контент при загрузке.
  */
 @Composable
-internal fun loadingContent(modifier: Modifier = Modifier) {
+internal fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -34,7 +34,7 @@ internal fun loadingContent(modifier: Modifier = Modifier) {
  * Контент при ошибке.
  */
 @Composable
-internal fun errorContent(
+internal fun ErrorContent(
     message: String,
     modifier: Modifier = Modifier,
 ) {

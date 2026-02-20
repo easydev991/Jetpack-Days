@@ -3,12 +3,12 @@ package com.dayscounter.presentation.ui.component
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.dayscounter.ui.component.daysCountText
+import com.dayscounter.ui.component.DaysCountText
 import org.junit.Rule
 import org.junit.Test
 
 /**
- * Компонентные тесты для [daysCountText].
+ * Компонентные тесты для [DaysCountText].
  *
  * Проверяет корректность отображения текста, применение стилей
  * и работу с различными текстовыми строками.
@@ -27,7 +27,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -49,7 +49,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -71,7 +71,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -93,7 +93,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -115,7 +115,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -137,7 +137,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }
@@ -159,7 +159,7 @@ class DaysCountTextTest {
 
         // When
         composeTestRule.setContent {
-            daysCountText(
+            DaysCountText(
                 formattedText = testText,
             )
         }

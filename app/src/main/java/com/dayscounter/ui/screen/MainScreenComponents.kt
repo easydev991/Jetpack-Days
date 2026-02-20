@@ -38,7 +38,7 @@ import com.dayscounter.domain.model.SortOrder
  * Меню сортировки.
  */
 @Composable
-internal fun sortMenu(
+internal fun SortMenu(
     sortOrder: SortOrder,
     onSortOrderChange: (SortOrder) -> Unit,
 ) {
@@ -93,7 +93,7 @@ internal fun sortMenu(
  * Контент с пустым списком.
  */
 @Composable
-internal fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
+internal fun EmptyContent(paddingValues: PaddingValues = PaddingValues()) {
     Column(
         modifier =
             Modifier
@@ -125,7 +125,7 @@ internal fun emptyContent(paddingValues: PaddingValues = PaddingValues()) {
  * Контент с пустым результатом поиска.
  */
 @Composable
-internal fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) {
+internal fun EmptySearchContent(paddingValues: PaddingValues = PaddingValues()) {
     Column(
         modifier =
             Modifier
@@ -157,7 +157,7 @@ internal fun emptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
  * Контент при загрузке.
  */
 @Composable
-internal fun loadingContent(modifier: Modifier = Modifier) {
+internal fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -174,7 +174,7 @@ internal fun loadingContent(modifier: Modifier = Modifier) {
  * Контент при ошибке.
  */
 @Composable
-internal fun errorContent(
+internal fun ErrorContent(
     message: String,
     modifier: Modifier = Modifier,
 ) {
@@ -199,7 +199,7 @@ internal fun errorContent(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun searchField(
+internal fun SearchField(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,

@@ -39,7 +39,7 @@ import com.dayscounter.ui.screen.CreateEditUiState as ScreenCreateEditUiState
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun createEditTopAppBar(
+internal fun CreateEditTopAppBar(
     itemId: Long?,
     onBackClick: () -> Unit,
 ) {
@@ -75,21 +75,21 @@ internal fun createEditTopAppBar(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun mainFormSections(
+private fun MainFormSections(
     params: CreateEditFormParams,
     onValueChange: () -> Unit,
 ) {
-    titleSection(
+    TitleSection(
         title = params.uiStates.title,
         onValueChange = { onValueChange() },
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
-    detailsSection(
+    DetailsSection(
         details = params.uiStates.details,
         onValueChange = { onValueChange() },
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
-    dateSection(
+    DateSection(
         selectedDate = params.uiStates.selectedDate,
         showDatePicker = params.showDatePicker,
     )
@@ -99,16 +99,16 @@ private fun mainFormSections(
  * Секция выбора цвета и опции отображения.
  */
 @Composable
-private fun colorAndDisplayOptionSection(
+private fun ColorAndDisplayOptionSection(
     params: CreateEditFormParams,
     onValueChange: () -> Unit,
 ) {
-    colorSelector(
+    ColorSelector(
         selectedColor = params.uiStates.selectedColor,
         onValueChange = onValueChange,
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
-    displayOptionSelector(
+    DisplayOptionSelector(
         selectedDisplayOption = params.uiStates.selectedDisplayOption,
         onValueChange = onValueChange,
     )
@@ -119,7 +119,7 @@ private fun colorAndDisplayOptionSection(
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-internal fun createEditFormContent(params: CreateEditFormParams) {
+internal fun CreateEditFormContent(params: CreateEditFormParams) {
     // Функция для отслеживания изменений
     val onValueChange: () -> Unit = {
         if (params.itemId != null) {
@@ -150,9 +150,9 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_regular)),
     ) {
-        mainFormSections(params, onValueChange)
+        MainFormSections(params, onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
-        colorAndDisplayOptionSection(params, onValueChange)
+        ColorAndDisplayOptionSection(params, onValueChange)
     }
 }
 
@@ -160,7 +160,7 @@ internal fun createEditFormContent(params: CreateEditFormParams) {
  * Секция с заголовком.
  */
 @Composable
-internal fun titleSection(
+internal fun TitleSection(
     title: MutableState<String>,
     onValueChange: (String) -> Unit = {},
 ) {
@@ -179,7 +179,7 @@ internal fun titleSection(
  * Секция с деталями.
  */
 @Composable
-internal fun detailsSection(
+internal fun DetailsSection(
     details: MutableState<String>,
     onValueChange: (String) -> Unit = {},
 ) {
@@ -200,7 +200,7 @@ internal fun detailsSection(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun dateSection(
+internal fun DateSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
 ) {

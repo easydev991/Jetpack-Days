@@ -18,8 +18,8 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
+import com.dayscounter.ui.component.DaysCountText
 import com.dayscounter.ui.component.DaysCountTextStyle
-import com.dayscounter.ui.component.daysCountText
 
 /**
  * Константы для компонента предпросмотра.
@@ -112,7 +112,7 @@ private fun formatPreviewDaysText(
  * Заголовок предпросмотра.
  */
 @Composable
-private fun previewHeader() {
+private fun PreviewHeader() {
     Text(
         text = stringResource(R.string.preview),
         style = MaterialTheme.typography.titleMedium,
@@ -124,8 +124,8 @@ private fun previewHeader() {
  * Отображение дней в предпросмотре.
  */
 @Composable
-private fun previewDays(daysText: String) {
-    daysCountText(
+private fun PreviewDays(daysText: String) {
+    DaysCountText(
         formattedText = daysText,
         textStyle = DaysCountTextStyle.EMPHASIZED,
     )
@@ -135,7 +135,7 @@ private fun previewDays(daysText: String) {
  * Описание прошедшего/оставшегося времени.
  */
 @Composable
-private fun previewFooter(daysBetween: Int) {
+private fun PreviewFooter(daysBetween: Int) {
     Text(
         text = if (daysBetween > 0) stringResource(R.string.elapsed) else stringResource(R.string.remaining),
         style = MaterialTheme.typography.bodyMedium,
@@ -150,7 +150,7 @@ private fun previewFooter(daysBetween: Int) {
  * @param displayOption Опция отображения дней
  */
 @Composable
-internal fun previewDaysContentInner(
+internal fun PreviewDaysContentInner(
     selectedDate: java.time.LocalDate,
     displayOption: DisplayOption = DisplayOption.DAY,
 ) {
@@ -176,11 +176,11 @@ internal fun previewDaysContentInner(
             modifier = Modifier.padding(dimensionResource(R.dimen.spacing_regular)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            previewHeader()
+            PreviewHeader()
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
-            previewDays(daysText)
+            PreviewDays(daysText)
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
-            previewFooter(daysBetween)
+            PreviewFooter(daysBetween)
         }
     }
 }

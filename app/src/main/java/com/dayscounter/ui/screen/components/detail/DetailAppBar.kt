@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.viewmodel.DetailScreenState
 
 /**
@@ -23,7 +23,7 @@ import com.dayscounter.viewmodel.DetailScreenState
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun detailTopAppBar(
+fun DetailTopAppBar(
     uiState: DetailScreenState,
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
@@ -47,7 +47,7 @@ fun detailTopAppBar(
         },
         actions = {
             if (uiState is DetailScreenState.Success) {
-                detailActionButtons(
+                DetailActionButtons(
                     onEditClick = onEditClick,
                     onDeleteClick = onDeleteClick,
                     itemId = itemId
@@ -65,7 +65,7 @@ fun detailTopAppBar(
  * Кнопки действий в TopAppBar.
  */
 @Composable
-internal fun detailActionButtons(
+internal fun DetailActionButtons(
     onEditClick: (Long) -> Unit,
     onDeleteClick: () -> Unit,
     itemId: Long,
@@ -88,9 +88,9 @@ internal fun detailActionButtons(
 
 @Preview(showBackground = true, name = "TopAppBar экрана деталей")
 @Composable
-fun detailTopAppBarPreview() {
-    jetpackDaysTheme {
-        detailTopAppBar(
+fun DetailTopAppBarPreview() {
+    JetpackDaysTheme {
+        DetailTopAppBar(
             uiState =
                 DetailScreenState.Success(
                     com.dayscounter.domain.model.Item(

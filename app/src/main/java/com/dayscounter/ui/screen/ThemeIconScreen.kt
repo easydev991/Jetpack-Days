@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
-import com.dayscounter.ui.screen.components.common.daysRadioButton
-import com.dayscounter.ui.screen.themeicon.iconPreviewItem
+import com.dayscounter.ui.screen.components.common.DaysRadioButton
+import com.dayscounter.ui.screen.themeicon.IconPreviewItem
 import com.dayscounter.ui.theme.DynamicColors
 import com.dayscounter.viewmodel.ThemeIconViewModel
 
@@ -43,13 +43,13 @@ import com.dayscounter.viewmodel.ThemeIconViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun themeIconScreen(
+fun ThemeIconScreen(
     viewModel: ThemeIconViewModel,
     onBackClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    themeIconScreenContent(
+    ThemeIconScreenContent(
         theme = uiState.theme,
         useDynamicColors = uiState.useDynamicColors,
         icon = uiState.icon,
@@ -67,7 +67,7 @@ fun themeIconScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun themeIconScreenContent(
+internal fun ThemeIconScreenContent(
     theme: AppTheme = AppTheme.SYSTEM,
     useDynamicColors: Boolean = true,
     icon: AppIcon = AppIcon.DEFAULT,
@@ -101,21 +101,21 @@ internal fun themeIconScreenContent(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            themeSection(
+            ThemeSection(
                 theme = theme,
                 onThemeChange = onThemeChange,
             )
 
             HorizontalDivider()
 
-            dynamicColorsSection(
+            DynamicColorsSection(
                 useDynamicColors = useDynamicColors,
                 onDynamicColorsChange = onDynamicColorsChange,
             )
 
             HorizontalDivider()
 
-            iconSection(
+            IconSection(
                 theme = theme,
                 icon = icon,
                 onIconChange = onIconChange,
@@ -128,7 +128,7 @@ internal fun themeIconScreenContent(
  * Секция выбора темы приложения.
  */
 @Composable
-private fun themeSection(
+private fun ThemeSection(
     theme: AppTheme,
     onThemeChange: (AppTheme) -> Unit,
 ) {
@@ -140,7 +140,7 @@ private fun themeSection(
 
     Column(modifier = Modifier.selectableGroup()) {
         // Светлая тема
-        daysRadioButton(
+        DaysRadioButton(
             text = stringResource(R.string.light),
             selected = theme == AppTheme.LIGHT,
             onClick = { onThemeChange(AppTheme.LIGHT) },
@@ -148,7 +148,7 @@ private fun themeSection(
         )
 
         // Тёмная тема
-        daysRadioButton(
+        DaysRadioButton(
             text = stringResource(R.string.dark),
             selected = theme == AppTheme.DARK,
             onClick = { onThemeChange(AppTheme.DARK) },
@@ -156,7 +156,7 @@ private fun themeSection(
         )
 
         // Системная тема
-        daysRadioButton(
+        DaysRadioButton(
             text = stringResource(R.string.system),
             selected = theme == AppTheme.SYSTEM,
             onClick = { onThemeChange(AppTheme.SYSTEM) },
@@ -169,7 +169,7 @@ private fun themeSection(
  * Секция выбора динамических цветов.
  */
 @Composable
-private fun dynamicColorsSection(
+private fun DynamicColorsSection(
     useDynamicColors: Boolean,
     onDynamicColorsChange: (Boolean) -> Unit,
 ) {
@@ -212,7 +212,7 @@ private fun dynamicColorsSection(
  * Секция выбора иконки приложения.
  */
 @Composable
-private fun iconSection(
+private fun IconSection(
     theme: AppTheme,
     icon: AppIcon,
     onIconChange: (AppIcon) -> Unit,
@@ -233,7 +233,7 @@ private fun iconSection(
                 .padding(bottom = dimensionResource(R.dimen.spacing_small)),
     )
 
-    iconGrid(
+    IconGrid(
         icons = AppIcon.entries,
         selectedIcon = icon,
         isDarkTheme = isDarkTheme,
@@ -248,7 +248,7 @@ private fun iconSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("MagicNumber")
 @Composable
-private fun iconGrid(
+private fun IconGrid(
     icons: List<AppIcon>,
     selectedIcon: AppIcon,
     isDarkTheme: Boolean,
@@ -263,7 +263,7 @@ private fun iconGrid(
             Box(
                 modifier = Modifier.width(64.dp),
             ) {
-                iconPreviewItem(
+                IconPreviewItem(
                     appIcon = appIcon,
                     isSelected = appIcon == selectedIcon,
                     isDarkTheme = isDarkTheme,

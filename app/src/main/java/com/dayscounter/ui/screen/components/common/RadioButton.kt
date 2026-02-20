@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
  * @param onClickable Флаг, указывающий, можно ли кликнуть по радио-кнопке
  */
 @Composable
-fun daysRadioButton(
+fun DaysRadioButton(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,

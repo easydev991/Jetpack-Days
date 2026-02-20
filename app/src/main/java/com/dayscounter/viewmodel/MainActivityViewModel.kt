@@ -16,7 +16,7 @@ private const val STATE_TIMEOUT_MS = 5000L
 /**
  * ViewModel для MainActivity. Отслеживает тему приложения из DataStore.
  *
- * Используется для передачи текущей темы в jetpackDaysTheme() на уровне Activity.
+ * Используется для передачи текущей темы в JetpackDaysTheme() на уровне Activity.
  */
 class MainActivityViewModel(
     private val dataStore: AppSettingsDataStore,

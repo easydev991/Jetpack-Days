@@ -38,13 +38,13 @@ import androidx.navigation.NavHostController
 import com.dayscounter.BuildConfig
 import com.dayscounter.R
 import com.dayscounter.navigation.Screen
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.util.AppConstants
 
 /** Экран с дополнительными функциями и настройками приложения. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun moreScreen(navController: NavHostController? = null) {
+fun MoreScreen(navController: NavHostController? = null) {
     val context = LocalContext.current
 
     Scaffold(
@@ -70,26 +70,26 @@ fun moreScreen(navController: NavHostController? = null) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Кнопки настроек
-            settingsButtons(navController)
+            SettingsButtons(navController)
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
             // Кнопки действий
-            actionButtons(context)
+            ActionButtons(context)
 
             Spacer(modifier = Modifier.weight(1f))
 
             // Версия приложения (снизу с учетом paddingValues)
-            appVersionText()
+            AppVersionText()
         }
     }
 }
 
 /** Кнопки настроек (заглушки). */
 @Composable
-private fun settingsButtons(navController: NavHostController?) {
+private fun SettingsButtons(navController: NavHostController?) {
     // Кнопка "Тема и иконка"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.app_theme_and_icon),
         onClick = {
             navController?.navigate(Screen.ThemeIcon.route) {
@@ -101,7 +101,7 @@ private fun settingsButtons(navController: NavHostController?) {
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Данные приложения"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.app_data),
         onClick = {
             navController?.navigate(Screen.AppData.route) {
@@ -113,9 +113,9 @@ private fun settingsButtons(navController: NavHostController?) {
 
 /** Кнопки действий. */
 @Composable
-private fun actionButtons(context: Context) {
+private fun ActionButtons(context: Context) {
     // Кнопка "Отправить отзыв"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.send_feedback),
         onClick = { sendFeedback(context) },
     )
@@ -123,7 +123,7 @@ private fun actionButtons(context: Context) {
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Оценить приложение"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.rate_the_app),
         onClick = { rateApp(context) },
     )
@@ -131,7 +131,7 @@ private fun actionButtons(context: Context) {
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Поделиться приложением"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.share_the_app),
         onClick = { shareApp(context) },
     )
@@ -139,7 +139,7 @@ private fun actionButtons(context: Context) {
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
     // Кнопка "Страница на GitHub"
-    moreButton(
+    MoreButton(
         text = stringResource(R.string.github_page),
         onClick = { openGitHub(context) },
     )
@@ -147,7 +147,7 @@ private fun actionButtons(context: Context) {
 
 /** Текст версии приложения. */
 @Composable
-private fun appVersionText() {
+private fun AppVersionText() {
     Text(
         text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
         modifier =
@@ -162,7 +162,7 @@ private fun appVersionText() {
 
 /** Кнопка для экрана More. */
 @Composable
-private fun moreButton(
+private fun MoreButton(
     text: String,
     onClick: () -> Unit,
 ) {
@@ -279,6 +279,6 @@ private fun openGitHub(context: Context) {
 
 @Preview(showBackground = true, name = "More Screen")
 @Composable
-fun moreScreenPreview() {
-    jetpackDaysTheme { moreScreen(null) }
+fun MoreScreenPreview() {
+    JetpackDaysTheme { MoreScreen(null) }
 }

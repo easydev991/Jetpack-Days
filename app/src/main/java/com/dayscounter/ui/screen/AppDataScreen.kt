@@ -40,7 +40,7 @@ import com.dayscounter.ui.state.AppDataUiState
 import com.dayscounter.viewmodel.AppDataScreenViewModel
 
 /**
- * Параметры для функции appDataScreenContent.
+ * Параметры для функции AppDataScreenContent.
  *
  * @property uiState Текущее состояние UI
  * @property showDeleteDialog Флаг, указывающий, нужно ли показывать диалог подтверждения удаления
@@ -71,7 +71,7 @@ internal data class AppDataScreenParams(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun appDataScreen(
+fun AppDataScreen(
     viewModel: AppDataScreenViewModel,
     onBackClick: () -> Unit = {},
 ) {
@@ -111,7 +111,7 @@ fun appDataScreen(
         viewModel.clearResultMessage()
     }
 
-    appDataScreenContent(
+    AppDataScreenContent(
         params =
             AppDataScreenParams(
                 uiState = uiState,
@@ -139,7 +139,7 @@ fun appDataScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun appDataScreenContent(params: AppDataScreenParams) {
+internal fun AppDataScreenContent(params: AppDataScreenParams) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -155,7 +155,7 @@ internal fun appDataScreenContent(params: AppDataScreenParams) {
             )
         },
     ) { paddingValues ->
-        appDataScreenBody(
+        AppDataScreenBody(
             params = params,
             paddingValues = paddingValues,
         )
@@ -163,7 +163,7 @@ internal fun appDataScreenContent(params: AppDataScreenParams) {
 
     // Диалог подтверждения удаления всех данных
     if (params.showDeleteDialog) {
-        appDataScreenDeleteConfirmDialog(params)
+        AppDataScreenDeleteConfirmDialog(params)
     }
 }
 
@@ -171,7 +171,7 @@ internal fun appDataScreenContent(params: AppDataScreenParams) {
  * Основной контент экрана управления данными.
  */
 @Composable
-private fun appDataScreenBody(
+private fun AppDataScreenBody(
     params: AppDataScreenParams,
     paddingValues: PaddingValues,
 ) {
@@ -189,13 +189,13 @@ private fun appDataScreenBody(
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
         if (params.uiState.hasItems) {
-            appDataScreenExportButton(params)
+            AppDataScreenExportButton(params)
         }
 
-        appDataScreenImportButton(params)
+        AppDataScreenImportButton(params)
 
         if (params.uiState.hasItems) {
-            appDataScreenDeleteButton(params)
+            AppDataScreenDeleteButton(params)
         }
     }
 }
@@ -204,7 +204,7 @@ private fun appDataScreenBody(
  * Кнопка "Создать резервную копию".
  */
 @Composable
-private fun appDataScreenExportButton(params: AppDataScreenParams) {
+private fun AppDataScreenExportButton(params: AppDataScreenParams) {
     FilledTonalButton(
         onClick = params.onExportBackupClick,
         enabled = !params.uiState.isExporting,
@@ -221,7 +221,7 @@ private fun appDataScreenExportButton(params: AppDataScreenParams) {
  * Кнопка "Восстановить из резервной копии".
  */
 @Composable
-private fun appDataScreenImportButton(params: AppDataScreenParams) {
+private fun AppDataScreenImportButton(params: AppDataScreenParams) {
     FilledTonalButton(
         onClick = params.onImportBackupClick,
         enabled = !params.uiState.isImporting,
@@ -238,7 +238,7 @@ private fun appDataScreenImportButton(params: AppDataScreenParams) {
  * Кнопка "Удалить все данные" (деструктивный стиль).
  */
 @Composable
-private fun appDataScreenDeleteButton(params: AppDataScreenParams) {
+private fun AppDataScreenDeleteButton(params: AppDataScreenParams) {
     Button(
         onClick = params.onDeleteAllDataClick,
         enabled = !params.uiState.isDeleting,
@@ -260,7 +260,7 @@ private fun appDataScreenDeleteButton(params: AppDataScreenParams) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun appDataScreenDeleteConfirmDialog(params: AppDataScreenParams) {
+private fun AppDataScreenDeleteConfirmDialog(params: AppDataScreenParams) {
     AlertDialog(
         onDismissRequest = params.onCancelDeleteAllData,
         title = { Text(stringResource(R.string.delete_all_data)) },

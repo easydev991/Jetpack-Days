@@ -17,14 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 
 // ==================== PREVIEWS ====================
 
 @Preview(showBackground = true, name = "Секция заголовка")
 @Composable
-fun titleSectionPreview() {
-    jetpackDaysTheme {
+fun TitleSectionPreview() {
+    JetpackDaysTheme {
         val title = remember { mutableStateOf("День рождения") }
         Column(
             modifier =
@@ -45,8 +45,8 @@ fun titleSectionPreview() {
 
 @Preview(showBackground = true, name = "Секция деталей")
 @Composable
-fun detailsSectionPreview() {
-    jetpackDaysTheme {
+fun DetailsSectionPreview() {
+    JetpackDaysTheme {
         val details = remember { mutableStateOf("Праздничный день с друзьями") }
         Column(
             modifier =
@@ -68,8 +68,8 @@ fun detailsSectionPreview() {
 
 @Preview(showBackground = true, name = "Секция даты")
 @Composable
-fun dateSectionPreview() {
-    jetpackDaysTheme {
+fun DateSectionPreview() {
+    JetpackDaysTheme {
         val selectedDate = remember { mutableStateOf(java.time.LocalDate.now()) }
         val showDatePicker = remember { mutableStateOf(false) }
         val formatter =

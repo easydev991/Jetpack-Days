@@ -29,14 +29,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
-import com.dayscounter.ui.screen.components.common.daysRadioButton
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.screen.components.common.DaysRadioButton
+import com.dayscounter.ui.theme.JetpackDaysTheme
 
 /**
  * Селектор цвета.
  */
 @Composable
-internal fun colorSelector(
+internal fun ColorSelector(
     selectedColor: MutableState<Color?>,
     onValueChange: () -> Unit = {},
 ) {
@@ -63,7 +63,7 @@ internal fun colorSelector(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
     ) {
         items(colors) { color ->
-            colorOptionSurface(
+            ColorOptionSurface(
                 color = color,
                 selectedColor = selectedColor,
                 onValueChange = onValueChange,
@@ -76,7 +76,7 @@ internal fun colorSelector(
  * Поверхность для выбора цвета.
  */
 @Composable
-internal fun colorOptionSurface(
+internal fun ColorOptionSurface(
     color: Color,
     selectedColor: MutableState<Color?>,
     onValueChange: () -> Unit = {},
@@ -112,7 +112,7 @@ internal fun colorOptionSurface(
  * Селектор опции отображения.
  */
 @Composable
-internal fun displayOptionSelector(
+internal fun DisplayOptionSelector(
     selectedDisplayOption: MutableState<DisplayOption>,
     onValueChange: () -> Unit = {},
 ) {
@@ -137,7 +137,7 @@ internal fun displayOptionSelector(
                         stringResource(R.string.days_only)
                 }
 
-            daysRadioButton(
+            DaysRadioButton(
                 text = text,
                 selected = selectedDisplayOption.value == option,
                 onClick = {
@@ -153,8 +153,8 @@ internal fun displayOptionSelector(
 
 @Preview(showBackground = true, name = "Селектор цвета с выбранным красным")
 @Composable
-fun colorSelectorRedPreview() {
-    jetpackDaysTheme {
+fun ColorSelectorRedPreview() {
+    JetpackDaysTheme {
         val selectedColor = remember { mutableStateOf<Color?>(Color.Red) }
 
         Column(
@@ -164,15 +164,15 @@ fun colorSelectorRedPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            colorSelector(selectedColor)
+            ColorSelector(selectedColor)
         }
     }
 }
 
 @Preview(showBackground = true, name = "Селектор опции отображения")
 @Composable
-fun displayOptionSelectorPreview() {
-    jetpackDaysTheme {
+fun DisplayOptionSelectorPreview() {
+    JetpackDaysTheme {
         val selectedDisplayOption = remember { mutableStateOf(DisplayOption.DAY) }
 
         Column(
@@ -182,7 +182,7 @@ fun displayOptionSelectorPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            displayOptionSelector(selectedDisplayOption)
+            DisplayOptionSelector(selectedDisplayOption)
         }
     }
 }

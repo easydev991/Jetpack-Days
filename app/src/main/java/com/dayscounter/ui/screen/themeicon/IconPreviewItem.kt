@@ -38,7 +38,7 @@ import com.dayscounter.domain.model.AppIcon
  * @param modifier Modifier для настройки внешнего вида
  */
 @Composable
-fun iconPreviewItem(
+fun IconPreviewItem(
     appIcon: AppIcon,
     isSelected: Boolean,
     isDarkTheme: Boolean,
@@ -105,13 +105,13 @@ fun iconPreviewItem(
                         x = 6.dp,
                         y = (-6).dp,
                     ),
-        ) { checkIcon() }
+        ) { CheckIcon() }
     }
 }
 
 /** Иконка галочки. */
 @Composable
-private fun checkIcon() {
+private fun CheckIcon() {
     Icon(
         imageVector = Icons.Default.Check,
         contentDescription = "Selected",

@@ -16,7 +16,7 @@ import com.dayscounter.R
 import com.dayscounter.di.FormatterModule
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import java.time.Duration
 import java.time.Instant
 
@@ -28,8 +28,8 @@ private val PREVIEW_DAYS_120 = Duration.ofDays(120)
 
 @Preview(showBackground = true, name = "Секция цветовой метки")
 @Composable
-fun colorTagSectionPreview() {
-    jetpackDaysTheme {
+fun ColorTagSectionPreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -38,15 +38,15 @@ fun colorTagSectionPreview() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            colorTagSection(android.graphics.Color.RED)
+            ColorTagSection(android.graphics.Color.RED)
         }
     }
 }
 
 @Preview(showBackground = true, name = "ReadSectionView - Title")
 @Composable
-fun readSectionViewTitlePreview() {
-    jetpackDaysTheme {
+fun ReadSectionViewTitlePreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -54,7 +54,7 @@ fun readSectionViewTitlePreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            readSectionView(
+            ReadSectionView(
                 headerText = "Title",
                 bodyText = "День рождения",
             )
@@ -64,8 +64,8 @@ fun readSectionViewTitlePreview() {
 
 @Preview(showBackground = true, name = "ReadSectionView - Details")
 @Composable
-fun readSectionViewDetailsPreview() {
-    jetpackDaysTheme {
+fun ReadSectionViewDetailsPreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -73,7 +73,7 @@ fun readSectionViewDetailsPreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            readSectionView(
+            ReadSectionView(
                 headerText = "Details",
                 bodyText = "Праздничный день с друзьями и семьей",
             )
@@ -83,7 +83,7 @@ fun readSectionViewDetailsPreview() {
 
 @Preview(showBackground = true, name = "DetailDatePicker - прошлое (DAY)")
 @Composable
-fun detailDatePickerPastDayPreview() {
+fun DetailDatePickerPastDayPreview() {
     val context = LocalContext.current
     val resourceProvider = FormatterModule.createResourceProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
@@ -106,7 +106,7 @@ fun detailDatePickerPastDayPreview() {
             resourceProvider,
         )
 
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -119,7 +119,7 @@ fun detailDatePickerPastDayPreview() {
                     .now()
                     .minus(PREVIEW_DAYS_12)
                     .toEpochMilli()
-            detailDatePicker(
+            DetailDatePicker(
                 item =
                     Item(
                         id = 1L,
@@ -137,7 +137,7 @@ fun detailDatePickerPastDayPreview() {
 
 @Preview(showBackground = true, name = "DetailDatePicker - будущее (MONTH_DAY)")
 @Composable
-fun detailDatePickerFutureMonthDayPreview() {
+fun DetailDatePickerFutureMonthDayPreview() {
     val context = LocalContext.current
     val resourceProvider = FormatterModule.createResourceProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
@@ -160,7 +160,7 @@ fun detailDatePickerFutureMonthDayPreview() {
             resourceProvider,
         )
 
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -173,7 +173,7 @@ fun detailDatePickerFutureMonthDayPreview() {
                     .now()
                     .plus(PREVIEW_DAYS_60)
                     .toEpochMilli()
-            detailDatePicker(
+            DetailDatePicker(
                 item =
                     Item(
                         id = 1L,
@@ -191,7 +191,7 @@ fun detailDatePickerFutureMonthDayPreview() {
 
 @Preview(showBackground = true, name = "DetailDatePicker - прошлое (YEAR_MONTH_DAY)")
 @Composable
-fun detailDatePickerPastYearMonthDayPreview() {
+fun DetailDatePickerPastYearMonthDayPreview() {
     val context = LocalContext.current
     val resourceProvider = FormatterModule.createResourceProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
@@ -214,7 +214,7 @@ fun detailDatePickerPastYearMonthDayPreview() {
             resourceProvider,
         )
 
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -227,7 +227,7 @@ fun detailDatePickerPastYearMonthDayPreview() {
                     .now()
                     .minus(PREVIEW_DAYS_120)
                     .toEpochMilli()
-            detailDatePicker(
+            DetailDatePicker(
                 item =
                     Item(
                         id = 1L,
@@ -245,8 +245,8 @@ fun detailDatePickerPastYearMonthDayPreview() {
 
 @Preview(showBackground = true, name = "DetailDisplayOptionPicker")
 @Composable
-fun detailDisplayOptionPickerPreview() {
-    jetpackDaysTheme {
+fun DetailDisplayOptionPickerPreview() {
+    JetpackDaysTheme {
         Column(
             modifier =
                 Modifier
@@ -254,14 +254,14 @@ fun detailDisplayOptionPickerPreview() {
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             verticalArrangement = Arrangement.Center,
         ) {
-            detailDisplayOptionPicker(displayOption = DisplayOption.MONTH_DAY)
+            DetailDisplayOptionPicker(displayOption = DisplayOption.MONTH_DAY)
         }
     }
 }
 
 @Preview(showBackground = true, name = "DetailContentInner - полная запись")
 @Composable
-fun detailContentInnerPreview() {
+fun DetailContentInnerPreview() {
     val context = LocalContext.current
     val resourceProvider = FormatterModule.createResourceProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
@@ -284,7 +284,7 @@ fun detailContentInnerPreview() {
             resourceProvider,
         )
 
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         val timestamp =
             Instant
                 .now()
@@ -299,7 +299,7 @@ fun detailContentInnerPreview() {
                 colorTag = android.graphics.Color.YELLOW,
                 displayOption = DisplayOption.MONTH_DAY,
             )
-        detailContentInner(
+        DetailContentInner(
             item = item,
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
         )
@@ -308,7 +308,7 @@ fun detailContentInnerPreview() {
 
 @Preview(showBackground = true, name = "DetailContentInner - без деталей и цвета")
 @Composable
-fun detailContentInnerSimplePreview() {
+fun DetailContentInnerSimplePreview() {
     val context = LocalContext.current
     val resourceProvider = FormatterModule.createResourceProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
@@ -331,7 +331,7 @@ fun detailContentInnerSimplePreview() {
             resourceProvider,
         )
 
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         val timestamp =
             Instant
                 .now()
@@ -346,7 +346,7 @@ fun detailContentInnerSimplePreview() {
                 colorTag = null,
                 displayOption = DisplayOption.DEFAULT,
             )
-        detailContentInner(
+        DetailContentInner(
             item = item,
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
         )

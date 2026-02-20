@@ -6,14 +6,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.R
-import com.dayscounter.ui.screen.moreScreen
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.screen.MoreScreen
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Компонентные тесты для [moreScreen].
+ * Компонентные тесты для [MoreScreen].
  *
  * Проверяет наличие всех кнопок на экране, корректность отображения
  * версии приложения и функциональность кнопок-заглушек.
@@ -32,8 +32,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsThemeAndIconButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -50,8 +50,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsAppDataButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -68,8 +68,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsSendFeedbackButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -86,8 +86,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsRateAppButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -104,8 +104,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsShareAppButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -122,8 +122,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsGitHubPageButton() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 
@@ -140,8 +140,8 @@ class MoreScreenTest {
     fun moreScreen_whenDisplayed_thenShowsAppVersion() {
         // When
         composeTestRule.setContent {
-            jetpackDaysTheme {
-                moreScreen()
+            JetpackDaysTheme {
+                MoreScreen()
             }
         }
 

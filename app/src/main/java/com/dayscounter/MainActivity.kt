@@ -12,8 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.data.preferences.createAppSettingsDataStore
-import com.dayscounter.ui.screen.rootScreen
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.screen.RootScreen
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.viewmodel.MainActivityViewModel
 
 /**
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
             val useDynamicColors by viewModel.useDynamicColors.collectAsState()
 
             // Применяем тему приложения
-            appContent(
+            AppContent(
                 theme = theme,
                 useDynamicColors = useDynamicColors,
             )
@@ -54,11 +54,11 @@ class MainActivity : ComponentActivity() {
  * @param theme Тема приложения из DataStore
  */
 @Composable
-private fun appContent(
+private fun AppContent(
     theme: com.dayscounter.domain.model.AppTheme,
     useDynamicColors: Boolean,
 ) {
-    jetpackDaysTheme(
+    JetpackDaysTheme(
         appTheme = theme,
         dynamicColor = useDynamicColors,
     ) {
@@ -67,7 +67,7 @@ private fun appContent(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
-            rootScreen()
+            RootScreen()
         }
     }
 }

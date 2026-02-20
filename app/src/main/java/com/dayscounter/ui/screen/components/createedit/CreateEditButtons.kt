@@ -16,7 +16,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 import java.time.Instant
 import java.time.ZoneId
 
@@ -25,7 +25,7 @@ import java.time.ZoneId
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun datePickerDialogSection(
+internal fun DatePickerDialogSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
     onDateSelected: () -> Unit = {},
@@ -103,7 +103,7 @@ internal fun SaveButton(
 @Preview(showBackground = true, name = "Кнопка сохранения")
 @Composable
 fun SaveButtonPreview() {
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         SaveButton(enabled = true, onClick = {})
     }
 }
@@ -111,7 +111,7 @@ fun SaveButtonPreview() {
 @Preview(showBackground = true, name = "Кнопка сохранения (disabled)")
 @Composable
 fun SaveButtonDisabledPreview() {
-    jetpackDaysTheme {
+    JetpackDaysTheme {
         SaveButton(enabled = false, onClick = {})
     }
 }

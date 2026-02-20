@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
-import com.dayscounter.ui.theme.jetpackDaysTheme
+import com.dayscounter.ui.theme.JetpackDaysTheme
 
 /**
  * Константы для компонента списка элементов.
@@ -46,7 +46,7 @@ private object ListItemViewConstants {
  * Цветовая метка элемента.
  */
 @Composable
-private fun itemColorTag(colorTag: Int) {
+private fun ItemColorTag(colorTag: Int) {
     Box(
         modifier =
             Modifier
@@ -61,7 +61,7 @@ private fun itemColorTag(colorTag: Int) {
  * Левая колонка с названием и описанием элемента.
  */
 @Composable
-private fun itemTitleAndDetails(
+private fun ItemTitleAndDetails(
     modifier: Modifier = Modifier,
     item: Item,
 ) {
@@ -96,7 +96,7 @@ private fun itemTitleAndDetails(
  * Правая колонка с количеством дней.
  */
 @Composable
-private fun itemDaysBadge(
+private fun ItemDaysBadge(
     modifier: Modifier = Modifier,
     formattedDaysText: String,
 ) {
@@ -105,7 +105,7 @@ private fun itemDaysBadge(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.Center,
     ) {
-        daysCountText(
+        DaysCountText(
             formattedText = formattedDaysText,
             textStyle = DaysCountTextStyle.NORMAL,
             textAlign = TextAlign.End,
@@ -117,7 +117,7 @@ private fun itemDaysBadge(
  * Компонент для отображения элемента списка событий.
  *
  * Показывает заголовок события, количество дней и цветовую метку.
- * Использует [daysCountText] для форматированного отображения количества дней.
+ * Использует [DaysCountText] для форматированного отображения количества дней.
  *
  * На главном экране:
  * - Текст с количеством дней справа и занимает не более 30% от ширины экрана
@@ -130,7 +130,7 @@ private fun itemDaysBadge(
  * @param modifier Modifier для компонента
  */
 @Composable
-fun listItemView(
+fun ListItemView(
     params: ListItemParams,
     modifier: Modifier = Modifier,
 ) {
@@ -166,13 +166,13 @@ fun listItemView(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (params.item.colorTag != null) {
-            itemColorTag(params.item.colorTag)
+            ItemColorTag(params.item.colorTag)
         }
-        itemTitleAndDetails(
+        ItemTitleAndDetails(
             modifier = Modifier.weight(ListItemViewConstants.TITLE_WEIGHT),
             params.item,
         )
-        itemDaysBadge(
+        ItemDaysBadge(
             modifier = Modifier.weight(ListItemViewConstants.DAYS_WEIGHT),
             params.formattedDaysText,
         )
@@ -183,9 +183,9 @@ fun listItemView(
 
 @Preview(showBackground = true)
 @Composable
-fun listItemViewPreview() {
-    jetpackDaysTheme {
-        listItemView(
+fun ListItemViewPreview() {
+    JetpackDaysTheme {
+        ListItemView(
             params =
                 ListItemParams(
                     item =
@@ -205,9 +205,9 @@ fun listItemViewPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun listItemViewNoColorPreview() {
-    jetpackDaysTheme {
-        listItemView(
+fun ListItemViewNoColorPreview() {
+    JetpackDaysTheme {
+        ListItemView(
             params =
                 ListItemParams(
                     item =
@@ -227,9 +227,9 @@ fun listItemViewNoColorPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun listItemViewTodayPreview() {
-    jetpackDaysTheme {
-        listItemView(
+fun ListItemViewTodayPreview() {
+    JetpackDaysTheme {
+        ListItemView(
             params =
                 ListItemParams(
                     item =
@@ -249,9 +249,9 @@ fun listItemViewTodayPreview() {
 
 @Preview(showBackground = true, name = "Длинный заголовок")
 @Composable
-fun listItemViewLongTitlePreview() {
-    jetpackDaysTheme {
-        listItemView(
+fun ListItemViewLongTitlePreview() {
+    JetpackDaysTheme {
+        ListItemView(
             params =
                 ListItemParams(
                     item =
