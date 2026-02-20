@@ -215,17 +215,25 @@ class ScreenshotsTest {
         try {
             // Проверяем, что кнопка доступна перед нажатием
             // Используем onFirst, чтобы выбрать конкретную кнопку, если их несколько
-            // Сначала скроллим к кнопке для маленьких экранов
-            composeTestRule.onAllNodesWithText(activity.getString(R.string.save))
+            // Пытаемся скроллим к кнопке для маленьких экранов (если она в скроллируемом контейнере)
+            val saveButton = composeTestRule.onAllNodesWithText(activity.getString(R.string.save))
                 .onFirst()
-                .performScrollTo()
-                .assertExists()
-                .assertIsEnabled()
+
+            try {
+                saveButton.performScrollTo()
+                Log.d("ScreenshotsTest", "Выполнен скролл к кнопке сохранения")
+            } catch (e: AssertionError) {
+                // Кнопка не в скроллируемом контейнере - это нормально, продолжаем
+                Log.d(
+                    "ScreenshotsTest",
+                    "Кнопка не требует скролла (не в скроллируемом контейнере)"
+                )
+            }
+
+            saveButton.assertExists().assertIsEnabled()
 
             Log.d("ScreenshotsTest", "Кнопка сохранения доступна, нажимаем")
-            composeTestRule.onAllNodesWithText(activity.getString(R.string.save))
-                .onFirst()
-                .performClick()
+            saveButton.performClick()
         } catch (e: AssertionError) {
             Log.e("ScreenshotsTest", "Кнопка сохранения недоступна: ${e.message}")
             Log.e("ScreenshotsTest", "Это означает, что дата не выбрана. Тест будет остановлен.")
