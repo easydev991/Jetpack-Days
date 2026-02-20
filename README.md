@@ -36,7 +36,7 @@ make help
 
 | Список записей | Создание новой записи | Выбор опции отображения | Перед сохранением | Сортировка на главном экране |
 | --- | --- | --- | --- | --- |
-| <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/1-demoList_1768663402836.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/2-chooseDate_1768663408046.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/3-chooseDisplayOption_1768663408770.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/4-beforeSave_1768663410399.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/5-sortByDate_1768663412968.png" alt=""> |
+| <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/1-demoList_1771606647609.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/2-chooseDate_1771606652813.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/3-chooseDisplayOption_1771606653503.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/4-beforeSave_1771606655086.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/5-sortByDate_1771606657572.png" alt=""> |
 
 ### Релизный процесс
 

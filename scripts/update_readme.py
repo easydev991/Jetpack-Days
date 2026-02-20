@@ -4,14 +4,14 @@
 """
 Скрипт для обновления таблицы скриншотов в README.md
 Находит актуальные файлы скриншотов по шаблону {номер}-{описание}_*.png
-и заменяет HTML-комментарии на реальные теги <img>
+и обновляет пути в существующих <img> тегах
 """
 
 import os
 import glob
-from pathlib import Path
+import re
 
-# Список скриншотов для замены (формат: "номер-описание")
+# Список скриншотов для обновления (формат: "номер-описание")
 SCREENSHOTS = [
     "1-demoList",
     "2-chooseDate",
@@ -63,24 +63,25 @@ def update_readme():
             print(f"⚠️  Предупреждение: файл скриншота не найден для шаблона {screenshot}_*.png")
             continue
 
-        # Создаем тег с атрибутом alt для markdownlint
-        placeholder = f"<!-- SCREENSHOT: {LOCALE}, {screenshot} -->"
-        img_tag = f'<img src="./{screenshot_path}" alt="">'
+        # Паттерн для поиска существующего <img> тега с этим скриншотом
+        # Ищет: <img src="./fastlane/.../1-demoList_любые_цифры.png" ...>
+        pattern = rf'<img\s+src="\./fastlane/metadata/android/[^/]+/images/phoneScreenshots/{re.escape(screenshot)}_\d+\.png"[^>]*>'
+        
+        new_img_tag = f'<img src="./{screenshot_path}" alt="">'
 
-        # Проверяем, есть ли placeholder в файле
-        if placeholder in content:
-            content = content.replace(placeholder, img_tag)
+        if re.search(pattern, content):
+            content = re.sub(pattern, new_img_tag, content)
             updated = True
             print(f"✅ Обновлен: {screenshot}")
         else:
-            print(f"⚠️  Предупреждение: placeholder {placeholder} не найден в {README_FILE}")
+            print(f"⚠️  Предупреждение: <img> тег для {screenshot} не найден в {README_FILE}")
 
     if updated:
         # Записываем обновленное содержимое
         with open(README_FILE, 'w', encoding='utf-8') as f:
             f.write(content)
         print("\n🎉 Таблица скриншотов обновлена успешно!")
-        print("\n💡 Проверьте README.md перед коммитом изменений")
+        print("💡 Проверьте README.md перед коммитом изменений")
         return True
     else:
         print("\n⚠️  Никаких обновлений не было сделано")
