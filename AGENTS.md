@@ -185,7 +185,7 @@ fun `calculate when same day then returns Today`() {
 app/src/main/java/com/dayscounter/
 ├── data/
 │   ├── database/         # Room entities, DAO, DB, converters, mappers
-│   ├── formatter/        # DaysFormatter, ResourceProvider
+│   ├── provider/         # DaysFormatter, ResourceProvider
 │   ├── preferences/      # AppSettingsDataStore
 │   └── repository/       # ItemRepositoryImpl
 ├── domain/
@@ -194,11 +194,11 @@ app/src/main/java/com/dayscounter/
 │   ├── repository/       # ItemRepository interface
 │   └── usecase/          # Use cases, IconManager, BackupException
 ├── ui/
-│   ├── component/        # Reusable components
-│   ├── screen/           # Compose screens
+│   ├── ds/               # Design System components (reusable)
+│   ├── screens/          # Compose screens (events/, detail/, createedit/, more/, etc.)
 │   ├── state/            # UI state classes
-│   └── theme/            # App theme
-├── viewmodel/            # ViewModels (separate folder)
+│   ├── theme/            # App theme
+│   └── viewmodel/        # ViewModels
 ├── navigation/           # Navigation routes
 ├── analytics/            # FirebaseAnalyticsHelper
 ├── crash/                # CrashlyticsHelper

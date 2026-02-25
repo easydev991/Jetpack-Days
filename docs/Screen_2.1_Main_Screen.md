@@ -98,7 +98,7 @@ Main Screen является основным экраном приложени�
 - **1.1** Entity — `app/src/main/java/com/dayscounter/data/database/entity/ItemEntity.kt`
 - **1.2** DAO — `app/src/main/java/com/dayscounter/data/database/dao/ItemDao.kt`
 - **1.3** Database — `app/src/main/java/com/dayscounter/data/database/DaysDatabase.kt`
-- **1.4** Mapper — `app/src/main/java/com/dayscounter/data/database/mapper/ItemMapper.kt`
+- **1.4** Mapper — `app/src/main/java/com/dayscounter/data/database/ItemMapper.kt`
 - **1.5** Repository — `app/src/main/java/com/dayscounter/data/repository/ItemRepositoryImpl.kt`
 
 ### Шаг 2: Подготовка слоя домена (Domain Layer)
@@ -115,7 +115,7 @@ Main Screen является основным экраном приложени�
 ✅ **ВЫПОЛНЕНО**
 
 - **3.1** UI State — `MainScreenState` (Loading, Success, Error) в `MainScreenViewModel.kt`
-- **3.2** ViewModel — `MainScreenViewModel.kt` с factory методом, DataStore для сортировки, поиск, фильтрация, удаление
+- **3.2** ViewModel — `ui/viewmodel/MainScreenViewModel.kt` с factory методом, DataStore для сортировки, поиск, фильтрация, удаление
 
 ### Шаг 4: Реализация UI компонентов
 
@@ -124,10 +124,10 @@ Main Screen является основным экраном приложени�
 - **4.1** ListItemView — карточка записи, 7 preview-вариантов
 - **4.2** EmptyState — 4 варианта (empty, search, loading, error)
 - **4.3** Toolbar — сортировка (возрастание/убывание), заголовок "События"
-- **4.4** MainScreen — LazyColumn, SearchField (OutlinedTextField), SwipeToDismissBox, состояния
+- **4.4** MainScreen — `ui/screens/events/MainScreen.kt` — LazyColumn, SearchField (OutlinedTextField), SwipeToDismissBox, состояния
 - **4.5** Context Menu — Просмотр/Редактирование/Удаление, длинное нажатие, выделение
 - **4.6** Delete Dialog — AlertDialog с подтверждением
-- **4.7** RootScreen Integration — `eventsScreenContent()`, NavHost
+- **4.7** RootScreen Integration — `eventsScreenContent()` в `ui/screens/root/RootScreenComponents.kt`, NavHost
 
 ### Шаг 5: Интеграция с другими экранами
 
@@ -150,13 +150,13 @@ Main Screen является основным экраном приложени�
 ✅ **ВЫПОЛНЕНО**
 
 - Entity, Domain model, DAO (in-memory), Repository — протестированы
-- ViewModel — `MainScreenViewModelTest.kt` (10 тестов с MockK): загрузка, поиск (название/детали, регистронезависимый), сортировка, удаление, пустое состояние
+- ViewModel — `ui/viewmodel/MainScreenViewModelTest.kt` (10 тестов с MockK): загрузка, поиск (название/детали, регистронезависимый), сортировка, удаление, пустое состояние
 
 ### Компонентные тесты (Compose Testing)
 
 ✅ **ВЫПОЛНЕНО**
 
-- `daysCountText` — `DaysCountTextTest.kt` (7 тестов): отображение текста, "Сегодня", форматы, английский язык
+- `daysCountText` — `ui/ds/DaysCountTextTest.kt` (7 тестов): отображение текста, "Сегодня", форматы, английский язык
 
 ### Интеграционные тесты
 
@@ -239,11 +239,11 @@ Main Screen является основным экраном приложени�
 ✅ **Приоритет 3: Полная интеграция навигации**
 
 - Интеграция с DetailScreen, CreateEditScreen (создание), CreateEditScreen (редактирование)
-- Маршруты в Screen.kt, навигация в RootScreenComponents.kt, factory методы
+- Маршруты в `navigation/Screen.kt`, навигация в `ui/screens/root/RootScreenComponents.kt`, factory методы
 
 ✅ **Приоритет 4: Unit-тесты для ViewModel**
 
-- `MainScreenViewModelTest.kt` с 10 тестами, FakeItemRepository
+- `MainScreenViewModelTest.kt` с 10 тестами, FakeItemRepository (в `test/java/com/dayscounter/ui/viewmodel/`)
 
 ✅ **Приоритет 4.5: Реализация контекстного меню**
 
@@ -252,7 +252,7 @@ Main Screen является основным экраном приложени�
 
 ✅ **Приоритет 5: Компонентные тесты для UI**
 
-- `DaysCountTextTest.kt` с 7 тестами, Compose Testing API
+- `DaysCountTextTest.kt` с 7 тестами, Compose Testing API (в `androidTest/java/com/dayscounter/ui/ds/`)
 
 ✅ **Приоритет 6: Проверка качества кода**
 

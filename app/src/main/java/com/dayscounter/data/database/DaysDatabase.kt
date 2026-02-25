@@ -7,7 +7,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.dayscounter.data.database.converters.DisplayOptionConverter
 import com.dayscounter.data.database.dao.ItemDao
 import com.dayscounter.data.database.entity.ItemEntity
 

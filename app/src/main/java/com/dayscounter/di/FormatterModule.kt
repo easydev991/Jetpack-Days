@@ -1,11 +1,11 @@
 package com.dayscounter.di
 
 import android.content.Context
-import com.dayscounter.data.formatter.DaysFormatter
-import com.dayscounter.data.formatter.DaysFormatterImpl
-import com.dayscounter.data.formatter.ResourceProvider
-import com.dayscounter.data.formatter.ResourceProviderImpl
-import com.dayscounter.data.formatter.StubResourceProvider
+import com.dayscounter.data.provider.DaysFormatter
+import com.dayscounter.data.provider.DaysFormatterImpl
+import com.dayscounter.data.provider.ResourceProvider
+import com.dayscounter.data.provider.ResourceProviderImpl
+import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.domain.usecase.GetDaysAnalysisTextUseCase

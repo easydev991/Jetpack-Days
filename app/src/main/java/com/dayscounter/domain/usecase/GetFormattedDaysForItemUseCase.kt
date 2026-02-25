@@ -1,7 +1,7 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.formatter.ResourceIds
-import com.dayscounter.data.formatter.ResourceProvider
+import com.dayscounter.data.provider.ResourceIds
+import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item

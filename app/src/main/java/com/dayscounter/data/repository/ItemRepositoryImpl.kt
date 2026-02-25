@@ -4,8 +4,8 @@ package com.dayscounter.data.repository
 
 import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.data.database.dao.ItemDao
-import com.dayscounter.data.database.mapper.toDomain
-import com.dayscounter.data.database.mapper.toEntity
+import com.dayscounter.data.database.toDomain
+import com.dayscounter.data.database.toEntity
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository

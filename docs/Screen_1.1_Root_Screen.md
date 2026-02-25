@@ -45,10 +45,10 @@ Root Screen является основным экраном приложени�
 ### Реализованные компоненты
 
 - `navigation/Screen.kt` — sealed class с маршрутами
-- `viewmodel/RootScreenViewModel.kt` — ViewModel для управления вкладками
+- `ui/viewmodel/RootScreenViewModel.kt` — ViewModel для управления вкладками
 - `ui/state/RootScreenState.kt` — UI State
-- `ui/screen/RootScreen.kt` — RootScreen composable
-- `ui/screen/components/RootScreenComponents.kt` — компоненты навигации
+- `ui/screens/RootScreen.kt` — RootScreen composable
+- `ui/screens/root/RootScreenComponents.kt` — компоненты навигации
 
 ### Тесты
 
@@ -103,9 +103,9 @@ Root Screen является основным экраном приложени�
 ## Файловая структура
 
 ```text
-ui/screen/
+ui/screens/
 ├── RootScreen.kt                     # Главный экран с TabBar
-└── components/
+└── root/
     └── RootScreenComponents.kt        # Компоненты навигации
         ├── navigationBarContent()     # Навигационная панель
         ├── navHostContent()           # Маршрутизация (NavHost)
@@ -121,16 +121,16 @@ ui/screen/
 navigation/
 └── Screen.kt                         # Sealed class для навигации (включая Events, More, ThemeIcon, AppData, ItemDetail, CreateItem, EditItem)
 
-viewmodel/
+ui/viewmodel/
 ├── RootScreenViewModel.kt             # ViewModel для управления вкладками
 └── ui/state/
     └── RootScreenState.kt            # UI State
 
 test/
 └── ...
-    ├── RootScreenViewModelTest.kt     # Тесты ViewModel (4 теста)
-    ├── RootScreenViewModelIntegrationTest.kt  # Интеграционные тесты
-    ├── RootScreenStateTest.kt         # Тесты UI State (3 теста)
+    ├── ui/viewmodel/RootScreenViewModelTest.kt     # Тесты ViewModel (4 теста)
+    ├── ui/viewmodel/RootScreenViewModelIntegrationTest.kt  # Интеграционные тесты
+    ├── ui/state/RootScreenStateTest.kt         # Тесты UI State (3 теста)
     └── navigation/
         └── ScreenTest.kt             # Тесты sealed class Screen (2 теста)
 ```

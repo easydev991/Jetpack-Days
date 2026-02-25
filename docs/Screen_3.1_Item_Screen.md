@@ -10,13 +10,13 @@ Item Screen предназначен для просмотра полной ин
 
 ## Компоненты
 
-- DetailScreen.kt — главный экран детализации
+- DetailScreen.kt — главный экран детализации (`ui/screens/detail/DetailScreen.kt`)
 - DetailScreenParams.kt — параметры экрана для передачи зависимостей
 - DetailAppBar.kt — TopAppBar с кнопками "Назад", "Редактировать", "Удалить"
 - DetailContent.kt — секции экрана: цветовая метка, название, дата, количество дней, описание, опция отображения
 - DetailContentPreviews.kt — preview компонентов секций
 - DetailStates.kt — состояния экрана: загрузка, ошибка
-- DetailScreenViewModel.kt — ViewModel с factory методом для DI
+- DetailScreenViewModel.kt — ViewModel с factory методом для DI (`ui/viewmodel/DetailScreenViewModel.kt`)
 
 ## Статус выполнения
 
@@ -111,8 +111,8 @@ DetailScreen.kt с Scaffold и DetailScreenParams, DetailContent (все сек�
 
 **Unit-тесты:** DetailScreenViewModel, DetailScreenState — **РЕАЛИЗОВАНО**
 
-- `DetailScreenViewModelTest.kt` (2 теста с MockK)
-- `DetailScreenStateTest.kt` (10 тестов)
+- `DetailScreenViewModelTest.kt` (2 теста с MockK) в `test/java/com/dayscounter/ui/viewmodel/`
+- `DetailScreenStateTest.kt` (10 тестов) в `test/java/com/dayscounter/ui/state/`
 
 ### Интеграционные тесты
 
@@ -159,16 +159,16 @@ DetailScreen.kt с Scaffold и DetailScreenParams, DetailContent (все сек�
 
 **Текущие файлы:**
 
-- `app/src/main/java/com/dayscounter/ui/screen/DetailScreen.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/DetailScreenParams.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailAppBar.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailContent.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailContentPreviews.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/detail/DetailStates.kt`
-- `app/src/main/java/com/dayscounter/viewmodel/DetailScreenViewModel.kt`
-- `app/src/test/java/com/dayscounter/viewmodel/DetailScreenViewModelTest.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreen.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreenParams.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailAppBar.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailContent.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailContentPreviews.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailStates.kt`
+- `app/src/main/java/com/dayscounter/ui/viewmodel/DetailScreenViewModel.kt`
+- `app/src/test/java/com/dayscounter/ui/viewmodel/DetailScreenViewModelTest.kt`
 - `app/src/test/java/com/dayscounter/ui/state/DetailScreenStateTest.kt`
-- `app/src/main/java/com/dayscounter/ui/screen/components/RootScreenComponents.kt` (строки 98-124)
+- `app/src/main/java/com/dayscounter/ui/screens/root/RootScreenComponents.kt` (строки 98-124)
 
 ---
 

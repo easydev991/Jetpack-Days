@@ -3,7 +3,7 @@ package com.dayscounter.data.database.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.dayscounter.data.database.converters.DisplayOptionConverter
+import com.dayscounter.data.database.DisplayOptionConverter
 import com.dayscounter.domain.model.DisplayOption
 
 /**

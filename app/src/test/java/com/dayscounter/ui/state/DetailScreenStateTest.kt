@@ -2,7 +2,7 @@ package com.dayscounter.ui.state
 
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
-import com.dayscounter.viewmodel.DetailScreenState
+import com.dayscounter.ui.viewmodel.DetailScreenState
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test

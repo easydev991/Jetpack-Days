@@ -1,0 +1,148 @@
+package com.dayscounter.ui.viewmodel
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.domain.exception.ItemException.DeleteFailed
+import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+/**
+ * ViewModel для управления состоянием экрана деталей события.
+ *
+ * @property repository Репозиторий для работы с данными
+ * @property logger Логгер для записи логов
+ * @property savedStateHandle SavedStateHandle для получения параметров навигации
+ */
+class DetailScreenViewModel(
+    private val repository: ItemRepository,
+    private val logger: Logger = AndroidLogger(),
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    companion object {
+        /** Таймаут подписки на StateFlow в миллисекундах */
+        private const val STATE_SUBSCRIPTION_TIMEOUT_MS = 5000L
+
+        fun factory(repository: ItemRepository): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    DetailScreenViewModel(
+                        repository = repository,
+                        savedStateHandle =
+                            checkNotNull(
+                                createSavedStateHandle(),
+                            ) {
+                                "SavedStateHandle is required"
+                            },
+                    )
+                }
+            }
+    }
+
+    /**
+     * Идентификатор события из параметров навигации.
+     */
+    private val itemId: Long =
+        checkNotNull(savedStateHandle["itemId"]) {
+            "ItemId parameter is required"
+        }
+
+    /**
+     * Состояние экрана.
+     */
+    val uiState: StateFlow<DetailScreenState> =
+        repository
+            .getItemFlow(itemId)
+            .filterNotNull()
+            .map { item ->
+                DetailScreenState.Success(item)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_TIMEOUT_MS),
+                initialValue = DetailScreenState.Loading,
+            )
+
+    /**
+     * Показывать диалог подтверждения удаления.
+     */
+    private val _showDeleteDialog = MutableStateFlow(false)
+    val showDeleteDialog: StateFlow<Boolean> = _showDeleteDialog.asStateFlow()
+
+    /**
+     * Удаляет событие.
+     */
+    fun deleteItem() {
+        viewModelScope.launch {
+            try {
+                val item = repository.getItemById(itemId)
+                if (item != null) {
+                    repository.deleteItem(item)
+                    logger.d(
+                        "DetailScreenViewModel",
+                        "Событие удалено: ${item.title} (id=${item.id})"
+                    )
+                }
+            } catch (e: DeleteFailed) {
+                val message = "Ошибка удаления события: ${e.message}"
+                logger.e("DetailScreenViewModel", message, e)
+            }
+        }
+    }
+
+    /**
+     * Запрашивает подтверждение удаления записи.
+     */
+    fun requestDelete() {
+        _showDeleteDialog.value = true
+        logger.d("DetailScreenViewModel", "Запрос на удаление")
+    }
+
+    /**
+     * Подтверждает удаление записи.
+     */
+    fun confirmDelete() {
+        deleteItem()
+        _showDeleteDialog.value = false
+        logger.d("DetailScreenViewModel", "Удаление подтверждено")
+    }
+
+    /**
+     * Отменяет удаление записи.
+     */
+    fun cancelDelete() {
+        _showDeleteDialog.value = false
+        logger.d("DetailScreenViewModel", "Удаление отменено")
+    }
+}
+
+/**
+ * Состояние экрана деталей.
+ */
+sealed class DetailScreenState {
+    /** Загрузка данных */
+    data object Loading : DetailScreenState()
+
+    /** Успешная загрузка */
+    data class Success(
+        val item: Item,
+    ) : DetailScreenState()
+
+    /** Ошибка загрузки */
+    data class Error(
+        val message: String,
+    ) : DetailScreenState()
+}

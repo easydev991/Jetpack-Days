@@ -1,6 +1,6 @@
 package com.dayscounter.domain.model
 
-import com.dayscounter.data.formatter.DaysFormatterImpl
+import com.dayscounter.data.provider.DaysFormatterImpl
 import com.dayscounter.di.FormatterModule
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

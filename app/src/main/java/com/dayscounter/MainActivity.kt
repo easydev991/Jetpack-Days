@@ -12,9 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.data.preferences.createAppSettingsDataStore
-import com.dayscounter.ui.screen.RootScreen
+import com.dayscounter.ui.screens.root.RootScreen
 import com.dayscounter.ui.theme.JetpackDaysTheme
-import com.dayscounter.viewmodel.MainActivityViewModel
+import com.dayscounter.ui.viewmodel.MainActivityViewModel
 
 /**
  * Главная Activity приложения.

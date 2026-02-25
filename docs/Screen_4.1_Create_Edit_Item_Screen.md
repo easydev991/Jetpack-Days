@@ -98,7 +98,7 @@ Create/Edit Item Screen предназначен для создания нов�
 
 #### 4.1. Unit-тесты для ViewModel ✅ ВЫПОЛНЕНО
 
-Файл: `app/src/test/java/com/dayscounter/viewmodel/CreateEditScreenViewModelTest.kt`
+Файл: `app/src/test/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModelTest.kt`
 
 Протестированы: инициализация, валидация, создание/обновление записей, загрузка данных, отслеживание изменений (включая проверку timestamp), обработка ошибок, сброс состояния изменений
 
@@ -108,7 +108,7 @@ Create/Edit Item Screen предназначен для создания нов�
 
 #### 4.2. Unit-тесты для UI State ✅ ВЫПОЛНЕНО
 
-Файл: `app/src/test/java/com/dayscounter/ui/screen/CreateEditUiStateTest.kt`
+Файл: `app/src/test/java/com/dayscounter/ui/screens/createedit/CreateEditUiStateTest.kt`
 
 Протестированы: создание UI State с дефолтными значениями, изменение всех полей, переключение DatePicker, обработка null значений
 
@@ -120,9 +120,9 @@ Create/Edit Item Screen предназначен для создания нов�
 
 Файлы:
 
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/LocalDateSaverTest.kt` - 5 тестов
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/ColorSaverTest.kt` - 5 тестов
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/DisplayOptionSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/LocalDateSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/ColorSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/DisplayOptionSaverTest.kt` - 5 тестов
 
 Протестированы: сохранение и восстановление LocalDate (nullable и non-null), Color (nullable), DisplayOption, обработка некорректных значений, sentinel значения для null
 
@@ -136,7 +136,7 @@ Create/Edit Item Screen предназначен для создания нов�
 
 **Важно:** Интеграционные тесты ViewModels (CreateEditScreenViewModelIntegrationTest) отложены из-за фундаментальной архитектурной проблемы (подробности в `.cursor/rules/testing.mdc`).
 
-Файл: `app/src/androidTest/java/com/dayscounter/viewmodel/CreateEditScreenViewModelIntegrationTest.kt`
+Файл: `app/src/androidTest/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModelIntegrationTest.kt`
 
 Статус: **ОТЛОЖЕНЫ** (отключены через @Ignore)
 
@@ -317,7 +317,7 @@ UI-тесты, автофокус на поле "Название", отобра
 
 **Детальный анализ кода:**
 
-1. **dateSection** (`CreateEditFormContent.kt`, строки 219-249):
+1. **dateSection** (`ui/screens/createedit/CreateEditFormContent.kt`, строки 219-249):
 
 ```kotlin
 internal fun dateSection(
@@ -340,7 +340,7 @@ internal fun dateSection(
 }
 ```
 
-2. **datePickerDialogSection** (`CreateEditButtons.kt`, строки 123-169):
+2. **datePickerDialogSection** (`ui/screens/createedit/CreateEditButtons.kt`, строки 123-169):
 
 ```kotlin
 internal fun datePickerDialogSection(
@@ -450,7 +450,7 @@ java.lang.IllegalStateException: MutableState(value=Color(...)) cannot be saved 
 
 ### Корневая причина
 
-В файле `app/src/main/java/com/dayscounter/ui/screen/components/createedit/CreateEditFormContent.kt`:
+В файле `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditFormContent.kt`:
 
 ```kotlin
 // Строки 245-258
@@ -475,7 +475,7 @@ internal fun rememberCreateEditUiStates(): ScreenCreateEditUiState =
 
 #### Этап 1: Создание Custom Savers
 
-Создан файл: `app/src/main/java/com/dayscounter/ui/screen/components/createedit/StateSavers.kt`
+Создан файл: `app/src/main/java/com/dayscounter/ui/screens/createedit/StateSavers.kt`
 
 Содержит 4 custom saver:
 
@@ -579,9 +579,9 @@ val showDatePicker = rememberSaveable { mutableStateOf(false) }
 
 Созданы unit-тесты для всех savers:
 
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/LocalDateSaverTest.kt` - 5 тестов
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/ColorSaverTest.kt` - 5 тестов
-- `app/src/test/java/com/dayscounter/ui/screen/components/createedit/DisplayOptionSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/LocalDateSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/ColorSaverTest.kt` - 5 тестов
+- `app/src/test/java/com/dayscounter/ui/screens/createedit/DisplayOptionSaverTest.kt` - 5 тестов
 
 Обновлены тесты `CreateEditUiStateTest.kt` - удалены проверки `showDatePicker`.
 
@@ -629,18 +629,18 @@ val showDatePicker = rememberSaveable { mutableStateOf(false) }
 
 **Изменённые файлы:**
 
-- ✅ `app/src/main/java/com/dayscounter/ui/screen/components/createedit/StateSavers.kt` (новый файл)
-- ✅ `app/src/main/java/com/dayscounter/ui/screen/components/createedit/CreateEditFormContent.kt`
-- ✅ `app/src/main/java/com/dayscounter/ui/screen/CreateEditUiState.kt`
-- ✅ `app/src/main/java/com/dayscounter/ui/screen/CreateEditScreen.kt`
-- ✅ `app/src/main/java/com/dayscounter/ui/screen/components/createedit/CreateEditButtons.kt`
+- ✅ `app/src/main/java/com/dayscounter/ui/screens/createedit/StateSavers.kt` (новый файл)
+- ✅ `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditFormContent.kt`
+- ✅ `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditUiState.kt`
+- ✅ `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditScreen.kt`
+- ✅ `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditButtons.kt`
 
 **Новые тестовые файлы:**
 
-- ✅ `app/src/test/java/com/dayscounter/ui/screen/components/createedit/LocalDateSaverTest.kt`
-- ✅ `app/src/test/java/com/dayscounter/ui/screen/components/createedit/ColorSaverTest.kt`
-- ✅ `app/src/test/java/com/dayscounter/ui/screen/components/createedit/DisplayOptionSaverTest.kt`
-- ✅ `app/src/test/java/com/dayscounter/ui/screen/CreateEditUiStateTest.kt` (обновлён)
+- ✅ `app/src/test/java/com/dayscounter/ui/screens/createedit/LocalDateSaverTest.kt`
+- ✅ `app/src/test/java/com/dayscounter/ui/screens/createedit/ColorSaverTest.kt`
+- ✅ `app/src/test/java/com/dayscounter/ui/screens/createedit/DisplayOptionSaverTest.kt`
+- ✅ `app/src/test/java/com/dayscounter/ui/screens/createedit/CreateEditUiStateTest.kt` (обновлён)
 
 ---
 

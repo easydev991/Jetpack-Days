@@ -1,7 +1,7 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.formatter.DaysFormatter
-import com.dayscounter.data.formatter.ResourceProvider
+import com.dayscounter.data.provider.DaysFormatter
+import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 
@@ -32,7 +32,7 @@ class FormatDaysTextUseCase(
         when (difference) {
             is DaysDifference.Today -> {
                 // Возвращаем локализованную строку "Сегодня"
-                resourceProvider.getString(com.dayscounter.data.formatter.ResourceIds.TODAY)
+                resourceProvider.getString(com.dayscounter.data.provider.ResourceIds.TODAY)
             }
 
             is DaysDifference.Calculated -> {

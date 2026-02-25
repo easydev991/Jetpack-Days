@@ -42,7 +42,7 @@
 | Domain Layer (Models) | ~25 | ✅ Завершено |
 | Data Layer (Entities, Mappers, Converters) | ~40 | ✅ Завершено |
 | Data Layer (Formatters, Preferences) | ~45 | ✅ Завершено |
-| ViewModel Layer (unit с MockK) | ~80 | ✅ Завершено |
+| ViewModel Layer (unit с MockK) | ~80 | ✅ Завершено (в `test/java/com/dayscounter/ui/viewmodel/`) |
 | UI Layer (Navigation, UI State, Components) | ~44 | ✅ Завершено |
 | **Итого** | **264** | **✅ Завершено** |
 

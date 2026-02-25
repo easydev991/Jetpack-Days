@@ -50,7 +50,7 @@ More Screen является экраном с дополнительными ф
 
 **Выполнено:**
 
-- ✅ Файл `MoreScreen.kt` создан в `app/src/main/java/com/dayscounter/ui/screen/MoreScreen.kt`
+- ✅ Файл `MoreScreen.kt` создан в `app/src/main/java/com/dayscounter/ui/screens/more/MoreScreen.kt`
 - ✅ Компонент `moreScreen()` полностью реализован
 
 ---
@@ -214,14 +214,14 @@ More Screen является экраном с дополнительными ф
 
 ### Выполнено
 
-- ✅ Файл `MoreScreen.kt` создан и функционален
+- ✅ Файл `MoreScreen.kt` создан и функционален (`ui/screens/more/MoreScreen.kt`)
 - ✅ Полноценная реализация UI с TopAppBar, 6 кнопками и отображением версии
 - ✅ Все функции реализованы: rateApp, shareApp, openGitHub, sendFeedback
 - ✅ Реальная навигация к экрану ThemeIcon Screen (Screen 5.2) реализована
 - ✅ Кнопка-заглушка для "Данные приложения" реализована
 - ✅ Вертикальная прокрутка через verticalScroll
 - ✅ AppConstants.kt создан с константами APP_RATE_URL, APP_SHARE_URL, GITHUB_REPOSITORY_URL
-- ✅ UI тесты для отображения элементов созданы в MoreScreenTest.kt
+- ✅ UI тесты для отображения элементов созданы в `androidTest/java/com/dayscounter/ui/screens/more/MoreScreenTest.kt`
 
 ### Не выполнено (низкий приоритет)
 

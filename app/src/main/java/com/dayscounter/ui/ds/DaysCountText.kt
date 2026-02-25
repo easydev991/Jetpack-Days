@@ -1,0 +1,175 @@
+package com.dayscounter.ui.ds
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.dayscounter.ui.theme.JetpackDaysTheme
+
+/**
+ * Вспомогательная функция для получения стиля для обычного отображения.
+ */
+@Composable
+private fun getNormalStyle(customStyle: TextStyle?): TextStyle =
+    customStyle
+        ?: MaterialTheme.typography.bodyLarge.copy(
+            fontWeight = FontWeight.Medium,
+        )
+
+/**
+ * Вспомогательная функция для получения акцентного стиля.
+ */
+@Composable
+private fun getEmphasizedStyle(
+    customStyle: TextStyle?,
+    color: Color,
+): TextStyle {
+    val accentColor =
+        if (color == Color.Unspecified) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            color
+        }
+
+    return customStyle?.copy(
+        fontWeight = FontWeight.Bold,
+        color = accentColor,
+    )
+        ?: MaterialTheme.typography.headlineSmall.copy(
+            fontWeight = FontWeight.Bold,
+            color = accentColor,
+        )
+}
+
+/**
+ * Вспомогательная функция для получения вторичного стиля.
+ */
+@Composable
+private fun getSecondaryStyle(
+    customStyle: TextStyle?,
+    color: Color,
+): TextStyle {
+    val secondaryColor =
+        if (color == Color.Unspecified) {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        } else {
+            color
+        }
+
+    return customStyle?.copy(color = secondaryColor)
+        ?: MaterialTheme.typography.bodyMedium.copy(color = secondaryColor)
+}
+
+/**
+ * Compose компонент для отображения форматированного количества дней.
+ *
+ * Поддерживает автоматическое обновление при изменении времени,
+ * отображение в разных стилях и корректную работу с Material3 темой.
+ *
+ * @param formattedText Форматированный текст для отображения
+ * @param modifier Modifier для компонента
+ * @param textStyle Стиль отображения текста
+ * @param customStyle Кастомный TextStyle (переопределяет textStyle)
+ * @param color Цвет текста (переопределяет тему)
+ * @param textAlign Горизонтальное выравнивание текста
+ */
+@Suppress("LongParameterList")
+@Composable
+fun DaysCountText(
+    formattedText: String,
+    modifier: Modifier = Modifier,
+    textStyle: DaysCountTextStyle = DaysCountTextStyle.NORMAL,
+    customStyle: TextStyle? = null,
+    color: Color = Color.Unspecified,
+    textAlign: TextAlign? = null,
+) {
+    val resolvedStyle =
+        when (textStyle) {
+            DaysCountTextStyle.NORMAL -> getNormalStyle(customStyle)
+            DaysCountTextStyle.EMPHASIZED -> getEmphasizedStyle(customStyle, color)
+            DaysCountTextStyle.SECONDARY -> getSecondaryStyle(customStyle, color)
+        }
+
+    val contentColor =
+        if (color != Color.Unspecified) {
+            color
+        } else {
+            LocalContentColor.current
+        }
+
+    Text(
+        text = formattedText,
+        modifier = modifier,
+        style = resolvedStyle,
+        color = contentColor,
+        textAlign = textAlign,
+    )
+}
+
+/**
+ * Предпросмотры компонента DaysCountText.
+ */
+@Preview(showBackground = true)
+@Composable
+fun DaysCountTextPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
+            formattedText = "5 дней",
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DaysCountTextTodayPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
+            formattedText = "Сегодня",
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DaysCountTextEmphasizedPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
+            formattedText = "1 год 2 месяца 5 дней",
+            modifier = Modifier.padding(16.dp),
+            textStyle = DaysCountTextStyle.EMPHASIZED,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DaysCountTextSecondaryPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
+            formattedText = "2 мес. 5 дн.",
+            modifier = Modifier.padding(16.dp),
+            textStyle = DaysCountTextStyle.SECONDARY,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DaysCountTextFullFormatPreview() {
+    JetpackDaysTheme {
+        DaysCountText(
+            formattedText = "1 год 2 месяца 5 дней",
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}

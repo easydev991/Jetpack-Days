@@ -1,5 +1,40 @@
 # План: Совместимость резервных копий iOS ↔ Android
 
+## Актуальные пути к файлам
+
+```
+app/src/main/java/com/dayscounter/
+├── domain/
+│   ├── model/
+│   │   ├── DisplayOption.kt      # Enum для опций отображения
+│   │   └── Item.kt               # Domain entity
+│   ├── repository/
+│   │   └── ItemRepository.kt     # Интерфейс репозитория
+│   └── usecase/
+│       ├── BackupItem.kt         # DTO для экспорта/импорта (существующий)
+│       ├── ExportBackupUseCase.kt
+│       └── ImportBackupUseCase.kt
+│
+├── data/
+│   └── repository/
+│       └── ItemRepositoryImpl.kt # Реализация репозитория
+│
+└── ui/screens/createedit/
+    └── CreateEditParams.kt       # Параметры для создания/редактирования
+
+app/src/test/java/com/dayscounter/domain/usecase/
+├── BackupItemTest.kt             # Тесты для BackupItem
+└── ImportBackupUseCaseTest.kt    # Тесты для импорта
+```
+
+**Новые файлы для создания:**
+- `domain/usecase/IosBackupItem.kt` - модель для парсинга iOS JSON
+- `domain/usecase/NsKeyedArchiverParser.kt` - парсер bplist00
+- `domain/usecase/IosBackupItemTest.kt` - тесты для iOS модели
+- `domain/usecase/NsKeyedArchiverParserTest.kt` - тесты парсера
+
+---
+
 ## Анализ текущего состояния
 
 ### Формат BackupItem
@@ -57,6 +92,10 @@
 
 ## Этап 1: Создание отдельной модели для парсинга iOS-бекапа (Domain Layer)
 
+**Файлы:**
+- Создать: `app/src/main/java/com/dayscounter/domain/usecase/IosBackupItem.kt`
+- Создать: `app/src/test/java/com/dayscounter/domain/usecase/IosBackupItemTest.kt`
+
 - [ ] Создать `IosBackupItem.kt` - модель для парсинга JSON из iOS
   - `timestamp: Double` - секунды с 1970 (как в iOS)
   - `colorTag: String?` - Base64-строка (как в iOS)
@@ -66,6 +105,10 @@
   - colorTag: распарсить Base64 NSKeyedArchiver или вернуть null
 
 ## Этап 2: Реализация парсинга colorTag из iOS (Domain Layer)
+
+**Файлы:**
+- Создать: `app/src/main/java/com/dayscounter/domain/usecase/NsKeyedArchiverParser.kt`
+- Создать: `app/src/test/java/com/dayscounter/domain/usecase/NsKeyedArchiverParserTest.kt`
 
 **Выбранный подход:** Парсить NSKeyedArchiver и конвертировать в hex
 
@@ -87,6 +130,10 @@
 
 ## Этап 3: Обновление ImportBackupUseCase (Domain Layer)
 
+**Файлы:**
+- Изменить: `app/src/main/java/com/dayscounter/domain/usecase/ImportBackupUseCase.kt`
+- Изменить: `app/src/test/java/com/dayscounter/domain/usecase/ImportBackupUseCaseTest.kt`
+
 - [ ] Добавить определение формата бекапа (iOS или Android)
   - Если `timestamp` - это Double/Float → iOS формат
   - Если `timestamp` - это Long → Android формат
@@ -94,6 +141,10 @@
 - [ ] Добавить тесты для обоих форматов
 
 ## Этап 4: Тестирование (TDD)
+
+**Файлы:**
+- Создать: `app/src/test/java/com/dayscounter/domain/usecase/IosBackupItemTest.kt`
+- Создать: `app/src/test/resources/ios-backup-sample.json` - тестовый JSON из iOS
 
 - [ ] Написать тесты для `IosBackupItem`
   - Парсинг timestamp (Double → Long миллисекунды)

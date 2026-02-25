@@ -388,11 +388,11 @@ app/src/main/java/com/dayscounter/
 │   │   ├── DaysDatabase.kt
 │   │   ├── dao/
 │   │   ├── entity/
-│   │   ├── mapper/
-│   │   └── converters/
+│   │   ├── ItemMapper.kt
+│   │   └── DisplayOptionConverter.kt
+│   ├── provider/           # Форматирование дней
 │   ├── repository/
 │   │   └── ItemRepositoryImpl.kt
-│   ├── formatter/          # Форматирование дней
 │   ├── preferences/        # DataStore настройки
 │   └── local/
 ├── domain/                 # Domain layer
@@ -401,25 +401,19 @@ app/src/main/java/com/dayscounter/
 │   ├── usecase/           # Use cases
 │   └── exception/         # Исключения
 ├── ui/                    # UI layer (Compose)
+│   ├── ds/                # Design System компоненты
+│   ├── screens/           # Экраны приложения
+│   │   ├── appdata/       # AppDataScreen
+│   │   ├── common/        # Общие компоненты экранов
+│   │   ├── createedit/    # CreateEditScreen + состояние
+│   │   ├── detail/        # DetailScreen
+│   │   ├── events/        # MainScreen (список событий)
+│   │   ├── more/          # MoreScreen
+│   │   ├── root/          # RootScreen
+│   │   └── themeicon/     # ThemeIconScreen
+│   ├── state/             # UI state классы
 │   ├── theme/             # App theme
-│   ├── component/          # Переиспользуемые компоненты
-│   ├── screen/            # Экраны приложения
-│   │   ├── RootScreen.kt
-│   │   ├── MainScreen.kt
-│   │   ├── DetailScreen.kt
-│   │   ├── CreateEditScreen.kt
-│   │   ├── MoreScreen.kt
-│   │   ├── ThemeIconScreen.kt
-│   │   └── AppDataScreen.kt
-│   └── state/             # UI state классы
-├── viewmodel/             # ViewModels
-│   ├── MainActivityViewModel.kt
-│   ├── RootScreenViewModel.kt
-│   ├── MainScreenViewModel.kt
-│   ├── DetailScreenViewModel.kt
-│   ├── CreateEditScreenViewModel.kt
-│   ├── ThemeIconViewModel.kt
-│   └── AppDataScreenViewModel.kt
+│   └── viewmodel/         # ViewModels
 ├── analytics/             # Firebase Analytics
 ├── crash/                 # Firebase Crashlytics
 └── util/                  # Утилиты
@@ -427,9 +421,9 @@ app/src/main/java/com/dayscounter/
 
 ## Правила
 
-- Экран → файл в `ui/screen/`
-- Компоненты → файл в `ui/component/`
-- ViewModel → файл в `viewmodel/`
+- Экран → файл в `ui/screens/<screen>/`
+- UI компоненты → файл в `ui/ds/` (Design System)
+- ViewModel → файл в `ui/viewmodel/`
 - DI → factory методы в `di/FormatterModule.kt`
 - Тесты → `test/` (unit) и `androidTest/` (integration/UI)
 - Структура тестов зеркалит структуру кода
