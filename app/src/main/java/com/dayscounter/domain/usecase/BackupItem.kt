@@ -71,7 +71,41 @@ fun String.fromHexColor(): Int? =
     }
 
 /**
- * Расширение для конвертации Item в BackupItem.
+ * Парсит colorTag в ARGB цвет, поддерживая оба формата.
+ *
+ * Поддерживаемые форматы:
+ * - Hex: #RRGGBB (Android формат)
+ * - Base64: NSKeyedArchiver с UIColor (iOS формат)
+ *
+ * @return ARGB цвет (Int) или null, если формат некорректный
+ */
+fun String?.parseColorTag(): Int? {
+    if (this.isNullOrBlank()) return null
+
+    // Проверяем формат hex (начинается с #)
+    if (startsWith("#")) {
+        return fromHexColor()
+    }
+
+    // Проверяем формат iOS NSKeyedArchiver (Base64 bplist00)
+    if (NsKeyedArchiverParser.isNsKeyedArchiver(this)) {
+        val hexColor = NsKeyedArchiverParser.parseHexColor(this) ?: return null
+        return hexColor.fromHexColor()
+    }
+
+    // Неизвестный формат
+    return null
+}
+
+/**
+ * Конвертирует ARGB цвет в Base64 NSKeyedArchiver (iOS формат).
+ *
+ * @return Base64-закодированный NSKeyedArchiver или null, если конвертация не удалась
+ */
+fun Int.toIosColorTag(): String = NsKeyedArchiverBuilder.buildFromArgb(this)
+
+/**
+ * Расширение для конвертации Item в BackupItem (Android формат - hex).
  */
 fun Item.toBackupItem(): BackupItem =
     BackupItem(
@@ -88,7 +122,28 @@ fun Item.toBackupItem(): BackupItem =
     )
 
 /**
+ * Расширение для конвертации Item в BackupItem (iOS формат - Base64 NSKeyedArchiver).
+ */
+fun Item.toIosBackupItem(): BackupItem =
+    BackupItem(
+        title = title,
+        details = details,
+        timestamp = timestamp,
+        colorTag = colorTag?.toIosColorTag(), // Конвертируем Int? в Base64 NSKeyedArchiver
+        displayOption =
+            when (displayOption) {
+                DisplayOption.DAY -> "day"
+                DisplayOption.MONTH_DAY -> "monthDay"
+                DisplayOption.YEAR_MONTH_DAY -> "yearMonthDay"
+            },
+    )
+
+/**
  * Расширение для конвертации BackupItem в Item.
+ *
+ * Поддерживает импорт colorTag в двух форматах:
+ * - Hex (#RRGGBB) - Android формат
+ * - Base64 NSKeyedArchiver - iOS формат
  */
 fun BackupItem.toItem(): Item? {
     val displayOption =
@@ -101,10 +156,8 @@ fun BackupItem.toItem(): Item? {
             }
         }
 
-    // Конвертируем colorTag из формата hex-строки в формат Android (Int ARGB)
-    // При экспорте мы конвертируем Int в hex-строку (#RRGGBB)
-    // При импорте нужно сделать обратную конвертацию
-    val androidColorTag: Int? = colorTag?.fromHexColor()
+    // Конвертируем colorTag, поддерживая оба формата (hex и Base64)
+    val androidColorTag: Int? = colorTag.parseColorTag()
 
     return Item(
         id = 0, // ID будет присвоен базой данных

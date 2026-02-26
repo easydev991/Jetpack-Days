@@ -13,6 +13,21 @@ import java.io.IOException
 private const val TAG = "ExportBackupUseCase"
 
 /**
+ * Формат экспорта резервной копии.
+ */
+enum class ExportFormat {
+    /**
+     * Android формат - colorTag в hex (#RRGGBB).
+     */
+    ANDROID,
+
+    /**
+     * iOS формат - colorTag в Base64 NSKeyedArchiver.
+     */
+    IOS,
+}
+
+/**
  * Use Case для экспорта данных в резервную копию.
  *
  * Экспортирует все записи в JSON формат, совместимый с iOS-приложением.
@@ -32,14 +47,26 @@ class ExportBackupUseCase(
         }
 
     /**
-     * Экспортирует все записи в файл.
+     * Экспортирует все записи в файл (Android формат по умолчанию).
      *
      * @param uri URI файла для сохранения
      * @return Result с количеством экспортированных записей или ошибкой
      */
-    suspend operator fun invoke(uri: Uri): Result<Int> =
+    suspend operator fun invoke(uri: Uri): Result<Int> = invoke(uri, ExportFormat.ANDROID)
+
+    /**
+     * Экспортирует все записи в файл с указанным форматом.
+     *
+     * @param uri URI файла для сохранения
+     * @param format Формат экспорта (ANDROID или IOS)
+     * @return Result с количеством экспортированных записей или ошибкой
+     */
+    suspend operator fun invoke(
+        uri: Uri,
+        format: ExportFormat,
+    ): Result<Int> =
         try {
-            logger.d(TAG, "Начало экспорта данных")
+            logger.d(TAG, "Начало экспорта данных (формат: $format)")
 
             // Получаем все записи из репозитория
             val items =
@@ -50,8 +77,12 @@ class ExportBackupUseCase(
 
             logger.d(TAG, "Получено ${items.size} записей для экспорта")
 
-            // Конвертируем в формат JSON, совместимый с iOS
-            val backupItems = items.map { it.toBackupItem() }
+            // Конвертируем в формат JSON, совместимый с iOS или Android
+            val backupItems =
+                when (format) {
+                    ExportFormat.IOS -> items.map { it.toIosBackupItem() }
+                    ExportFormat.ANDROID -> items.map { it.toBackupItem() }
+                }
             val jsonString = json.encodeToString(backupItems)
 
             // Записываем в файл

@@ -301,4 +301,116 @@ class BackupItemTest {
         assertEquals(originalItem.colorTag, restoredItem.colorTag)
         assertEquals(originalItem.displayOption, restoredItem.displayOption)
     }
+
+    // MARK: - parseColorTag Tests (hex and Base64 formats)
+
+    @Test
+    fun `parseColorTag with hex format returns correct color`() {
+        // Given
+        val hexColor = "#FF0000"
+
+        // When
+        val color = hexColor.parseColorTag()
+
+        // Then
+        assertNotNull(color)
+        assertEquals(0xFFFF0000.toInt(), color)
+    }
+
+    @Test
+    fun `parseColorTag with Base64 iOS format returns correct color`() {
+        // Given - используем строку из NsKeyedArchiverParserTest напрямую
+        @Suppress("MaxLineLength")
+        val base64FromParserTest =
+            "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05T" +
+                "S2V5ZWRBcmNoaXZlctEICVRyb290gAGjCwwdVSRudWxs2A0ODxAREhMUFRYXGBkaGxxfEBVVSUNvbG9y" +
+                "Q29tcG9uZW50Q291bnRWVUlHcmVublZVSUJsdWVXVUlBbHBoYVVOU1JHQlYkY2xhc3NVVUlSZWRcTlND" +
+                "b2xvclNwYWNlEAQiPmkSDiI+Py6wIj+AAABNMSAwLjIyOCAwLjE4N4ACIj+ADl8QAtMeHyAhIiRaJGNs" +
+                "YXNzbmFtZVgkY2xhc3Nlc1skY2xhc3NoaW50c1dVSUNvbG9yoiEjWE5TT2JqZWN0oSVXTlNDb2xvcgAI" +
+                "ABEAGgAkACkAMgA3AEkATABRAFMAVwBdAG4AhgCOAJUAnQCjAKoAsAC9AL8AxADJAM4A3ADeAOMA5QDs" +
+                "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
+
+        // Debug: проверяем длину
+        println("base64FromParserTest length: ${base64FromParserTest.length}")
+
+        // When - сначала проверяем что парсер распознает формат
+        val isNsKeyedArchiver = NsKeyedArchiverParser.isNsKeyedArchiver(base64FromParserTest)
+        println("isNsKeyedArchiver: $isNsKeyedArchiver")
+        val hexFromParser = NsKeyedArchiverParser.parseHexColor(base64FromParserTest)
+        println("hexFromParser: $hexFromParser")
+        val color = base64FromParserTest.parseColorTag()
+        println("color: $color")
+
+        // Then
+        assertEquals(true, isNsKeyedArchiver, "Should be recognized as NSKeyedArchiver")
+        assertEquals("#FF3A30", hexFromParser, "Parser should return #FF3A30")
+        assertNotNull(color, "parseColorTag should return non-null")
+        assertEquals(0xFFFF3A30.toInt(), color)
+    }
+
+    @Test
+    fun `parseColorTag with null returns null`() {
+        // Given
+        val nullColor: String? = null
+
+        // When
+        val color = nullColor.parseColorTag()
+
+        // Then
+        assertNull(color)
+    }
+
+    @Test
+    fun `parseColorTag with empty string returns null`() {
+        // Given
+        val emptyColor = ""
+
+        // When
+        val color = emptyColor.parseColorTag()
+
+        // Then
+        assertNull(color)
+    }
+
+    @Test
+    fun `parseColorTag with invalid format returns null`() {
+        // Given
+        val invalidColor = "INVALID_COLOR"
+
+        // When
+        val color = invalidColor.parseColorTag()
+
+        // Then
+        assertNull(color)
+    }
+
+    @Test
+    fun `BackupItem to Item with iOS Base64 colorTag`() {
+        // Given - BackupItem с colorTag в формате iOS Base64
+        @Suppress("MaxLineLength")
+        val base64Color =
+            "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05T" +
+                "S2V5ZWRBcmNoaXZlctEICVRyb290gAGjCwwdVSRudWxs2A0ODxAREhMUFRYXGBkaGxxfEBVVSUNvbG9y" +
+                "Q29tcG9uZW50Q291bnRWVUlHcmVublZVSUJsdWVXVUlBbHBoYVVOU1JHQlYkY2xhc3NVVUlSZWRcTlND" +
+                "b2xvclNwYWNlEAQiPmkSDiI+Py6wIj+AAABNMSAwLjIyOCAwLjE4N4ACIj+ADl8QAtMeHyAhIiRaJGNs" +
+                "YXNzbmFtZVgkY2xhc3Nlc1skY2xhc3NoaW50c1dVSUNvbG9yoiEjWE5TT2JqZWN0oSVXTlNDb2xvcgAI" +
+                "ABEAGgAkACkAMgA3AEkATABRAFMAVwBdAG4AhgCOAJUAnQCjAKoAsAC9AL8AxADJAM4A3ADeAOMA5QDs" +
+                "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
+
+        val backupItem =
+            BackupItem(
+                title = "iOS Event",
+                details = "Imported from iOS",
+                timestamp = 769363669529L,
+                colorTag = base64Color,
+                displayOption = "day",
+            )
+
+        // When
+        val item = backupItem.toItem()
+
+        // Then
+        assertNotNull(item)
+        assertEquals(0xFFFF3A30.toInt(), item!!.colorTag)
+    }
 }
