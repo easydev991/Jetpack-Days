@@ -22,9 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
@@ -33,22 +34,40 @@ import com.dayscounter.ui.screens.common.DaysRadioButton
 import com.dayscounter.ui.theme.JetpackDaysTheme
 
 /**
+ * Предустановленные цвета для селектора.
+ */
+@Suppress("MagicNumber")
+internal object PresetColors {
+    val Red = Color(0xFFE53935)
+    val Teal = Color(0xFF00897B)
+    val Blue = Color(0xFF1E88E5)
+    val Green = Color(0xFF43A047)
+    val Yellow = Color(0xFFFDD835)
+    val Purple = Color(0xFF8E24AA)
+
+    val all: List<Color>
+        get() = listOf(Red, Teal, Blue, Green, Yellow, Purple)
+}
+
+/**
+ * Предустановленные цвета для селектора.
+ */
+@Composable
+internal fun rememberPresetColors(): List<Color> = remember { PresetColors.all }
+
+/**
  * Селектор цвета.
+ *
+ * Поддерживает отображение кастомного цвета (не из preset) в начале списка.
  */
 @Composable
 internal fun ColorSelector(
     selectedColor: MutableState<Color?>,
     onValueChange: () -> Unit = {},
 ) {
-    val colors =
-        listOf(
-            colorResource(R.color.color_primary_red),
-            colorResource(R.color.color_primary_teal),
-            colorResource(R.color.color_primary_blue),
-            colorResource(R.color.color_primary_green),
-            colorResource(R.color.color_primary_yellow),
-            colorResource(R.color.color_primary_purple),
-        )
+    val presetColors = rememberPresetColors()
+    val showCustomColor = isCustomColor(selectedColor.value, presetColors)
+    val colorContentDescription = stringResource(R.string.color)
 
     Text(
         text = stringResource(R.string.color_tag),
@@ -62,11 +81,25 @@ internal fun ColorSelector(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
     ) {
-        items(colors) { color ->
+        // Кастомный цвет в начале списка (если есть)
+        if (showCustomColor && selectedColor.value != null) {
+            item {
+                ColorOptionSurface(
+                    color = selectedColor.value!!,
+                    selectedColor = selectedColor,
+                    onValueChange = onValueChange,
+                    contentDescription = colorContentDescription,
+                )
+            }
+        }
+
+        // Предустановленные цвета
+        items(presetColors) { color ->
             ColorOptionSurface(
                 color = color,
                 selectedColor = selectedColor,
                 onValueChange = onValueChange,
+                contentDescription = colorContentDescription,
             )
         }
     }
@@ -74,12 +107,18 @@ internal fun ColorSelector(
 
 /**
  * Поверхность для выбора цвета.
+ *
+ * @param color Цвет для отображения
+ * @param selectedColor Состояние выбранного цвета
+ * @param onValueChange Callback при изменении цвета
+ * @param contentDescription Описание для accessibility и тестов
  */
 @Composable
 internal fun ColorOptionSurface(
     color: Color,
     selectedColor: MutableState<Color?>,
     onValueChange: () -> Unit = {},
+    contentDescription: String = "",
 ) {
     Surface(
         onClick = {
@@ -93,7 +132,8 @@ internal fun ColorOptionSurface(
         modifier =
             Modifier
                 .size(dimensionResource(R.dimen.color_tag_size))
-                .padding(dimensionResource(R.dimen.spacing_xxsmall)),
+                .padding(dimensionResource(R.dimen.spacing_xxsmall))
+                .semantics { this.contentDescription = contentDescription },
         shape = CircleShape,
         color = color,
         border =
@@ -156,6 +196,26 @@ internal fun DisplayOptionSelector(
 fun ColorSelectorRedPreview() {
     JetpackDaysTheme {
         val selectedColor = remember { mutableStateOf<Color?>(Color.Red) }
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            ColorSelector(selectedColor)
+        }
+    }
+}
+
+@Suppress("MagicNumber")
+@Preview(showBackground = true, name = "Селектор цвета с кастомным цветом")
+@Composable
+fun ColorSelectorCustomColorPreview() {
+    JetpackDaysTheme {
+        val customColor = Color(0xFFFF6600) // Оранжевый — не в preset
+        val selectedColor = remember { mutableStateOf<Color?>(customColor) }
 
         Column(
             modifier =
