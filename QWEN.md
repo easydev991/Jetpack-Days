@@ -43,12 +43,12 @@
 
 ### Обновленная информация о проекте
 
-- **AGP (Android Gradle Plugin)**: 9.0.0
-- **Kotlin**: 2.3.0
+- **AGP (Android Gradle Plugin)**: 9.0.1
+- **Kotlin**: 2.3.10
 - **Compile SDK**: 36
 - **Target SDK**: 35
 - **Min SDK**: 26
-- **KSP (Kotlin Symbol Processing)**: 2.3.2 (KSP2)
+- **KSP (Kotlin Symbol Processing)**: 2.3.4 (KSP2)
 
 ## Architecture
 
