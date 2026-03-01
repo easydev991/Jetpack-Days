@@ -37,7 +37,7 @@ class LocalDateSaverTest {
 
         // When
         val saved = saveLocalDate(originalDate)
-        val restored = restoreLocalDate(saved ?: -1L)
+        val restored = restoreLocalDate(saved)
 
         // Then
         assertEquals(originalDate, restored)
@@ -50,7 +50,7 @@ class LocalDateSaverTest {
 
         // When
         val saved = saveLocalDate(originalDate)
-        val restored = if (saved != null) restoreLocalDate(saved) else null
+        val restored = restoreLocalDate(saved)
 
         // Then
         assertNull(restored)
@@ -77,7 +77,7 @@ class LocalDateSaverTest {
 
         // When
         val saved = saveLocalDate(leapYearDate)
-        val restored = restoreLocalDate(saved ?: -1L)
+        val restored = restoreLocalDate(saved)
 
         // Then
         assertEquals(leapYearDate, restored)
@@ -90,7 +90,7 @@ class LocalDateSaverTest {
 
         // When
         val saved = saveLocalDate(pastDate)
-        val restored = restoreLocalDate(saved ?: -1L)
+        val restored = restoreLocalDate(saved)
 
         // Then
         assertEquals(pastDate, restored)
@@ -103,7 +103,7 @@ class LocalDateSaverTest {
 
         // When
         val saved = saveLocalDate(futureDate)
-        val restored = restoreLocalDate(saved ?: -1L)
+        val restored = restoreLocalDate(saved)
 
         // Then
         assertEquals(futureDate, restored)

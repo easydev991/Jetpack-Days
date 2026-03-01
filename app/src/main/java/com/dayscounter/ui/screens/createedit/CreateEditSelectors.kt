@@ -1,16 +1,17 @@
 package com.dayscounter.ui.screens.createedit
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -69,32 +70,37 @@ internal fun ColorSelector(
     val showCustomColor = isCustomColor(selectedColor.value, presetColors)
     val colorContentDescription = stringResource(R.string.color)
 
+    // Выносим dimensionResource наружу для корректной работы
+    val spacingSmall = dimensionResource(R.dimen.spacing_small)
+    val spacingXsmall = dimensionResource(R.dimen.spacing_xsmall)
+
     Text(
         text = stringResource(R.string.color_tag),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurface,
     )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
+    Spacer(modifier = Modifier.height(spacingXsmall))
 
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
+    // Используем Row вместо LazyRow для корректного отображения кастомного цвета
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(spacingSmall),
     ) {
         // Кастомный цвет в начале списка (если есть)
         if (showCustomColor && selectedColor.value != null) {
-            item {
-                ColorOptionSurface(
-                    color = selectedColor.value!!,
-                    selectedColor = selectedColor,
-                    onValueChange = onValueChange,
-                    contentDescription = colorContentDescription,
-                )
-            }
+            ColorOptionSurface(
+                color = selectedColor.value!!,
+                selectedColor = selectedColor,
+                onValueChange = onValueChange,
+                contentDescription = colorContentDescription,
+            )
         }
 
         // Предустановленные цвета
-        items(presetColors) { color ->
+        presetColors.forEach { color ->
             ColorOptionSurface(
                 color = color,
                 selectedColor = selectedColor,

@@ -13,24 +13,10 @@ import java.io.IOException
 private const val TAG = "ExportBackupUseCase"
 
 /**
- * Формат экспорта резервной копии.
- */
-enum class ExportFormat {
-    /**
-     * Android формат - colorTag в hex (#RRGGBB).
-     */
-    ANDROID,
-
-    /**
-     * iOS формат - colorTag в Base64 NSKeyedArchiver.
-     */
-    IOS,
-}
-
-/**
  * Use Case для экспорта данных в резервную копию.
  *
- * Экспортирует все записи в JSON формат, совместимый с iOS-приложением.
+ * Экспортирует все записи в JSON формат с обёрткой BackupWrapper,
+ * содержащей поле format = "android" для указания платформы-источника.
  *
  * @property repository Repository для работы с данными
  * @property context Контекст приложения
@@ -47,26 +33,14 @@ class ExportBackupUseCase(
         }
 
     /**
-     * Экспортирует все записи в файл (Android формат по умолчанию).
+     * Экспортирует все записи в файл (Android формат).
      *
      * @param uri URI файла для сохранения
      * @return Result с количеством экспортированных записей или ошибкой
      */
-    suspend operator fun invoke(uri: Uri): Result<Int> = invoke(uri, ExportFormat.ANDROID)
-
-    /**
-     * Экспортирует все записи в файл с указанным форматом.
-     *
-     * @param uri URI файла для сохранения
-     * @param format Формат экспорта (ANDROID или IOS)
-     * @return Result с количеством экспортированных записей или ошибкой
-     */
-    suspend operator fun invoke(
-        uri: Uri,
-        format: ExportFormat,
-    ): Result<Int> =
+    suspend operator fun invoke(uri: Uri): Result<Int> =
         try {
-            logger.d(TAG, "Начало экспорта данных (формат: $format)")
+            logger.d(TAG, "Начало экспорта данных")
 
             // Получаем все записи из репозитория
             val items =
@@ -77,13 +51,17 @@ class ExportBackupUseCase(
 
             logger.d(TAG, "Получено ${items.size} записей для экспорта")
 
-            // Конвертируем в формат JSON, совместимый с iOS или Android
-            val backupItems =
-                when (format) {
-                    ExportFormat.IOS -> items.map { it.toIosBackupItem() }
-                    ExportFormat.ANDROID -> items.map { it.toBackupItem() }
-                }
-            val jsonString = json.encodeToString(backupItems)
+            // Конвертируем в Android формат
+            val backupItems = items.map { it.toBackupItem() }
+
+            // Создаём обёртку с указанием формата Android
+            val wrapper =
+                BackupWrapper(
+                    format = BackupFormat.ANDROID,
+                    items = backupItems,
+                )
+
+            val jsonString = json.encodeToString(BackupWrapper.serializer(), wrapper)
 
             // Записываем в файл
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->

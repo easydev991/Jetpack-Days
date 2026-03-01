@@ -1,0 +1,58 @@
+[
+    {
+      "title": "День рождения",
+      "details": "Мой день рождения",
+      "timestamp": 699417600000,
+      "colorTag": "#FF5722",
+      "displayOption": "day"
+    },
+    {
+      "title": "Новый год 2025",
+      "details": "Празднование Нового года",
+      "timestamp": 1735689600000,
+      "colorTag": "#4CAF50",
+      "displayOption": "monthDay"
+    },
+    {
+      "title": "День победы",
+      "details": "9 мая 1945 года",
+      "timestamp": -777868800000,
+      "colorTag": "#2196F3",
+      "displayOption": "yearMonthDay"
+    },
+    {
+      "title": "Встреча с друзьями",
+      "details": "",
+      "timestamp": 1704067200000,
+      "colorTag": "#9C27B0",
+      "displayOption": "day"
+    },
+    {
+      "title": "Без цвета",
+      "details": "Событие без цветового тега",
+      "timestamp": 1609459200000,
+      "colorTag": null,
+      "displayOption": "day"
+    },
+    {
+      "title": "Без описания",
+      "details": null,
+      "timestamp": 1500000000000,
+      "colorTag": "#F44336",
+      "displayOption": "day"
+    },
+    {
+      "title": "Синий",
+      "details": "Тест синего цвета",
+      "timestamp": 1400000000000,
+      "colorTag": "#2196F3",
+      "displayOption": "day"
+    },
+    {
+      "title": "Зелёный",
+      "details": "Тест зелёного цвета",
+      "timestamp": 1300000000000,
+      "colorTag": "#4CAF50",
+      "displayOption": "day"
+    }
+]

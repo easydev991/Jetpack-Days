@@ -98,13 +98,6 @@ fun String?.parseColorTag(): Int? {
 }
 
 /**
- * Конвертирует ARGB цвет в Base64 NSKeyedArchiver (iOS формат).
- *
- * @return Base64-закодированный NSKeyedArchiver или null, если конвертация не удалась
- */
-fun Int.toIosColorTag(): String = NsKeyedArchiverBuilder.buildFromArgb(this)
-
-/**
  * Расширение для конвертации Item в BackupItem (Android формат - hex).
  */
 fun Item.toBackupItem(): BackupItem =
@@ -113,23 +106,6 @@ fun Item.toBackupItem(): BackupItem =
         details = details,
         timestamp = timestamp,
         colorTag = colorTag?.toHexColor(), // Конвертируем Int? в hex-строку
-        displayOption =
-            when (displayOption) {
-                DisplayOption.DAY -> "day"
-                DisplayOption.MONTH_DAY -> "monthDay"
-                DisplayOption.YEAR_MONTH_DAY -> "yearMonthDay"
-            },
-    )
-
-/**
- * Расширение для конвертации Item в BackupItem (iOS формат - Base64 NSKeyedArchiver).
- */
-fun Item.toIosBackupItem(): BackupItem =
-    BackupItem(
-        title = title,
-        details = details,
-        timestamp = timestamp,
-        colorTag = colorTag?.toIosColorTag(), // Конвертируем Int? в Base64 NSKeyedArchiver
         displayOption =
             when (displayOption) {
                 DisplayOption.DAY -> "day"

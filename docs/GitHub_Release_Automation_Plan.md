@@ -134,17 +134,7 @@ github_release:
  fi
  @printf "$(YELLOW)Проверка секретов для подписи...$(RESET)\n"
  @if [ ! -d ".secrets" ]; then \
-  printf "$(YELLOW)Загрузка секретов из репозитория android-secrets...$(RESET)\n"; \
-  if [ -d "../android-secrets/jetpackdays" ]; then \
-   mkdir -p ".secrets"; \
-   cp -r ../android-secrets/jetpackdays/* .secrets/; \
-   sed -i.tmp 's|^KEYSTORE_FILE=.*|KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore|' .secrets/secrets.properties && rm -f .secrets/secrets.properties.tmp; \
-   printf "$(GREEN)Секреты загружены успешно$(RESET)\n"; \
-  else \
-   printf "$(RED)Ошибка: репозиторий android-secrets не найден в ../android-secrets/jetpackdays$(RESET)\n"; \
-   printf "$(YELLOW)Проверьте, что репозиторий android-secrets склонирован в нужное место$(RESET)\n"; \
-   exit 1; \
-  fi \
+  $(MAKE) _load_secrets; \
  fi
  @printf "$(YELLOW)Создаю релизный APK...$(RESET)\n"
  @./gradlew assembleRelease

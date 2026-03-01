@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.sql.SQLException
@@ -18,8 +17,12 @@ private const val TAG = "ImportBackupUseCase"
 /**
  * Use Case для импорта данных из резервной копии.
  *
- * Импортирует записи из JSON файла, формата, совместимого с iOS-приложением.
+ * Импортирует записи из JSON файла, поддерживая форматы iOS и Android.
  * Предотвращает дубликаты путем сравнения записей по всем полям.
+ *
+ * Поддерживаемые форматы:
+ * - Новый формат с обёрткой BackupWrapper (с полем format: "ios" или "android")
+ * - Старый формат без обёртки (массив BackupItem напрямую)
  *
  * @property repository Repository для работы с данными
  * @property context Контекст приложения
@@ -54,10 +57,10 @@ class ImportBackupUseCase(
 
             logger.d(TAG, "В базе данных ${existingItems.size} записей")
 
-            // Читаем JSON из файла
+            // Читаем JSON из файла и определяем формат
             val backupItems: List<BackupItem> =
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    json.decodeFromStream(inputStream)
+                    parseBackupFile(inputStream)
                 } ?: throw BackupException("Не удалось открыть InputStream для чтения")
 
             logger.d(TAG, "В файле ${backupItems.size} записей")
@@ -68,8 +71,6 @@ class ImportBackupUseCase(
                     .mapNotNull { it.toItem() }
                     .filter { newItem ->
                         // Проверяем, есть ли такая запись уже в базе
-                        // Для проверки дубликатов используем null для colorTag, так как
-                        // импорт из iOS с Data не конвертируется корректно
                         !existingItems.any { existingItem ->
                             existingItem.title == newItem.title &&
                                 existingItem.details == newItem.details &&
@@ -102,4 +103,45 @@ class ImportBackupUseCase(
             logger.e(TAG, "Ошибка при импорте данных", e)
             Result.failure(BackupException("Не удалось сохранить данные: ${e.message}", e))
         }
+
+    /**
+     * Парсит файл резервной копии, определяя формат автоматически.
+     *
+     * Логика определения формата:
+     * 1. Попытка декодировать как BackupWrapper (Android формат с timestamp: Long)
+     * 2. Попытка декодировать как IosBackupWrapper (iOS формат с timestamp: Double)
+     * 3. Fallback на List<BackupItem> (старый формат без обёртки)
+     *
+     * @param inputStream Поток с JSON данными
+     * @return Список BackupItem в Android-формате
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun parseBackupFile(inputStream: java.io.InputStream): List<BackupItem> {
+        // Считываем весь поток в строку для повторного использования
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+
+        // Попытка декодировать как BackupWrapper (Android формат с полем format)
+        val wrapperResult = runCatching { json.decodeFromString<BackupWrapper>(jsonString) }
+
+        if (wrapperResult.isSuccess) {
+            val wrapper = wrapperResult.getOrThrow()
+            logger.d(TAG, "Обнаружен Android формат: ${wrapper.format ?: "не указан"}")
+            // Android формат или формат не указан — используем как есть
+            return wrapper.items
+        }
+
+        // Попытка декодировать как IosBackupWrapper (iOS формат с timestamp: Double)
+        val iosWrapperResult = runCatching { json.decodeFromString<IosBackupWrapper>(jsonString) }
+
+        if (iosWrapperResult.isSuccess) {
+            val iosWrapper = iosWrapperResult.getOrThrow()
+            logger.d(TAG, "Обнаружен iOS формат: ${iosWrapper.format}")
+            // iOS формат: конвертируем каждый IosBackupItem в BackupItem
+            return iosWrapper.items.mapNotNull { iosItem -> iosItem.toBackupItem() }
+        }
+
+        // Fallback: попытка декодировать как List<BackupItem> (старый формат без обёртки)
+        logger.d(TAG, "Fallback: декодирование как List<BackupItem> (старый формат)")
+        return json.decodeFromString<List<BackupItem>>(jsonString)
+    }
 }

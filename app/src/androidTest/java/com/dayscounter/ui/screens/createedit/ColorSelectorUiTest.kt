@@ -26,7 +26,7 @@ class ColorSelectorUiTest {
     fun colorSelector_whenCustomColorSelected_thenShowsCustomColorChip() {
         // Given
         @Suppress("MagicNumber")
-        val customColor = Color(0xFFFF6600) // Оранжевый — не в preset
+        val customColor = Color(0xFF123456) // Синий — точно не в preset
         val selectedColor = mutableStateOf<Color?>(customColor)
 
         // When
@@ -92,7 +92,7 @@ class ColorSelectorUiTest {
     fun colorSelector_whenCustomColorClicked_thenDeselects() {
         // Given
         @Suppress("MagicNumber")
-        val customColor = Color(0xFFFF6600) // Оранжевый
+        val customColor = Color(0xFF123456) // Синий
         val selectedColor = mutableStateOf<Color?>(customColor)
 
         composeTestRule.setContent {

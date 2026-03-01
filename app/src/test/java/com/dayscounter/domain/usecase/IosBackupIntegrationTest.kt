@@ -41,7 +41,7 @@ class IosBackupIntegrationTest {
         // Given - читаем JSON из ресурсов
         val inputStream =
             javaClass.classLoader
-                ?.getResourceAsStream("ios-backup-sample.json")
+                ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
 
         // When - парсим JSON
@@ -54,7 +54,7 @@ class IosBackupIntegrationTest {
         val birthday = iosBackupItems[0]
         assertEquals("День рождения", birthday.title)
         assertEquals("Мой день рождения", birthday.details)
-        assertEquals(699417600.0, birthday.timestamp)
+        assertEquals(-278889600.0, birthday.timestamp) // iOS: секунды с 2001-01-01
         assertNotNull(birthday.colorTag)
         assertEquals("day", birthday.displayOption)
 
@@ -62,7 +62,7 @@ class IosBackupIntegrationTest {
         val wedding = iosBackupItems[1]
         assertEquals("Свадьба", wedding.title)
         assertEquals("День свадьбы", wedding.details)
-        assertEquals(1151808000.0, wedding.timestamp)
+        assertEquals(173500800.0, wedding.timestamp) // iOS: секунды с 2001-01-01
         assertNotNull(wedding.colorTag)
         assertEquals("monthDay", wedding.displayOption)
 
@@ -70,7 +70,7 @@ class IosBackupIntegrationTest {
         val work = iosBackupItems[2]
         assertEquals("Первый день на работе", work.title)
         assertEquals("Начало карьеры", work.details)
-        assertEquals(1262736000.0, work.timestamp)
+        assertEquals(284428800.0, work.timestamp) // iOS: секунды с 2001-01-01
         assertNotNull(work.colorTag)
         assertEquals("yearMonthDay", work.displayOption)
 
@@ -78,7 +78,7 @@ class IosBackupIntegrationTest {
         val graduation = iosBackupItems[3]
         assertEquals("Выпускной", graduation.title)
         assertEquals("Окончание университета", graduation.details)
-        assertEquals(1020489600.0, graduation.timestamp)
+        assertEquals(42182400.0, graduation.timestamp) // iOS: секунды с 2001-01-01
         assertNull(graduation.colorTag)
         assertEquals("day", graduation.displayOption)
     }
@@ -89,7 +89,7 @@ class IosBackupIntegrationTest {
         // Given
         val inputStream =
             javaClass.classLoader
-                ?.getResourceAsStream("ios-backup-sample.json")
+                ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
 
@@ -120,7 +120,7 @@ class IosBackupIntegrationTest {
         // Given
         val inputStream =
             javaClass.classLoader
-                ?.getResourceAsStream("ios-backup-sample.json")
+                ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
 
@@ -154,7 +154,7 @@ class IosBackupIntegrationTest {
         // Given
         val inputStream =
             javaClass.classLoader
-                ?.getResourceAsStream("ios-backup-sample.json")
+                ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
         val backupItems = iosBackupItems.mapNotNull { it.toBackupItem() }
@@ -187,12 +187,13 @@ class IosBackupIntegrationTest {
 
     @Test
     fun `timestamp conversion - seconds to milliseconds`() {
-        // Given
+        // Given - iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
+        // -278889600.0 сек с 2001 = 699417600000 мс с 1970
         val iosItem =
             IosBackupItem(
                 title = "Тест",
                 details = null,
-                timestamp = 699417600.0, // Секунды
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -202,13 +203,14 @@ class IosBackupIntegrationTest {
 
         // Then
         assertNotNull(backupItem)
-        assertEquals(699417600000L, backupItem!!.timestamp) // Миллисекунды
+        assertEquals(699417600000L, backupItem!!.timestamp) // Android: миллисекунды с 1970-01-01
     }
 
     @Test
     fun `timestamp conversion - preserves date correctly`() {
-        // Given - 1 января 2000 года 00:00:00 UTC в секундах
-        val timestamp2000 = 946684800.0
+        // Given - 1 января 2000 года 00:00:00 UTC в секундах с 2001-01-01
+        // 946684800 сек с 1970 - 978307200 = -31622400 сек с 2001
+        val timestamp2000 = -31622400.0
         val iosItem =
             IosBackupItem(
                 title = "2000",
@@ -243,7 +245,7 @@ class IosBackupIntegrationTest {
             IosBackupItem(
                 title = "Тест",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -272,7 +274,7 @@ class IosBackupIntegrationTest {
             IosBackupItem(
                 title = "Тест",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = greenBase64,
                 displayOption = "day",
             )
@@ -298,7 +300,7 @@ class IosBackupIntegrationTest {
                 IosBackupItem(
                     title = "Тест",
                     details = null,
-                    timestamp = 699417600.0,
+                    timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                     colorTag = null,
                     displayOption = option,
                 )
@@ -319,7 +321,7 @@ class IosBackupIntegrationTest {
             IosBackupItem(
                 title = "Тест",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "invalidOption",
             )
@@ -339,7 +341,7 @@ class IosBackupIntegrationTest {
         // Given
         val inputStream =
             javaClass.classLoader
-                ?.getResourceAsStream("ios-backup-sample.json")
+                ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
         val originalIosItem = iosBackupItems[0] // День рождения
@@ -354,7 +356,9 @@ class IosBackupIntegrationTest {
         val restoredItem = item!!
         assertEquals(originalIosItem.title, restoredItem.title)
         assertEquals(originalIosItem.details, restoredItem.details)
-        assertEquals((originalIosItem.timestamp * 1000).toLong(), restoredItem.timestamp)
+        // iOS timestamp конвертируется: (seconds + 978307200) * 1000 = milliseconds
+        val expectedTimestamp = ((originalIosItem.timestamp + 978307200) * 1000).toLong()
+        assertEquals(expectedTimestamp, restoredItem.timestamp)
 
         // colorTag должен быть конвертирован из Base64 в Int
         assertNotNull(restoredItem.colorTag)
@@ -369,7 +373,7 @@ class IosBackupIntegrationTest {
             IosBackupItem(
                 title = "Тест",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -390,7 +394,7 @@ class IosBackupIntegrationTest {
             IosBackupItem(
                 title = "",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )

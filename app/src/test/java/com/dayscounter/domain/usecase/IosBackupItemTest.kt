@@ -25,11 +25,13 @@ class IosBackupItemTest {
     @Test
     fun `toBackupItem converts iOS timestamp (seconds) to Android timestamp (milliseconds)`() {
         // Given
+        // iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
+        // -278889600.0 сек с 2001 = 699417600000 мс с 1970
         val iosBackupItem =
             IosBackupItem(
                 title = "Test Event",
                 details = "Test Details",
-                timestamp = 699417600.0, // iOS: секунды с 1970-01-01
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -39,17 +41,19 @@ class IosBackupItemTest {
 
         // Then
         assertNotNull(backupItem)
-        assertEquals(699417600000L, backupItem!!.timestamp) // Android: миллисекунды
+        assertEquals(699417600000L, backupItem!!.timestamp) // Android: миллисекунды с 1970-01-01
     }
 
     @Test
     fun `toBackupItem converts iOS timestamp with fractional seconds`() {
         // Given
+        // iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
+        // -208943530.470082 сек с 2001 = 769363669529 мс с 1970
         val iosBackupItem =
             IosBackupItem(
                 title = "Test Event",
                 details = "Test Details",
-                timestamp = 769363669.529918, // iOS: секунды с дробной частью
+                timestamp = -208943530.470082, // iOS: секунды с 2001-01-01 с дробной частью
                 colorTag = null,
                 displayOption = "day",
             )
@@ -69,7 +73,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Оффер",
                 details = "Компания, 999 гросс",
-                timestamp = 769363669.529918,
+                timestamp = -208943530.470082, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -90,7 +94,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Test Event",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "monthDay",
             )
@@ -110,7 +114,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Test Event",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -130,7 +134,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Test Event",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "invalid_option",
             )
@@ -149,7 +153,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Оффер",
                 details = "Компания, 999 гросс",
-                timestamp = 769363669.529918,
+                timestamp = -208943530.470082, // iOS: секунды с 2001-01-01
                 colorTag = redColorBase64,
                 displayOption = "day",
             )
@@ -169,7 +173,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Test Event",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "day",
             )
@@ -189,7 +193,7 @@ class IosBackupItemTest {
             IosBackupItem(
                 title = "Test Event",
                 details = null,
-                timestamp = 699417600.0,
+                timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
                 displayOption = "yearMonthDay",
             )

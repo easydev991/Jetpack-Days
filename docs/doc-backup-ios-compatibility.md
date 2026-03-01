@@ -1,51 +1,31 @@
-# Документация: Совместимость резервных копий iOS ↔ Android
+# Резервные копии в Android
 
 ## Обзор
 
-Android-приложение полностью совместимо с резервными копиями iOS-версии. При импорте автоматически определяется формат (iOS или Android) и выполняется конвертация данных.
+Приложение поддерживает:
+- **Импорт**: Android и iOS форматы (автоопределение)
+- **Экспорт**: только Android-формат
+
+При импорте iOS-файлов автоматически конвертируются timestamp (секунды с 2001-01-01 → миллисекунды с 1970-01-01) и colorTag (Base64 NSKeyedArchiver → hex #RRGGBB).
 
 ---
 
 ## Импорт резервных копий
 
-### Определение формата
+### Порядок парсинга файлов
 
-При импорте автоматически определяется тип резервной копии:
+`ImportBackupUseCase` пытается распарсить файл в следующем порядке:
 
-| Поле            | iOS формат                              | Android формат            |
-|-----------------|-----------------------------------------|---------------------------|
-| `timestamp`     | Секунды с 1970-01-01                    | Миллисекунды с 1970-01-01 |
-| `colorTag`      | Base64 NSKeyedArchiver (bplist00)       | Hex-строка (#RRGGBB)      |
-| `displayOption` | camelCase (day, monthDay, yearMonthDay) | camelCase (идентично)     |
-
-### Логика определения timestamp
-
-Если значение timestamp < 10¹² (примерно до 2001 года в мс), считается что это секунды (iOS) и умножается на 1000 для конвертации в миллисекунды.
-
-### Логика определения colorTag
-
-1. Если начинается с `#` → hex-формат (Android)
-2. Если Base64 декодируется в `bplist00` → NSKeyedArchiver (iOS)
-3. Иначе → некорректный формат, colorTag = null
-
-### Обработка colorTag
-
-**iOS → Android:**
-
-- Base64 NSKeyedArchiver парсится для извлечения RGBA компонентов UIColor
-- Конвертируется в ARGB Int для хранения в Android
-- Поддерживаются любые цвета (не ограничено палитрой Android)
-
-**Android → iOS:**
-
-- ARGB Int конвертируется в Base64 NSKeyedArchiver
-- Генерируется валидный bplist00 формат для UIColor
+1. **BackupWrapper** (Android формат с полем `format: "android"`)
+2. **IosBackupWrapper** (iOS формат с полем `format: "ios"`)
+3. **List<BackupItem>** (старый формат без обёртки — fallback)
 
 ### Обнаружение дубликатов
 
 При импорте проверяется наличие события с идентичными:
 
 - `title` (название)
+- `details` (описание)
 - `timestamp` (дата)
 - `displayOption` (формат отображения)
 
@@ -55,80 +35,66 @@ Android-приложение полностью совместимо с резе
 
 ## Экспорт резервных копий
 
-### Форматы экспорта
-
-Приложение поддерживает два формата экспорта:
-
-1. **Android формат** — для импорта в Android-приложение
-   - `timestamp`: миллисекунды
-   - `colorTag`: hex-строка (#RRGGBB)
-
-2. **iOS формат** — для импорта в iOS-приложение
-   - `timestamp`: секунды
-   - `colorTag`: Base64 NSKeyedArchiver
-
-### Совместимость с iOS
-
-Резервные копии, созданные в Android-приложении в iOS формате, полностью совместимы с iOS-версией:
-
-- JSON структура идентична
-- timestamp конвертируется в секунды
-- colorTag конвертируется в NSKeyedArchiver с UIColor
-- displayOption использует те же значения enum
-
----
-
-## Структура JSON резервной копии
+### Android-формат
 
 ```json
-[
-  {
-    "title": "Название события",
-    "details": "Описание",
-    "timestamp": 1234567890,
-    "colorTag": "#FF0000",
-    "displayOption": "day"
-  }
-]
+{
+  "format": "android",
+  "items": [
+    {
+      "title": "Название события",
+      "details": "Описание",
+      "timestamp": 699417600000,
+      "colorTag": "#FF5722",
+      "displayOption": "day"
+    }
+  ]
+}
 ```
 
 ### Поля
 
-| Поле            | Тип     | Описание                               |
-|-----------------|---------|----------------------------------------|
-| `title`         | String  | Название события                       |
-| `details`       | String? | Описание (опционально)                 |
-| `timestamp`     | Long    | Дата в секундах (iOS) или мс (Android) |
-| `colorTag`      | String? | Цвет: hex или Base64 (опционально)     |
-| `displayOption` | String  | `day`, `monthDay` или `yearMonthDay`   |
+| Поле            | Тип     | Описание                                   |
+|-----------------|---------|-------------------------------------------|
+| `title`         | String  | Название события                          |
+| `details`       | String? | Описание (опционально)                    |
+| `timestamp`     | Long    | Миллисекунды с 1970-01-01                 |
+| `colorTag`      | String? | Hex-цвет #RRGGBB (опционально)            |
+| `displayOption` | String  | `day`, `monthDay` или `yearMonthDay`      |
 
 ---
 
 ## Файлы реализации
 
-| Файл                        | Назначение                                             |
-|-----------------------------|--------------------------------------------------------|
-| `BackupItem.kt`             | DTO для резервных копий, конвертация Item ↔ BackupItem |
-| `IosBackupItem.kt`          | DTO для iOS-формата, конвертация timestamp и colorTag  |
-| `NsKeyedArchiverParser.kt`  | Парсер Base64 NSKeyedArchiver → UIColor компоненты     |
-| `NsKeyedArchiverBuilder.kt` | Генератор UIColor → Base64 NSKeyedArchiver             |
-| `ExportBackupUseCase.kt`    | Логика экспорта в Android/iOS формат                   |
-| `ImportBackupUseCase.kt`    | Логика импорта с автоопределением формата              |
+| Файл                        | Назначение                                      |
+|-----------------------------|-------------------------------------------------|
+| `BackupItem.kt`             | DTO для Android-формата, Item ↔ BackupItem      |
+| `BackupWrapper.kt`          | Обёртка с полем format                          |
+| `ExportBackupUseCase.kt`    | Экспорт в Android-формат                        |
+| `ImportBackupUseCase.kt`    | Импорт с автоопределением формата               |
+
+iOS-совместимость (импорт):
+- `IosBackupItem.kt` — DTO для iOS-формата
+- `IosBackupWrapper.kt` — обёртка для iOS
+- `NsKeyedArchiverParser.kt` — парсер colorTag из iOS
 
 ---
 
 ## Тестирование
 
-- Unit-тесты для конвертации colorTag (hex и Base64)
-- Unit-тесты для конвертации timestamp
-- Интеграционные тесты с реальным iOS-бекапом (`ios-backup-sample.json`)
-- Тесты обнаружения дубликатов
-- Тесты невалидных данных
+### Unit-тесты
 
----
+- `BackupItemTest.kt` — конвертация Item ↔ BackupItem
+- `IosBackupItemTest.kt` — конвертация iOS timestamp/colorTag
+- `NsKeyedArchiverParserTest.kt` — парсинг iOS colorTag
+- `BackupWrapperTest.kt` — сериализация wrapper'ов
 
-## Технический долг
+### Интеграционные тесты
 
-**Detekt предупреждения** (не блокируют сборку):
+Файлы в `app/src/test/resources/`:
+- `new-backup-sample.json` — Android с wrapper
+- `new-ios-backup.json` — iOS с wrapper
+- `old-backup-sample.json` — старый Android (массив)
+- `old-ios-backup-sample.json` — старый iOS (массив)
 
-- `BackupItem.kt`: ReturnCount в `parseColorTag()`
+Тесты в `BackupImportRealFilesTest.kt` проверяют парсинг всех форматов.

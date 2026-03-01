@@ -64,13 +64,13 @@ class CalculateDaysDifferenceUseCaseTest {
 
     @Test
     fun `calculate when 30 days difference then returns 30 days`() {
-        // Given
-        val currentDate = LocalDate.now()
-        val eventDate = currentDate.minusDays(30)
+        // Given - используем даты в пределах одного месяца для точного подсчёта 30 дней
+        val currentDate = LocalDate.of(2024, 3, 31)
+        val eventDate = LocalDate.of(2024, 3, 1)
         val timestamp = eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         // When
-        val result = useCase(eventTimestamp = timestamp)
+        val result = useCase(eventTimestamp = timestamp, currentDate = currentDate)
 
         // Then
         assertTrue(result is DaysDifference.Calculated, "Результат должен быть Calculated")
