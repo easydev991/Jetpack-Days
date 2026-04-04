@@ -34,7 +34,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -52,7 +52,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -67,7 +67,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = 10,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         every {
             daysFormatter.formatComposite(
@@ -75,7 +75,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
                 totalDays = 10,
-                showMinus = true,
+                showMinus = true
             )
         } returns "10 дней"
 
@@ -85,7 +85,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -100,7 +100,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = 10,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         every {
             daysFormatter.formatComposite(
@@ -108,7 +108,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
                 totalDays = 10,
-                showMinus = false,
+                showMinus = false
             )
         } returns "10 дней"
 
@@ -118,7 +118,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -133,7 +133,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -7,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         every {
             daysFormatter.formatComposite(
@@ -141,7 +141,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -7,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-7 дней"
 
@@ -151,7 +151,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -167,7 +167,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -7,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
         // а DaysFormatterImpl сам решает, показывать минус или нет
@@ -177,7 +177,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -7,
-                showMinus = false,
+                showMinus = false
             )
         } returns "7 дней"
 
@@ -187,7 +187,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -202,7 +202,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -40,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         every {
             daysFormatter.formatComposite(
@@ -210,7 +210,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -40,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-40 дней"
 
@@ -220,7 +220,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -235,7 +235,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -40,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
         // а DaysFormatterImpl сам решает, показывать минус или нет
@@ -245,7 +245,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -40,
-                showMinus = false,
+                showMinus = false
             )
         } returns "40 дней"
 
@@ -255,7 +255,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -270,7 +270,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -800,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         every {
             daysFormatter.formatComposite(
@@ -278,7 +278,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -800,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-800 дней"
 
@@ -288,7 +288,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -303,7 +303,7 @@ class FormatDaysTextUseCaseTest {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = -800,
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
         // а DaysFormatterImpl сам решает, показывать минус или нет
@@ -313,7 +313,7 @@ class FormatDaysTextUseCaseTest {
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
                 totalDays = -800,
-                showMinus = false,
+                showMinus = false
             )
         } returns "800 дней"
 
@@ -323,7 +323,7 @@ class FormatDaysTextUseCaseTest {
                 difference = difference,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then

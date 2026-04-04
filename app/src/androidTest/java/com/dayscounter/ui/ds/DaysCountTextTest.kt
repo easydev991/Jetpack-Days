@@ -27,7 +27,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -49,7 +49,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -71,7 +71,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -93,7 +93,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -115,7 +115,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -137,7 +137,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 
@@ -159,7 +159,7 @@ class DaysCountTextTest {
         // When
         composeTestRule.setContent {
             DaysCountText(
-                formattedText = testText,
+                formattedText = testText
             )
         }
 

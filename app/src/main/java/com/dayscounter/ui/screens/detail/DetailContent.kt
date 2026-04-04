@@ -42,7 +42,7 @@ import java.time.format.DateTimeFormatter
 fun DetailContentByState(
     uiState: DetailScreenState,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (uiState) {
         is DetailScreenState.Loading -> {
@@ -53,14 +53,14 @@ fun DetailContentByState(
             DetailContentInner(
                 item = uiState.item,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
-                modifier = modifier,
+                modifier = modifier
             )
         }
 
         is DetailScreenState.Error -> {
             ErrorContent(
                 message = uiState.message,
-                modifier = modifier,
+                modifier = modifier
             )
         }
     }
@@ -78,7 +78,7 @@ fun DetailContentByState(
 internal fun DetailContentInner(
     item: Item,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier =
@@ -86,35 +86,35 @@ internal fun DetailContentInner(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(dimensionResource(R.dimen.spacing_regular)),
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_medium))
     ) {
         ReadSectionView(
             headerText = stringResource(R.string.title),
-            bodyText = item.title,
+            bodyText = item.title
         )
         if (item.details.isNotEmpty()) {
             ReadSectionView(
                 headerText = stringResource(R.string.details),
-                bodyText = item.details,
+                bodyText = item.details
             )
         }
         if (item.colorTag != null) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.color_tag),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
                 ColorTagSection(item.colorTag)
             }
         }
         DetailDatePicker(
             item = item,
-            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
         DetailDisplayOptionPicker(displayOption = item.displayOption)
         Spacer(modifier = Modifier.weight(1f))
@@ -131,7 +131,7 @@ fun ColorTagSection(colorTag: Int) {
         shape = CircleShape,
         color =
             androidx.compose.ui.graphics
-                .Color(colorTag),
+                .Color(colorTag)
     ) {}
 }
 
@@ -147,24 +147,24 @@ fun ColorTagSection(colorTag: Int) {
 fun ReadSectionView(
     headerText: String,
     bodyText: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
     ) {
         Text(
             text = headerText,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
         Text(
             text = bodyText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -183,7 +183,7 @@ fun ReadSectionView(
 fun DetailDatePicker(
     item: Item,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val formatter =
         remember {
@@ -204,23 +204,23 @@ fun DetailDatePicker(
     // Для режима только для чтения отображаем как Text вместо DatePicker
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
     ) {
         Text(
             text = stringResource(R.string.date),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text = formattedDate,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = daysAnalysisText,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -235,17 +235,17 @@ fun DetailDatePicker(
 @Composable
 fun DetailDisplayOptionPicker(
     displayOption: DisplayOption,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
     ) {
         Text(
             text = stringResource(R.string.display_format),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text =
@@ -259,7 +259,7 @@ fun DetailDisplayOptionPicker(
                         stringResource(R.string.days_only)
                 },
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

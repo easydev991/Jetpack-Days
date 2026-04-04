@@ -39,7 +39,7 @@ fun DetailScreen(
     modifier: Modifier = Modifier,
     viewModel: DetailScreenViewModel = viewModel(),
     onBackClick: () -> Unit = {},
-    onEditClick: (Long) -> Unit = {},
+    onEditClick: (Long) -> Unit = {}
 ) {
     val context = LocalContext.current
     // Создаем use cases для форматирования
@@ -56,14 +56,14 @@ fun DetailScreen(
             .createGetFormattedDaysForItemUseCase(
                 calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase = formatDaysTextUseCase,
-                resourceProvider = resourceProvider,
+                resourceProvider = resourceProvider
             )
     val getDaysAnalysisTextUseCase =
         com.dayscounter.di.FormatterModule
             .createGetDaysAnalysisTextUseCase(
                 calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
                 getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-                resourceProvider = resourceProvider,
+                resourceProvider = resourceProvider
             )
 
     val uiState by viewModel.uiState.collectAsState()
@@ -86,10 +86,10 @@ fun DetailScreen(
                 onCancelDelete = {
                     viewModel.cancelDelete()
                 },
-                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             ),
         modifier = modifier,
-        uiState = uiState,
+        uiState = uiState
     )
 }
 
@@ -101,7 +101,7 @@ fun DetailScreen(
 private fun DetailScreenContent(
     params: DetailScreenParams,
     modifier: Modifier = Modifier,
-    uiState: DetailScreenState,
+    uiState: DetailScreenState
 ) {
     val currentItem = (uiState as? DetailScreenState.Success)?.item
 
@@ -113,14 +113,14 @@ private fun DetailScreenContent(
                 onBackClick = params.onBackClick,
                 onEditClick = params.onEditClick,
                 onDeleteClick = params.onDeleteClick,
-                itemId = params.itemId,
+                itemId = params.itemId
             )
-        },
+        }
     ) { paddingValues ->
         DetailContentByState(
             uiState = uiState,
             getDaysAnalysisTextUseCase = params.getDaysAnalysisTextUseCase,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues)
         )
     }
 
@@ -135,18 +135,18 @@ private fun DetailScreenContent(
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = { params.onConfirmDelete() },
+                        onClick = { params.onConfirmDelete() }
                     ) {
                         Text(stringResource(R.string.delete_item_confirm))
                     }
                 },
                 dismissButton = {
                     TextButton(
-                        onClick = { params.onCancelDelete() },
+                        onClick = { params.onCancelDelete() }
                     ) {
                         Text(stringResource(R.string.cancel))
                     }
-                },
+                }
             )
         }
     }

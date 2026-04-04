@@ -20,7 +20,7 @@ fun ItemEntity.toDomain(): Item =
         details = details,
         timestamp = timestamp,
         colorTag = colorTag,
-        displayOption = displayOptionConverter.toDisplayOption(displayOption),
+        displayOption = displayOptionConverter.toDisplayOption(displayOption)
     )
 
 /**
@@ -35,5 +35,5 @@ fun Item.toEntity(): ItemEntity =
         details = details,
         timestamp = timestamp,
         colorTag = colorTag,
-        displayOption = displayOptionConverter.fromDisplayOption(displayOption),
+        displayOption = displayOptionConverter.fromDisplayOption(displayOption)
     )

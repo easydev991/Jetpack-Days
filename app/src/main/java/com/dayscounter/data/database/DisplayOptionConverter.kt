@@ -34,7 +34,7 @@ class DisplayOptionConverter {
             android.util.Log.w(
                 TAG,
                 "Неизвестное значение DisplayOption: '$value', используется DEFAULT",
-                e,
+                e
             )
             DisplayOption.DEFAULT
         }

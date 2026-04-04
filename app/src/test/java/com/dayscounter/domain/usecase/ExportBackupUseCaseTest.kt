@@ -58,8 +58,8 @@ class ExportBackupUseCaseTest {
                         details = "Test Details",
                         timestamp = 1234567890000L,
                         colorTag = 0xFFFF5722.toInt(),
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -90,7 +90,7 @@ class ExportBackupUseCaseTest {
                         details = "Details 1",
                         timestamp = 1000000000000L,
                         colorTag = 0xFFFF0000.toInt(),
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -98,8 +98,8 @@ class ExportBackupUseCaseTest {
                         details = "Details 2",
                         timestamp = 2000000000000L,
                         colorTag = 0xFF00FF00.toInt(),
-                        displayOption = DisplayOption.MONTH_DAY,
-                    ),
+                        displayOption = DisplayOption.MONTH_DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -135,8 +135,8 @@ class ExportBackupUseCaseTest {
                         details = "",
                         timestamp = testTimestamp,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -167,7 +167,7 @@ class ExportBackupUseCaseTest {
                         details = "Red color",
                         timestamp = 1000000000000L,
                         colorTag = 0xFFFF0000.toInt(), // ARGB красный
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -175,7 +175,7 @@ class ExportBackupUseCaseTest {
                         details = "Green color",
                         timestamp = 2000000000000L,
                         colorTag = 0xFF4CAF50.toInt(), // ARGB зелёный (Material Design)
-                        displayOption = DisplayOption.MONTH_DAY,
+                        displayOption = DisplayOption.MONTH_DAY
                     ),
                     Item(
                         id = 3L,
@@ -183,8 +183,8 @@ class ExportBackupUseCaseTest {
                         details = "Blue color",
                         timestamp = 3000000000000L,
                         colorTag = 0xFF2196F3.toInt(), // ARGB синий (Material Design)
-                        displayOption = DisplayOption.YEAR_MONTH_DAY,
-                    ),
+                        displayOption = DisplayOption.YEAR_MONTH_DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -219,8 +219,8 @@ class ExportBackupUseCaseTest {
                         details = "No color",
                         timestamp = 1000000000000L,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -277,7 +277,7 @@ class ExportBackupUseCaseTest {
                         details = "",
                         timestamp = 1000000000000L,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -285,7 +285,7 @@ class ExportBackupUseCaseTest {
                         details = "",
                         timestamp = 2000000000000L,
                         colorTag = null,
-                        displayOption = DisplayOption.MONTH_DAY,
+                        displayOption = DisplayOption.MONTH_DAY
                     ),
                     Item(
                         id = 3L,
@@ -293,8 +293,8 @@ class ExportBackupUseCaseTest {
                         details = "",
                         timestamp = 3000000000000L,
                         colorTag = null,
-                        displayOption = DisplayOption.YEAR_MONTH_DAY,
-                    ),
+                        displayOption = DisplayOption.YEAR_MONTH_DAY
+                    )
                 )
             val uri: Uri = mockk()
 
@@ -334,8 +334,8 @@ class ExportBackupUseCaseTest {
                         details = "", // empty string
                         timestamp = 1000000000000L,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             val uri: Uri = mockk()
 

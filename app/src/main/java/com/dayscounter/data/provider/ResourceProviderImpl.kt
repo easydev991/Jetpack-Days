@@ -10,11 +10,11 @@ import android.content.Context
  * @property context Application context
  */
 class ResourceProviderImpl(
-    private val context: Context,
+    private val context: Context
 ) : ResourceProvider {
     override fun getString(
         resId: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String =
         if (formatArgs.isEmpty()) {
             context.getString(resId)
@@ -25,7 +25,7 @@ class ResourceProviderImpl(
     override fun getQuantityString(
         resId: Int,
         quantity: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String =
         if (formatArgs.isEmpty()) {
             context.resources.getQuantityString(resId, quantity, quantity)
@@ -37,13 +37,13 @@ class ResourceProviderImpl(
         context.resources.getQuantityString(
             ResourceIds.YEARS_COUNT,
             quantity,
-            quantity,
+            quantity
         )
 
     override fun getMonthsString(quantity: Int): String =
         context.resources.getQuantityString(
             ResourceIds.MONTHS_COUNT,
             quantity,
-            quantity,
+            quantity
         )
 }

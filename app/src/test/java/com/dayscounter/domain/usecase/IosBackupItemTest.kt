@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
  */
 class IosBackupItemTest {
     // Пример Base64 NSKeyedArchiver для красного цвета (реальный пример из iOS)
-    // ktlint-disable max-line-length
     @Suppress("MaxLineLength")
     private val redColorBase64 =
         "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05T" +
@@ -33,7 +32,7 @@ class IosBackupItemTest {
                 details = "Test Details",
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -55,7 +54,7 @@ class IosBackupItemTest {
                 details = "Test Details",
                 timestamp = -208943530.470082, // iOS: секунды с 2001-01-01 с дробной частью
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -75,7 +74,7 @@ class IosBackupItemTest {
                 details = "Компания, 999 гросс",
                 timestamp = -208943530.470082, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -96,7 +95,7 @@ class IosBackupItemTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "monthDay",
+                displayOption = "monthDay"
             )
 
         // When
@@ -116,7 +115,7 @@ class IosBackupItemTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -136,7 +135,7 @@ class IosBackupItemTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "invalid_option",
+                displayOption = "invalid_option"
             )
 
         // When
@@ -155,7 +154,7 @@ class IosBackupItemTest {
                 details = "Компания, 999 гросс",
                 timestamp = -208943530.470082, // iOS: секунды с 2001-01-01
                 colorTag = redColorBase64,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When - colorTag парсится из Base64 NSKeyedArchiver в hex
@@ -175,7 +174,7 @@ class IosBackupItemTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -195,7 +194,7 @@ class IosBackupItemTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "yearMonthDay",
+                displayOption = "yearMonthDay"
             )
 
         // When

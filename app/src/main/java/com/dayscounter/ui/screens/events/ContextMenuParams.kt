@@ -12,5 +12,5 @@ data class ContextMenuParams(
     val onDismiss: () -> Unit,
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
-    val onDeleteClick: (Item) -> Unit,
+    val onDeleteClick: (Item) -> Unit
 )

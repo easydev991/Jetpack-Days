@@ -76,7 +76,7 @@ class MainScreenViewModelTest {
                         details = "Детали 1",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -84,8 +84,8 @@ class MainScreenViewModelTest {
                         details = "Детали 2",
                         timestamp = System.currentTimeMillis() - 86400000,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -113,7 +113,7 @@ class MainScreenViewModelTest {
                         details = "Праздничный день",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -121,8 +121,8 @@ class MainScreenViewModelTest {
                         details = "Праздник",
                         timestamp = System.currentTimeMillis() - 86400000,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -138,7 +138,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 "День рождения",
                 successState.items[0].title,
-                "Должен быть правильный элемент",
+                "Должен быть правильный элемент"
             )
         }
     }
@@ -155,7 +155,7 @@ class MainScreenViewModelTest {
                         details = "Праздничный день",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -163,8 +163,8 @@ class MainScreenViewModelTest {
                         details = "Праздник",
                         timestamp = System.currentTimeMillis() - 86400000,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -194,7 +194,7 @@ class MainScreenViewModelTest {
                         details = "Детали 1",
                         timestamp = System.currentTimeMillis() - 86400000,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -202,8 +202,8 @@ class MainScreenViewModelTest {
                         details = "Детали 2",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -220,7 +220,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 SortOrder.ASCENDING,
                 viewModel.sortOrder.value,
-                "Порядок сортировки должен обновиться",
+                "Порядок сортировки должен обновиться"
             )
             coVerify { dataStore.setSortOrder(SortOrder.ASCENDING) }
         }
@@ -238,7 +238,7 @@ class MainScreenViewModelTest {
                         details = "Детали 1",
                         timestamp = System.currentTimeMillis() - 86400000,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
                     Item(
                         id = 2L,
@@ -246,8 +246,8 @@ class MainScreenViewModelTest {
                         details = "Детали 2",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -274,7 +274,7 @@ class MainScreenViewModelTest {
                     details = "Детали",
                     timestamp = System.currentTimeMillis(),
                     colorTag = null,
-                    displayOption = DisplayOption.DAY,
+                    displayOption = DisplayOption.DAY
                 )
             repository.setItems(listOf(item))
 
@@ -290,7 +290,7 @@ class MainScreenViewModelTest {
             assertEquals(
                 0,
                 viewModel.itemsCount.value,
-                "Количество элементов в ViewModel должно быть 0",
+                "Количество элементов в ViewModel должно быть 0"
             )
         }
     }
@@ -325,8 +325,8 @@ class MainScreenViewModelTest {
                         details = "Праздничный день рождения",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -354,8 +354,8 @@ class MainScreenViewModelTest {
                         details = "Детали",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 
@@ -383,8 +383,8 @@ class MainScreenViewModelTest {
                         details = "Детали",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
-                    ),
+                        displayOption = DisplayOption.DAY
+                    )
                 )
             repository.setItems(items)
 

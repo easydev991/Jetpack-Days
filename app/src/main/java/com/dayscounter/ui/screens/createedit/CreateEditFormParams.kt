@@ -12,5 +12,5 @@ data class CreateEditFormParams(
     val uiStates: CreateEditUiState,
     val showDatePicker: MutableState<Boolean>,
     val viewModel: CreateEditScreenViewModel,
-    val onBackClick: () -> Unit,
+    val onBackClick: () -> Unit
 )

@@ -19,7 +19,7 @@ interface DaysFormatter {
      */
     fun format(
         days: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String
 
     /**
@@ -31,7 +31,7 @@ interface DaysFormatter {
      */
     fun formatMonths(
         months: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String
 
     /**
@@ -43,7 +43,7 @@ interface DaysFormatter {
      */
     fun formatYears(
         years: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String
 
     /**
@@ -61,6 +61,6 @@ interface DaysFormatter {
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
         totalDays: Int,
-        showMinus: Boolean,
+        showMinus: Boolean
     ): String
 }

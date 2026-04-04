@@ -38,7 +38,7 @@ class DetailScreenViewModelTest {
             details = "Описание события",
             timestamp = System.currentTimeMillis(),
             colorTag = null,
-            displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
+            displayOption = com.dayscounter.domain.model.DisplayOption.DAY
         )
 
     @BeforeEach
@@ -65,7 +65,7 @@ class DetailScreenViewModelTest {
             val initialState = viewModel.uiState.value
             assertTrue(
                 initialState is DetailScreenState.Loading,
-                "Начальное состояние должно быть Loading",
+                "Начальное состояние должно быть Loading"
             )
         }
     }
@@ -84,7 +84,7 @@ class DetailScreenViewModelTest {
             val currentState = viewModel.uiState.value
             assertTrue(
                 currentState is DetailScreenState.Loading,
-                "Должно остаться в состоянии Loading",
+                "Должно остаться в состоянии Loading"
             )
         }
     }
@@ -109,7 +109,7 @@ class DetailScreenViewModelTest {
             val currentState = viewModel.uiState.value
             assertTrue(
                 currentState is DetailScreenState.Success,
-                "Состояние должно быть Success, фактическое: $currentState",
+                "Состояние должно быть Success, фактическое: $currentState"
             )
             val successState = currentState as DetailScreenState.Success
             assertEquals(testItem, successState.item, "Элемент должен совпадать")
@@ -160,7 +160,7 @@ class DetailScreenViewModelTest {
             // Then - Элемент должен быть удален и диалог скрыт
             assertFalse(
                 repository.containsItem(testItemId),
-                "Элемент должен быть удален из repository",
+                "Элемент должен быть удален из repository"
             )
             assertFalse(viewModel.showDeleteDialog.value, "Диалог удаления должен быть скрыт")
             // stateIn кэширует последнее значение, поэтому состояние остается Success
@@ -168,7 +168,7 @@ class DetailScreenViewModelTest {
             assertTrue(
                 currentState is DetailScreenState.Success,
                 "После удаления состояние остается Success " +
-                    "(stateIn кэширует последнее значение), фактическое: $currentState",
+                    "(stateIn кэширует последнее значение), фактическое: $currentState"
             )
         }
     }
@@ -206,8 +206,7 @@ class DetailScreenViewModelTest {
 
         override fun getAllItems(): Flow<List<Item>> = items
 
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
-            items
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = items
 
         override suspend fun getItemById(id: Long): Item? {
             // Без задержки для тестов - getItemFlow используется для загрузки в ViewModel

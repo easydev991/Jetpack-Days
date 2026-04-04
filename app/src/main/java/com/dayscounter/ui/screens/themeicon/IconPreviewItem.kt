@@ -43,7 +43,7 @@ fun IconPreviewItem(
     isSelected: Boolean,
     isDarkTheme: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val iconResource = appIcon.iconResource(isDarkTheme)
     val borderColor =
@@ -54,10 +54,11 @@ fun IconPreviewItem(
         }
     val borderWidth = if (isSelected) 4.dp else 2.dp
     Box(
-        modifier = modifier
-            .size(64.dp)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .size(64.dp)
+                .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
         // Иконка с закруглением и бордюром (аналог iOS overlay)
         Image(
@@ -74,9 +75,9 @@ fun IconPreviewItem(
                         drawRoundRect(
                             color = borderColor,
                             style = Stroke(width = borderWidth.toPx()),
-                            cornerRadius = CornerRadius(16.dp.toPx()),
+                            cornerRadius = CornerRadius(16.dp.toPx())
                         )
-                    },
+                    }
         )
 
         // Галочка на выбранной иконке (аналог iOS .overlay(alignment: .topTrailing))
@@ -87,24 +88,24 @@ fun IconPreviewItem(
                     animationSpec =
                         spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow,
-                        ),
+                            stiffness = Spring.StiffnessLow
+                        )
                 ),
             exit =
                 scaleOut(
                     animationSpec =
                         spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow,
-                        ),
+                            stiffness = Spring.StiffnessLow
+                        )
                 ),
             modifier =
                 Modifier
                     .align(Alignment.TopEnd)
                     .offset(
                         x = 6.dp,
-                        y = (-6).dp,
-                    ),
+                        y = (-6).dp
+                    )
         ) { CheckIcon() }
     }
 }
@@ -116,7 +117,7 @@ private fun CheckIcon() {
         imageVector = Icons.Default.Check,
         contentDescription = "Selected",
         tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(24.dp),
+        modifier = Modifier.size(24.dp)
     )
 }
 

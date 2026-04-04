@@ -30,7 +30,7 @@ data class BackupItem(
     val details: String?,
     val timestamp: Long,
     val colorTag: String?,
-    val displayOption: String,
+    val displayOption: String
 )
 
 /**
@@ -111,7 +111,7 @@ fun Item.toBackupItem(): BackupItem =
                 DisplayOption.DAY -> "day"
                 DisplayOption.MONTH_DAY -> "monthDay"
                 DisplayOption.YEAR_MONTH_DAY -> "yearMonthDay"
-            },
+            }
     )
 
 /**
@@ -141,6 +141,6 @@ fun BackupItem.toItem(): Item? {
         details = details ?: "", // Конвертируем String? в String с дефолтным значением
         timestamp = timestamp,
         colorTag = androidColorTag,
-        displayOption = displayOption,
+        displayOption = displayOption
     )
 }

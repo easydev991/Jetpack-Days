@@ -42,7 +42,7 @@ class DaysDifferenceTest {
         val differences: List<DaysDifference> =
             listOf(
                 DaysDifference.Today(System.currentTimeMillis()),
-                DaysDifference.Calculated(TimePeriod(), 100, System.currentTimeMillis()),
+                DaysDifference.Calculated(TimePeriod(), 100, System.currentTimeMillis())
             )
 
         // When

@@ -49,7 +49,7 @@ private val lightScheme =
         surfaceContainerLow = surfaceContainerLowLight,
         surfaceContainer = surfaceContainerLight,
         surfaceContainerHigh = surfaceContainerHighLight,
-        surfaceContainerHighest = surfaceContainerHighestLight,
+        surfaceContainerHighest = surfaceContainerHighestLight
     )
 
 private val darkScheme =
@@ -88,7 +88,7 @@ private val darkScheme =
         surfaceContainerLow = surfaceContainerLowDark,
         surfaceContainer = surfaceContainerDark,
         surfaceContainerHigh = surfaceContainerHighDark,
-        surfaceContainerHighest = surfaceContainerHighestDark,
+        surfaceContainerHighest = surfaceContainerHighestDark
     )
 
 @Immutable
@@ -96,7 +96,7 @@ data class ColorFamily(
     val color: Color,
     val onColor: Color,
     val colorContainer: Color,
-    val onColorContainer: Color,
+    val onColorContainer: Color
 )
 
 val unspecified_scheme =
@@ -104,7 +104,7 @@ val unspecified_scheme =
         Color.Unspecified,
         Color.Unspecified,
         Color.Unspecified,
-        Color.Unspecified,
+        Color.Unspecified
     )
 
 @Composable
@@ -113,7 +113,7 @@ fun JetpackDaysTheme(
     appTheme: AppTheme? = null,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     val useDarkTheme =
         when (appTheme) {
@@ -140,6 +140,6 @@ fun JetpackDaysTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
-        content = content,
+        content = content
     )
 }

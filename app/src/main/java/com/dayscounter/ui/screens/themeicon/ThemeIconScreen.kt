@@ -44,7 +44,7 @@ import com.dayscounter.ui.viewmodel.ThemeIconViewModel
 @Composable
 fun ThemeIconScreen(
     viewModel: ThemeIconViewModel,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -55,7 +55,7 @@ fun ThemeIconScreen(
         onThemeChange = { viewModel.updateTheme(it) },
         onDynamicColorsChange = { viewModel.updateDynamicColors(it) },
         onIconChange = { viewModel.updateIcon(it) },
-        onBackClick = onBackClick,
+        onBackClick = onBackClick
     )
 }
 
@@ -73,7 +73,7 @@ internal fun ThemeIconScreenContent(
     onThemeChange: (AppTheme) -> Unit = {},
     onDynamicColorsChange: (Boolean) -> Unit = {},
     onIconChange: (AppIcon) -> Unit = {},
-    onBackClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -83,12 +83,12 @@ internal fun ThemeIconScreenContent(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
-                },
+                }
             )
-        },
+        }
     ) { paddingValues ->
         val scrollState = rememberScrollState()
         Column(
@@ -98,18 +98,18 @@ internal fun ThemeIconScreenContent(
                     .verticalScroll(scrollState)
                     .padding(paddingValues)
                     .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ThemeSection(
                 theme = theme,
-                onThemeChange = onThemeChange,
+                onThemeChange = onThemeChange
             )
 
             HorizontalDivider()
 
             DynamicColorsSection(
                 useDynamicColors = useDynamicColors,
-                onDynamicColorsChange = onDynamicColorsChange,
+                onDynamicColorsChange = onDynamicColorsChange
             )
 
             HorizontalDivider()
@@ -117,7 +117,7 @@ internal fun ThemeIconScreenContent(
             IconSection(
                 theme = theme,
                 icon = icon,
-                onIconChange = onIconChange,
+                onIconChange = onIconChange
             )
         }
     }
@@ -129,12 +129,12 @@ internal fun ThemeIconScreenContent(
 @Composable
 private fun ThemeSection(
     theme: AppTheme,
-    onThemeChange: (AppTheme) -> Unit,
+    onThemeChange: (AppTheme) -> Unit
 ) {
     Text(
         text = stringResource(R.string.app_theme),
         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     )
 
     Column(modifier = Modifier.selectableGroup()) {
@@ -143,7 +143,7 @@ private fun ThemeSection(
             text = stringResource(R.string.light),
             selected = theme == AppTheme.LIGHT,
             onClick = { onThemeChange(AppTheme.LIGHT) },
-            onClickable = theme != AppTheme.LIGHT,
+            onClickable = theme != AppTheme.LIGHT
         )
 
         // Тёмная тема
@@ -151,7 +151,7 @@ private fun ThemeSection(
             text = stringResource(R.string.dark),
             selected = theme == AppTheme.DARK,
             onClick = { onThemeChange(AppTheme.DARK) },
-            onClickable = theme != AppTheme.DARK,
+            onClickable = theme != AppTheme.DARK
         )
 
         // Системная тема
@@ -159,7 +159,7 @@ private fun ThemeSection(
             text = stringResource(R.string.system),
             selected = theme == AppTheme.SYSTEM,
             onClick = { onThemeChange(AppTheme.SYSTEM) },
-            onClickable = theme != AppTheme.SYSTEM,
+            onClickable = theme != AppTheme.SYSTEM
         )
     }
 }
@@ -170,7 +170,7 @@ private fun ThemeSection(
 @Composable
 private fun DynamicColorsSection(
     useDynamicColors: Boolean,
-    onDynamicColorsChange: (Boolean) -> Unit,
+    onDynamicColorsChange: (Boolean) -> Unit
 ) {
     // Секция отображается только если доступны динамические цвета (Android 12+)
     val dynamicColorAvailable = DynamicColors.isDynamicColorAvailable()
@@ -179,29 +179,29 @@ private fun DynamicColorsSection(
         Text(
             text = stringResource(R.string.dynamic_colors),
             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.use_dynamic_colors),
                     style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 Switch(
                     checked = useDynamicColors,
-                    onCheckedChange = onDynamicColorsChange,
+                    onCheckedChange = onDynamicColorsChange
                 )
             }
             Text(
                 text = stringResource(R.string.dynamic_colors_hint),
                 style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -214,7 +214,7 @@ private fun DynamicColorsSection(
 private fun IconSection(
     theme: AppTheme,
     icon: AppIcon,
-    onIconChange: (AppIcon) -> Unit,
+    onIconChange: (AppIcon) -> Unit
 ) {
     val isDarkTheme =
         when (theme) {
@@ -229,14 +229,14 @@ private fun IconSection(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = dimensionResource(R.dimen.spacing_small)),
+                .padding(bottom = dimensionResource(R.dimen.spacing_small))
     )
 
     IconGrid(
         icons = AppIcon.entries,
         selectedIcon = icon,
         isDarkTheme = isDarkTheme,
-        onIconClick = onIconChange,
+        onIconClick = onIconChange
     )
 }
 
@@ -251,22 +251,22 @@ private fun IconGrid(
     icons: List<AppIcon>,
     selectedIcon: AppIcon,
     isDarkTheme: Boolean,
-    onIconClick: (AppIcon) -> Unit,
+    onIconClick: (AppIcon) -> Unit
 ) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(32.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         icons.forEach { appIcon ->
             Box(
-                modifier = Modifier.width(64.dp),
+                modifier = Modifier.width(64.dp)
             ) {
                 IconPreviewItem(
                     appIcon = appIcon,
                     isSelected = appIcon == selectedIcon,
                     isDarkTheme = isDarkTheme,
-                    onClick = { onIconClick(appIcon) },
+                    onClick = { onIconClick(appIcon) }
                 )
             }
         }

@@ -16,7 +16,7 @@ class ItemEntityTest {
         val entity =
             ItemEntity(
                 title = title,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
 
         // Then
@@ -46,7 +46,7 @@ class ItemEntityTest {
                 details = details,
                 timestamp = timestamp,
                 colorTag = colorTag,
-                displayOption = displayOption,
+                displayOption = displayOption
             )
 
         // Then
@@ -68,7 +68,7 @@ class ItemEntityTest {
         val entity =
             ItemEntity(
                 title = title,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
 
         // Then

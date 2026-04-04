@@ -28,20 +28,20 @@ fun DetailTopAppBar(
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
     onDeleteClick: () -> Unit,
-    itemId: Long,
+    itemId: Long
 ) {
     TopAppBar(
         title = {
             Text(
                 text = stringResource(R.string.details),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge
             )
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.close)
                 )
             }
         },
@@ -56,8 +56,8 @@ fun DetailTopAppBar(
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+                containerColor = MaterialTheme.colorScheme.surface
+            )
     )
 }
 
@@ -68,18 +68,18 @@ fun DetailTopAppBar(
 internal fun DetailActionButtons(
     onEditClick: (Long) -> Unit,
     onDeleteClick: () -> Unit,
-    itemId: Long,
+    itemId: Long
 ) {
     IconButton(onClick = { onEditClick(itemId) }) {
         Icon(
             imageVector = Icons.Default.Edit,
-            contentDescription = stringResource(R.string.edit),
+            contentDescription = stringResource(R.string.edit)
         )
     }
     IconButton(onClick = onDeleteClick) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = stringResource(R.string.delete),
+            contentDescription = stringResource(R.string.delete)
         )
     }
 }
@@ -99,13 +99,13 @@ fun DetailTopAppBarPreview() {
                         details = "Праздничный день",
                         timestamp = System.currentTimeMillis(),
                         colorTag = android.graphics.Color.RED,
-                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
-                    ),
+                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY
+                    )
                 ),
             onBackClick = {},
             onEditClick = {},
             onDeleteClick = {},
-            itemId = 1L,
+            itemId = 1L
         )
     }
 }

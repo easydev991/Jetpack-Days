@@ -8,5 +8,5 @@ enum class SortOrder {
     ASCENDING,
 
     /** Новые первые (по убыванию) */
-    DESCENDING,
+    DESCENDING
 }

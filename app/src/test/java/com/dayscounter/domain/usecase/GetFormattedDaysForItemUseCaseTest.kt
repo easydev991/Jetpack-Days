@@ -28,7 +28,7 @@ class GetFormattedDaysForItemUseCaseTest {
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             formatDaysTextUseCase = formatDaysTextUseCase,
-            resourceProvider = resourceProvider,
+            resourceProvider = resourceProvider
         )
 
     @Test
@@ -44,21 +44,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 7),
                 totalDays = -7,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-7 дней"
 
@@ -86,21 +86,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 7),
                 totalDays = -7,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "7 дней"
 
@@ -124,21 +124,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 10),
                 totalDays = 10,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "10 дней"
 
@@ -162,21 +162,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 10),
                 totalDays = 10,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "10 дней"
 
@@ -199,7 +199,7 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
@@ -209,7 +209,7 @@ class GetFormattedDaysForItemUseCaseTest {
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "Сегодня"
 
@@ -232,7 +232,7 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
@@ -242,7 +242,7 @@ class GetFormattedDaysForItemUseCaseTest {
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "Сегодня"
 
@@ -266,21 +266,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 1, days = 5),
                 totalDays = -40,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-40 дней"
 
@@ -304,21 +304,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 1, days = 5),
                 totalDays = -40,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "40 дней"
 
@@ -342,21 +342,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
+                displayOption = DisplayOption.YEAR_MONTH_DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 2, months = 2, days = 10),
                 totalDays = -800,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-800 дней"
 
@@ -380,21 +380,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
+                displayOption = DisplayOption.YEAR_MONTH_DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 2, months = 2, days = 10),
                 totalDays = -800,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "800 дней"
 
@@ -418,21 +418,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), customDate) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 7),
                 totalDays = -7,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-7 дней"
 
@@ -456,21 +456,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         every { calculateDaysDifferenceUseCase(any(), customDate) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 7),
                 totalDays = -7,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = false,
+                showMinus = false
             )
         } returns "7 дней"
 
@@ -494,21 +494,21 @@ class GetFormattedDaysForItemUseCaseTest {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DEFAULT,
+                displayOption = DisplayOption.DEFAULT
             )
 
         every { calculateDaysDifferenceUseCase(any(), any()) } returns
             DaysDifference.Calculated(
                 period = TimePeriod(years = 0, months = 0, days = 7),
                 totalDays = -7,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         every {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
                 resourceProvider = resourceProvider,
-                showMinus = true,
+                showMinus = true
             )
         } returns "-7 дней"
 
@@ -517,7 +517,7 @@ class GetFormattedDaysForItemUseCaseTest {
             useCase.invoke(
                 item = item,
                 defaultDisplayOption = DisplayOption.DAY,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then

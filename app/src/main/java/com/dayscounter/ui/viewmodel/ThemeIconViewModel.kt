@@ -36,7 +36,7 @@ private const val TAG = "ThemeIconViewModel"
 class ThemeIconViewModel(
     private val dataStore: AppSettingsDataStore,
     private val iconManager: IconManager,
-    private val logger: Logger = AndroidLogger(),
+    private val logger: Logger = AndroidLogger()
 ) : ViewModel() {
     companion object {
         /**
@@ -48,7 +48,7 @@ class ThemeIconViewModel(
          */
         fun factory(
             dataStore: AppSettingsDataStore,
-            application: Application,
+            application: Application
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 val iconManager = IconManager(application)
@@ -61,18 +61,18 @@ class ThemeIconViewModel(
         combine(
             dataStore.theme,
             dataStore.useDynamicColors,
-            dataStore.icon,
+            dataStore.icon
         ) { theme, useDynamicColors, icon ->
             ThemeIconUiState(
                 theme = theme,
                 useDynamicColors = useDynamicColors,
                 icon = icon,
-                isLoading = false,
+                isLoading = false
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
-            initialValue = ThemeIconUiState(),
+            initialValue = ThemeIconUiState()
         )
 
     /**

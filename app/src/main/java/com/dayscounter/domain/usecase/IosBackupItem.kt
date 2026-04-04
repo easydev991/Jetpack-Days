@@ -31,7 +31,7 @@ data class IosBackupItem(
     val details: String? = null,
     val timestamp: Double,
     val colorTag: String? = null,
-    val displayOption: String,
+    val displayOption: String
 )
 
 /**
@@ -59,15 +59,16 @@ fun IosBackupItem.toBackupItem(): BackupItem? {
         ((timestamp + IOS_REFERENCE_DATE_OFFSET_SECONDS) * MILLIS_PER_SECOND).toLong()
 
     // Конвертируем colorTag: Base64 NSKeyedArchiver → hex-строка
-    val androidColorTag: String? = colorTag?.let { iosColorTag ->
-        NsKeyedArchiverParser.parseHexColor(iosColorTag)
-    }
+    val androidColorTag: String? =
+        colorTag?.let { iosColorTag ->
+            NsKeyedArchiverParser.parseHexColor(iosColorTag)
+        }
 
     return BackupItem(
         title = title,
         details = details,
         timestamp = androidTimestamp,
         colorTag = androidColorTag,
-        displayOption = displayOption,
+        displayOption = displayOption
     )
 }

@@ -62,7 +62,7 @@ class StubResourceProvider : ResourceProvider {
     override fun getQuantityString(
         resId: Int,
         quantity: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String {
         // Заглушка для множественного числа - возвращает только число (для детального экрана)
         // ВАЖНО: Для детального экрана используем только сокращения,
@@ -72,7 +72,7 @@ class StubResourceProvider : ResourceProvider {
 
     override fun getString(
         resId: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String {
         // Заглушка для обычных строк
         return when (resId) {
@@ -87,8 +87,8 @@ class StubResourceProvider : ResourceProvider {
             RES_YEARS_ABBR -> "г."
             ResourceIds.DAYS_COUNT,
             ResourceIds.MONTHS_COUNT,
-            ResourceIds.YEARS_COUNT,
-                -> "Заглушка"
+            ResourceIds.YEARS_COUNT
+            -> "Заглушка"
 
             else -> "Заглушка"
         }

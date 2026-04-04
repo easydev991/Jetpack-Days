@@ -46,7 +46,7 @@ import com.dayscounter.ui.viewmodel.ThemeIconViewModel
 internal fun NavigationBarContent(
     items: List<Screen>,
     viewModel: RootScreenViewModel,
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     val currentTab by viewModel.currentTab
 
@@ -56,7 +56,7 @@ internal fun NavigationBarContent(
                 icon = {
                     Icon(
                         imageVector = screen.icon!!,
-                        contentDescription = stringResource(id = screen.titleResId!!),
+                        contentDescription = stringResource(id = screen.titleResId!!)
                     )
                 },
                 label = {
@@ -77,7 +77,7 @@ internal fun NavigationBarContent(
                         launchSingleTop = true
                         restoreState = true
                     }
-                },
+                }
             )
         }
     }
@@ -93,7 +93,7 @@ private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navControl
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.EVENTS,
-            screenClass = "MainScreen",
+            screenClass = "MainScreen"
         )
         EventsScreenContent(navController)
     }
@@ -105,7 +105,7 @@ private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navControl
 @OptIn(ExperimentalMaterial3Api::class)
 private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     composable(
         route = Screen.ItemDetail.route,
@@ -113,8 +113,8 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
             listOf(
                 navArgument("itemId") {
                     type = NavType.LongType
-                },
-            ),
+                }
+            )
     ) { backStackEntry ->
         val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
@@ -122,18 +122,18 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.DETAIL,
-            screenClass = "DetailScreen",
+            screenClass = "DetailScreen"
         )
         DetailScreen(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = DetailScreenViewModel.factory(repository),
+                    factory = DetailScreenViewModel.factory(repository)
                 ),
             onBackClick = { navController.popBackStack() },
             onEditClick = { id ->
                 navController.navigate(Screen.EditItem.createRoute(id))
-            },
+            }
         )
     }
 }
@@ -145,7 +145,7 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
 private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
     resourceProvider: com.dayscounter.data.provider.ResourceProvider,
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     composable(Screen.CreateItem.route) {
         val context = LocalContext.current
@@ -153,15 +153,15 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.CREATE,
-            screenClass = "CreateEditScreen",
+            screenClass = "CreateEditScreen"
         )
         CreateEditScreen(
             itemId = null,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider)
                 ),
-            onBackClick = { navController.popBackStack() },
+            onBackClick = { navController.popBackStack() }
         )
     }
     composable(
@@ -170,8 +170,8 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
             listOf(
                 navArgument("itemId") {
                     type = NavType.LongType
-                },
-            ),
+                }
+            )
     ) { backStackEntry ->
         val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
@@ -179,15 +179,15 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.CREATE,
-            screenClass = "CreateEditScreen",
+            screenClass = "CreateEditScreen"
         )
         CreateEditScreen(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider),
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider)
                 ),
-            onBackClick = { navController.popBackStack() },
+            onBackClick = { navController.popBackStack() }
         )
     }
 }
@@ -202,7 +202,7 @@ private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navControl
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.MORE,
-            screenClass = "MoreScreen",
+            screenClass = "MoreScreen"
         )
         MoreScreen(navController)
     }
@@ -215,7 +215,7 @@ private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navControl
 private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
     navController: NavHostController,
     dataStore: AppSettingsDataStore,
-    application: android.app.Application,
+    application: android.app.Application
 ) {
     composable(Screen.ThemeIcon.route) {
         val context = LocalContext.current
@@ -225,11 +225,11 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.THEME_ICON,
-            screenClass = "ThemeIconScreen",
+            screenClass = "ThemeIconScreen"
         )
         ThemeIconScreen(
             viewModel = viewModel,
-            onBackClick = { navController.popBackStack() },
+            onBackClick = { navController.popBackStack() }
         )
     }
 }
@@ -241,7 +241,7 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
 private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
     navController: NavHostController,
     repository: com.dayscounter.domain.repository.ItemRepository,
-    application: android.app.Application,
+    application: android.app.Application
 ) {
     composable(Screen.AppData.route) {
         val context = LocalContext.current
@@ -251,11 +251,11 @@ private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
         FirebaseAnalyticsHelper.logScreenView(
             context = context,
             screenName = ScreenNames.APP_DATA,
-            screenClass = "AppDataScreen",
+            screenClass = "AppDataScreen"
         )
         AppDataScreen(
             viewModel = viewModel,
-            onBackClick = { navController.popBackStack() },
+            onBackClick = { navController.popBackStack() }
         )
     }
 }
@@ -269,7 +269,7 @@ internal fun NavHostContent(
     navController: NavHostController,
     paddingValues: androidx.compose.foundation.layout.PaddingValues =
         androidx.compose.foundation.layout
-            .PaddingValues(),
+            .PaddingValues()
 ) {
     // Получаем зависимости для создания ViewModels
     val context = LocalContext.current.applicationContext
@@ -281,7 +281,7 @@ internal fun NavHostContent(
     NavHost(
         navController = navController,
         startDestination = Screen.Events.route,
-        modifier = Modifier.padding(paddingValues),
+        modifier = Modifier.padding(paddingValues)
     ) {
         this.mainScreenDestination(navController)
         this.detailScreenDestination(repository, navController)
@@ -290,12 +290,12 @@ internal fun NavHostContent(
         this.themeIconScreenDestination(
             navController,
             dataStore,
-            context as android.app.Application,
+            context as android.app.Application
         )
         this.appDataScreenDestination(
             navController,
             repository,
-            context,
+            context
         )
     }
 }
@@ -318,7 +318,7 @@ internal fun EventsScreenContent(navController: NavHostController) {
         onCreateClick = {
             Log.d("RootScreen", "Навигация к экрану создания")
             navController.navigate(Screen.CreateItem.route)
-        },
+        }
     )
 }
 
@@ -328,7 +328,7 @@ internal fun EventsScreenContent(navController: NavHostController) {
 @Composable
 internal fun UpdateTabBasedOnRoute(
     navController: NavHostController,
-    viewModel: RootScreenViewModel,
+    viewModel: RootScreenViewModel
 ) {
     // Определяем текущий маршрут для обновления состояния вкладки
     val navBackStackEntry by navController.currentBackStackEntryAsState()

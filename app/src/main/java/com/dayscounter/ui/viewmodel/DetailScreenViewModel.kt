@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 class DetailScreenViewModel(
     private val repository: ItemRepository,
     private val logger: Logger = AndroidLogger(),
-    savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     companion object {
         /** Таймаут подписки на StateFlow в миллисекундах */
@@ -44,10 +44,10 @@ class DetailScreenViewModel(
                         repository = repository,
                         savedStateHandle =
                             checkNotNull(
-                                createSavedStateHandle(),
+                                createSavedStateHandle()
                             ) {
                                 "SavedStateHandle is required"
-                            },
+                            }
                     )
                 }
             }
@@ -73,7 +73,7 @@ class DetailScreenViewModel(
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_TIMEOUT_MS),
-                initialValue = DetailScreenState.Loading,
+                initialValue = DetailScreenState.Loading
             )
 
     /**
@@ -138,11 +138,11 @@ sealed class DetailScreenState {
 
     /** Успешная загрузка */
     data class Success(
-        val item: Item,
+        val item: Item
     ) : DetailScreenState()
 
     /** Ошибка загрузки */
     data class Error(
-        val message: String,
+        val message: String
     ) : DetailScreenState()
 }

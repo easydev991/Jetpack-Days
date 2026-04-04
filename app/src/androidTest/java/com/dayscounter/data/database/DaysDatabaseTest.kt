@@ -20,7 +20,7 @@ class DaysDatabaseTest {
             Room
                 .inMemoryDatabaseBuilder(
                     ApplicationProvider.getApplicationContext(),
-                    DaysDatabase::class.java,
+                    DaysDatabase::class.java
                 ).allowMainThreadQueries()
                 .build()
     }

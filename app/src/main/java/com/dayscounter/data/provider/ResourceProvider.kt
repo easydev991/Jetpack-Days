@@ -16,7 +16,7 @@ interface ResourceProvider {
      */
     fun getString(
         resId: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String
 
     /**
@@ -30,7 +30,7 @@ interface ResourceProvider {
     fun getQuantityString(
         resId: Int,
         quantity: Int,
-        vararg formatArgs: Any,
+        vararg formatArgs: Any
     ): String
 
     /**

@@ -31,12 +31,12 @@ class CreateEditScreenViewModel(
     private val repository: ItemRepository,
     private val resourceProvider: ResourceProvider,
     private val logger: Logger = AndroidLogger(),
-    savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     companion object {
         fun factory(
             repository: ItemRepository,
-            resourceProvider: ResourceProvider,
+            resourceProvider: ResourceProvider
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -45,10 +45,10 @@ class CreateEditScreenViewModel(
                         resourceProvider = resourceProvider,
                         savedStateHandle =
                             checkNotNull(
-                                createSavedStateHandle(),
+                                createSavedStateHandle()
                             ) {
                                 "SavedStateHandle is required"
-                            },
+                            }
                     )
                 }
             }
@@ -89,8 +89,8 @@ class CreateEditScreenViewModel(
                         details = "",
                         timestamp = System.currentTimeMillis(),
                         colorTag = null,
-                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
-                    ),
+                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY
+                    )
                 )
         }
     }
@@ -103,7 +103,7 @@ class CreateEditScreenViewModel(
         details: String,
         timestamp: Long,
         colorTag: Int?,
-        displayOption: com.dayscounter.domain.model.DisplayOption,
+        displayOption: com.dayscounter.domain.model.DisplayOption
     ) {
         val original = _originalItem.value ?: return
         val hasChanges =
@@ -142,7 +142,7 @@ class CreateEditScreenViewModel(
                 } else {
                     _uiState.value =
                         CreateEditScreenState.Error(
-                            resourceProvider.getString(ResourceIds.EVENT_NOT_FOUND),
+                            resourceProvider.getString(ResourceIds.EVENT_NOT_FOUND)
                         )
                     logger.w("CreateEditScreenViewModel", "Событие не найдено: $itemId")
                 }
@@ -150,7 +150,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_LOADING_EVENT,
-                        e.message,
+                        e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
@@ -173,7 +173,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_CREATING_EVENT,
-                        e.message,
+                        e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
@@ -198,7 +198,7 @@ class CreateEditScreenViewModel(
                 val message =
                     resourceProvider.getString(
                         ResourceIds.ERROR_UPDATING_EVENT,
-                        e.message,
+                        e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
                 _uiState.value = CreateEditScreenState.Error(message)
@@ -216,11 +216,11 @@ sealed class CreateEditScreenState {
 
     /** Успешная загрузка */
     data class Success(
-        val item: Item,
+        val item: Item
     ) : CreateEditScreenState()
 
     /** Ошибка загрузки */
     data class Error(
-        val message: String,
+        val message: String
     ) : CreateEditScreenState()
 }

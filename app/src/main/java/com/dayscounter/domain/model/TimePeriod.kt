@@ -10,7 +10,7 @@ package com.dayscounter.domain.model
 data class TimePeriod(
     val years: Int = 0,
     val months: Int = 0,
-    val days: Int = 0,
+    val days: Int = 0
 ) {
     /**
      * Проверяет, является ли период пустым (все значения равны нулю).

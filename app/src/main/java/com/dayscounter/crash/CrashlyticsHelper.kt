@@ -29,7 +29,7 @@ object CrashlyticsHelper {
      */
     fun logException(
         exception: Throwable,
-        message: String? = null,
+        message: String? = null
     ) {
         try {
             Firebase.crashlytics.apply {

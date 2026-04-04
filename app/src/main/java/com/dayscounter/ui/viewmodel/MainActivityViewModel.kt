@@ -19,7 +19,7 @@ private const val STATE_TIMEOUT_MS = 5000L
  * Используется для передачи текущей темы в JetpackDaysTheme() на уровне Activity.
  */
 class MainActivityViewModel(
-    private val dataStore: AppSettingsDataStore,
+    private val dataStore: AppSettingsDataStore
 ) : ViewModel() {
     companion object {
         /**
@@ -42,7 +42,7 @@ class MainActivityViewModel(
         dataStore.theme.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
-            initialValue = AppTheme.SYSTEM,
+            initialValue = AppTheme.SYSTEM
         )
 
     /**
@@ -53,6 +53,6 @@ class MainActivityViewModel(
         dataStore.useDynamicColors.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
-            initialValue = true,
+            initialValue = true
         )
 }

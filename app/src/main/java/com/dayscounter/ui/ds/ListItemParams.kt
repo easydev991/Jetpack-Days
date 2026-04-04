@@ -11,5 +11,5 @@ data class ListItemParams(
     val formattedDaysText: String,
     val onClick: (Item) -> Unit = {},
     val onLongClick: ((Offset) -> Unit)? = null,
-    val isSelected: Boolean = false,
+    val isSelected: Boolean = false
 )

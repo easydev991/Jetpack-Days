@@ -19,7 +19,7 @@ object BackupFormatSerializer : KSerializer<BackupFormat> {
 
     override fun serialize(
         encoder: Encoder,
-        value: BackupFormat,
+        value: BackupFormat
     ) {
         encoder.encodeString(value.serialName)
     }
@@ -27,10 +27,11 @@ object BackupFormatSerializer : KSerializer<BackupFormat> {
     override fun deserialize(decoder: Decoder): BackupFormat {
         val string = decoder.decodeString()
         return BackupFormat.entries.find {
-            it.serialName == string || it.name.equals(
-                string,
-                ignoreCase = true
-            )
+            it.serialName == string ||
+                it.name.equals(
+                    string,
+                    ignoreCase = true
+                )
         }
             ?: throw IllegalArgumentException("Unknown BackupFormat: $string")
     }

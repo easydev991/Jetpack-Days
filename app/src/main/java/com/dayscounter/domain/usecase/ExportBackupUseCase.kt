@@ -25,7 +25,7 @@ private const val TAG = "ExportBackupUseCase"
 class ExportBackupUseCase(
     private val repository: ItemRepository,
     private val context: Context,
-    private val logger: Logger = com.dayscounter.util.AndroidLogger(),
+    private val logger: Logger = com.dayscounter.util.AndroidLogger()
 ) {
     private val json =
         Json {
@@ -58,7 +58,7 @@ class ExportBackupUseCase(
             val wrapper =
                 BackupWrapper(
                     format = BackupFormat.ANDROID,
-                    items = backupItems,
+                    items = backupItems
                 )
 
             val jsonString = json.encodeToString(BackupWrapper.serializer(), wrapper)

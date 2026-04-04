@@ -20,7 +20,7 @@ class AppIconTest {
                 AppIcon.ICON_3,
                 AppIcon.ICON_4,
                 AppIcon.ICON_5,
-                AppIcon.ICON_6,
+                AppIcon.ICON_6
             )
 
         // When

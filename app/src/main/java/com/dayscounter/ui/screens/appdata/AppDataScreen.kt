@@ -59,7 +59,7 @@ internal data class AppDataScreenParams(
     val onDeleteAllDataClick: () -> Unit = {},
     val onConfirmDeleteAllData: () -> Unit = {},
     val onCancelDeleteAllData: () -> Unit = {},
-    val onBackClick: () -> Unit = {},
+    val onBackClick: () -> Unit = {}
 )
 
 /**
@@ -73,7 +73,7 @@ internal data class AppDataScreenParams(
 @Composable
 fun AppDataScreen(
     viewModel: AppDataScreenViewModel,
-    onBackClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
@@ -82,7 +82,7 @@ fun AppDataScreen(
     // Launcher для создания резервной копии (экспорт)
     val exportLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/json"),
+            contract = ActivityResultContracts.CreateDocument("application/json")
         ) { uri ->
             if (uri != null) {
                 viewModel.exportBackup(uri)
@@ -92,7 +92,7 @@ fun AppDataScreen(
     // Launcher для выбора файла резервной копии (импорт)
     val importLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
+            contract = ActivityResultContracts.OpenDocument()
         ) { uri ->
             if (uri != null) {
                 viewModel.importBackup(uri)
@@ -127,8 +127,8 @@ fun AppDataScreen(
                 onDeleteAllDataClick = { viewModel.deleteAllData() },
                 onConfirmDeleteAllData = { viewModel.confirmDeleteAllData() },
                 onCancelDeleteAllData = { viewModel.cancelDeleteAllData() },
-                onBackClick = onBackClick,
-            ),
+                onBackClick = onBackClick
+            )
     )
 }
 
@@ -148,16 +148,16 @@ internal fun AppDataScreenContent(params: AppDataScreenParams) {
                     IconButton(onClick = params.onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
-                },
+                }
             )
-        },
+        }
     ) { paddingValues ->
         AppDataScreenBody(
             params = params,
-            paddingValues = paddingValues,
+            paddingValues = paddingValues
         )
     }
 
@@ -173,7 +173,7 @@ internal fun AppDataScreenContent(params: AppDataScreenParams) {
 @Composable
 private fun AppDataScreenBody(
     params: AppDataScreenParams,
-    paddingValues: PaddingValues,
+    paddingValues: PaddingValues
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -184,7 +184,7 @@ private fun AppDataScreenBody(
                 .padding(paddingValues)
                 .padding(dimensionResource(R.dimen.spacing_xsmall)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xxsmall)),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
@@ -210,8 +210,8 @@ private fun AppDataScreenExportButton(params: AppDataScreenParams) {
         enabled = !params.uiState.isExporting,
         contentPadding =
             PaddingValues(
-                horizontal = dimensionResource(R.dimen.button_horizontal_padding),
-            ),
+                horizontal = dimensionResource(R.dimen.button_horizontal_padding)
+            )
     ) {
         Text(stringResource(R.string.create_a_backup))
     }
@@ -227,8 +227,8 @@ private fun AppDataScreenImportButton(params: AppDataScreenParams) {
         enabled = !params.uiState.isImporting,
         contentPadding =
             PaddingValues(
-                horizontal = dimensionResource(R.dimen.button_horizontal_padding),
-            ),
+                horizontal = dimensionResource(R.dimen.button_horizontal_padding)
+            )
     ) {
         Text(stringResource(R.string.restore_from_backup))
     }
@@ -244,12 +244,12 @@ private fun AppDataScreenDeleteButton(params: AppDataScreenParams) {
         enabled = !params.uiState.isDeleting,
         colors =
             ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
+                containerColor = MaterialTheme.colorScheme.error
             ),
         contentPadding =
             PaddingValues(
-                horizontal = dimensionResource(R.dimen.button_horizontal_padding),
-            ),
+                horizontal = dimensionResource(R.dimen.button_horizontal_padding)
+            )
     ) {
         Text(stringResource(R.string.delete_all_data))
     }
@@ -272,8 +272,8 @@ private fun AppDataScreenDeleteConfirmDialog(params: AppDataScreenParams) {
                 onClick = params.onConfirmDeleteAllData,
                 colors =
                     ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                    ),
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
             ) {
                 Text(stringResource(R.string.delete))
             }
@@ -282,6 +282,6 @@ private fun AppDataScreenDeleteConfirmDialog(params: AppDataScreenParams) {
             TextButton(onClick = params.onCancelDeleteAllData) {
                 Text(stringResource(R.string.cancel))
             }
-        },
+        }
     )
 }

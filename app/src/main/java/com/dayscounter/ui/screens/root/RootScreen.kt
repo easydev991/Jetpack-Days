@@ -25,11 +25,11 @@ fun RootScreen(
     modifier: Modifier = Modifier,
     viewModel: RootScreenViewModel =
         androidx.lifecycle.viewmodel.compose
-            .viewModel(),
+            .viewModel()
 ) {
     RootScreenContent(
         modifier = modifier,
-        viewModel = viewModel,
+        viewModel = viewModel
     )
 }
 
@@ -40,13 +40,13 @@ fun RootScreen(
 @Composable
 private fun RootScreenContent(
     modifier: Modifier = Modifier,
-    viewModel: RootScreenViewModel,
+    viewModel: RootScreenViewModel
 ) {
     val navController = rememberNavController()
     val items =
         listOf(
             Screen.Events,
-            Screen.More,
+            Screen.More
         )
 
     // Получаем текущую вкладку из ViewModel
@@ -69,18 +69,18 @@ private fun RootScreenContent(
                 NavigationBarContent(
                     items = items,
                     viewModel = viewModel,
-                    navController = navController,
+                    navController = navController
                 )
             }
         },
         contentWindowInsets =
             androidx.compose.foundation.layout
-                .WindowInsets(0, 0, 0, 0),
+                .WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         // Основной контент с навигацией
         NavHostContent(
             navController = navController,
-            paddingValues = paddingValues,
+            paddingValues = paddingValues
         )
     }
 }

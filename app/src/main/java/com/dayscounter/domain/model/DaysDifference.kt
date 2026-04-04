@@ -14,7 +14,7 @@ sealed class DaysDifference {
      * @property timestamp Временная метка события в миллисекундах
      */
     data class Today(
-        val timestamp: Long,
+        val timestamp: Long
     ) : DaysDifference()
 
     /**
@@ -27,6 +27,6 @@ sealed class DaysDifference {
     data class Calculated(
         val period: TimePeriod,
         val totalDays: Int,
-        val timestamp: Long,
+        val timestamp: Long
     ) : DaysDifference()
 }

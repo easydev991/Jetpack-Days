@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             // Создаём ViewModel для MainActivity
             val viewModel: MainActivityViewModel =
                 viewModel(
-                    factory = MainActivityViewModel.factory(dataStore),
+                    factory = MainActivityViewModel.factory(dataStore)
                 )
 
             // Получаем текущую тему и настройку динамических цветов из ViewModel
@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
             // Применяем тему приложения
             AppContent(
                 theme = theme,
-                useDynamicColors = useDynamicColors,
+                useDynamicColors = useDynamicColors
             )
         }
     }
@@ -56,16 +56,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AppContent(
     theme: com.dayscounter.domain.model.AppTheme,
-    useDynamicColors: Boolean,
+    useDynamicColors: Boolean
 ) {
     JetpackDaysTheme(
         appTheme = theme,
-        dynamicColor = useDynamicColors,
+        dynamicColor = useDynamicColors
     ) {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background,
+            color = MaterialTheme.colorScheme.background
         ) {
             RootScreen()
         }

@@ -12,38 +12,38 @@ import com.dayscounter.R
 sealed class Screen(
     val route: String,
     val icon: ImageVector? = null,
-    val titleResId: Int? = null,
+    val titleResId: Int? = null
 ) {
     object Events : Screen(
         route = "events",
         icon = Icons.AutoMirrored.Filled.List,
-        titleResId = R.string.events,
+        titleResId = R.string.events
     )
 
     object More : Screen(
         route = "more",
         icon = Icons.Filled.MoreVert,
-        titleResId = R.string.more,
+        titleResId = R.string.more
     )
 
     object ThemeIcon : Screen(
         route = "theme_icon",
-        titleResId = R.string.app_theme_and_icon,
+        titleResId = R.string.app_theme_and_icon
     )
 
     object ItemDetail : Screen(
-        route = "item_detail/{itemId}",
+        route = "item_detail/{itemId}"
     ) {
         /** Создает маршрут для экрана деталей с указанным itemId */
         fun createRoute(itemId: Long) = "item_detail/$itemId"
     }
 
     object CreateItem : Screen(
-        route = "create_item",
+        route = "create_item"
     )
 
     object EditItem : Screen(
-        route = "edit_item/{itemId}",
+        route = "edit_item/{itemId}"
     ) {
         /** Создает маршрут для экрана редактирования с указанным itemId */
         fun createRoute(itemId: Long) = "edit_item/$itemId"
@@ -51,6 +51,6 @@ sealed class Screen(
 
     object AppData : Screen(
         route = "app_data",
-        titleResId = R.string.app_data,
+        titleResId = R.string.app_data
     )
 }

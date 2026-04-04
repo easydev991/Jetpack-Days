@@ -20,12 +20,12 @@ import com.dayscounter.R
 internal fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = stringResource(R.string.loading),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -36,20 +36,20 @@ internal fun LoadingContent(modifier: Modifier = Modifier) {
 @Composable
 internal fun ErrorContent(
     message: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .padding(dimensionResource(R.dimen.spacing_large)),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }

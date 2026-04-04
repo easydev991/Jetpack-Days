@@ -42,7 +42,7 @@ import com.dayscounter.ui.viewmodel.CreateEditScreenState
 @Composable
 internal fun CreateEditTopAppBar(
     itemId: Long?,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -53,21 +53,21 @@ internal fun CreateEditTopAppBar(
                     } else {
                         stringResource(R.string.new_item)
                     },
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge
             )
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cancel),
+                    contentDescription = stringResource(R.string.cancel)
                 )
             }
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+                containerColor = MaterialTheme.colorScheme.surface
+            )
     )
 }
 
@@ -78,21 +78,21 @@ internal fun CreateEditTopAppBar(
 @Composable
 private fun MainFormSections(
     params: CreateEditFormParams,
-    onValueChange: () -> Unit,
+    onValueChange: () -> Unit
 ) {
     TitleSection(
         title = params.uiStates.title,
-        onValueChange = { onValueChange() },
+        onValueChange = { onValueChange() }
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DetailsSection(
         details = params.uiStates.details,
-        onValueChange = { onValueChange() },
+        onValueChange = { onValueChange() }
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DateSection(
         selectedDate = params.uiStates.selectedDate,
-        showDatePicker = params.showDatePicker,
+        showDatePicker = params.showDatePicker
     )
 }
 
@@ -102,16 +102,16 @@ private fun MainFormSections(
 @Composable
 private fun ColorAndDisplayOptionSection(
     params: CreateEditFormParams,
-    onValueChange: () -> Unit,
+    onValueChange: () -> Unit
 ) {
     ColorSelector(
         selectedColor = params.uiStates.selectedColor,
-        onValueChange = onValueChange,
+        onValueChange = onValueChange
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DisplayOptionSelector(
         selectedDisplayOption = params.uiStates.selectedDisplayOption,
-        onValueChange = onValueChange,
+        onValueChange = onValueChange
     )
 }
 
@@ -137,7 +137,7 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
                 colorTag =
                     params.uiStates.selectedColor.value
                         ?.toArgb(),
-                displayOption = params.uiStates.selectedDisplayOption.value,
+                displayOption = params.uiStates.selectedDisplayOption.value
             )
         }
     }
@@ -149,7 +149,7 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
                 .padding(params.paddingValues)
                 .imeNestedScroll()
                 .verticalScroll(rememberScrollState())
-                .padding(dimensionResource(R.dimen.spacing_regular)),
+                .padding(dimensionResource(R.dimen.spacing_regular))
     ) {
         MainFormSections(params, onValueChange)
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
@@ -163,7 +163,7 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
 @Composable
 internal fun TitleSection(
     title: MutableState<String>,
-    onValueChange: (String) -> Unit = {},
+    onValueChange: (String) -> Unit = {}
 ) {
     OutlinedTextField(
         value = title.value,
@@ -172,7 +172,7 @@ internal fun TitleSection(
             onValueChange(it)
         },
         label = { Text(stringResource(R.string.title)) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
@@ -182,7 +182,7 @@ internal fun TitleSection(
 @Composable
 internal fun DetailsSection(
     details: MutableState<String>,
-    onValueChange: (String) -> Unit = {},
+    onValueChange: (String) -> Unit = {}
 ) {
     OutlinedTextField(
         value = details.value,
@@ -192,7 +192,7 @@ internal fun DetailsSection(
         },
         label = { Text(stringResource(R.string.details)) },
         modifier = Modifier.fillMaxWidth(),
-        minLines = 3,
+        minLines = 3
     )
 }
 
@@ -203,7 +203,7 @@ internal fun DetailsSection(
 @Composable
 internal fun DateSection(
     selectedDate: MutableState<java.time.LocalDate?>,
-    showDatePicker: MutableState<Boolean>,
+    showDatePicker: MutableState<Boolean>
 ) {
     val configuration = LocalConfiguration.current
     val formatter =
@@ -222,14 +222,14 @@ internal fun DateSection(
             IconButton(
                 onClick = {
                     showDatePicker.value = true
-                },
+                }
             ) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
-                    contentDescription = stringResource(R.string.select_date),
+                    contentDescription = stringResource(R.string.select_date)
                 )
             }
-        },
+        }
     )
 }
 
@@ -246,9 +246,9 @@ internal fun rememberCreateEditUiStates(): CreateEditUiState =
         selectedDisplayOption =
             rememberSaveable(stateSaver = DisplayOptionSaver) {
                 mutableStateOf(
-                    DisplayOption.DAY,
+                    DisplayOption.DAY
                 )
-            },
+            }
     )
 
 /**
@@ -257,7 +257,7 @@ internal fun rememberCreateEditUiStates(): CreateEditUiState =
 fun loadItemData(
     itemId: Long?,
     uiState: CreateEditScreenState,
-    uiStates: CreateEditUiState,
+    uiStates: CreateEditUiState
 ) {
     val isEditingExistingItem = itemId != null
     val isStateSuccess = uiState is CreateEditScreenState.Success

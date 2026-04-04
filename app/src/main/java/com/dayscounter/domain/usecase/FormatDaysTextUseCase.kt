@@ -12,7 +12,7 @@ import com.dayscounter.domain.model.DisplayOption
  * разницы дат в соответствии с выбранной опцией отображения.
  */
 class FormatDaysTextUseCase(
-    private val daysFormatter: DaysFormatter,
+    private val daysFormatter: DaysFormatter
 ) {
     /**
      * Форматирует разницу дней в текст.
@@ -27,7 +27,7 @@ class FormatDaysTextUseCase(
         difference: DaysDifference,
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
-        showMinus: Boolean,
+        showMinus: Boolean
     ): String =
         when (difference) {
             is DaysDifference.Today -> {
@@ -44,7 +44,7 @@ class FormatDaysTextUseCase(
                     displayOption = displayOption,
                     resourceProvider = resourceProvider,
                     totalDays = difference.totalDays,
-                    showMinus = showMinus,
+                    showMinus = showMinus
                 )
             }
         }

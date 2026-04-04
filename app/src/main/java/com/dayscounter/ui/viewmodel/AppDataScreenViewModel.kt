@@ -43,7 +43,7 @@ class AppDataScreenViewModel(
     private val context: Context,
     private val exportBackupUseCase: ExportBackupUseCase,
     private val importBackupUseCase: ImportBackupUseCase,
-    private val logger: Logger = AndroidLogger(),
+    private val logger: Logger = AndroidLogger()
 ) : ViewModel() {
     companion object {
         /**
@@ -55,7 +55,7 @@ class AppDataScreenViewModel(
          */
         fun factory(
             repository: ItemRepository,
-            application: Application,
+            application: Application
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -63,7 +63,7 @@ class AppDataScreenViewModel(
                         repository = repository,
                         context = application,
                         exportBackupUseCase = ExportBackupUseCase(repository, application),
-                        importBackupUseCase = ImportBackupUseCase(repository, application),
+                        importBackupUseCase = ImportBackupUseCase(repository, application)
                     )
                 }
             }
@@ -77,7 +77,7 @@ class AppDataScreenViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
-                initialValue = false,
+                initialValue = false
             )
 
     /** Мутабельный UI State для обновления состояния (кроме hasItems и showDeleteDialog) */
@@ -96,7 +96,7 @@ class AppDataScreenViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_TIMEOUT_MS),
-            initialValue = AppDataUiState(),
+            initialValue = AppDataUiState()
         )
 
     /**
@@ -120,7 +120,7 @@ class AppDataScreenViewModel(
                             _uiState.value.copy(
                                 isExporting = false,
                                 resultMessage = context.getString(R.string.backup_data_saved),
-                                isError = false,
+                                isError = false
                             )
                     }.onFailure { e ->
                         logger.e(TAG, "Ошибка при экспорте данных", e)
@@ -130,7 +130,7 @@ class AppDataScreenViewModel(
                                 resultMessage =
                                     e.message
                                         ?: context.getString(R.string.error),
-                                isError = true,
+                                isError = true
                             )
                     }
             } catch (e: BackupException) {
@@ -139,7 +139,7 @@ class AppDataScreenViewModel(
                     _uiState.value.copy(
                         isExporting = false,
                         resultMessage = e.message ?: context.getString(R.string.error),
-                        isError = true,
+                        isError = true
                     )
             }
         }
@@ -166,7 +166,7 @@ class AppDataScreenViewModel(
                             _uiState.value.copy(
                                 isImporting = false,
                                 resultMessage = context.getString(R.string.data_restored_from_backup),
-                                isError = false,
+                                isError = false
                             )
                     }.onFailure { e ->
                         logger.e(TAG, "Ошибка при импорте данных", e)
@@ -176,7 +176,7 @@ class AppDataScreenViewModel(
                                 resultMessage =
                                     e.message
                                         ?: context.getString(R.string.error),
-                                isError = true,
+                                isError = true
                             )
                     }
             } catch (e: BackupException) {
@@ -185,7 +185,7 @@ class AppDataScreenViewModel(
                     _uiState.value.copy(
                         isImporting = false,
                         resultMessage = e.message ?: context.getString(R.string.error),
-                        isError = true,
+                        isError = true
                     )
             }
         }
@@ -216,7 +216,7 @@ class AppDataScreenViewModel(
                     _uiState.value.copy(
                         isDeleting = false,
                         resultMessage = context.getString(R.string.all_data_deleted),
-                        isError = false,
+                        isError = false
                     )
             } catch (e: SQLException) {
                 logger.e(TAG, "Ошибка при удалении данных", e)
@@ -224,7 +224,7 @@ class AppDataScreenViewModel(
                     _uiState.value.copy(
                         isDeleting = false,
                         resultMessage = e.message ?: context.getString(R.string.error),
-                        isError = true,
+                        isError = true
                     )
             }
         }

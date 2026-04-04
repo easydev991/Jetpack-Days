@@ -81,7 +81,7 @@ class ThemeIconViewModelTest {
                 listOf(
                     AppTheme.LIGHT,
                     AppTheme.DARK,
-                    AppTheme.SYSTEM,
+                    AppTheme.SYSTEM
                 )
 
             coEvery { mockDataStore.setTheme(any()) } coAnswers { }
@@ -137,7 +137,7 @@ class ThemeIconViewModelTest {
                     AppIcon.ICON_3,
                     AppIcon.ICON_4,
                     AppIcon.ICON_5,
-                    AppIcon.ICON_6,
+                    AppIcon.ICON_6
                 )
 
             coEvery { mockDataStore.setIcon(any()) } coAnswers { }

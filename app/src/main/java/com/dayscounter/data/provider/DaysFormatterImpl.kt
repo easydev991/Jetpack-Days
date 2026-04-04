@@ -36,35 +36,35 @@ class DaysFormatterImpl : DaysFormatter {
             val showMonths: Boolean = false,
             val monthsValue: Int = 0,
             val showDays: Boolean = false,
-            val daysValue: Int = 0,
+            val daysValue: Int = 0
         )
     }
 
     override fun format(
         days: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String =
         resourceProvider.getQuantityString(
             resId = ResourceIds.DAYS_COUNT,
-            quantity = days,
+            quantity = days
         )
 
     override fun formatMonths(
         months: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String =
         resourceProvider.getQuantityString(
             resId = ResourceIds.MONTHS_COUNT,
-            quantity = months,
+            quantity = months
         )
 
     override fun formatYears(
         years: Int,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): String =
         resourceProvider.getQuantityString(
             resId = ResourceIds.YEARS_COUNT,
-            quantity = years,
+            quantity = years
         )
 
     override fun formatComposite(
@@ -72,7 +72,7 @@ class DaysFormatterImpl : DaysFormatter {
         displayOption: DisplayOption,
         resourceProvider: ResourceProvider,
         totalDays: Int,
-        showMinus: Boolean,
+        showMinus: Boolean
     ): String =
         when (displayOption) {
             DisplayOption.DAY -> {
@@ -106,7 +106,7 @@ class DaysFormatterImpl : DaysFormatter {
         period: TimePeriod,
         resourceProvider: ResourceProvider,
         showMinus: Boolean,
-        totalDays: Int,
+        totalDays: Int
     ): String {
         // Конвертируем годы в месяцы для MONTH_DAY (как в iOS)
         val totalMonths = period.years * MONTHS_IN_YEAR + period.months
@@ -127,7 +127,7 @@ class DaysFormatterImpl : DaysFormatter {
                 showMonths = monthsValue != 0,
                 monthsValue = monthsValue,
                 showDays = daysValue != 0,
-                daysValue = daysValue,
+                daysValue = daysValue
             )
 
         val components = buildComponentsList(timeComponents, resourceProvider)
@@ -147,7 +147,7 @@ class DaysFormatterImpl : DaysFormatter {
         period: TimePeriod,
         resourceProvider: ResourceProvider,
         showMinus: Boolean,
-        totalDays: Int,
+        totalDays: Int
     ): String {
         // Для будущих дат с showMinus = false используем абсолютные значения
         // Если дата в будущем (totalDays < 0) и showMinus = false, формируем текст без минуса
@@ -171,7 +171,7 @@ class DaysFormatterImpl : DaysFormatter {
                 showMonths = monthsValue != 0,
                 monthsValue = monthsValue,
                 showDays = daysValue != 0,
-                daysValue = daysValue,
+                daysValue = daysValue
             )
 
         val components = buildComponentsList(timeComponents, resourceProvider)
@@ -188,7 +188,7 @@ class DaysFormatterImpl : DaysFormatter {
      */
     private fun buildComponentsList(
         components: TimeComponents,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): List<String> {
         val result = mutableListOf<String>()
 

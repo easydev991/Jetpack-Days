@@ -11,5 +11,5 @@ data class MainScreenParams(
     val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
-    val onCreateClick: () -> Unit,
+    val onCreateClick: () -> Unit
 )

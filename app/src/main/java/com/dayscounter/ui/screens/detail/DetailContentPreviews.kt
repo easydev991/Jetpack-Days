@@ -36,7 +36,7 @@ fun ColorTagSectionPreview() {
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             ColorTagSection(android.graphics.Color.RED)
         }
@@ -52,11 +52,11 @@ fun ReadSectionViewTitlePreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             ReadSectionView(
                 headerText = "Title",
-                bodyText = "День рождения",
+                bodyText = "День рождения"
             )
         }
     }
@@ -71,11 +71,11 @@ fun ReadSectionViewDetailsPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             ReadSectionView(
                 headerText = "Details",
-                bodyText = "Праздничный день с друзьями и семьей",
+                bodyText = "Праздничный день с друзьями и семьей"
             )
         }
     }
@@ -97,13 +97,13 @@ fun DetailDatePickerPastDayPreview() {
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     JetpackDaysTheme {
@@ -112,7 +112,7 @@ fun DetailDatePickerPastDayPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             val timestamp =
                 Instant
@@ -127,9 +127,9 @@ fun DetailDatePickerPastDayPreview() {
                         details = "",
                         timestamp = timestamp,
                         colorTag = null,
-                        displayOption = DisplayOption.DAY,
+                        displayOption = DisplayOption.DAY
                     ),
-                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             )
         }
     }
@@ -151,13 +151,13 @@ fun DetailDatePickerFutureMonthDayPreview() {
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     JetpackDaysTheme {
@@ -166,7 +166,7 @@ fun DetailDatePickerFutureMonthDayPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             val timestamp =
                 Instant
@@ -181,9 +181,9 @@ fun DetailDatePickerFutureMonthDayPreview() {
                         details = "",
                         timestamp = timestamp,
                         colorTag = null,
-                        displayOption = DisplayOption.MONTH_DAY,
+                        displayOption = DisplayOption.MONTH_DAY
                     ),
-                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             )
         }
     }
@@ -205,13 +205,13 @@ fun DetailDatePickerPastYearMonthDayPreview() {
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     JetpackDaysTheme {
@@ -220,7 +220,7 @@ fun DetailDatePickerPastYearMonthDayPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             val timestamp =
                 Instant
@@ -235,9 +235,9 @@ fun DetailDatePickerPastYearMonthDayPreview() {
                         details = "",
                         timestamp = timestamp,
                         colorTag = null,
-                        displayOption = DisplayOption.YEAR_MONTH_DAY,
+                        displayOption = DisplayOption.YEAR_MONTH_DAY
                     ),
-                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+                getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             )
         }
     }
@@ -252,7 +252,7 @@ fun DetailDisplayOptionPickerPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             DetailDisplayOptionPicker(displayOption = DisplayOption.MONTH_DAY)
         }
@@ -275,13 +275,13 @@ fun DetailContentInnerPreview() {
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     JetpackDaysTheme {
@@ -297,11 +297,11 @@ fun DetailContentInnerPreview() {
                 details = "Праздничный день с друзьями и семьей",
                 timestamp = timestamp,
                 colorTag = android.graphics.Color.YELLOW,
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
         DetailContentInner(
             item = item,
-            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
     }
 }
@@ -322,13 +322,13 @@ fun DetailContentInnerSimplePreview() {
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     JetpackDaysTheme {
@@ -344,11 +344,11 @@ fun DetailContentInnerSimplePreview() {
                 details = "",
                 timestamp = timestamp,
                 colorTag = null,
-                displayOption = DisplayOption.DEFAULT,
+                displayOption = DisplayOption.DEFAULT
             )
         DetailContentInner(
             item = item,
-            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
+            getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
     }
 }

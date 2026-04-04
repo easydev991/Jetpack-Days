@@ -34,12 +34,12 @@ private const val TAG = "MainScreenViewModel"
 class MainScreenViewModel(
     private val repository: ItemRepository,
     private val dataStore: AppSettingsDataStore,
-    private val logger: Logger = AndroidLogger(),
+    private val logger: Logger = AndroidLogger()
 ) : ViewModel() {
     companion object {
         fun factory(
             repository: ItemRepository,
-            dataStore: AppSettingsDataStore,
+            dataStore: AppSettingsDataStore
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -69,7 +69,7 @@ class MainScreenViewModel(
             started =
                 kotlinx.coroutines.flow.SharingStarted
                     .WhileSubscribed(STATE_TIMEOUT_MS),
-            initialValue = SortOrder.DESCENDING,
+            initialValue = SortOrder.DESCENDING
         )
 
     /**
@@ -99,7 +99,7 @@ class MainScreenViewModel(
         viewModelScope.launch {
             combine(
                 sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
-                _searchQuery,
+                _searchQuery
             ) { items, query ->
                 logger.d(
                     TAG,
@@ -118,7 +118,7 @@ class MainScreenViewModel(
                                     "детали=\'${item.details}\', " +
                                     "запрос=\'$query\', " +
                                     "titleContains=$titleContains, " +
-                                    "detailsContains=$detailsContains",
+                                    "detailsContains=$detailsContains"
                             )
                             titleContains || detailsContains
                         }
@@ -229,11 +229,11 @@ sealed class MainScreenState {
 
     /** Успешная загрузка */
     data class Success(
-        val items: List<Item>,
+        val items: List<Item>
     ) : MainScreenState()
 
     /** Ошибка загрузки */
     data class Error(
-        val message: String,
+        val message: String
     ) : MainScreenState()
 }

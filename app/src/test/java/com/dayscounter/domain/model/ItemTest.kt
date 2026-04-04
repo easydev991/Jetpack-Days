@@ -20,7 +20,7 @@ class ItemTest {
         val item =
             Item(
                 title = title,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
 
         // Then
@@ -50,7 +50,7 @@ class ItemTest {
                 details = details,
                 timestamp = timestamp,
                 colorTag = colorTag,
-                displayOption = displayOption,
+                displayOption = displayOption
             )
 
         // Then
@@ -72,7 +72,7 @@ class ItemTest {
         val item =
             Item(
                 title = title,
-                timestamp = timestamp,
+                timestamp = timestamp
             )
 
         // Then
@@ -93,7 +93,7 @@ class ItemTest {
         val item =
             Item(
                 title = "Тест",
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         val currentDate = LocalDate.now()
 
@@ -106,7 +106,7 @@ class ItemTest {
             FormatterModule.createGetFormattedDaysForItemUseCase(
                 calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase,
-                resourceProvider,
+                resourceProvider
             )
 
         // When
@@ -129,7 +129,7 @@ class ItemTest {
         val item =
             Item(
                 title = "Тест",
-                timestamp = timestamp,
+                timestamp = timestamp
             )
         val currentDate1 = LocalDate.of(2024, 1, 6) // Через 5 дней
         val currentDate2 = LocalDate.of(2024, 1, 7) // Через 6 дней
@@ -143,7 +143,7 @@ class ItemTest {
             FormatterModule.createGetFormattedDaysForItemUseCase(
                 calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase,
-                resourceProvider,
+                resourceProvider
             )
 
         // When

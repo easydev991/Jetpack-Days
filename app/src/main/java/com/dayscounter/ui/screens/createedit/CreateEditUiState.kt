@@ -12,5 +12,5 @@ data class CreateEditUiState(
     val details: MutableState<String>,
     val selectedDate: MutableState<java.time.LocalDate?>,
     val selectedColor: MutableState<Color?>,
-    val selectedDisplayOption: MutableState<DisplayOption>,
+    val selectedDisplayOption: MutableState<DisplayOption>
 )

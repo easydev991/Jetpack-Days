@@ -18,7 +18,7 @@ class ItemMapperTest {
                 details = "Описание",
                 timestamp = 1234567890000L,
                 colorTag = 0xFFFF0000.toInt(),
-                displayOption = DisplayOption.MONTH_DAY.name,
+                displayOption = DisplayOption.MONTH_DAY.name
             )
 
         // When
@@ -42,7 +42,7 @@ class ItemMapperTest {
                 title = "Событие",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = DisplayOption.DAY.name,
+                displayOption = DisplayOption.DAY.name
             )
 
         // When
@@ -61,7 +61,7 @@ class ItemMapperTest {
         val entity =
             ItemEntity(
                 title = "Событие",
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
 
         // When
@@ -84,7 +84,7 @@ class ItemMapperTest {
                 details = "Описание",
                 timestamp = 1234567890000L,
                 colorTag = 0xFFFF0000.toInt(),
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
 
         // When
@@ -108,7 +108,7 @@ class ItemMapperTest {
                 title = "Событие",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         // When
@@ -127,7 +127,7 @@ class ItemMapperTest {
         val domain =
             Item(
                 title = "Событие",
-                timestamp = 1234567890000L,
+                timestamp = 1234567890000L
             )
 
         // When
@@ -150,7 +150,7 @@ class ItemMapperTest {
                 details = "Детали",
                 timestamp = 9876543210000L,
                 colorTag = 0xFF00FF00.toInt(),
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
+                displayOption = DisplayOption.YEAR_MONTH_DAY
             )
 
         // When
@@ -174,7 +174,7 @@ class ItemMapperTest {
                 id = 6L,
                 title = "Событие без цвета",
                 timestamp = 1234567890000L,
-                colorTag = null,
+                colorTag = null
             )
 
         // When

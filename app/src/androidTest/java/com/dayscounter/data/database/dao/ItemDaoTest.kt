@@ -27,7 +27,7 @@ class ItemDaoTest {
             Room
                 .inMemoryDatabaseBuilder(
                     ApplicationProvider.getApplicationContext(),
-                    DaysDatabase::class.java,
+                    DaysDatabase::class.java
                 ).allowMainThreadQueries()
                 .build()
         itemDao = database.itemDao()
@@ -48,7 +48,7 @@ class ItemDaoTest {
                     details = "Описание",
                     timestamp = 1234567890000L,
                     colorTag = 0xFFFF0000.toInt(),
-                    displayOption = DisplayOption.MONTH_DAY.name,
+                    displayOption = DisplayOption.MONTH_DAY.name
                 )
 
             // When
@@ -143,13 +143,13 @@ class ItemDaoTest {
                 ItemEntity(
                     title = "Событие 1",
                     details = "Важное событие",
-                    timestamp = 1000000000000L,
+                    timestamp = 1000000000000L
                 )
             val item2 =
                 ItemEntity(
                     title = "Событие 2",
                     details = "Обычное событие",
-                    timestamp = 2000000000000L,
+                    timestamp = 2000000000000L
                 )
 
             itemDao.insertItem(item1)
@@ -175,7 +175,7 @@ class ItemDaoTest {
                 ItemEntity(
                     id = insertedId,
                     title = "Новое название",
-                    timestamp = 1234567890000L,
+                    timestamp = 1234567890000L
                 )
             itemDao.updateItem(updatedItem)
             val retrieved = itemDao.getItemById(insertedId)
@@ -197,7 +197,7 @@ class ItemDaoTest {
                 ItemEntity(
                     id = insertedId,
                     title = "Событие",
-                    timestamp = 1234567890000L,
+                    timestamp = 1234567890000L
                 )
             itemDao.deleteItem(itemToDelete)
             val retrieved = itemDao.getItemById(insertedId)

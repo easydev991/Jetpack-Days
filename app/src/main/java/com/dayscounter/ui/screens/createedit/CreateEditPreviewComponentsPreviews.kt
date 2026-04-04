@@ -22,7 +22,7 @@ fun PreviewDaysContentTodayPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             PreviewDaysContentInner(java.time.LocalDate.now())
         }
@@ -38,12 +38,12 @@ fun PreviewDaysContentPastPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             PreviewDaysContentInner(
                 java.time.LocalDate
                     .now()
-                    .minusDays(PreviewComponentsConstants.PREVIEW_PAST_DAYS),
+                    .minusDays(PreviewComponentsConstants.PREVIEW_PAST_DAYS)
             )
         }
     }
@@ -58,12 +58,12 @@ fun PreviewDaysContentFuturePreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(dimensionResource(R.dimen.spacing_regular)),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             PreviewDaysContentInner(
                 java.time.LocalDate
                     .now()
-                    .plusDays(PreviewComponentsConstants.PREVIEW_FUTURE_DAYS),
+                    .plusDays(PreviewComponentsConstants.PREVIEW_FUTURE_DAYS)
             )
         }
     }

@@ -23,7 +23,7 @@ import java.time.LocalDate
 class GetDaysAnalysisTextUseCase(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-    private val resourceProvider: ResourceProvider,
+    private val resourceProvider: ResourceProvider
 ) {
     /**
      * Получает полный текст анализа дней с префиксом.
@@ -34,12 +34,12 @@ class GetDaysAnalysisTextUseCase(
      */
     operator fun invoke(
         item: Item,
-        currentDate: LocalDate? = null,
+        currentDate: LocalDate? = null
     ): String {
         val difference =
             calculateDaysDifferenceUseCase(
                 eventTimestamp = item.timestamp,
-                currentDate = currentDate ?: LocalDate.now(),
+                currentDate = currentDate ?: LocalDate.now()
             )
 
         return when (difference) {
@@ -64,7 +64,7 @@ class GetDaysAnalysisTextUseCase(
                         getFormattedDaysForItemUseCase(
                             item = item,
                             currentDate = currentDate,
-                            showMinus = false,
+                            showMinus = false
                         )
 
                     "$prefix $formattedDays"

@@ -61,7 +61,7 @@ interface ItemDao {
      * @return Flow со списком найденных записей
      */
     @Query(
-        "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%'",
+        "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%'"
     )
     fun searchItems(searchQuery: String): Flow<List<ItemEntity>>
 

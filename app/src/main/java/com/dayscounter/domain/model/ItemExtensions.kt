@@ -20,11 +20,11 @@ fun Item.makeDaysCount(
     useCase: GetFormattedDaysForItemUseCase,
     currentDate: LocalDate? = null,
     defaultDisplayOption: DisplayOption = DisplayOption.DAY,
-    showMinus: Boolean = true,
+    showMinus: Boolean = true
 ): String =
     useCase(
         item = this,
         currentDate = currentDate,
         defaultDisplayOption = defaultDisplayOption,
-        showMinus = showMinus,
+        showMinus = showMinus
     )

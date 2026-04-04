@@ -26,7 +26,7 @@ import kotlin.math.round
     "ReturnCount", // Early returns необходимы для валидации бинарных данных
     "TooGenericExceptionCaught", // Парсер должен быть устойчив к любым ошибкам
     "SwallowedException", // Ошибки парсинга возвращают null вместо выброса исключений
-    "LoopWithTooManyJumpStatements", // Continue используется для early exit в циклах парсинга
+    "LoopWithTooManyJumpStatements" // Continue используется для early exit в циклах парсинга
 )
 object NsKeyedArchiverParser {
     private const val BPLIST_MAGIC = "bplist00"
@@ -51,11 +51,12 @@ object NsKeyedArchiverParser {
 
         return try {
             val bytes = Base64.getDecoder().decode(base64String)
-            bytes.size >= BPLIST_MAGIC.length && String(
-                bytes,
-                0,
-                BPLIST_MAGIC.length
-            ) == BPLIST_MAGIC
+            bytes.size >= BPLIST_MAGIC.length &&
+                String(
+                    bytes,
+                    0,
+                    BPLIST_MAGIC.length
+                ) == BPLIST_MAGIC
         } catch (_: IllegalArgumentException) {
             false
         }
@@ -89,29 +90,31 @@ object NsKeyedArchiverParser {
         val objectRefSize: Int,
         val numObjects: Long,
         val topObject: Long,
-        val offsetTableOffset: Long,
+        val offsetTableOffset: Long
     )
 
     private data class Rgba(
         val red: Float,
         val green: Float,
         val blue: Float,
-        val alpha: Float,
+        val alpha: Float
     )
 
     private fun parseBplistColor(bytes: ByteArray): Rgba? {
         if (bytes.size < BPLIST_MAGIC.length + TRAILER_SIZE) return null
         if (String(bytes, 0, BPLIST_MAGIC.length) != BPLIST_MAGIC) return null
 
-        val trailer = parseTrailer(bytes) ?: run {
-            println("DEBUG: parseTrailer returned null")
-            return null
-        }
+        val trailer =
+            parseTrailer(bytes) ?: run {
+                println("DEBUG: parseTrailer returned null")
+                return null
+            }
         println("DEBUG: trailer = $trailer")
-        val offsetTable = parseOffsetTable(bytes, trailer) ?: run {
-            println("DEBUG: parseOffsetTable returned null")
-            return null
-        }
+        val offsetTable =
+            parseOffsetTable(bytes, trailer) ?: run {
+                println("DEBUG: parseOffsetTable returned null")
+                return null
+            }
         println("DEBUG: offsetTable size = ${offsetTable.size}")
         val objects = parseObjects(bytes, offsetTable, trailer)
         println("DEBUG: objects count = ${objects.size}")
@@ -160,13 +163,13 @@ object NsKeyedArchiverParser {
             objectRefSize = objectRefSize,
             numObjects = numObjects,
             topObject = topObject,
-            offsetTableOffset = offsetTableOffset,
+            offsetTableOffset = offsetTableOffset
         )
     }
 
     private fun parseOffsetTable(
         bytes: ByteArray,
-        trailer: BplistTrailer,
+        trailer: BplistTrailer
     ): LongArray? {
         // Проверка разумности offsetIntSize (1-8 байт)
         if (trailer.offsetIntSize !in 1..8) return null
@@ -189,7 +192,7 @@ object NsKeyedArchiverParser {
     private fun parseObjects(
         bytes: ByteArray,
         offsetTable: LongArray,
-        trailer: BplistTrailer,
+        trailer: BplistTrailer
     ): List<Any?> {
         val objects = mutableListOf<Any?>()
         val buffer = ByteBuffer.wrap(bytes)
@@ -204,7 +207,10 @@ object NsKeyedArchiverParser {
         return objects
     }
 
-    private fun parseObject(buffer: ByteBuffer, objectRefSize: Int): Any? {
+    private fun parseObject(
+        buffer: ByteBuffer,
+        objectRefSize: Int
+    ): Any? {
         if (buffer.remaining() < 1) return null
 
         val marker = buffer.get().toInt() and 0xFF
@@ -214,12 +220,13 @@ object NsKeyedArchiverParser {
         // Возвращаем BplistNull для null-object (маркер 0x00)
         // Это позволяет отличить "null объект в bplist" от "ошибка парсинга"
         return when (highNibble) {
-            0x0 -> when (lowNibble) {
-                0x0 -> BplistNull // null object в bplist
-                0x8 -> false // false
-                0x9 -> true // true
-                else -> null // неизвестный тип - ошибка
-            }
+            0x0 ->
+                when (lowNibble) {
+                    0x0 -> BplistNull // null object в bplist
+                    0x8 -> false // false
+                    0x9 -> true // true
+                    else -> null // неизвестный тип - ошибка
+                }
 
             0x1 -> parseInteger(buffer, lowNibble)
             0x2 -> parseReal(buffer, lowNibble)
@@ -238,14 +245,18 @@ object NsKeyedArchiverParser {
 
     // MARK: - Object Parsers
 
-    private fun parseInteger(buffer: ByteBuffer, sizeHint: Int): Long {
-        val size = when (sizeHint) {
-            0x0 -> 1
-            0x1 -> 2
-            0x2 -> 4
-            0x3 -> 8
-            else -> 1 shl sizeHint
-        }
+    private fun parseInteger(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): Long {
+        val size =
+            when (sizeHint) {
+                0x0 -> 1
+                0x1 -> 2
+                0x2 -> 4
+                0x3 -> 8
+                else -> 1 shl sizeHint
+            }
 
         var value = 0L
         repeat(size) {
@@ -254,8 +265,11 @@ object NsKeyedArchiverParser {
         return value
     }
 
-    private fun parseReal(buffer: ByteBuffer, sizeHint: Int): Float {
-        return when (sizeHint) {
+    private fun parseReal(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): Float =
+        when (sizeHint) {
             0x2 -> {
                 buffer.order(ByteOrder.BIG_ENDIAN)
                 buffer.float
@@ -269,42 +283,56 @@ object NsKeyedArchiverParser {
 
             else -> 0f
         }
-    }
 
     private fun parseDate(buffer: ByteBuffer): Double {
         buffer.order(ByteOrder.BIG_ENDIAN)
         return buffer.double
     }
 
-    private fun parseData(buffer: ByteBuffer, sizeHint: Int): ByteArray {
+    private fun parseData(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): ByteArray {
         val size = readCount(buffer, sizeHint)
         val data = ByteArray(size)
         buffer.get(data)
         return data
     }
 
-    private fun parseAsciiString(buffer: ByteBuffer, sizeHint: Int): String {
+    private fun parseAsciiString(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): String {
         val size = readCount(buffer, sizeHint)
         val bytes = ByteArray(size)
         buffer.get(bytes)
         return String(bytes, Charsets.US_ASCII)
     }
 
-    private fun parseUtf16String(buffer: ByteBuffer, sizeHint: Int): String {
+    private fun parseUtf16String(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): String {
         val size = readCount(buffer, sizeHint)
         val bytes = ByteArray(size * 2)
         buffer.get(bytes)
         return String(bytes, Charsets.UTF_16BE)
     }
 
-    private fun parseUtf8String(buffer: ByteBuffer, sizeHint: Int): String {
+    private fun parseUtf8String(
+        buffer: ByteBuffer,
+        sizeHint: Int
+    ): String {
         val size = readCount(buffer, sizeHint)
         val bytes = ByteArray(size)
         buffer.get(bytes)
         return String(bytes, Charsets.UTF_8)
     }
 
-    private fun parseUid(buffer: ByteBuffer, size: Int): Long {
+    private fun parseUid(
+        buffer: ByteBuffer,
+        size: Int
+    ): Long {
         var value = 0L
         repeat(size) {
             value = (value shl 8) or (buffer.get().toLong() and 0xFF)
@@ -312,7 +340,11 @@ object NsKeyedArchiverParser {
         return value
     }
 
-    private fun parseArray(buffer: ByteBuffer, sizeHint: Int, objectRefSize: Int): List<Any?> {
+    private fun parseArray(
+        buffer: ByteBuffer,
+        sizeHint: Int,
+        objectRefSize: Int
+    ): List<Any?> {
         val size = readCount(buffer, sizeHint)
         val array = mutableListOf<Any?>()
         repeat(size) {
@@ -322,7 +354,11 @@ object NsKeyedArchiverParser {
         return array
     }
 
-    private fun parseSet(buffer: ByteBuffer, sizeHint: Int, objectRefSize: Int): Set<Any?> {
+    private fun parseSet(
+        buffer: ByteBuffer,
+        sizeHint: Int,
+        objectRefSize: Int
+    ): Set<Any?> {
         val size = readCount(buffer, sizeHint)
         val set = mutableSetOf<Any?>()
         repeat(size) {
@@ -358,25 +394,32 @@ object NsKeyedArchiverParser {
 
     // MARK: - Helpers
 
-    private fun readCount(buffer: ByteBuffer, hint: Int): Int {
+    private fun readCount(
+        buffer: ByteBuffer,
+        hint: Int
+    ): Int {
         return if (hint == 0xF) {
             // Extended count - следующий байт определяет размер типа и значение
             val extMarker = buffer.get().toInt() and 0xFF
             val extType = (extMarker shr 4) and 0x0F
-            val extSize = when (extType) {
-                0x1 -> 1 // 1-byte count
-                0x2 -> 2 // 2-byte count
-                0x4 -> 4 // 4-byte count
-                0x8 -> 8 // 8-byte count
-                else -> return 0
-            }
+            val extSize =
+                when (extType) {
+                    0x1 -> 1 // 1-byte count
+                    0x2 -> 2 // 2-byte count
+                    0x4 -> 4 // 4-byte count
+                    0x8 -> 8 // 8-byte count
+                    else -> return 0
+                }
             readInt(buffer, extSize).toInt()
         } else {
             hint
         }
     }
 
-    private fun readInt(buffer: ByteBuffer, size: Int): Long {
+    private fun readInt(
+        buffer: ByteBuffer,
+        size: Int
+    ): Long {
         var value = 0L
         repeat(size) {
             value = (value shl 8) or (buffer.get().toLong() and 0xFF)
@@ -393,28 +436,30 @@ object NsKeyedArchiverParser {
         for (obj in objects) {
             if (obj is Map<*, *>) {
                 // Проверяем есть ли в этом dict цветовые ключи
-                val hasColorKeys = obj.entries.any { (key, _) ->
-                    val keyStr = key.toString()
-                    if (keyStr.startsWith("key_")) {
-                        val keyRef = keyStr.removePrefix("key_").toIntOrNull()
-                        if (keyRef != null && keyRef < objects.size) {
-                            val keyObj = objects[keyRef]
-                            keyObj is String && keyObj in
-                                listOf(
-                                    "UIRed",
-                                    "UIGreen",
-                                    "UIBlue",
-                                    "UIColorComponentCount",
-                                    "UIGree",
-                                    "UIGren"
-                                )
+                val hasColorKeys =
+                    obj.entries.any { (key, _) ->
+                        val keyStr = key.toString()
+                        if (keyStr.startsWith("key_")) {
+                            val keyRef = keyStr.removePrefix("key_").toIntOrNull()
+                            if (keyRef != null && keyRef < objects.size) {
+                                val keyObj = objects[keyRef]
+                                keyObj is String &&
+                                    keyObj in
+                                    listOf(
+                                        "UIRed",
+                                        "UIGreen",
+                                        "UIBlue",
+                                        "UIColorComponentCount",
+                                        "UIGree",
+                                        "UIGren"
+                                    )
+                            } else {
+                                false
+                            }
                         } else {
                             false
                         }
-                    } else {
-                        false
                     }
-                }
 
                 if (hasColorKeys) {
                     val color = tryExtractColor(obj, objects)
@@ -430,7 +475,7 @@ object NsKeyedArchiverParser {
 
     private fun tryExtractColor(
         dict: Map<*, *>,
-        objects: List<Any?>,
+        objects: List<Any?>
     ): Rgba? {
         var red: Float? = null
         var green: Float? = null
@@ -438,21 +483,26 @@ object NsKeyedArchiverParser {
         var alpha = 1.0f
 
         // Ищем UIColorComponentCount = 4, чтобы подтвердить что это UIColor
-        val hasComponentCount = dict.entries.any { (key, value) ->
-            val keyStr = key.toString()
-            if (keyStr.startsWith("key_")) {
-                val keyRef = keyStr.removePrefix("key_").toIntOrNull()
-                if (keyRef != null && keyRef < objects.size) {
-                    val keyObj = objects[keyRef]
-                    if (keyObj == "UIColorComponentCount") {
-                        val valueRef = (value as? Int) ?: return@any false
-                        if (valueRef < objects.size) {
-                            val numValue = when (val valueObj = objects[valueRef]) {
-                                is Long -> valueObj
-                                is Int -> valueObj.toLong()
-                                else -> return@any false
+        val hasComponentCount =
+            dict.entries.any { (key, value) ->
+                val keyStr = key.toString()
+                if (keyStr.startsWith("key_")) {
+                    val keyRef = keyStr.removePrefix("key_").toIntOrNull()
+                    if (keyRef != null && keyRef < objects.size) {
+                        val keyObj = objects[keyRef]
+                        if (keyObj == "UIColorComponentCount") {
+                            val valueRef = (value as? Int) ?: return@any false
+                            if (valueRef < objects.size) {
+                                val numValue =
+                                    when (val valueObj = objects[valueRef]) {
+                                        is Long -> valueObj
+                                        is Int -> valueObj.toLong()
+                                        else -> return@any false
+                                    }
+                                numValue == 4L
+                            } else {
+                                false
                             }
-                            numValue == 4L
                         } else {
                             false
                         }
@@ -462,34 +512,32 @@ object NsKeyedArchiverParser {
                 } else {
                     false
                 }
-            } else {
-                false
             }
-        }
 
         if (!hasComponentCount) {
             // Альтернативно, проверяем наличие $class = UIColor
-            val hasUIClass = dict.entries.any { (key, value) ->
-                val keyStr = key.toString()
-                if (keyStr.startsWith("key_")) {
-                    val keyRef = keyStr.removePrefix("key_").toIntOrNull()
-                    if (keyRef != null && keyRef < objects.size) {
-                        val keyObj = objects[keyRef]
-                        if (keyObj == $$"$class") {
-                            val valueRef = (value as? Int) ?: return@any false
-                            if (valueRef < objects.size) {
-                                val classDict = objects[valueRef] as? Map<*, *>
-                                return@any checkClassIsUIColor(classDict, objects)
+            val hasUIClass =
+                dict.entries.any { (key, value) ->
+                    val keyStr = key.toString()
+                    if (keyStr.startsWith("key_")) {
+                        val keyRef = keyStr.removePrefix("key_").toIntOrNull()
+                        if (keyRef != null && keyRef < objects.size) {
+                            val keyObj = objects[keyRef]
+                            if (keyObj == $$"$class") {
+                                val valueRef = (value as? Int) ?: return@any false
+                                if (valueRef < objects.size) {
+                                    val classDict = objects[valueRef] as? Map<*, *>
+                                    return@any checkClassIsUIColor(classDict, objects)
+                                }
                             }
+                            false
+                        } else {
+                            false
                         }
-                        false
                     } else {
                         false
                     }
-                } else {
-                    false
                 }
-            }
 
             if (!hasUIClass) return null
         }
@@ -506,17 +554,19 @@ object NsKeyedArchiverParser {
             val valueRef = (value as? Int) ?: continue
             if (valueRef >= objects.size) continue
 
-            val floatValue = when (val valueObj = objects[valueRef]) {
-                is Float -> valueObj
-                is Double -> valueObj.toFloat()
-                is Long -> valueObj.toFloat()
-                else -> continue
-            }
+            val floatValue =
+                when (val valueObj = objects[valueRef]) {
+                    is Float -> valueObj
+                    is Double -> valueObj.toFloat()
+                    is Long -> valueObj.toFloat()
+                    else -> continue
+                }
 
             when (keyObj) {
                 "UIRed" -> red = floatValue
-                "UIGreen", "UIGree", "UIGren" -> green =
-                    floatValue // "UIGree"/"UIGren" - обрезанные имена в iOS bplist
+                "UIGreen", "UIGree", "UIGren" ->
+                    green =
+                        floatValue // "UIGree"/"UIGren" - обрезанные имена в iOS bplist
                 "UIBlue" -> blue = floatValue
                 "UIAlpha" -> alpha = floatValue
             }
@@ -531,7 +581,7 @@ object NsKeyedArchiverParser {
 
     private fun checkClassIsUIColor(
         classDict: Map<*, *>?,
-        objects: List<Any?>,
+        objects: List<Any?>
     ): Boolean {
         if (classDict == null) return false
 

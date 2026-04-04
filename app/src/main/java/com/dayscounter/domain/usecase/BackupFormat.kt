@@ -22,5 +22,5 @@ enum class BackupFormat {
      * - timestamp: секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
      * - colorTag: Base64 NSKeyedArchiver (UIColor)
      */
-    IOS,
+    IOS
 }

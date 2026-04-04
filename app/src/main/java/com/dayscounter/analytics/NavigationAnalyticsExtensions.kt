@@ -22,14 +22,14 @@ fun NavController.navigateWithLogging(
     context: Context,
     route: String,
     builder: (NavOptionsBuilder.() -> Unit)? = null,
-    screenName: String? = null,
+    screenName: String? = null
 ) {
     // Логируем screen_view перед навигацией
     val screenToLog = screenName ?: route
     FirebaseAnalyticsHelper.logScreenView(
         context = context,
         screenName = screenToLog,
-        screenClass = route,
+        screenClass = route
     )
 
     // Выполняем навигацию

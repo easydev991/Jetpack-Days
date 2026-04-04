@@ -24,7 +24,7 @@ val LocalDateSaver: Saver<LocalDate, Long> =
                 .ofEpochMilli(epochMilli)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate()
-        },
+        }
     )
 
 /**
@@ -40,7 +40,7 @@ val NullableColorSaver: Saver<Color?, Int> =
             } else {
                 Color(argb)
             }
-        },
+        }
     )
 
 /**
@@ -56,7 +56,7 @@ val DisplayOptionSaver: Saver<DisplayOption, String> =
             } catch (e: IllegalArgumentException) {
                 DisplayOption.DAY
             }
-        },
+        }
     )
 
 /**
@@ -82,5 +82,5 @@ val NullableLocalDateSaver: Saver<LocalDate?, Long> =
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate()
             }
-        },
+        }
     )

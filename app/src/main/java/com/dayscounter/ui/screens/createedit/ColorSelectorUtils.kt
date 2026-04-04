@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
  */
 fun isCustomColor(
     selectedColor: Color?,
-    presetColors: List<Color>,
+    presetColors: List<Color>
 ): Boolean {
     if (selectedColor == null) return false
     return !presetColors.contains(selectedColor)

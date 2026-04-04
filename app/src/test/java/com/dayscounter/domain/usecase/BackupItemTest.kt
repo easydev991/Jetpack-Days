@@ -74,7 +74,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = 0xFFFF0000.toInt(),
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         // When
@@ -98,7 +98,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
 
         // When
@@ -122,7 +122,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
 
         // When
@@ -146,7 +146,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
+                displayOption = DisplayOption.YEAR_MONTH_DAY
             )
 
         // When
@@ -169,7 +169,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = "#FF0000",
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -193,7 +193,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -217,7 +217,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = "monthDay",
+                displayOption = "monthDay"
             )
 
         // When
@@ -241,7 +241,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = "yearMonthDay",
+                displayOption = "yearMonthDay"
             )
 
         // When
@@ -265,7 +265,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = null,
-                displayOption = "invalid",
+                displayOption = "invalid"
             )
 
         // When
@@ -285,7 +285,7 @@ class BackupItemTest {
                 details = "Test Details",
                 timestamp = 1234567890000L,
                 colorTag = 0xFF00FF00.toInt(),
-                displayOption = DisplayOption.MONTH_DAY,
+                displayOption = DisplayOption.MONTH_DAY
             )
 
         // When
@@ -403,7 +403,7 @@ class BackupItemTest {
                 details = "Imported from iOS",
                 timestamp = 769363669529L,
                 colorTag = base64Color,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When

@@ -17,7 +17,7 @@ class AppThemeTest {
             listOf(
                 AppTheme.LIGHT,
                 AppTheme.DARK,
-                AppTheme.SYSTEM,
+                AppTheme.SYSTEM
             )
 
         // When

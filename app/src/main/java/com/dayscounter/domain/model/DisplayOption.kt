@@ -26,7 +26,7 @@ enum class DisplayOption {
     /**
      * Отображать год, месяц и день (например, "5 дней (15 марта 2024)")
      */
-    YEAR_MONTH_DAY,
+    YEAR_MONTH_DAY
 
     ;
 

@@ -21,7 +21,7 @@ import com.dayscounter.ui.theme.JetpackDaysTheme
 private fun getNormalStyle(customStyle: TextStyle?): TextStyle =
     customStyle
         ?: MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
 
 /**
@@ -30,7 +30,7 @@ private fun getNormalStyle(customStyle: TextStyle?): TextStyle =
 @Composable
 private fun getEmphasizedStyle(
     customStyle: TextStyle?,
-    color: Color,
+    color: Color
 ): TextStyle {
     val accentColor =
         if (color == Color.Unspecified) {
@@ -41,11 +41,11 @@ private fun getEmphasizedStyle(
 
     return customStyle?.copy(
         fontWeight = FontWeight.Bold,
-        color = accentColor,
+        color = accentColor
     )
         ?: MaterialTheme.typography.headlineSmall.copy(
             fontWeight = FontWeight.Bold,
-            color = accentColor,
+            color = accentColor
         )
 }
 
@@ -55,7 +55,7 @@ private fun getEmphasizedStyle(
 @Composable
 private fun getSecondaryStyle(
     customStyle: TextStyle?,
-    color: Color,
+    color: Color
 ): TextStyle {
     val secondaryColor =
         if (color == Color.Unspecified) {
@@ -89,7 +89,7 @@ fun DaysCountText(
     textStyle: DaysCountTextStyle = DaysCountTextStyle.NORMAL,
     customStyle: TextStyle? = null,
     color: Color = Color.Unspecified,
-    textAlign: TextAlign? = null,
+    textAlign: TextAlign? = null
 ) {
     val resolvedStyle =
         when (textStyle) {
@@ -110,7 +110,7 @@ fun DaysCountText(
         modifier = modifier,
         style = resolvedStyle,
         color = contentColor,
-        textAlign = textAlign,
+        textAlign = textAlign
     )
 }
 
@@ -123,7 +123,7 @@ fun DaysCountTextPreview() {
     JetpackDaysTheme {
         DaysCountText(
             formattedText = "5 дней",
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -134,7 +134,7 @@ fun DaysCountTextTodayPreview() {
     JetpackDaysTheme {
         DaysCountText(
             formattedText = "Сегодня",
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -146,7 +146,7 @@ fun DaysCountTextEmphasizedPreview() {
         DaysCountText(
             formattedText = "1 год 2 месяца 5 дней",
             modifier = Modifier.padding(16.dp),
-            textStyle = DaysCountTextStyle.EMPHASIZED,
+            textStyle = DaysCountTextStyle.EMPHASIZED
         )
     }
 }
@@ -158,7 +158,7 @@ fun DaysCountTextSecondaryPreview() {
         DaysCountText(
             formattedText = "2 мес. 5 дн.",
             modifier = Modifier.padding(16.dp),
-            textStyle = DaysCountTextStyle.SECONDARY,
+            textStyle = DaysCountTextStyle.SECONDARY
         )
     }
 }
@@ -169,7 +169,7 @@ fun DaysCountTextFullFormatPreview() {
     JetpackDaysTheme {
         DaysCountText(
             formattedText = "1 год 2 месяца 5 дней",
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp)
         )
     }
 }

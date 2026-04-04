@@ -31,13 +31,13 @@ fun CreateEditScreen(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel = viewModel(),
-    onBackClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     CreateEditScreenContent(
         itemId = itemId,
         modifier = modifier,
         viewModel = viewModel,
-        onBackClick = onBackClick,
+        onBackClick = onBackClick
     )
 }
 
@@ -50,7 +50,7 @@ private fun CreateEditScreenContent(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val hasChanges by viewModel.hasChanges.collectAsState()
@@ -86,7 +86,7 @@ private fun CreateEditScreenContent(
                                 details = uiStates.details.value,
                                 timestamp = timestamp,
                                 colorTag = uiStates.selectedColor.value?.toArgb(),
-                                displayOption = uiStates.selectedDisplayOption.value,
+                                displayOption = uiStates.selectedDisplayOption.value
                             )
 
                         if (isEditing) {
@@ -96,9 +96,9 @@ private fun CreateEditScreenContent(
                         }
                         onBackClick()
                     }
-                },
+                }
             )
-        },
+        }
     ) { paddingValues ->
         CreateEditFormContent(
             params =
@@ -108,8 +108,8 @@ private fun CreateEditScreenContent(
                     uiStates = uiStates,
                     showDatePicker = showDatePicker,
                     viewModel = viewModel,
-                    onBackClick = onBackClick,
-                ),
+                    onBackClick = onBackClick
+                )
         )
     }
 
@@ -131,10 +131,10 @@ private fun CreateEditScreenContent(
                         details = uiStates.details.value,
                         timestamp = timestamp,
                         colorTag = uiStates.selectedColor.value?.toArgb(),
-                        displayOption = uiStates.selectedDisplayOption.value,
+                        displayOption = uiStates.selectedDisplayOption.value
                     )
                 }
-            },
+            }
         )
     }
 }

@@ -14,7 +14,7 @@ import java.util.Base64
 @Suppress(
     "MagicNumber",
     "TooManyFunctions",
-    "LongMethod",
+    "LongMethod"
 )
 object NsKeyedArchiverBuilder {
     private const val BPLIST_MAGIC = "bplist00"
@@ -55,26 +55,35 @@ object NsKeyedArchiverBuilder {
      * @param a Alpha (0.0 - 1.0)
      * @return Base64-закодированный NSKeyedArchiver
      */
-    fun buildFromRgba(r: Float, g: Float, b: Float, a: Float): String {
+    fun buildFromRgba(
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float
+    ): String {
         val bytes = buildBplist(r, g, b, a)
         return Base64.getEncoder().encodeToString(bytes)
     }
 
     // MARK: - Hex Parsing
 
-    private fun parseHexToArgb(hexColor: String): Int? {
-        return hexColor
+    private fun parseHexToArgb(hexColor: String): Int? =
+        hexColor
             .takeIf { it.startsWith("#") }
             ?.removePrefix("#")
             ?.takeIf { it.length == 6 }
             ?.toIntOrNull(16)
             ?.let { rgb -> (0xFF000000.toInt()) or rgb }
-    }
 
     // MARK: - Bplist Building
 
     @Suppress("SimplifiableCall")
-    private fun buildBplist(r: Float, g: Float, b: Float, a: Float): ByteArray {
+    private fun buildBplist(
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float
+    ): ByteArray {
         // Структура основана на реальном iOS примере
         // Содержит NSKeyedArchiver с UIColor
 
@@ -151,14 +160,14 @@ object NsKeyedArchiverBuilder {
         objects.add(
             encodeDict(
                 mapOf(
-                    9 to 24,   // $class -> UIColor class
-                    14 to 19,  // UIColorComponentCount -> 4
-                    15 to 20,  // UIRed -> r
-                    16 to 21,  // UIGreen -> g
-                    17 to 22,  // UIBlue -> b
-                    18 to 23,  // UIAlpha -> a
-                ),
-            ),
+                    9 to 24, // $class -> UIColor class
+                    14 to 19, // UIColorComponentCount -> 4
+                    15 to 20, // UIRed -> r
+                    16 to 21, // UIGreen -> g
+                    17 to 22, // UIBlue -> b
+                    18 to 23 // UIAlpha -> a
+                )
+            )
         )
 
         // Теперь собираем финальный bplist
@@ -183,7 +192,14 @@ object NsKeyedArchiverBuilder {
 
         // Offset table
         val offsetTableStart = stream.size()
-        val offsetSize = if (currentOffset < 256) 1 else if (currentOffset < 65536) 2 else 4
+        val offsetSize =
+            if (currentOffset < 256) {
+                1
+            } else if (currentOffset < 65536) {
+                2
+            } else {
+                4
+            }
 
         for (offset in offsets) {
             when (offsetSize) {
@@ -258,15 +274,14 @@ object NsKeyedArchiverBuilder {
         return header + keys + values
     }
 
-    private fun encodeInt(value: Int): ByteArray {
-        return if (value < 256) {
+    private fun encodeInt(value: Int): ByteArray =
+        if (value < 256) {
             byteArrayOf(0x10, value.toByte())
         } else {
             byteArrayOf(
                 0x11,
                 ((value shr 8) and 0xFF).toByte(),
-                (value and 0xFF).toByte(),
+                (value and 0xFF).toByte()
             )
         }
-    }
 }

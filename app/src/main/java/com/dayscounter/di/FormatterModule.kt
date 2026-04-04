@@ -37,15 +37,13 @@ object FormatterModule {
     /**
      * Создает [CalculateDaysDifferenceUseCase].
      */
-    fun createCalculateDaysDifferenceUseCase(): CalculateDaysDifferenceUseCase =
-        CalculateDaysDifferenceUseCase()
+    fun createCalculateDaysDifferenceUseCase(): CalculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
 
     /**
      * Создает [FormatDaysTextUseCase].
      */
     @Suppress("MaxLineLength")
-    fun createFormatDaysTextUseCase(daysFormatter: DaysFormatter): FormatDaysTextUseCase =
-        FormatDaysTextUseCase(daysFormatter)
+    fun createFormatDaysTextUseCase(daysFormatter: DaysFormatter): FormatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
 
     /**
      * Создает [GetFormattedDaysForItemUseCase].
@@ -53,12 +51,12 @@ object FormatterModule {
     fun createGetFormattedDaysForItemUseCase(
         calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
         formatDaysTextUseCase: FormatDaysTextUseCase,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): GetFormattedDaysForItemUseCase =
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider,
+            resourceProvider
         )
 
     /**
@@ -73,11 +71,11 @@ object FormatterModule {
     fun createGetDaysAnalysisTextUseCase(
         calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
         getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-        resourceProvider: ResourceProvider,
+        resourceProvider: ResourceProvider
     ): GetDaysAnalysisTextUseCase =
         GetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-            resourceProvider = resourceProvider,
+            resourceProvider = resourceProvider
         )
 }

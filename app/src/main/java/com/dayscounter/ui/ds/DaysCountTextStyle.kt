@@ -11,5 +11,5 @@ enum class DaysCountTextStyle {
     EMPHASIZED,
 
     /** Вторичный стиль (с уменьшенным размером и другим цветом) */
-    SECONDARY,
+    SECONDARY
 }

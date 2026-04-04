@@ -43,12 +43,12 @@ class DetailScreenViewModelIntegrationTest {
     private val testItemId = 1L
     private val testItem =
         Item(
-            id = 0L,  // Используем id = 0L, чтобы Room генерировал новый ID
+            id = 0L, // Используем id = 0L, чтобы Room генерировал новый ID
             title = "Тестовое событие",
             details = "Описание события",
             timestamp = System.currentTimeMillis(),
             colorTag = null,
-            displayOption = DisplayOption.DAY,
+            displayOption = DisplayOption.DAY
         )
 
     @Before
@@ -60,7 +60,7 @@ class DetailScreenViewModelIntegrationTest {
             Room
                 .inMemoryDatabaseBuilder(
                     context,
-                    DaysDatabase::class.java,
+                    DaysDatabase::class.java
                 ).allowMainThreadQueries()
                 .build()
 
@@ -89,7 +89,7 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 // Проверяем состояние Success
@@ -123,7 +123,7 @@ class DetailScreenViewModelIntegrationTest {
             // Состояние должно остаться Loading
             assertTrue(
                 "Состояние должно быть Loading",
-                viewModel.uiState.value is DetailScreenState.Loading,
+                viewModel.uiState.value is DetailScreenState.Loading
             )
         }
     }
@@ -141,7 +141,7 @@ class DetailScreenViewModelIntegrationTest {
             viewModel.requestDelete()
             assertTrue(
                 "Диалог удаления должен быть показан",
-                viewModel.showDeleteDialog.value,
+                viewModel.showDeleteDialog.value
             )
         }
     }
@@ -160,7 +160,7 @@ class DetailScreenViewModelIntegrationTest {
             viewModel.cancelDelete()
             assertFalse(
                 "Диалог удаления должен быть скрыт",
-                viewModel.showDeleteDialog.value,
+                viewModel.showDeleteDialog.value
             )
             val item = repository.getItemById(insertedId)
             assertNotNull("Элемент должен остаться в базе данных", item)
@@ -173,7 +173,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val itemWithColorTag =
                 testItem.copy(
-                    colorTag = 0xFFFF00FF.toInt(),
+                    colorTag = 0xFFFF00FF.toInt()
                 )
             val insertedId = repository.insertItem(itemWithColorTag)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
@@ -184,7 +184,7 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 val successState = awaitItem()
@@ -195,7 +195,7 @@ class DetailScreenViewModelIntegrationTest {
                 val success = successState as DetailScreenState.Success
                 assertEquals(
                     0xFFFF00FF.toInt(),
-                    success.item.colorTag,
+                    success.item.colorTag
                 )
             }
         }
@@ -213,13 +213,13 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 val initialState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Success",
-                    initialState is DetailScreenState.Success,
+                    initialState is DetailScreenState.Success
                 )
                 val initialSuccess = initialState as DetailScreenState.Success
                 assertEquals("Тестовое событие", initialSuccess.item.title)
@@ -227,23 +227,23 @@ class DetailScreenViewModelIntegrationTest {
                 val updatedItem =
                     initialSuccess.item.copy(
                         title = "Обновленное событие",
-                        details = "Обновленное описание",
+                        details = "Обновленное описание"
                     )
                 repository.updateItem(updatedItem)
 
                 val updatedState = awaitItem()
                 assertTrue(
                     "Обновленное состояние должно быть Success",
-                    updatedState is DetailScreenState.Success,
+                    updatedState is DetailScreenState.Success
                 )
                 val updatedSuccess = updatedState as DetailScreenState.Success
                 assertEquals(
                     "Обновленное событие",
-                    updatedSuccess.item.title,
+                    updatedSuccess.item.title
                 )
                 assertEquals(
                     "Обновленное описание",
-                    updatedSuccess.item.details,
+                    updatedSuccess.item.details
                 )
             }
         }
@@ -267,7 +267,7 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 val successState = awaitItem()
@@ -278,7 +278,7 @@ class DetailScreenViewModelIntegrationTest {
                 val success = successState as DetailScreenState.Success
                 assertEquals(
                     "Событие 2",
-                    success.item.title,
+                    success.item.title
                 )
             }
         }
@@ -289,7 +289,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val itemWithEmptyDetails =
                 testItem.copy(
-                    details = "",
+                    details = ""
                 )
             val insertedId = repository.insertItem(itemWithEmptyDetails)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
@@ -300,7 +300,7 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 val successState = awaitItem()
@@ -320,7 +320,7 @@ class DetailScreenViewModelIntegrationTest {
             val specificTimestamp = 1234567890000L
             val itemWithTimestamp =
                 testItem.copy(
-                    timestamp = specificTimestamp,
+                    timestamp = specificTimestamp
                 )
             val insertedId = repository.insertItem(itemWithTimestamp)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
@@ -331,7 +331,7 @@ class DetailScreenViewModelIntegrationTest {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
-                    loadingState is DetailScreenState.Loading,
+                    loadingState is DetailScreenState.Loading
                 )
 
                 val successState = awaitItem()
@@ -342,12 +342,11 @@ class DetailScreenViewModelIntegrationTest {
                 val success = successState as DetailScreenState.Success
                 assertEquals(
                     specificTimestamp,
-                    success.item.timestamp,
+                    success.item.timestamp
                 )
             }
         }
     }
-
 }
 
 /**
@@ -359,11 +358,11 @@ sealed class DetailScreenState {
 
     /** Успешная загрузка */
     data class Success(
-        val item: Item,
+        val item: Item
     ) : DetailScreenState()
 
     /** Ошибка загрузки */
     data class Error(
-        val message: String,
+        val message: String
     ) : DetailScreenState()
 }

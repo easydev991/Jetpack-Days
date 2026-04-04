@@ -24,7 +24,7 @@ class CreateEditUiStateTest {
                 details = mutableStateOf(""),
                 selectedDate = mutableStateOf(null),
                 selectedColor = mutableStateOf(null),
-                selectedDisplayOption = mutableStateOf(DisplayOption.DAY),
+                selectedDisplayOption = mutableStateOf(DisplayOption.DAY)
             )
     }
 
@@ -113,7 +113,7 @@ class CreateEditUiStateTest {
         assertEquals(
             DisplayOption.MONTH_DAY,
             uiState.selectedDisplayOption.value,
-            "Опция отображения должна быть обновлена",
+            "Опция отображения должна быть обновлена"
         )
     }
 
@@ -138,7 +138,7 @@ class CreateEditUiStateTest {
         assertEquals(
             DisplayOption.YEAR_MONTH_DAY,
             uiState.selectedDisplayOption.value,
-            "Опция отображения должна быть обновлена",
+            "Опция отображения должна быть обновлена"
         )
     }
 
@@ -158,7 +158,7 @@ class CreateEditUiStateTest {
                 details = mutableStateOf(initialDetails),
                 selectedDate = mutableStateOf(initialDate),
                 selectedColor = mutableStateOf(initialColor),
-                selectedDisplayOption = mutableStateOf(initialDisplayOption),
+                selectedDisplayOption = mutableStateOf(initialDisplayOption)
             )
 
         // Then - Значения должны быть сохранены
@@ -181,7 +181,7 @@ class CreateEditUiStateTest {
         assertEquals(
             initialDisplayOption,
             uiStateWithValues.selectedDisplayOption.value,
-            "Опция отображения должна быть сохранена",
+            "Опция отображения должна быть сохранена"
         )
     }
 

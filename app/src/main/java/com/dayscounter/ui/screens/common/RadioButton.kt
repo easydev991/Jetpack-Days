@@ -30,14 +30,14 @@ fun DaysRadioButton(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
-    onClickable: Boolean = true,
+    onClickable: Boolean = true
 ) {
     val rowModifier =
         if (onClickable) {
             Modifier.selectable(
                 selected = selected,
                 onClick = onClick,
-                role = Role.RadioButton,
+                role = Role.RadioButton
             )
         } else {
             Modifier
@@ -48,17 +48,17 @@ fun DaysRadioButton(
             rowModifier
                 .fillMaxWidth()
                 .height(56.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
             selected = selected,
-            onClick = null, // null recommended for accessibility with screen readers
+            onClick = null // null recommended for accessibility with screen readers
         )
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 16.dp),
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Start
         )
     }
 }

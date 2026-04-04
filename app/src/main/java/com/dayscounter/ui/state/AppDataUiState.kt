@@ -18,5 +18,5 @@ data class AppDataUiState(
     val isDeleting: Boolean = false,
     val showDeleteDialog: Boolean = false,
     val resultMessage: String? = null,
-    val isError: Boolean = false,
+    val isError: Boolean = false
 )

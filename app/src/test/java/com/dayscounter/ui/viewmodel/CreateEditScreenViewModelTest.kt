@@ -43,7 +43,7 @@ class CreateEditScreenViewModelTest {
             details = "Описание события",
             timestamp = System.currentTimeMillis(),
             colorTag = null,
-            displayOption = DisplayOption.DAY,
+            displayOption = DisplayOption.DAY
         )
 
     @BeforeEach
@@ -60,7 +60,7 @@ class CreateEditScreenViewModelTest {
                 repository,
                 resourceProvider,
                 NoOpLogger(),
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = SavedStateHandle()
             )
     }
 
@@ -81,7 +81,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             // Then - Состояние должно быть Success с пустым Item
@@ -93,7 +93,7 @@ class CreateEditScreenViewModelTest {
             assertEquals("", successState.item.details, "Описание должно быть пустым")
             assertEquals(
                 DisplayOption.DAY,
-                successState.item.displayOption,
+                successState.item.displayOption
             )
             assertNull(newViewModel.originalItem.value, "Оригинальный элемент должен быть null")
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
@@ -113,7 +113,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             // Then - Элемент должен быть загружен
@@ -126,7 +126,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 testItem,
                 newViewModel.originalItem.value,
-                "Оригинальный элемент должен быть сохранен",
+                "Оригинальный элемент должен быть сохранен"
             )
             assertFalse(newViewModel.hasChanges.value, "Изменений не должно быть")
         }
@@ -144,7 +144,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             // Then - Должно быть состояние Error
@@ -155,7 +155,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 "Событие не найдено",
                 errorState.message,
-                "Сообщение об ошибке должно быть корректным",
+                "Сообщение об ошибке должно быть корректным"
             )
         }
     }
@@ -172,7 +172,7 @@ class CreateEditScreenViewModelTest {
                     details = "Новое описание",
                     timestamp = System.currentTimeMillis(),
                     colorTag = null,
-                    displayOption = DisplayOption.MONTH_DAY,
+                    displayOption = DisplayOption.MONTH_DAY
                 )
 
             // When - Создаем элемент
@@ -181,7 +181,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -197,7 +197,7 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 DisplayOption.MONTH_DAY,
                 successState.item.displayOption,
-                "Опция отображения должна совпадать",
+                "Опция отображения должна совпадать"
             )
             assertTrue(repository.insertItemCalled, "Метод insertItem должен быть вызван")
         }
@@ -216,7 +216,7 @@ class CreateEditScreenViewModelTest {
                     details = "Описание",
                     timestamp = System.currentTimeMillis(),
                     colorTag = null,
-                    displayOption = DisplayOption.DAY,
+                    displayOption = DisplayOption.DAY
                 )
 
             // When - Пытаем создать элемент
@@ -225,7 +225,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             createViewModel.createItem(errorItem)
@@ -237,7 +237,7 @@ class CreateEditScreenViewModelTest {
             val errorState = uiState as CreateEditScreenState.Error
             assertTrue(
                 errorState.message.contains("Ошибка создания события"),
-                "Сообщение об ошибке должно содержать текст об ошибке",
+                "Сообщение об ошибке должно содержать текст об ошибке"
             )
         }
     }
@@ -254,7 +254,7 @@ class CreateEditScreenViewModelTest {
                     details = "Обновленное описание",
                     timestamp = testItem.timestamp + 86400000L,
                     colorTag = 0xFFFF0000.toInt(),
-                    displayOption = DisplayOption.YEAR_MONTH_DAY,
+                    displayOption = DisplayOption.YEAR_MONTH_DAY
                 )
 
             // When - Обновляем элемент
@@ -263,7 +263,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -277,17 +277,17 @@ class CreateEditScreenViewModelTest {
             assertEquals(
                 "Обновленное название",
                 successState.item.title,
-                "Название должно быть обновлено",
+                "Название должно быть обновлено"
             )
             assertEquals(
                 "Обновленное описание",
                 successState.item.details,
-                "Описание должно быть обновлено",
+                "Описание должно быть обновлено"
             )
             assertEquals(
                 DisplayOption.YEAR_MONTH_DAY,
                 successState.item.displayOption,
-                "Опция отображения должна быть обновлена",
+                "Опция отображения должна быть обновлена"
             )
             assertTrue(repository.updateItemCalled, "Метод updateItem должен быть вызван")
         }
@@ -308,7 +308,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             updateViewModel.updateItem(updatedItem)
@@ -320,7 +320,7 @@ class CreateEditScreenViewModelTest {
             val errorState = uiState as CreateEditScreenState.Error
             assertTrue(
                 errorState.message.contains("Ошибка обновления события"),
-                "Сообщение об ошибке должно содержать текст об ошибке",
+                "Сообщение об ошибке должно содержать текст об ошибке"
             )
         }
     }
@@ -338,7 +338,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -349,7 +349,7 @@ class CreateEditScreenViewModelTest {
             val errorState = uiState as CreateEditScreenState.Error
             assertTrue(
                 errorState.message.contains("Ошибка загрузки события"),
-                "Сообщение об ошибке должно содержать текст об ошибке",
+                "Сообщение об ошибке должно содержать текст об ошибке"
             )
         }
     }
@@ -367,7 +367,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -376,7 +376,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp,
                 colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
 
             // Then - Изменения должны быть обнаружены
@@ -397,7 +397,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -406,7 +406,7 @@ class CreateEditScreenViewModelTest {
                 details = "Измененное описание",
                 timestamp = testItem.timestamp,
                 colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
 
             // Then - Изменения должны быть обнаружены
@@ -427,7 +427,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -436,7 +436,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp + 86400000L,
                 colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
 
             // Then - Изменения должны быть обнаружены
@@ -457,7 +457,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -466,7 +466,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp,
                 colorTag = 0xFFFF0000.toInt(),
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
 
             // Then - Изменения должны быть обнаружены
@@ -487,7 +487,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -496,7 +496,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp,
                 colorTag = testItem.colorTag,
-                displayOption = DisplayOption.YEAR_MONTH_DAY,
+                displayOption = DisplayOption.YEAR_MONTH_DAY
             )
 
             // Then - Изменения должны быть обнаружены
@@ -517,7 +517,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -526,7 +526,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp,
                 colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
 
             // Then - Изменений не должно быть
@@ -550,7 +550,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -559,13 +559,13 @@ class CreateEditScreenViewModelTest {
                 details = itemWithFixedTimestamp.details,
                 timestamp = fixedTimestamp, // Тот же самый timestamp
                 colorTag = itemWithFixedTimestamp.colorTag,
-                displayOption = itemWithFixedTimestamp.displayOption,
+                displayOption = itemWithFixedTimestamp.displayOption
             )
 
             // Then - Изменений не должно быть обнаружено
             assertFalse(
                 newViewModel.hasChanges.value,
-                "При том же timestamp изменения не должны быть обнаружены",
+                "При том же timestamp изменения не должны быть обнаружены"
             )
         }
     }
@@ -586,7 +586,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -597,13 +597,13 @@ class CreateEditScreenViewModelTest {
                 details = itemWithFixedTimestamp.details,
                 timestamp = nextDayTimestamp, // На 1 день позже
                 colorTag = itemWithFixedTimestamp.colorTag,
-                displayOption = itemWithFixedTimestamp.displayOption,
+                displayOption = itemWithFixedTimestamp.displayOption
             )
 
             // Then - Изменения должны быть обнаружены
             assertTrue(
                 newViewModel.hasChanges.value,
-                "При изменении timestamp на 1 день изменения должны быть обнаружены",
+                "При изменении timestamp на 1 день изменения должны быть обнаружены"
             )
         }
     }
@@ -621,7 +621,7 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -630,7 +630,7 @@ class CreateEditScreenViewModelTest {
                 details = testItem.details,
                 timestamp = testItem.timestamp,
                 colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption,
+                displayOption = testItem.displayOption
             )
             assertTrue(newViewModel.hasChanges.value, "Изменения должны быть обнаружены")
 
@@ -656,14 +656,14 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle,
+                    savedStateHandle
                 )
 
             // Then - Сначала должно быть состояние Loading
             var uiState = newViewModel.uiState.value
             assertTrue(
                 uiState is CreateEditScreenState.Loading,
-                "Сначала должно быть состояние Loading",
+                "Сначала должно быть состояние Loading"
             )
 
             // After delay - должно стать Success
@@ -671,7 +671,7 @@ class CreateEditScreenViewModelTest {
             uiState = newViewModel.uiState.value
             assertTrue(
                 uiState is CreateEditScreenState.Success,
-                "После загрузки должно быть состояние Success",
+                "После загрузки должно быть состояние Success"
             )
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
@@ -699,8 +699,7 @@ class CreateEditScreenViewModelTest {
         override fun getAllItems(): Flow<List<Item>> = flowOf(emptyList())
 
         @Suppress("MaxLineLength")
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
-            flowOf(emptyList())
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = flowOf(emptyList())
 
         override suspend fun getItemById(id: Long): Item? {
             if (loadingDelayMs > 0) {
@@ -754,7 +753,7 @@ class CreateEditScreenViewModelTest {
     private class FakeResourceProvider : ResourceProvider {
         override fun getString(
             resId: Int,
-            vararg formatArgs: Any,
+            vararg formatArgs: Any
         ): String =
             when (resId) {
                 ResourceIds.EVENT_NOT_FOUND -> "Событие не найдено"
@@ -767,7 +766,7 @@ class CreateEditScreenViewModelTest {
         override fun getQuantityString(
             resId: Int,
             quantity: Int,
-            vararg formatArgs: Any,
+            vararg formatArgs: Any
         ): String = "$quantity"
 
         override fun getYearsString(quantity: Int): String = "$quantity год"

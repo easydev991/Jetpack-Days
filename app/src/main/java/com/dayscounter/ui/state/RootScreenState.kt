@@ -7,5 +7,5 @@ import com.dayscounter.navigation.Screen
  */
 data class RootScreenState(
     val currentTab: Screen = Screen.Events,
-    val tabs: List<Screen> = listOf(Screen.Events, Screen.More),
+    val tabs: List<Screen> = listOf(Screen.Events, Screen.More)
 )

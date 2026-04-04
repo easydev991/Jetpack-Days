@@ -52,7 +52,7 @@ private fun ItemColorTag(colorTag: Int) {
             Modifier
                 .size(dimensionResource(R.dimen.color_tag_size_small))
                 .clip(CircleShape)
-                .background(color = Color(colorTag)),
+                .background(color = Color(colorTag))
     )
     Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_regular)))
 }
@@ -63,11 +63,11 @@ private fun ItemColorTag(colorTag: Int) {
 @Composable
 private fun ItemTitleAndDetails(
     modifier: Modifier = Modifier,
-    item: Item,
+    item: Item
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         // Заголовок события (до 2 строк)
         Text(
@@ -75,7 +75,7 @@ private fun ItemTitleAndDetails(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
 
         // Описание события (до 2 строк)
@@ -86,7 +86,7 @@ private fun ItemTitleAndDetails(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -98,17 +98,17 @@ private fun ItemTitleAndDetails(
 @Composable
 private fun ItemDaysBadge(
     modifier: Modifier = Modifier,
-    formattedDaysText: String,
+    formattedDaysText: String
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         DaysCountText(
             formattedText = formattedDaysText,
             textStyle = DaysCountTextStyle.NORMAL,
-            textAlign = TextAlign.End,
+            textAlign = TextAlign.End
         )
     }
 }
@@ -132,7 +132,7 @@ private fun ItemDaysBadge(
 @Composable
 fun ListItemView(
     params: ListItemParams,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor =
         animateColorAsState(
@@ -142,7 +142,7 @@ fun ListItemView(
                 } else {
                     MaterialTheme.colorScheme.surface
                 },
-            label = "backgroundColor",
+            label = "backgroundColor"
         ).value
 
     Row(
@@ -154,27 +154,26 @@ fun ListItemView(
                     if (params.onLongClick != null) {
                         detectTapGestures(
                             onTap = { params.onClick(params.item) },
-                            onLongPress = { offset -> params.onLongClick.invoke(offset) },
+                            onLongPress = { offset -> params.onLongClick.invoke(offset) }
                         )
                     } else {
                         detectTapGestures(
-                            onTap = { params.onClick(params.item) },
+                            onTap = { params.onClick(params.item) }
                         )
                     }
-                }
-                .padding(dimensionResource(R.dimen.spacing_regular)),
-        verticalAlignment = Alignment.CenterVertically,
+                }.padding(dimensionResource(R.dimen.spacing_regular)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (params.item.colorTag != null) {
             ItemColorTag(params.item.colorTag)
         }
         ItemTitleAndDetails(
             modifier = Modifier.weight(ListItemViewConstants.TITLE_WEIGHT),
-            params.item,
+            params.item
         )
         ItemDaysBadge(
             modifier = Modifier.weight(ListItemViewConstants.DAYS_WEIGHT),
-            params.formattedDaysText,
+            params.formattedDaysText
         )
     }
 }
@@ -195,10 +194,10 @@ fun ListItemViewPreview() {
                             details = "Праздничный день",
                             timestamp = System.currentTimeMillis() - (5 * 24 * 60 * 60 * 1000L),
                             colorTag = R.color.color_primary_red,
-                            displayOption = DisplayOption.DAY,
+                            displayOption = DisplayOption.DAY
                         ),
-                    formattedDaysText = "5 дней",
-                ),
+                    formattedDaysText = "5 дней"
+                )
         )
     }
 }
@@ -217,10 +216,10 @@ fun ListItemViewNoColorPreview() {
                             details = "Первый день на новой работе",
                             timestamp = System.currentTimeMillis() - (365 * 24 * 60 * 60 * 1000L),
                             colorTag = null,
-                            displayOption = DisplayOption.YEAR_MONTH_DAY,
+                            displayOption = DisplayOption.YEAR_MONTH_DAY
                         ),
-                    formattedDaysText = "1 год",
-                ),
+                    formattedDaysText = "1 год"
+                )
         )
     }
 }
@@ -239,10 +238,10 @@ fun ListItemViewTodayPreview() {
                             details = "Произошло сегодня",
                             timestamp = System.currentTimeMillis(),
                             colorTag = R.color.color_primary_teal,
-                            displayOption = DisplayOption.MONTH_DAY,
+                            displayOption = DisplayOption.MONTH_DAY
                         ),
-                    formattedDaysText = "Сегодня",
-                ),
+                    formattedDaysText = "Сегодня"
+                )
         )
     }
 }
@@ -261,10 +260,10 @@ fun ListItemViewLongTitlePreview() {
                             details = "Детали события",
                             timestamp = System.currentTimeMillis() - (100 * 24 * 60 * 60 * 1000L),
                             colorTag = R.color.color_primary_blue,
-                            displayOption = DisplayOption.DAY,
+                            displayOption = DisplayOption.DAY
                         ),
-                    formattedDaysText = "100 дней",
-                ),
+                    formattedDaysText = "100 дней"
+                )
         )
     }
 }

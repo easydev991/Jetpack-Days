@@ -28,7 +28,7 @@ import java.time.ZoneId
 internal fun DatePickerDialogSection(
     selectedDate: MutableState<java.time.LocalDate?>,
     showDatePicker: MutableState<Boolean>,
-    onDateSelected: () -> Unit = {},
+    onDateSelected: () -> Unit = {}
 ) {
     if (showDatePicker.value) {
         val datePickerState =
@@ -37,7 +37,7 @@ internal fun DatePickerDialogSection(
                     selectedDate.value
                         ?.atStartOfDay(ZoneId.systemDefault())
                         ?.toInstant()
-                        ?.toEpochMilli(),
+                        ?.toEpochMilli()
             )
 
         DatePickerDialog(
@@ -54,7 +54,7 @@ internal fun DatePickerDialogSection(
                         }
                         showDatePicker.value = false
                         onDateSelected()
-                    },
+                    }
                 ) {
                     Text(stringResource(R.string.ok))
                 }
@@ -64,15 +64,15 @@ internal fun DatePickerDialogSection(
                     onClick = {
                         showDatePicker.value = false
                         onDateSelected()
-                    },
+                    }
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            },
+            }
         ) {
             DatePicker(
                 state = datePickerState,
-                showModeToggle = false,
+                showModeToggle = false
             )
         }
     }
@@ -84,7 +84,7 @@ internal fun DatePickerDialogSection(
 @Composable
 internal fun SaveButton(
     enabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
@@ -92,7 +92,7 @@ internal fun SaveButton(
             Modifier
                 .fillMaxWidth()
                 .padding(all = dimensionResource(R.dimen.spacing_regular)),
-        enabled = enabled,
+        enabled = enabled
     ) {
         Text(stringResource(R.string.save))
     }

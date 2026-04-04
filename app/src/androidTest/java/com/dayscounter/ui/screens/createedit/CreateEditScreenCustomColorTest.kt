@@ -60,7 +60,7 @@ class CreateEditScreenCustomColorTest {
                         details = details,
                         selectedDate = selectedDate,
                         selectedColor = selectedColorState,
-                        selectedDisplayOption = selectedDisplayOption,
+                        selectedDisplayOption = selectedDisplayOption
                     )
 
                 val params =
@@ -70,7 +70,7 @@ class CreateEditScreenCustomColorTest {
                         uiStates = uiStates,
                         showDatePicker = showDatePicker,
                         viewModel = createTestViewModel(),
-                        onBackClick = {},
+                        onBackClick = {}
                     )
 
                 CreateEditFormContent(params)
@@ -114,7 +114,7 @@ class CreateEditScreenCustomColorTest {
                         details = details,
                         selectedDate = selectedDate,
                         selectedColor = selectedColor,
-                        selectedDisplayOption = selectedDisplayOption,
+                        selectedDisplayOption = selectedDisplayOption
                     )
 
                 val params =
@@ -124,7 +124,7 @@ class CreateEditScreenCustomColorTest {
                         uiStates = uiStates,
                         showDatePicker = showDatePicker,
                         viewModel = createTestViewModel(),
-                        onBackClick = {},
+                        onBackClick = {}
                     )
 
                 CreateEditFormContent(params)

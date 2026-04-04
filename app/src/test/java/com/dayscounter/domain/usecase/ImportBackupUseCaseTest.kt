@@ -257,7 +257,7 @@ class ImportBackupUseCaseTest {
                     details = "Existing Details",
                     timestamp = 1234567890000L,
                     colorTag = 0xFFFF0000.toInt(),
-                    displayOption = com.dayscounter.domain.model.DisplayOption.DAY,
+                    displayOption = com.dayscounter.domain.model.DisplayOption.DAY
                 )
 
             every { contentResolver.openInputStream(uri) } returns inputStream

@@ -49,7 +49,7 @@ private fun createPreviewUseCases(): GetFormattedDaysForItemUseCase {
     return GetFormattedDaysForItemUseCase(
         calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
         formatDaysTextUseCase = formatDaysTextUseCase,
-        resourceProvider = resourceProvider,
+        resourceProvider = resourceProvider
     )
 }
 
@@ -58,7 +58,7 @@ private fun createPreviewUseCases(): GetFormattedDaysForItemUseCase {
  */
 private fun calculatePreviewDays(
     selectedDate: java.time.LocalDate,
-    currentDate: java.time.LocalDate,
+    currentDate: java.time.LocalDate
 ): Int =
     java.time.temporal.ChronoUnit.DAYS
         .between(selectedDate, currentDate)
@@ -69,7 +69,7 @@ private fun calculatePreviewDays(
  */
 private fun createPreviewItem(
     selectedDate: java.time.LocalDate,
-    displayOption: DisplayOption,
+    displayOption: DisplayOption
 ): com.dayscounter.domain.model.Item {
     val timestamp =
         selectedDate
@@ -82,7 +82,7 @@ private fun createPreviewItem(
         details = "",
         timestamp = timestamp,
         colorTag = null,
-        displayOption = displayOption,
+        displayOption = displayOption
     )
 }
 
@@ -95,7 +95,7 @@ private fun formatPreviewDaysText(
     item: com.dayscounter.domain.model.Item,
     currentDate: java.time.LocalDate,
     displayOption: DisplayOption,
-    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
+    getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase
 ): String =
     when {
         daysBetween == 0 -> stringResource(R.string.today)
@@ -104,7 +104,7 @@ private fun formatPreviewDaysText(
                 item = item,
                 currentDate = currentDate,
                 defaultDisplayOption = displayOption,
-                showMinus = false,
+                showMinus = false
             )
     }
 
@@ -116,7 +116,7 @@ private fun PreviewHeader() {
     Text(
         text = stringResource(R.string.preview),
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -127,7 +127,7 @@ private fun PreviewHeader() {
 private fun PreviewDays(daysText: String) {
     DaysCountText(
         formattedText = daysText,
-        textStyle = DaysCountTextStyle.EMPHASIZED,
+        textStyle = DaysCountTextStyle.EMPHASIZED
     )
 }
 
@@ -139,7 +139,7 @@ private fun PreviewFooter(daysBetween: Int) {
     Text(
         text = if (daysBetween > 0) stringResource(R.string.elapsed) else stringResource(R.string.remaining),
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -152,7 +152,7 @@ private fun PreviewFooter(daysBetween: Int) {
 @Composable
 internal fun PreviewDaysContentInner(
     selectedDate: java.time.LocalDate,
-    displayOption: DisplayOption = DisplayOption.DAY,
+    displayOption: DisplayOption = DisplayOption.DAY
 ) {
     val getFormattedDaysForItemUseCase = createPreviewUseCases()
     val currentDate = java.time.LocalDate.now()
@@ -164,17 +164,17 @@ internal fun PreviewDaysContentInner(
             item = item,
             currentDate = currentDate,
             displayOption = displayOption,
-            getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+            getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase
         )
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(
             modifier = Modifier.padding(dimensionResource(R.dimen.spacing_regular)),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PreviewHeader()
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))

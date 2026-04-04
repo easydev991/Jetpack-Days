@@ -14,5 +14,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IosBackupWrapper(
     val format: String? = null,
-    val items: List<IosBackupItem>,
+    val items: List<IosBackupItem>
 )

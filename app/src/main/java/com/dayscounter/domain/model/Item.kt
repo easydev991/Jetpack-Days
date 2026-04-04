@@ -16,7 +16,7 @@ data class Item(
     val details: String = "",
     val timestamp: Long,
     val colorTag: Int? = null,
-    val displayOption: DisplayOption = DisplayOption.DEFAULT,
+    val displayOption: DisplayOption = DisplayOption.DEFAULT
 ) {
     /**
      * Вычисляет и форматирует количество дней с момента события до текущей даты.
@@ -30,7 +30,7 @@ data class Item(
      */
     @Deprecated(
         message = "Используйте Item.makeDaysCount(useCase, currentDate) вместо этого метода",
-        replaceWith = ReplaceWith("makeDaysCount(useCase, currentDate)"),
+        replaceWith = ReplaceWith("makeDaysCount(useCase, currentDate)")
     )
     @Suppress("FunctionOnlyReturningConstant", "SameReturnValue", "UnusedParameter")
     fun makeDaysCount(currentDate: Long): String {

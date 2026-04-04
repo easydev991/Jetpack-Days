@@ -8,5 +8,5 @@ package com.dayscounter.domain.usecase
  */
 class BackupException(
     message: String,
-    cause: Throwable? = null,
+    cause: Throwable? = null
 ) : Exception(message, cause)

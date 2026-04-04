@@ -22,7 +22,7 @@ import com.dayscounter.util.ThemeUtils
 @Suppress("TooGenericExceptionCaught")
 class IconManager(
     private val context: Context,
-    private val logger: Logger = AndroidLogger(),
+    private val logger: Logger = AndroidLogger()
 ) {
     companion object {
         private const val TAG = "IconManager"
@@ -57,7 +57,7 @@ class IconManager(
     @Suppress("TooManyFunctions", "ThrowsCount")
     fun changeIcon(
         icon: AppIcon,
-        isDarkTheme: Boolean,
+        isDarkTheme: Boolean
     ) {
         val packageName = context.packageName
 
@@ -68,7 +68,7 @@ class IconManager(
             context.packageManager.setComponentEnabledSetting(
                 targetComponentName,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP,
+                PackageManager.DONT_KILL_APP
             )
             val themeSuffix = if (isDarkTheme) " (тёмная тема)" else " (светлая тема)"
             logger.d(TAG, "Иконка $targetComponentClassName АКТИВИРОВАНА$themeSuffix")
@@ -117,7 +117,7 @@ class IconManager(
             context.packageManager.setComponentEnabledSetting(
                 componentName,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP,
+                PackageManager.DONT_KILL_APP
             )
             val themeSuffix =
                 if (componentName.className.endsWith("Dark")) {
@@ -156,7 +156,7 @@ class IconManager(
 private fun getIconComponentName(
     icon: AppIcon,
     isDarkTheme: Boolean,
-    packageName: String,
+    packageName: String
 ): android.content.ComponentName {
     val className = icon.getComponentName(isDarkTheme)
     return android.content.ComponentName(packageName, className)

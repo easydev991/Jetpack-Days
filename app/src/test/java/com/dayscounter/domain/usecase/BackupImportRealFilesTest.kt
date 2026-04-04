@@ -172,7 +172,7 @@ class BackupImportRealFilesTest {
     @kotlinx.serialization.Serializable
     private data class IosBackupWrapper(
         val format: String? = null,
-        val items: List<IosBackupItem>,
+        val items: List<IosBackupItem>
     )
 
     @Test

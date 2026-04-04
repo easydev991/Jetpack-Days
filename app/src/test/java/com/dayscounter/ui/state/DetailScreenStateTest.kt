@@ -30,7 +30,7 @@ class DetailScreenStateTest {
                 details = "Описание",
                 timestamp = System.currentTimeMillis(),
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state = DetailScreenState.Success(testItem)
 
@@ -50,7 +50,7 @@ class DetailScreenStateTest {
                 details = "Праздничный день",
                 timestamp = System.currentTimeMillis() - 86400000,
                 colorTag = 0xFFFF00,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state = DetailScreenState.Success(testItem)
 
@@ -84,7 +84,7 @@ class DetailScreenStateTest {
                 details = "",
                 timestamp = System.currentTimeMillis(),
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val item2 =
             Item(
@@ -93,7 +93,7 @@ class DetailScreenStateTest {
                 details = "",
                 timestamp = System.currentTimeMillis(),
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state1 = DetailScreenState.Success(item1)
         val state2 = DetailScreenState.Success(item2)
@@ -101,7 +101,7 @@ class DetailScreenStateTest {
         // Then
         assertFalse(
             state1 == state2,
-            "Разные Success состояния не должны быть равны",
+            "Разные Success состояния не должны быть равны"
         )
     }
 
@@ -115,7 +115,7 @@ class DetailScreenStateTest {
                 details = "Детали",
                 timestamp = System.currentTimeMillis(),
                 colorTag = 0xFF0000,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state1 = DetailScreenState.Success(item)
         val state2 = DetailScreenState.Success(item)
@@ -124,7 +124,7 @@ class DetailScreenStateTest {
         assertEquals(
             state1,
             state2,
-            "Одинаковые Success состояния должны быть равны",
+            "Одинаковые Success состояния должны быть равны"
         )
     }
 
@@ -138,7 +138,7 @@ class DetailScreenStateTest {
                 details = "",
                 timestamp = System.currentTimeMillis(),
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state = DetailScreenState.Success(item)
 
@@ -156,7 +156,7 @@ class DetailScreenStateTest {
                 details = "Детали",
                 timestamp = System.currentTimeMillis(),
                 colorTag = null,
-                displayOption = DisplayOption.DAY,
+                displayOption = DisplayOption.DAY
             )
         val state = DetailScreenState.Success(item)
 
@@ -173,7 +173,7 @@ class DetailScreenStateTest {
         // Then
         assertFalse(
             state1 == state2,
-            "Error состояния с разными сообщениями не должны быть равны",
+            "Error состояния с разными сообщениями не должны быть равны"
         )
     }
 
@@ -188,7 +188,7 @@ class DetailScreenStateTest {
         assertEquals(
             state1,
             state2,
-            "Error состояния с одинаковым сообщением должны быть равны",
+            "Error состояния с одинаковым сообщением должны быть равны"
         )
     }
 }

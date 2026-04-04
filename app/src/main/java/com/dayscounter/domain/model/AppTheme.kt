@@ -10,5 +10,5 @@ package com.dayscounter.domain.model
 enum class AppTheme {
     LIGHT,
     DARK,
-    SYSTEM,
+    SYSTEM
 }

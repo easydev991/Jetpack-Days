@@ -64,7 +64,7 @@ internal fun rememberPresetColors(): List<Color> = remember { PresetColors.all }
 @Composable
 internal fun ColorSelector(
     selectedColor: MutableState<Color?>,
-    onValueChange: () -> Unit = {},
+    onValueChange: () -> Unit = {}
 ) {
     val presetColors = rememberPresetColors()
     val showCustomColor = isCustomColor(selectedColor.value, presetColors)
@@ -77,17 +77,18 @@ internal fun ColorSelector(
     Text(
         text = stringResource(R.string.color_tag),
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.onSurface
     )
 
     Spacer(modifier = Modifier.height(spacingXsmall))
 
     // Используем Row вместо LazyRow для корректного отображения кастомного цвета
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(spacingSmall),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(spacingSmall)
     ) {
         // Кастомный цвет в начале списка (если есть)
         if (showCustomColor && selectedColor.value != null) {
@@ -95,7 +96,7 @@ internal fun ColorSelector(
                 color = selectedColor.value!!,
                 selectedColor = selectedColor,
                 onValueChange = onValueChange,
-                contentDescription = colorContentDescription,
+                contentDescription = colorContentDescription
             )
         }
 
@@ -105,7 +106,7 @@ internal fun ColorSelector(
                 color = color,
                 selectedColor = selectedColor,
                 onValueChange = onValueChange,
-                contentDescription = colorContentDescription,
+                contentDescription = colorContentDescription
             )
         }
     }
@@ -124,7 +125,7 @@ internal fun ColorOptionSurface(
     color: Color,
     selectedColor: MutableState<Color?>,
     onValueChange: () -> Unit = {},
-    contentDescription: String = "",
+    contentDescription: String = ""
 ) {
     Surface(
         onClick = {
@@ -146,11 +147,11 @@ internal fun ColorOptionSurface(
             if (selectedColor.value == color) {
                 BorderStroke(
                     dimensionResource(R.dimen.border_width),
-                    MaterialTheme.colorScheme.outline,
+                    MaterialTheme.colorScheme.outline
                 )
             } else {
                 null
-            },
+            }
     ) {}
 }
 
@@ -160,12 +161,12 @@ internal fun ColorOptionSurface(
 @Composable
 internal fun DisplayOptionSelector(
     selectedDisplayOption: MutableState<DisplayOption>,
-    onValueChange: () -> Unit = {},
+    onValueChange: () -> Unit = {}
 ) {
     Text(
         text = stringResource(R.string.display_format),
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.onSurface
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
@@ -189,7 +190,7 @@ internal fun DisplayOptionSelector(
                 onClick = {
                     selectedDisplayOption.value = option
                     onValueChange()
-                },
+                }
             )
         }
     }
@@ -208,7 +209,7 @@ fun ColorSelectorRedPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             ColorSelector(selectedColor)
         }
@@ -228,7 +229,7 @@ fun ColorSelectorCustomColorPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             ColorSelector(selectedColor)
         }
@@ -246,7 +247,7 @@ fun DisplayOptionSelectorPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             DisplayOptionSelector(selectedDisplayOption)
         }

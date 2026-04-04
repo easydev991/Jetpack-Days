@@ -20,7 +20,7 @@ import com.dayscounter.data.database.entity.ItemEntity
 @Database(
     entities = [ItemEntity::class],
     version = 1,
-    exportSchema = false,
+    exportSchema = false
 )
 @TypeConverters(DisplayOptionConverter::class)
 abstract class DaysDatabase : RoomDatabase() {
@@ -49,7 +49,7 @@ abstract class DaysDatabase : RoomDatabase() {
                         .databaseBuilder(
                             context.applicationContext,
                             DaysDatabase::class.java,
-                            "days_database",
+                            "days_database"
                         ).build()
                 INSTANCE = instance
                 instance

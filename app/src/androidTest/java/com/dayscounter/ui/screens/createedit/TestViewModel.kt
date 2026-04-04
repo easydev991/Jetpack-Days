@@ -18,7 +18,7 @@ fun createTestViewModel(): CreateEditScreenViewModel =
     CreateEditScreenViewModel(
         repository = createTestItemRepository(),
         resourceProvider = createTestResourceProvider(),
-        savedStateHandle = SavedStateHandle(),
+        savedStateHandle = SavedStateHandle()
     )
 
 /**
@@ -54,13 +54,13 @@ private fun createTestResourceProvider(): ResourceProvider =
     object : ResourceProvider {
         override fun getString(
             resId: Int,
-            vararg formatArgs: Any,
+            vararg formatArgs: Any
         ): String = ""
 
         override fun getQuantityString(
             resId: Int,
             quantity: Int,
-            vararg formatArgs: Any,
+            vararg formatArgs: Any
         ): String = ""
 
         override fun getYearsString(quantity: Int): String = ""

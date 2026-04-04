@@ -16,5 +16,5 @@ data class ItemsListParams(
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
     val viewModel: MainScreenViewModel,
-    val paddingValues: PaddingValues,
+    val paddingValues: PaddingValues
 )

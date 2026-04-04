@@ -21,7 +21,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 день"
 
@@ -38,7 +38,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 дня"
 
@@ -55,7 +55,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дней"
 
@@ -72,7 +72,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 месяц"
 
@@ -89,7 +89,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 год"
 
@@ -106,7 +106,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 года"
 
@@ -123,7 +123,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 3,
+                quantity = 3
             )
         } returns "3 года"
 
@@ -140,7 +140,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 4,
+                quantity = 4
             )
         } returns "4 года"
 
@@ -157,7 +157,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 лет"
 
@@ -174,7 +174,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 11,
+                quantity = 11
             )
         } returns "11 лет"
 
@@ -191,7 +191,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 21,
+                quantity = 21
             )
         } returns "21 год"
 
@@ -208,7 +208,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 22,
+                quantity = 22
             )
         } returns "22 года"
 
@@ -225,7 +225,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 25,
+                quantity = 25
             )
         } returns "25 лет"
 
@@ -244,7 +244,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 365,
+                quantity = 365
             )
         } returns "365 дней"
 
@@ -255,7 +255,7 @@ class DaysFormatterImplTest {
                 DisplayOption.DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -269,13 +269,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -286,7 +286,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -300,13 +300,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 48,
+                quantity = 48
             )
         } returns "48 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 10,
+                quantity = 10
             )
         } returns "10 дн."
 
@@ -317,7 +317,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -335,13 +335,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 14,
+                quantity = 14
             )
         } returns "14 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 3,
+                quantity = 3
             )
         } returns "3 дн."
         // Mock для сокращений (новая логика)
@@ -355,7 +355,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -369,7 +369,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 месяца"
 
@@ -380,7 +380,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -394,19 +394,19 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 г."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -417,7 +417,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -431,13 +431,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -448,7 +448,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -462,7 +462,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 г."
 
@@ -473,7 +473,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then
@@ -490,7 +490,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 10,
+                quantity = 10
             )
         } returns "10 дней"
 
@@ -501,7 +501,7 @@ class DaysFormatterImplTest {
                 DisplayOption.DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -516,7 +516,7 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = -7,
+                quantity = -7
             )
         } returns "-7 дней"
 
@@ -527,7 +527,7 @@ class DaysFormatterImplTest {
                 DisplayOption.DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -541,13 +541,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -558,7 +558,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -573,13 +573,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -590,7 +590,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -604,19 +604,19 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 г."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -627,7 +627,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays = 0,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -646,19 +646,19 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 г."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -669,7 +669,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then
@@ -690,13 +690,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 дн."
 
@@ -707,7 +707,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then - не должно быть минуса, используется абсолютные значения
@@ -726,19 +726,19 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = 1,
+                quantity = 1
             )
         } returns "1 г."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = 2,
+                quantity = 2
             )
         } returns "2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = 5,
+                quantity = 5
             )
         } returns "5 дн."
 
@@ -749,7 +749,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = false,
+                showMinus = false
             )
 
         // Then - не должно быть минуса, используется абсолютные значения
@@ -768,13 +768,13 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = -1,
+                quantity = -1
             )
         } returns "-1 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = -2,
+                quantity = -2
             )
         } returns "-2 дн."
 
@@ -785,7 +785,7 @@ class DaysFormatterImplTest {
                 DisplayOption.MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then - должен быть минус для будущей даты с showMinus = true
@@ -804,19 +804,19 @@ class DaysFormatterImplTest {
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.years_count,
-                quantity = -1,
+                quantity = -1
             )
         } returns "-1 г."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.months_count,
-                quantity = -2,
+                quantity = -2
             )
         } returns "-2 мес."
         every {
             resourceProvider.getQuantityString(
                 resId = R.plurals.days_count,
-                quantity = -5,
+                quantity = -5
             )
         } returns "-5 дн."
 
@@ -827,7 +827,7 @@ class DaysFormatterImplTest {
                 DisplayOption.YEAR_MONTH_DAY,
                 resourceProvider,
                 totalDays,
-                showMinus = true,
+                showMinus = true
             )
 
         // Then - должен быть минус для будущей даты с showMinus = true

@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 // Чтение секретов из .secrets/secrets.properties
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "com.dayscounter"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = project.findProperty("VERSION_CODE")?.toString()?.toInt() ?: 1
         versionName = project.findProperty("VERSION_NAME")?.toString() ?: "1.0"
 
@@ -60,14 +60,9 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-
-            // Автоматическая загрузка mapping files в Firebase
-            firebaseCrashlytics {
-                mappingFileUploadEnabled = true
-            }
         }
     }
     compileOptions {

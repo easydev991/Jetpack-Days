@@ -151,8 +151,8 @@ class MoreScreenTest {
             .onNodeWithText(
                 context.getString(
                     R.string.app_version,
-                    expectedVersionText,
-                ),
+                    expectedVersionText
+                )
             ).assertIsDisplayed()
     }
 }

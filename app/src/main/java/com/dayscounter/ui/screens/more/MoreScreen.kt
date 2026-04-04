@@ -55,10 +55,10 @@ fun MoreScreen(navController: NavHostController? = null) {
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
+                        titleContentColor = MaterialTheme.colorScheme.onSurface
+                    )
             )
-        },
+        }
     ) { paddingValues ->
         Column(
             modifier =
@@ -67,7 +67,7 @@ fun MoreScreen(navController: NavHostController? = null) {
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(dimensionResource(R.dimen.spacing_xsmall)),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Кнопки настроек
             SettingsButtons(navController)
@@ -95,7 +95,7 @@ private fun SettingsButtons(navController: NavHostController?) {
             navController?.navigate(Screen.ThemeIcon.route) {
                 popUpTo(Screen.More.route)
             }
-        },
+        }
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
@@ -107,7 +107,7 @@ private fun SettingsButtons(navController: NavHostController?) {
             navController?.navigate(Screen.AppData.route) {
                 popUpTo(Screen.More.route)
             }
-        },
+        }
     )
 }
 
@@ -117,7 +117,7 @@ private fun ActionButtons(context: Context) {
     // Кнопка "Отправить отзыв"
     MoreButton(
         text = stringResource(R.string.send_feedback),
-        onClick = { sendFeedback(context) },
+        onClick = { sendFeedback(context) }
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
@@ -125,7 +125,7 @@ private fun ActionButtons(context: Context) {
     // Кнопка "Оценить приложение"
     MoreButton(
         text = stringResource(R.string.rate_the_app),
-        onClick = { rateApp(context) },
+        onClick = { rateApp(context) }
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
@@ -133,7 +133,7 @@ private fun ActionButtons(context: Context) {
     // Кнопка "Поделиться приложением"
     MoreButton(
         text = stringResource(R.string.share_the_app),
-        onClick = { shareApp(context) },
+        onClick = { shareApp(context) }
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
@@ -141,7 +141,7 @@ private fun ActionButtons(context: Context) {
     // Кнопка "Страница на GitHub"
     MoreButton(
         text = stringResource(R.string.github_page),
-        onClick = { openGitHub(context) },
+        onClick = { openGitHub(context) }
     )
 }
 
@@ -156,7 +156,7 @@ private fun AppVersionText() {
                 .padding(dimensionResource(R.dimen.spacing_xsmall)),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Center
     )
 }
 
@@ -164,21 +164,21 @@ private fun AppVersionText() {
 @Composable
 private fun MoreButton(
     text: String,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     FilledTonalButton(
         onClick = onClick,
         contentPadding =
             PaddingValues(
-                horizontal = dimensionResource(R.dimen.button_horizontal_padding),
-            ),
+                horizontal = dimensionResource(R.dimen.button_horizontal_padding)
+            )
     ) {
         Text(
             text = text,
             style =
                 MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Normal,
-                ),
+                    fontWeight = FontWeight.Normal
+                )
         )
     }
 }
@@ -200,7 +200,7 @@ private fun sendFeedback(context: Context) {
         context.getString(
             R.string.feedback_body,
             Build.VERSION.RELEASE,
-            BuildConfig.VERSION_NAME,
+            BuildConfig.VERSION_NAME
         )
 
     val encodedSubject = Uri.encode(subject)
@@ -221,7 +221,7 @@ private fun rateApp(context: Context) {
     val intent =
         Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(AppConstants.APP_RATE_URL),
+            Uri.parse(AppConstants.APP_RATE_URL)
         )
 
     try {
@@ -235,15 +235,15 @@ private fun rateApp(context: Context) {
 private fun shareApp(context: Context) {
     val intent =
         Intent(
-            Intent.ACTION_SEND,
+            Intent.ACTION_SEND
         ).apply {
             type = "text/plain"
             putExtra(
                 Intent.EXTRA_TEXT,
                 context.getString(
                     R.string.share_text,
-                    context.getString(R.string.app_display_name),
-                ) + "\n" + AppConstants.APP_SHARE_URL,
+                    context.getString(R.string.app_display_name)
+                ) + "\n" + AppConstants.APP_SHARE_URL
             )
             putExtra(Intent.EXTRA_TITLE, context.getString(R.string.share_chooser_title))
         }
@@ -252,8 +252,8 @@ private fun shareApp(context: Context) {
         context.startActivity(
             Intent.createChooser(
                 intent,
-                context.getString(R.string.share_chooser_title),
-            ),
+                context.getString(R.string.share_chooser_title)
+            )
         )
     } catch (e: ActivityNotFoundException) {
         Log.e("MoreScreen", "Не удалось открыть ShareSheet: ${e.message}")
@@ -265,7 +265,7 @@ private fun openGitHub(context: Context) {
     val intent =
         Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(AppConstants.GITHUB_REPOSITORY_URL),
+            Uri.parse(AppConstants.GITHUB_REPOSITORY_URL)
         )
 
     try {

@@ -20,7 +20,7 @@ import java.time.LocalDate
 class GetFormattedDaysForItemUseCase(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val formatDaysTextUseCase: FormatDaysTextUseCase,
-    private val resourceProvider: ResourceProvider,
+    private val resourceProvider: ResourceProvider
 ) {
     /**
      * Получает форматированный текст количества дней для указанного Item.
@@ -38,7 +38,7 @@ class GetFormattedDaysForItemUseCase(
         item: Item,
         currentDate: LocalDate? = null,
         defaultDisplayOption: DisplayOption = DisplayOption.DAY,
-        showMinus: Boolean,
+        showMinus: Boolean
     ): String {
         // Определяем опцию отображения
         val displayOption =
@@ -52,7 +52,7 @@ class GetFormattedDaysForItemUseCase(
         val difference: DaysDifference =
             calculateDaysDifferenceUseCase(
                 eventTimestamp = item.timestamp,
-                currentDate = currentDate ?: LocalDate.now(),
+                currentDate = currentDate ?: LocalDate.now()
             )
 
         // Форматируем результат в текст
@@ -62,7 +62,7 @@ class GetFormattedDaysForItemUseCase(
                 difference = difference,
                 displayOption = displayOption,
                 resourceProvider = resourceProvider,
-                showMinus = showMinus,
+                showMinus = showMinus
             )
         } catch (e: Exception) {
             // Обрабатываем исключения при форматировании

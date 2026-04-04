@@ -40,7 +40,7 @@ import com.dayscounter.domain.model.SortOrder
 @Composable
 internal fun SortMenu(
     sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit,
+    onSortOrderChange: (SortOrder) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -48,12 +48,12 @@ internal fun SortMenu(
         IconButton(onClick = { expanded = true }) {
             Icon(
                 painter = painterResource(R.drawable.sort_24px),
-                contentDescription = stringResource(R.string.sort),
+                contentDescription = stringResource(R.string.sort)
             )
         }
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
+            onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.old_first)) },
@@ -65,10 +65,10 @@ internal fun SortMenu(
                     if (sortOrder == SortOrder.ASCENDING) {
                         Icon(
                             imageVector = Icons.Filled.Check,
-                            contentDescription = null,
+                            contentDescription = null
                         )
                     }
-                },
+                }
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.new_first)) },
@@ -80,10 +80,10 @@ internal fun SortMenu(
                     if (sortOrder == SortOrder.DESCENDING) {
                         Icon(
                             imageVector = Icons.Filled.Check,
-                            contentDescription = null,
+                            contentDescription = null
                         )
                     }
-                },
+                }
             )
         }
     }
@@ -101,13 +101,13 @@ internal fun EmptyContent(paddingValues: PaddingValues = PaddingValues()) {
                 .padding(paddingValues)
                 .padding(dimensionResource(R.dimen.spacing_large)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(R.string.what_should_we_remember),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
@@ -116,7 +116,7 @@ internal fun EmptyContent(paddingValues: PaddingValues = PaddingValues()) {
             text = stringResource(R.string.create_your_first_item),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -133,13 +133,13 @@ internal fun EmptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
                 .padding(paddingValues)
                 .padding(dimensionResource(R.dimen.spacing_large)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(R.string.no_results_found),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
@@ -148,7 +148,7 @@ internal fun EmptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
             text = stringResource(R.string.try_different_search_terms),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -160,12 +160,12 @@ internal fun EmptySearchContent(paddingValues: PaddingValues = PaddingValues()) 
 internal fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = stringResource(R.string.loading),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -176,20 +176,20 @@ internal fun LoadingContent(modifier: Modifier = Modifier) {
 @Composable
 internal fun ErrorContent(
     message: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .padding(dimensionResource(R.dimen.spacing_large)),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -202,7 +202,7 @@ internal fun ErrorContent(
 internal fun SearchField(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = searchQuery,
@@ -213,7 +213,7 @@ internal fun SearchField(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(R.string.search),
+                contentDescription = stringResource(R.string.search)
             )
         },
         trailingIcon = {
@@ -221,12 +221,12 @@ internal fun SearchField(
                 IconButton(onClick = { onSearchQueryChange("") }) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
+                        contentDescription = stringResource(R.string.close)
                     )
                 }
             }
         },
         singleLine = true,
-        modifier = modifier,
+        modifier = modifier
     )
 }

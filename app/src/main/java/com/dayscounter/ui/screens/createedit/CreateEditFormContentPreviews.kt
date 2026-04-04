@@ -31,13 +31,13 @@ fun TitleSectionPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             OutlinedTextField(
                 value = title.value,
                 onValueChange = { title.value = it },
                 label = { Text("Название") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -53,14 +53,14 @@ fun DetailsSectionPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             OutlinedTextField(
                 value = details.value,
                 onValueChange = { details.value = it },
                 label = { Text("Описание") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
+                minLines = 3
             )
         }
     }
@@ -81,7 +81,7 @@ fun DateSectionPreview() {
                 Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
             OutlinedTextField(
                 value = selectedDate.value?.format(formatter) ?: "",
@@ -93,10 +93,10 @@ fun DateSectionPreview() {
                     IconButton(onClick = { showDatePicker.value = true }) {
                         Icon(
                             imageVector = Icons.Filled.DateRange,
-                            contentDescription = "Выбрать дату",
+                            contentDescription = "Выбрать дату"
                         )
                     }
-                },
+                }
             )
         }
     }

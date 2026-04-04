@@ -29,7 +29,7 @@ object FirebaseAnalyticsHelper {
     fun logScreenView(
         context: Context,
         screenName: String,
-        screenClass: String? = null,
+        screenClass: String? = null
     ) {
         try {
             val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
@@ -60,7 +60,7 @@ object FirebaseAnalyticsHelper {
     fun logEvent(
         context: Context,
         eventName: String,
-        parameters: Bundle? = null,
+        parameters: Bundle? = null
     ) {
         try {
             val firebaseAnalytics = FirebaseAnalytics.getInstance(context)

@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.map
  * Это позволяет получить полную информацию о проблемах в production.
  */
 class ItemRepositoryImpl(
-    private val itemDao: ItemDao,
+    private val itemDao: ItemDao
 ) : ItemRepository {
     override fun getAllItems(): Flow<List<Item>> =
         try {
@@ -33,7 +33,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при получении списка элементов",
+                "Ошибка при получении списка элементов"
             )
             throw e
         }
@@ -50,7 +50,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при получении списка элементов с сортировкой: $sortOrder",
+                "Ошибка при получении списка элементов с сортировкой: $sortOrder"
             )
             throw e
         }
@@ -63,7 +63,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при получении элемента с id: $id",
+                "Ошибка при получении элемента с id: $id"
             )
             throw e
         }
@@ -77,7 +77,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при получении потока элемента с id: $id",
+                "Ошибка при получении потока элемента с id: $id"
             )
             throw e
         }
@@ -91,7 +91,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при поиске элементов: $query",
+                "Ошибка при поиске элементов: $query"
             )
             throw e
         }
@@ -103,7 +103,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при вставке элемента: ${item.title}",
+                "Ошибка при вставке элемента: ${item.title}"
             )
             throw e
         }
@@ -115,7 +115,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при обновлении элемента: ${item.title}",
+                "Ошибка при обновлении элемента: ${item.title}"
             )
             throw e
         }
@@ -128,7 +128,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при удалении элемента: ${item.title}",
+                "Ошибка при удалении элемента: ${item.title}"
             )
             throw e
         }
@@ -141,7 +141,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при удалении всех элементов",
+                "Ошибка при удалении всех элементов"
             )
             throw e
         }
@@ -154,7 +154,7 @@ class ItemRepositoryImpl(
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при получении количества элементов",
+                "Ошибка при получении количества элементов"
             )
             throw e
         }

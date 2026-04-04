@@ -16,7 +16,7 @@ enum class AppIcon {
     ICON_3,
     ICON_4,
     ICON_5,
-    ICON_6,
+    ICON_6
     ;
 
     /**

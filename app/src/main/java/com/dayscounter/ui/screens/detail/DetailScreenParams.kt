@@ -13,5 +13,5 @@ data class DetailScreenParams(
     val showDeleteDialog: Boolean,
     val onConfirmDelete: () -> Unit,
     val onCancelDelete: () -> Unit,
-    val getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
+    val getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase
 )

@@ -158,9 +158,9 @@ class BackupWrapperTest {
                             details = "Test Details",
                             timestamp = 1234567890000L,
                             colorTag = "#FF0000",
-                            displayOption = "day",
-                        ),
-                    ),
+                            displayOption = "day"
+                        )
+                    )
             )
 
         // When
@@ -185,9 +185,9 @@ class BackupWrapperTest {
                             details = null,
                             timestamp = 999999999000L,
                             colorTag = null,
-                            displayOption = "day",
-                        ),
-                    ),
+                            displayOption = "day"
+                        )
+                    )
             )
 
         // When
@@ -213,9 +213,9 @@ class BackupWrapperTest {
                             details = "Test",
                             timestamp = 1111111111111L,
                             colorTag = "#ABCDEF",
-                            displayOption = "monthDay",
-                        ),
-                    ),
+                            displayOption = "monthDay"
+                        )
+                    )
             )
 
         // When
@@ -243,9 +243,9 @@ class BackupWrapperTest {
                             details = "From iPhone",
                             timestamp = -1000000000L,
                             colorTag = null,
-                            displayOption = "day",
-                        ),
-                    ),
+                            displayOption = "day"
+                        )
+                    )
             )
 
         // When
@@ -290,5 +290,4 @@ class BackupWrapperTest {
         assertEquals("Old Event 1", items[0].title)
         assertEquals("Old Event 2", items[1].title)
     }
-
 }

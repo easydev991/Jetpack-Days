@@ -1,6 +1,5 @@
 package com.dayscounter.screenshots
 
-
 import android.content.Context
 import android.util.Log
 import androidx.compose.ui.test.assertIsEnabled
@@ -30,7 +29,6 @@ import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy
 import tools.fastlane.screengrab.locale.LocaleTestRule
 import java.util.Locale
 
-
 /**
  * UI тесты для автоматической генерации скриншотов для Google Play Store.
  *
@@ -48,7 +46,6 @@ import java.util.Locale
  */
 @RunWith(AndroidJUnit4::class)
 class ScreenshotsTest {
-
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
@@ -60,30 +57,31 @@ class ScreenshotsTest {
     private lateinit var database: DaysDatabase
 
     @Before
-    fun setup() = runBlocking {
-        context = InstrumentationRegistry.getInstrumentation().targetContext
-        database = DaysDatabase.getDatabase(context.applicationContext)
+    fun setup() =
+        runBlocking {
+            context = InstrumentationRegistry.getInstrumentation().targetContext
+            database = DaysDatabase.getDatabase(context.applicationContext)
 
-        // Устанавливаем стратегию скриншотов для Compose
-        Screengrab.setDefaultScreenshotStrategy(UiAutomatorScreenshotStrategy())
+            // Устанавливаем стратегию скриншотов для Compose
+            Screengrab.setDefaultScreenshotStrategy(UiAutomatorScreenshotStrategy())
 
-        // Очищаем базу данных перед тестом
-        database.itemDao().deleteAllItems()
+            // Очищаем базу данных перед тестом
+            database.itemDao().deleteAllItems()
 
-        // Загружаем демо-данные
-        loadDemoData()
-    }
+            // Загружаем демо-данные
+            loadDemoData()
+        }
 
     @After
-    fun tearDown() = runBlocking {
-        // Очищаем базу данных после теста
-        database.itemDao().deleteAllItems()
-    }
+    fun tearDown() =
+        runBlocking {
+            // Очищаем базу данных после теста
+            database.itemDao().deleteAllItems()
+        }
 
     @Test
     fun testScreenshots() {
         val activity = composeTestRule.activity
-
 
         // Ждем загрузки UI
         composeTestRule.waitForIdle()
@@ -102,15 +100,14 @@ class ScreenshotsTest {
         ) // Скриншот 2: Экран создания записи с открытым DatePicker
 
         // Нажимаем кнопку добавления (FAB) через contentDescription
-        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.add_item))
+        composeTestRule
+            .onNodeWithContentDescription(activity.getString(R.string.add_item))
             .performClick()
-
 
         // Ждем открытия экрана создания
         composeTestRule.waitForIdle()
 
         Thread.sleep(1000)
-
 
         Log.d("ScreenshotsTest", "Проверяем, что экран создания открыт")
         // Проверяем, что экран создания открыт
@@ -136,7 +133,8 @@ class ScreenshotsTest {
         // Но для надежности попробуем нажать на дату "15"
         // Используем onAllNodesWithText, так как может быть несколько вхождений
         try {
-            composeTestRule.onAllNodesWithText("15", substring = true)
+            composeTestRule
+                .onAllNodesWithText("15", substring = true)
                 .onFirst()
                 .performClick()
             Log.d("ScreenshotsTest", "Успешно нажали на дату 15")
@@ -170,15 +168,17 @@ class ScreenshotsTest {
         Log.d("ScreenshotsTest", "Заполняем поле заголовка")
         // Заполняем поле заголовка в зависимости от текущей локали
         val currentLocale = Locale.getDefault()
-        val testTitle = if (currentLocale.language == "ru") {
-            "Слетали на море"
-        } else {
-            "Travelled to the seaside"
-        }
+        val testTitle =
+            if (currentLocale.language == "ru") {
+                "Слетали на море"
+            } else {
+                "Travelled to the seaside"
+            }
 
         composeTestRule.onNodeWithText(activity.getString(R.string.title)).performClick()
 
-        composeTestRule.onNodeWithText(activity.getString(R.string.title))
+        composeTestRule
+            .onNodeWithText(activity.getString(R.string.title))
             .performTextInput(testTitle)
 
         // Ждем ввода
@@ -188,11 +188,12 @@ class ScreenshotsTest {
 
         Log.d("ScreenshotsTest", "Заполняем поле деталей")
         // Заполняем поле деталей в зависимости от текущей локали
-        val testDetails = if (currentLocale.language == "ru") {
-            "Отдыхали у теплого моря, купались, загорали и катались на велосипедах"
-        } else {
-            "Relaxed by the warm sea, swam, sunbathed and rode bicycles"
-        }
+        val testDetails =
+            if (currentLocale.language == "ru") {
+                "Отдыхали у теплого моря, купались, загорали и катались на велосипедах"
+            } else {
+                "Relaxed by the warm sea, swam, sunbathed and rode bicycles"
+            }
 
         composeTestRule.onNodeWithText(activity.getString(R.string.details)).performClick()
 
@@ -209,15 +210,16 @@ class ScreenshotsTest {
 
         Screengrab.screenshot("4-beforeSave")
 
-
         Log.d("ScreenshotsTest", "Сохраняем запись")
         // Сохраняем запись
         try {
             // Проверяем, что кнопка доступна перед нажатием
             // Используем onFirst, чтобы выбрать конкретную кнопку, если их несколько
             // Пытаемся скроллим к кнопке для маленьких экранов (если она в скроллируемом контейнере)
-            val saveButton = composeTestRule.onAllNodesWithText(activity.getString(R.string.save))
-                .onFirst()
+            val saveButton =
+                composeTestRule
+                    .onAllNodesWithText(activity.getString(R.string.save))
+                    .onFirst()
 
             try {
                 saveButton.performScrollTo()
@@ -248,7 +250,8 @@ class ScreenshotsTest {
         // Шаг 1: Открываем меню сортировки и меняем на "сначала старые"
         Log.d("ScreenshotsTest", "Открываем меню сортировки для изменения порядка")
 
-        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.sort))
+        composeTestRule
+            .onNodeWithContentDescription(activity.getString(R.string.sort))
             .performClick()
 
         composeTestRule.waitForIdle()
@@ -258,7 +261,8 @@ class ScreenshotsTest {
         // Шаг 2: Снова открываем меню сортировки для скриншота
         Log.d("ScreenshotsTest", "Открываем меню сортировки для скриншота")
 
-        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.sort))
+        composeTestRule
+            .onNodeWithContentDescription(activity.getString(R.string.sort))
             .performClick()
 
         // Ждем открытия меню
@@ -268,7 +272,6 @@ class ScreenshotsTest {
         Log.d(
             "ScreenshotsTest",
             "Снимаем скриншот 5: Главный экран с открытым меню сортировки (выбрано 'сначала старые')"
-
         )
 
         Screengrab.screenshot("5-sortByDate")
@@ -283,88 +286,89 @@ class ScreenshotsTest {
     private suspend fun loadDemoData() {
         val currentLocale = Locale.getDefault()
         val isEnglish = currentLocale.language == "en"
-        val demoItems = listOf(
-            DemoItem(
-                titleRu = "Новые кроссовки",
-                titleEn = "New Sneakers",
-                detailsRu = "Купили спортивную обувь для утренних пробежек",
-                detailsEn = "Purchased sports shoes for morning runs",
-                timestampSeconds = 1_672_531_200, // 2023-01-01
-                colorTag = null
-            ),
-            DemoItem(
-                titleRu = "Ремонт окна",
-                titleEn = "Window Repair",
-                detailsRu = "Замена старой рамы на энергосберегающую конструкцию",
-                detailsEn = "Replacing old frame with energy-saving structure",
-                timestampSeconds = 1_641_081_600, // 2022-01-02
-                colorTag = null
-            ),
-            DemoItem(
-                titleRu = "Торжественное мероприятие",
-                titleEn = "Celebratory Event",
-                detailsRu = "Посещение праздничного вечера с друзьями",
-                detailsEn = "Attending a festive evening with friends",
-                timestampSeconds = 1_633_046_400, // 2021-10-01
-                colorTag = 0xFFFFA500.toInt() // Orange
-            ),
-            DemoItem(
-                titleRu = "Приобретение автомобиля",
-                titleEn = "Car Purchase",
-                detailsRu = "Оформление кредита на новый внедорожник",
-                detailsEn = "Arranging a loan for a new SUV",
-                timestampSeconds = 1_654_041_600, // 2022-06-01
-                colorTag = android.graphics.Color.RED // Red
-            ),
-            DemoItem(
-                titleRu = "Стоматологический осмотр",
-                titleEn = "Dental Checkup",
-                detailsRu = "Установка пломбы на коренной зуб",
-                detailsEn = "Filling placement on a molar tooth",
-                timestampSeconds = 1_664_582_400, // 2022-10-01
-                colorTag = null
-            ),
-            DemoItem(
-                titleRu = "Зарубежное путешествие",
-                titleEn = "Overseas Trip",
-                detailsRu = "Тур по историческим достопримечательностям",
-                detailsEn = "Tour of historical landmarks",
-                timestampSeconds = 1_598_918_400, // 2020-09-01
-                colorTag = 0xFF800080.toInt() // Purple
-            ),
-            DemoItem(
-                titleRu = "Защита проекта",
-                titleEn = "Project Defense",
-                detailsRu = "Успешная презентация годового исследования",
-                detailsEn = "Successful presentation of annual research",
-                timestampSeconds = 1_561_939_200, // 2019-07-01
-                colorTag = android.graphics.Color.YELLOW // Yellow
-            ),
-            DemoItem(
-                titleRu = "Смена адреса",
-                titleEn = "Address Change",
-                detailsRu = "Переезд в новую квартиру с улучшенной планировкой",
-                detailsEn = "Moving to a new apartment with better layout",
-                timestampSeconds = 1_585_699_200, // 2020-04-02
-                colorTag = null
-            ),
-            DemoItem(
-                titleRu = "Водительский экзамен",
-                titleEn = "Driving Exam",
-                detailsRu = "Успешная сдача теста в ГИБДД с первого раза",
-                detailsEn = "Passed driving test on first attempt",
-                timestampSeconds = 1_483_228_800, // 2017-01-01
-                colorTag = 0xFF98FF98.toInt() // Mint
-            ),
-            DemoItem(
-                titleRu = "Медицинская операция",
-                titleEn = "Medical Surgery",
-                detailsRu = "Плановое хирургическое вмешательство в клинике",
-                detailsEn = "Scheduled surgical procedure at clinic",
-                timestampSeconds = 1_538_352_000, // 2018-10-01
-                colorTag = null
+        val demoItems =
+            listOf(
+                DemoItem(
+                    titleRu = "Новые кроссовки",
+                    titleEn = "New Sneakers",
+                    detailsRu = "Купили спортивную обувь для утренних пробежек",
+                    detailsEn = "Purchased sports shoes for morning runs",
+                    timestampSeconds = 1_672_531_200, // 2023-01-01
+                    colorTag = null
+                ),
+                DemoItem(
+                    titleRu = "Ремонт окна",
+                    titleEn = "Window Repair",
+                    detailsRu = "Замена старой рамы на энергосберегающую конструкцию",
+                    detailsEn = "Replacing old frame with energy-saving structure",
+                    timestampSeconds = 1_641_081_600, // 2022-01-02
+                    colorTag = null
+                ),
+                DemoItem(
+                    titleRu = "Торжественное мероприятие",
+                    titleEn = "Celebratory Event",
+                    detailsRu = "Посещение праздничного вечера с друзьями",
+                    detailsEn = "Attending a festive evening with friends",
+                    timestampSeconds = 1_633_046_400, // 2021-10-01
+                    colorTag = 0xFFFFA500.toInt() // Orange
+                ),
+                DemoItem(
+                    titleRu = "Приобретение автомобиля",
+                    titleEn = "Car Purchase",
+                    detailsRu = "Оформление кредита на новый внедорожник",
+                    detailsEn = "Arranging a loan for a new SUV",
+                    timestampSeconds = 1_654_041_600, // 2022-06-01
+                    colorTag = android.graphics.Color.RED // Red
+                ),
+                DemoItem(
+                    titleRu = "Стоматологический осмотр",
+                    titleEn = "Dental Checkup",
+                    detailsRu = "Установка пломбы на коренной зуб",
+                    detailsEn = "Filling placement on a molar tooth",
+                    timestampSeconds = 1_664_582_400, // 2022-10-01
+                    colorTag = null
+                ),
+                DemoItem(
+                    titleRu = "Зарубежное путешествие",
+                    titleEn = "Overseas Trip",
+                    detailsRu = "Тур по историческим достопримечательностям",
+                    detailsEn = "Tour of historical landmarks",
+                    timestampSeconds = 1_598_918_400, // 2020-09-01
+                    colorTag = 0xFF800080.toInt() // Purple
+                ),
+                DemoItem(
+                    titleRu = "Защита проекта",
+                    titleEn = "Project Defense",
+                    detailsRu = "Успешная презентация годового исследования",
+                    detailsEn = "Successful presentation of annual research",
+                    timestampSeconds = 1_561_939_200, // 2019-07-01
+                    colorTag = android.graphics.Color.YELLOW // Yellow
+                ),
+                DemoItem(
+                    titleRu = "Смена адреса",
+                    titleEn = "Address Change",
+                    detailsRu = "Переезд в новую квартиру с улучшенной планировкой",
+                    detailsEn = "Moving to a new apartment with better layout",
+                    timestampSeconds = 1_585_699_200, // 2020-04-02
+                    colorTag = null
+                ),
+                DemoItem(
+                    titleRu = "Водительский экзамен",
+                    titleEn = "Driving Exam",
+                    detailsRu = "Успешная сдача теста в ГИБДД с первого раза",
+                    detailsEn = "Passed driving test on first attempt",
+                    timestampSeconds = 1_483_228_800, // 2017-01-01
+                    colorTag = 0xFF98FF98.toInt() // Mint
+                ),
+                DemoItem(
+                    titleRu = "Медицинская операция",
+                    titleEn = "Medical Surgery",
+                    detailsRu = "Плановое хирургическое вмешательство в клинике",
+                    detailsEn = "Scheduled surgical procedure at clinic",
+                    timestampSeconds = 1_538_352_000, // 2018-10-01
+                    colorTag = null
+                )
             )
-        )
 
         // Вставляем записи в базу данных
         demoItems.forEachIndexed { index, demoItem ->

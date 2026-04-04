@@ -78,7 +78,7 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     onItemClick: (Long) -> Unit = {},
     onEditClick: (Long) -> Unit = {},
-    onCreateClick: () -> Unit = {},
+    onCreateClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val viewModel: MainScreenViewModel =
@@ -87,11 +87,11 @@ fun MainScreen(
                 MainScreenViewModel.factory(
                     createItemRepository(
                         getDatabase(
-                            context.applicationContext,
-                        ),
+                            context.applicationContext
+                        )
                     ),
-                    createAppSettingsDataStore(context.applicationContext),
-                ),
+                    createAppSettingsDataStore(context.applicationContext)
+                )
         )
     // Создаем use cases для форматирования
     val resourceProvider =
@@ -106,7 +106,7 @@ fun MainScreen(
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             formatDaysTextUseCase = formatDaysTextUseCase,
-            resourceProvider = resourceProvider,
+            resourceProvider = resourceProvider
         )
 
     MainScreenContent(
@@ -116,9 +116,9 @@ fun MainScreen(
                 getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
                 onItemClick = onItemClick,
                 onEditClick = onEditClick,
-                onCreateClick = onCreateClick,
+                onCreateClick = onCreateClick
             ),
-        modifier = modifier,
+        modifier = modifier
     )
 }
 
@@ -130,15 +130,15 @@ fun MainScreen(
 private fun ScreenHeader(
     itemsCount: Int,
     sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit,
+    onSortOrderChange: (SortOrder) -> Unit
 ) {
     MainScreenTopBar(
         state =
             MainScreenTopBarState(
                 itemsCount = itemsCount,
                 sortOrder = sortOrder,
-                onSortOrderChange = onSortOrderChange,
-            ),
+                onSortOrderChange = onSortOrderChange
+            )
     )
 }
 
@@ -151,7 +151,7 @@ private fun ScreenBody(
     itemsCount: Int,
     paddingValues: PaddingValues,
     state: MainScreenContentState,
-    onSearchQueryChange: (String) -> Unit,
+    onSearchQueryChange: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
@@ -163,7 +163,7 @@ private fun ScreenBody(
                     Modifier
                         .fillMaxWidth()
                         .padding(paddingValues)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
         MainScreenContentByState(
@@ -173,8 +173,8 @@ private fun ScreenBody(
                     top = if (showSearchField) 0.dp else paddingValues.calculateTopPadding(),
                     start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                     end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                    bottom = paddingValues.calculateBottomPadding(),
-                ),
+                    bottom = paddingValues.calculateBottomPadding()
+                )
         )
     }
 }
@@ -186,7 +186,7 @@ private fun ScreenBody(
 private fun DeleteDialog(
     item: com.dayscounter.domain.model.Item,
     onConfirm: () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onCancel,
@@ -196,18 +196,18 @@ private fun DeleteDialog(
         },
         confirmButton = {
             androidx.compose.material3.TextButton(
-                onClick = onConfirm,
+                onClick = onConfirm
             ) {
                 Text(stringResource(R.string.delete_item_confirm))
             }
         },
         dismissButton = {
             androidx.compose.material3.TextButton(
-                onClick = onCancel,
+                onClick = onCancel
             ) {
                 Text(stringResource(R.string.cancel))
             }
-        },
+        }
     )
 }
 
@@ -217,7 +217,7 @@ private fun DeleteDialog(
 @Composable
 private fun MainScreenContent(
     params: MainScreenParams,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val uiState by params.viewModel.uiState.collectAsState()
     val searchQuery by params.viewModel.searchQuery.collectAsState()
@@ -232,19 +232,19 @@ private fun MainScreenContent(
             ScreenHeader(
                 itemsCount = itemsCount,
                 sortOrder = sortOrder,
-                onSortOrderChange = { params.viewModel.updateSortOrder(it) },
+                onSortOrderChange = { params.viewModel.updateSortOrder(it) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = params.onCreateClick,
+                onClick = params.onCreateClick
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_item),
+                    contentDescription = stringResource(R.string.add_item)
                 )
             }
-        },
+        }
     ) { paddingValues ->
         ScreenBody(
             searchQuery = searchQuery,
@@ -258,9 +258,9 @@ private fun MainScreenContent(
                     getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
                     onItemClick = params.onItemClick,
                     onEditClick = params.onEditClick,
-                    viewModel = params.viewModel,
+                    viewModel = params.viewModel
                 ),
-            onSearchQueryChange = { params.viewModel.updateSearchQuery(it) },
+            onSearchQueryChange = { params.viewModel.updateSearchQuery(it) }
         )
     }
 
@@ -268,7 +268,7 @@ private fun MainScreenContent(
         DeleteDialog(
             item = item,
             onConfirm = { params.viewModel.confirmDelete() },
-            onCancel = { params.viewModel.cancelDelete() },
+            onCancel = { params.viewModel.cancelDelete() }
         )
     }
 }
@@ -282,7 +282,7 @@ private fun ListItemWrapper(
     formattedDaysText: String,
     onItemClick: (Long) -> Unit,
     onLongClick: (Offset, Offset) -> Unit,
-    isSelected: Boolean,
+    isSelected: Boolean
 ) {
     var itemPosition by remember { mutableStateOf(Offset.Zero) }
     Box(
@@ -290,7 +290,7 @@ private fun ListItemWrapper(
             Modifier
                 .onGloballyPositioned { coordinates ->
                     itemPosition = coordinates.positionInRoot()
-                },
+                }
     ) {
         ListItemView(
             params =
@@ -299,8 +299,8 @@ private fun ListItemWrapper(
                     formattedDaysText = formattedDaysText,
                     onClick = { onItemClick(item.id) },
                     onLongClick = { localOffset -> onLongClick(localOffset, itemPosition) },
-                    isSelected = isSelected,
-                ),
+                    isSelected = isSelected
+                )
         )
     }
 }
@@ -313,46 +313,46 @@ private fun ContextMenu(params: ContextMenuParams) {
     DropdownMenu(
         expanded = true,
         onDismissRequest = params.onDismiss,
-        offset = params.menuOffset,
+        offset = params.menuOffset
     ) {
         DropdownMenuItem(
             text = { Text(stringResource(R.string.context_menu_view)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Visibility,
-                    contentDescription = null,
+                    contentDescription = null
                 )
             },
             onClick = {
                 params.onDismiss()
                 params.onItemClick(params.item.id)
-            },
+            }
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.context_menu_edit)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Edit,
-                    contentDescription = null,
+                    contentDescription = null
                 )
             },
             onClick = {
                 params.onDismiss()
                 params.onEditClick(params.item.id)
-            },
+            }
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.context_menu_delete)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = null,
+                    contentDescription = null
                 )
             },
             onClick = {
                 params.onDismiss()
                 params.onDeleteClick(params.item)
-            },
+            }
         )
     }
 }
@@ -370,11 +370,11 @@ private fun ItemsListContent(params: ItemsListParams) {
         modifier = Modifier.fillMaxSize(),
         state = params.listState,
         contentPadding = params.paddingValues,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
     ) {
         items(
             items = params.items,
-            key = { it.id },
+            key = { it.id }
         ) { item ->
             val formattedDaysText =
                 params.getFormattedDaysForItemUseCase(item = item, showMinus = true)
@@ -388,11 +388,11 @@ private fun ItemsListContent(params: ItemsListParams) {
                         with(density) {
                             DpOffset(
                                 (itemPosition.x + localOffset.x).toDp(),
-                                (itemPosition.y + localOffset.y).toDp(),
+                                (itemPosition.y + localOffset.y).toDp()
                             )
                         }
                 },
-                isSelected = contextMenuItem?.id == item.id,
+                isSelected = contextMenuItem?.id == item.id
             )
         }
     }
@@ -406,8 +406,8 @@ private fun ItemsListContent(params: ItemsListParams) {
                     onDismiss = { contextMenuItem = null },
                     onItemClick = params.onItemClick,
                     onEditClick = params.onEditClick,
-                    onDeleteClick = { params.viewModel.requestDelete(it) },
-                ),
+                    onDeleteClick = { params.viewModel.requestDelete(it) }
+                )
         )
     }
 }
@@ -418,7 +418,7 @@ private fun ItemsListContent(params: ItemsListParams) {
 private data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
-    val onSortOrderChange: (SortOrder) -> Unit,
+    val onSortOrderChange: (SortOrder) -> Unit
 )
 
 /**
@@ -433,15 +433,15 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
             if (state.itemsCount > 1) {
                 SortMenu(
                     sortOrder = state.sortOrder,
-                    onSortOrderChange = state.onSortOrderChange,
+                    onSortOrderChange = state.onSortOrderChange
                 )
             }
         },
         colors =
             TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.surface,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
-            ),
+                titleContentColor = MaterialTheme.colorScheme.onSurface
+            )
     )
 }
 
@@ -455,7 +455,7 @@ private data class MainScreenContentState(
     val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
-    val viewModel: MainScreenViewModel,
+    val viewModel: MainScreenViewModel
 )
 
 /**
@@ -464,7 +464,7 @@ private data class MainScreenContentState(
 @Composable
 private fun MainScreenContentByState(
     state: MainScreenContentState,
-    paddingValues: PaddingValues,
+    paddingValues: PaddingValues
 ) {
     when (val uiState = state.uiState) {
         is MainScreenState.Loading -> {
@@ -488,8 +488,8 @@ private fun MainScreenContentByState(
                             onItemClick = state.onItemClick,
                             onEditClick = state.onEditClick,
                             viewModel = state.viewModel,
-                            paddingValues = paddingValues,
-                        ),
+                            paddingValues = paddingValues
+                        )
                 )
             }
         }
@@ -497,7 +497,7 @@ private fun MainScreenContentByState(
         is MainScreenState.Error -> {
             ErrorContent(
                 message = uiState.message,
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.padding(paddingValues)
             )
         }
     }

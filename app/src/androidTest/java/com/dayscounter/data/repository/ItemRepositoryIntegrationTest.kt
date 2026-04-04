@@ -29,7 +29,7 @@ class ItemRepositoryIntegrationTest {
             Room
                 .inMemoryDatabaseBuilder(
                     ApplicationProvider.getApplicationContext(),
-                    DaysDatabase::class.java,
+                    DaysDatabase::class.java
                 ).allowMainThreadQueries()
                 .build()
         itemDao = database.itemDao()
@@ -51,7 +51,7 @@ class ItemRepositoryIntegrationTest {
                     details = "Описание",
                     timestamp = 1234567890000L,
                     colorTag = 0xFFFF0000.toInt(),
-                    displayOption = DisplayOption.MONTH_DAY,
+                    displayOption = DisplayOption.MONTH_DAY
                 )
 
             // When - Insert
@@ -69,7 +69,7 @@ class ItemRepositoryIntegrationTest {
             val updatedItem =
                 retrieved!!.copy(
                     title = "Обновленное событие",
-                    details = "Новое описание",
+                    details = "Новое описание"
                 )
             repository.updateItem(updatedItem)
 
@@ -176,7 +176,7 @@ class ItemRepositoryIntegrationTest {
                     details = "Детали события",
                     timestamp = 9876543210000L,
                     colorTag = 0xFF00FF00.toInt(),
-                    displayOption = DisplayOption.YEAR_MONTH_DAY,
+                    displayOption = DisplayOption.YEAR_MONTH_DAY
                 )
 
             // When
@@ -201,7 +201,7 @@ class ItemRepositoryIntegrationTest {
                 Item(
                     title = "Событие без цвета",
                     timestamp = 1234567890000L,
-                    colorTag = null,
+                    colorTag = null
                 )
 
             // When

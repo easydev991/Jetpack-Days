@@ -195,7 +195,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -217,7 +217,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = timestamp2000,
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -247,7 +247,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -276,7 +276,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = greenBase64,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -302,7 +302,7 @@ class IosBackupIntegrationTest {
                     details = null,
                     timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                     colorTag = null,
-                    displayOption = option,
+                    displayOption = option
                 )
 
             // When
@@ -323,7 +323,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "invalidOption",
+                displayOption = "invalidOption"
             )
 
         // When
@@ -375,7 +375,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When
@@ -396,7 +396,7 @@ class IosBackupIntegrationTest {
                 details = null,
                 timestamp = -278889600.0, // iOS: секунды с 2001-01-01
                 colorTag = null,
-                displayOption = "day",
+                displayOption = "day"
             )
 
         // When

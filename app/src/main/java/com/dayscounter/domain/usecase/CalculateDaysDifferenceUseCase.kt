@@ -20,7 +20,7 @@ class CalculateDaysDifferenceUseCase {
      */
     operator fun invoke(
         eventTimestamp: Long,
-        currentDate: LocalDate = LocalDate.now(),
+        currentDate: LocalDate = LocalDate.now()
     ): DaysDifference {
         return try {
             // Конвертируем timestamp в LocalDate
@@ -28,7 +28,7 @@ class CalculateDaysDifferenceUseCase {
                 LocalDateTime
                     .ofInstant(
                         Instant.ofEpochMilli(eventTimestamp),
-                        ZoneId.systemDefault(),
+                        ZoneId.systemDefault()
                     ).toLocalDate()
 
             // Вычисляем разницу в днях
@@ -45,13 +45,13 @@ class CalculateDaysDifferenceUseCase {
             DaysDifference.Calculated(
                 period = period,
                 totalDays = totalDays,
-                timestamp = eventTimestamp,
+                timestamp = eventTimestamp
             )
         } catch (e: Exception) {
             // Логируем критическую ошибку в Crashlytics
             CrashlyticsHelper.logException(
                 e,
-                "Ошибка при вычислении разницы дат: $eventTimestamp - $currentDate",
+                "Ошибка при вычислении разницы дат: $eventTimestamp - $currentDate"
             )
             // Возвращаем Today как fallback
             DaysDifference.Today(timestamp = eventTimestamp)
@@ -72,7 +72,7 @@ class CalculateDaysDifferenceUseCase {
      */
     private fun calculateTimePeriod(
         startDate: LocalDate,
-        endDate: LocalDate,
+        endDate: LocalDate
     ): TimePeriod {
         var years = 0
         var months = 0
@@ -107,7 +107,7 @@ class CalculateDaysDifferenceUseCase {
         return TimePeriod(
             years = years,
             months = months,
-            days = days,
+            days = days
         )
     }
 }
