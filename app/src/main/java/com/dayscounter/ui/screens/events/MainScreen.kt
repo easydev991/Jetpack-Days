@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -195,14 +197,18 @@ private fun DeleteDialog(
             Text(stringResource(R.string.delete_item_message, item.title))
         },
         confirmButton = {
-            androidx.compose.material3.TextButton(
-                onClick = onConfirm
+            TextButton(
+                onClick = onConfirm,
+                colors =
+                    ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
             ) {
                 Text(stringResource(R.string.delete_item_confirm))
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(
+            TextButton(
                 onClick = onCancel
             ) {
                 Text(stringResource(R.string.cancel))
