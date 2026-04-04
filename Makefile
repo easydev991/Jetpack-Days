@@ -358,6 +358,7 @@ screenshots:
 	@$(MAKE) _ensure_fastlane
 	@PATH="/Users/Oleg991/Library/Android/sdk/platform-tools:$$PATH" $(BUNDLE_EXEC) fastlane screenshots
 	@$(MAKE) _cleanup_screenshots_apk
+	@$(MAKE) update_readme
 
 ## screenshots-ru: Генерировать скриншоты только на русском
 screenshots-ru:
@@ -397,8 +398,9 @@ update_readme_versions:
 _build_screenshots_apk:
 	@printf "$(YELLOW)Удаляю старые APK артефакты...$(RESET)\n"
 	@rm -rf app/build/outputs/apk
+	@rm -rf screenshots/build/outputs/apk
 	@printf "$(YELLOW)Собираю APK для скриншотов...$(RESET)\n"
-	@./gradlew assembleDebug assembleDebugAndroidTest --quiet
+	@./gradlew :app:assembleDebug :screenshots:assembleDebug --quiet
 
 ## _cleanup_screenshots_apk: Удалить APK артефакты после генерации скриншотов
 _cleanup_screenshots_apk:

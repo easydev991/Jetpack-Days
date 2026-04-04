@@ -2,10 +2,13 @@
 app_package_name 'com.dayscounter'
 
 # Имя пакета тестов
-tests_package_name 'com.dayscounter.test'
+tests_package_name 'com.dayscounter.screenshots'
 
 # Запускать только тесты скриншотов из пакета
 use_tests_in_packages ['com.dayscounter.screenshots']
+
+# Runner для тестов скриншотов
+test_instrumentation_runner 'com.dayscounter.screenshots.ScreenshotTestRunner'
 
 # Локали для скриншотов
 locales ['ru-RU', 'en-US']
