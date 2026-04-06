@@ -37,7 +37,7 @@
     <string name="new_item">New Item</string>
     <string name="edit_item">Edit Item</string>
     <string name="app_data">App data</string>
-    <string name="app_theme_and_icon">App theme and Icon</string>
+    <string name="app_theme_and_icon">Appearance</string>
 
     <!-- Main Screen -->
     <string name="what_should_we_remember">What should we remember?</string>
@@ -79,7 +79,7 @@
     <string name="share_the_app">Share app</string>
     <string name="share_chooser_title">Share app</string>
     <string name="share_text">%1$s - days tracking app</string>
-    <string name="github_page">GitHub page</string>
+    <string name="github_page">GitHub</string>
     <string name="app_version">App version: %1$s</string>
 
     <!-- Theme and Icon Screen -->
@@ -106,7 +106,7 @@
     <string name="error">Error</string>
 
     <!-- UI states and messages -->
-    <string name="loading">Loading</string>
+    <string name="loading">Loading...</string>
     <string name="back">Back</string>
     <string name="event_deleted">Event deleted</string>
     <string name="select_date">Select date</string>

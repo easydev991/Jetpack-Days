@@ -37,7 +37,7 @@
     <string name="new_item">Новая запись</string>
     <string name="edit_item">Изменить запись</string>
     <string name="app_data">Данные приложения</string>
-    <string name="app_theme_and_icon">Тема и иконка приложения</string>
+    <string name="app_theme_and_icon">Оформление приложения</string>
 
     <!-- Main Screen -->
     <string name="what_should_we_remember">Что нужно запомнить?</string>
@@ -79,7 +79,7 @@
     <string name="share_the_app">Поделиться приложением</string>
     <string name="share_chooser_title">Поделиться приложением</string>
     <string name="share_text">%1$s - приложение для отслеживания дней</string>
-    <string name="github_page">Ссылка на GitHub</string>
+    <string name="github_page">GitHub</string>
     <string name="app_version">Версия приложения: %1$s</string>
 
     <!-- Theme and Icon Screen -->
