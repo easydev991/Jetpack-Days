@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screens.createedit
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -91,6 +92,7 @@ internal fun SaveButton(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(all = dimensionResource(R.dimen.spacing_regular)),
         enabled = enabled
     ) {
