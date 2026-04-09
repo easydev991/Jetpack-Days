@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Jetpack-Days"
 include(":app")
-include(":screenshots")
+include(":screenshot-tests")
