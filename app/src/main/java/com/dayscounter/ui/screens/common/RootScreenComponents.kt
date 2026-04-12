@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screens.common
 
 import android.util.Log
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -8,20 +9,24 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.dayscounter.analytics.FirebaseAnalyticsHelper
-import com.dayscounter.analytics.ScreenNames
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.AppScreen
+import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
@@ -86,16 +91,15 @@ internal fun NavigationBarContent(
 /**
  * Навигационное назначение для главного экрана событий.
  */
-private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navController: NavHostController) {
+private fun NavGraphBuilder.mainScreenDestination(
+    analyticsService: AnalyticsService,
+    navController: NavHostController
+) {
     composable(Screen.Events.route) {
-        val context = LocalContext.current
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.EVENTS,
-            screenClass = "MainScreen"
-        )
-        EventsScreenContent(navController)
+        LaunchedEffect(Unit) {
+            analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.EVENTS, "MainScreen"))
+        }
+        EventsScreenContent(navController, analyticsService)
     }
 }
 
@@ -103,8 +107,9 @@ private fun androidx.navigation.NavGraphBuilder.mainScreenDestination(navControl
  * Навигационное назначение для экрана деталей события.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
+private fun NavGraphBuilder.detailScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
+    analyticsService: AnalyticsService,
     navController: NavHostController
 ) {
     composable(
@@ -116,14 +121,10 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
                 }
             )
     ) { backStackEntry ->
-        val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.DETAIL,
-            screenClass = "DetailScreen"
-        )
+        LaunchedEffect(backStackEntry.id) {
+            analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.DETAIL, "DetailScreen"))
+        }
         DetailScreen(
             itemId = itemId,
             viewModel =
@@ -132,6 +133,7 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
                 ),
             onBackClick = { navController.popBackStack() },
             onEditClick = { id ->
+                analyticsService.log(AnalyticsEvent.UserAction(UserActionType.EDIT))
                 navController.navigate(Screen.EditItem.createRoute(id))
             }
         )
@@ -142,26 +144,29 @@ private fun androidx.navigation.NavGraphBuilder.detailScreenDestination(
  * Навигационное назначение для экрана создания/редактирования события.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
+private fun NavGraphBuilder.createEditScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
     resourceProvider: com.dayscounter.data.provider.ResourceProvider,
+    analyticsService: AnalyticsService,
     navController: NavHostController
 ) {
     composable(Screen.CreateItem.route) {
-        val context = LocalContext.current
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.CREATE,
-            screenClass = "CreateEditScreen"
-        )
+        LaunchedEffect(Unit) {
+            analyticsService.log(
+                AnalyticsEvent.ScreenView(
+                    AppScreen.CREATE_EDIT,
+                    "CreateEditScreen"
+                )
+            )
+        }
         CreateEditScreen(
             itemId = null,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider)
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider, analyticsService)
                 ),
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            analyticsService = analyticsService
         )
     }
     composable(
@@ -173,21 +178,23 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
                 }
             )
     ) { backStackEntry ->
-        val context = LocalContext.current
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.CREATE,
-            screenClass = "CreateEditScreen"
-        )
+        LaunchedEffect(backStackEntry.id) {
+            analyticsService.log(
+                AnalyticsEvent.ScreenView(
+                    AppScreen.CREATE_EDIT,
+                    "CreateEditScreen"
+                )
+            )
+        }
         CreateEditScreen(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider)
+                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider, analyticsService)
                 ),
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            analyticsService = analyticsService
         )
     }
 }
@@ -195,15 +202,14 @@ private fun androidx.navigation.NavGraphBuilder.createEditScreenDestination(
 /**
  * Навигационное назначение для экрана настроек.
  */
-private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navController: NavHostController) {
+private fun NavGraphBuilder.moreScreenDestination(
+    analyticsService: AnalyticsService,
+    navController: NavHostController
+) {
     composable(Screen.More.route) {
-        val context = LocalContext.current
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.MORE,
-            screenClass = "MoreScreen"
-        )
+        LaunchedEffect(Unit) {
+            analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.MORE, "MoreScreen"))
+        }
         MoreScreen(navController)
     }
 }
@@ -212,21 +218,18 @@ private fun androidx.navigation.NavGraphBuilder.moreScreenDestination(navControl
  * Навигационное назначение для экрана темы и иконки.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
+private fun NavGraphBuilder.themeIconScreenDestination(
+    analyticsService: AnalyticsService,
     navController: NavHostController,
     dataStore: AppSettingsDataStore,
     application: android.app.Application
 ) {
     composable(Screen.ThemeIcon.route) {
-        val context = LocalContext.current
         val viewModel: ThemeIconViewModel =
-            viewModel(factory = ThemeIconViewModel.factory(dataStore, application))
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.THEME_ICON,
-            screenClass = "ThemeIconScreen"
-        )
+            viewModel(factory = ThemeIconViewModel.factory(dataStore, application, analyticsService))
+        LaunchedEffect(Unit) {
+            analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.THEME_ICON, "ThemeIconScreen"))
+        }
         ThemeIconScreen(
             viewModel = viewModel,
             onBackClick = { navController.popBackStack() }
@@ -238,24 +241,22 @@ private fun androidx.navigation.NavGraphBuilder.themeIconScreenDestination(
  * Навигационное назначение для экрана данных приложения.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
+private fun NavGraphBuilder.appDataScreenDestination(
+    analyticsService: AnalyticsService,
     navController: NavHostController,
     repository: com.dayscounter.domain.repository.ItemRepository,
     application: android.app.Application
 ) {
     composable(Screen.AppData.route) {
-        val context = LocalContext.current
         val viewModel: AppDataScreenViewModel =
-            viewModel(factory = AppDataScreenViewModel.factory(repository, application))
-        // Логируем screen_view событие для Analytics и breadcrumb logs
-        FirebaseAnalyticsHelper.logScreenView(
-            context = context,
-            screenName = ScreenNames.APP_DATA,
-            screenClass = "AppDataScreen"
-        )
+            viewModel(factory = AppDataScreenViewModel.factory(repository, application, analyticsService))
+        LaunchedEffect(Unit) {
+            analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.APP_DATA, "AppDataScreen"))
+        }
         AppDataScreen(
             viewModel = viewModel,
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            analyticsService = analyticsService
         )
     }
 }
@@ -267,12 +268,16 @@ private fun androidx.navigation.NavGraphBuilder.appDataScreenDestination(
 @Composable
 internal fun NavHostContent(
     navController: NavHostController,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues =
-        androidx.compose.foundation.layout
-            .PaddingValues()
+    paddingValues: PaddingValues =
+        PaddingValues(),
+    analyticsService: AnalyticsService
 ) {
     // Получаем зависимости для создания ViewModels
     val context = LocalContext.current.applicationContext
+    val application =
+        checkNotNull(context as? android.app.Application) {
+            "Application context is required"
+        }
     val database = DaysDatabase.getDatabase(context)
     val repository = AppModule.createItemRepository(database)
     val resourceProvider = AppModule.resourceProvider
@@ -283,19 +288,26 @@ internal fun NavHostContent(
         startDestination = Screen.Events.route,
         modifier = Modifier.padding(paddingValues)
     ) {
-        this.mainScreenDestination(navController)
-        this.detailScreenDestination(repository, navController)
-        this.createEditScreenDestination(repository, resourceProvider, navController)
-        this.moreScreenDestination(navController)
+        this.mainScreenDestination(analyticsService, navController)
+        this.detailScreenDestination(repository, analyticsService, navController)
+        this.createEditScreenDestination(
+            repository,
+            resourceProvider,
+            analyticsService,
+            navController
+        )
+        this.moreScreenDestination(analyticsService, navController)
         this.themeIconScreenDestination(
+            analyticsService,
             navController,
             dataStore,
-            context as android.app.Application
+            application
         )
         this.appDataScreenDestination(
+            analyticsService,
             navController,
             repository,
-            context
+            application
         )
     }
 }
@@ -304,7 +316,10 @@ internal fun NavHostContent(
  * Контент для экрана событий.
  */
 @Composable
-internal fun EventsScreenContent(navController: NavHostController) {
+internal fun EventsScreenContent(
+    navController: NavHostController,
+    analyticsService: AnalyticsService
+) {
     Log.d("RootScreen", "Отображение экрана событий")
     MainScreen(
         onItemClick = { itemId ->
@@ -312,13 +327,16 @@ internal fun EventsScreenContent(navController: NavHostController) {
             navController.navigate(Screen.ItemDetail.createRoute(itemId))
         },
         onEditClick = { itemId ->
+            analyticsService.log(AnalyticsEvent.UserAction(UserActionType.EDIT))
             Log.d("RootScreen", "Навигация к экрану редактирования: $itemId")
             navController.navigate(Screen.EditItem.createRoute(itemId))
         },
         onCreateClick = {
+            analyticsService.log(AnalyticsEvent.UserAction(UserActionType.CREATE))
             Log.d("RootScreen", "Навигация к экрану создания")
             navController.navigate(Screen.CreateItem.route)
-        }
+        },
+        analyticsService = analyticsService
     )
 }
 

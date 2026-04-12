@@ -7,6 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.AppErrorOperation
+import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
@@ -36,6 +40,7 @@ private const val TAG = "ThemeIconViewModel"
 class ThemeIconViewModel(
     private val dataStore: AppSettingsDataStore,
     private val iconManager: IconManager,
+    private val analyticsService: AnalyticsService,
     private val logger: Logger = AndroidLogger()
 ) : ViewModel() {
     companion object {
@@ -48,11 +53,12 @@ class ThemeIconViewModel(
          */
         fun factory(
             dataStore: AppSettingsDataStore,
-            application: Application
+            application: Application,
+            analyticsService: AnalyticsService
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 val iconManager = IconManager(application)
-                initializer { ThemeIconViewModel(dataStore, iconManager) }
+                initializer { ThemeIconViewModel(dataStore, iconManager, analyticsService) }
             }
     }
 
@@ -104,6 +110,7 @@ class ThemeIconViewModel(
      */
     fun updateIcon(icon: AppIcon) {
         viewModelScope.launch {
+            analyticsService.log(AnalyticsEvent.UserAction(UserActionType.ICON_SELECTED, icon.name))
             try {
                 // Получаем текущую тему
                 val currentTheme = uiState.value.theme
@@ -118,13 +125,13 @@ class ThemeIconViewModel(
                 logger.d(TAG, "Иконка успешно изменена на ${icon.name} (тёмная тема: $isDarkTheme)")
             } catch (e: SecurityException) {
                 logger.e(TAG, "Ошибка безопасности при смене иконки", e)
-                // Продолжаем работу, даже если смена иконки не удалась
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.SET_ICON, e))
             } catch (e: PackageManager.NameNotFoundException) {
                 logger.e(TAG, "Компонент иконки не найден", e)
-                // Продолжаем работу, даже если смена иконки не удалась
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.SET_ICON, e))
             } catch (e: IllegalArgumentException) {
                 logger.e(TAG, "Неверный аргумент при смене иконки", e)
-                // Продолжаем работу, даже если смена иконки не удалась
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.SET_ICON, e))
             }
         }
     }

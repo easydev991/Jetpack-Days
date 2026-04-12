@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
 import com.dayscounter.data.preferences.createAppSettingsDataStore
 import com.dayscounter.di.AppModule.createItemRepository
@@ -80,7 +83,8 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     onItemClick: (Long) -> Unit = {},
     onEditClick: (Long) -> Unit = {},
-    onCreateClick: () -> Unit = {}
+    onCreateClick: () -> Unit = {},
+    analyticsService: AnalyticsService
 ) {
     val context = LocalContext.current
     val viewModel: MainScreenViewModel =
@@ -118,7 +122,8 @@ fun MainScreen(
                 getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
                 onItemClick = onItemClick,
                 onEditClick = onEditClick,
-                onCreateClick = onCreateClick
+                onCreateClick = onCreateClick,
+                analyticsService = analyticsService
             ),
         modifier = modifier
     )
@@ -238,7 +243,12 @@ private fun MainScreenContent(
             ScreenHeader(
                 itemsCount = itemsCount,
                 sortOrder = sortOrder,
-                onSortOrderChange = { params.viewModel.updateSortOrder(it) }
+                onSortOrderChange = { newSortOrder ->
+                    if (newSortOrder != sortOrder) {
+                        params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
+                    }
+                    params.viewModel.updateSortOrder(newSortOrder)
+                }
             )
         },
         floatingActionButton = {
@@ -273,7 +283,10 @@ private fun MainScreenContent(
     showDeleteDialog?.let { item ->
         DeleteDialog(
             item = item,
-            onConfirm = { params.viewModel.confirmDelete() },
+            onConfirm = {
+                params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.DELETE))
+                params.viewModel.confirmDelete()
+            },
             onCancel = { params.viewModel.cancelDelete() }
         )
     }

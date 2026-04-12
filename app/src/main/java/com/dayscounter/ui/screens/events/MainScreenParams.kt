@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screens.events
 
+import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.ui.viewmodel.MainScreenViewModel
 
@@ -11,5 +12,6 @@ data class MainScreenParams(
     val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     val onItemClick: (Long) -> Unit,
     val onEditClick: (Long) -> Unit,
-    val onCreateClick: () -> Unit
+    val onCreateClick: () -> Unit,
+    val analyticsService: AnalyticsService
 )

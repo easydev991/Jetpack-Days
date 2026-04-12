@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.screens.common.NavHostContent
 import com.dayscounter.ui.screens.common.NavigationBarContent
@@ -17,18 +18,21 @@ import com.dayscounter.ui.viewmodel.RootScreenViewModel
  * Экран с навигацией между главным экраном событий и экраном настроек.
  *
  * @param modifier Modifier для экрана
+ * @param analyticsService Сервис аналитики
  * @param viewModel ViewModel для управления состоянием
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootScreen(
     modifier: Modifier = Modifier,
+    analyticsService: AnalyticsService,
     viewModel: RootScreenViewModel =
         androidx.lifecycle.viewmodel.compose
             .viewModel()
 ) {
     RootScreenContent(
         modifier = modifier,
+        analyticsService = analyticsService,
         viewModel = viewModel
     )
 }
@@ -40,6 +44,7 @@ fun RootScreen(
 @Composable
 private fun RootScreenContent(
     modifier: Modifier = Modifier,
+    analyticsService: AnalyticsService,
     viewModel: RootScreenViewModel
 ) {
     val navController = rememberNavController()
@@ -80,7 +85,8 @@ private fun RootScreenContent(
         // Основной контент с навигацией
         NavHostContent(
             navController = navController,
-            paddingValues = paddingValues
+            paddingValues = paddingValues,
+            analyticsService = analyticsService
         )
     }
 }

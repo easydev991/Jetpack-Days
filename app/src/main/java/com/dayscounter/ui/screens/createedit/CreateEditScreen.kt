@@ -11,6 +11,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.UserActionType
 import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
 import java.time.ZoneId
@@ -31,13 +34,15 @@ fun CreateEditScreen(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel = viewModel(),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    analyticsService: AnalyticsService
 ) {
     CreateEditScreenContent(
         itemId = itemId,
         modifier = modifier,
         viewModel = viewModel,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        analyticsService = analyticsService
     )
 }
 
@@ -50,7 +55,8 @@ private fun CreateEditScreenContent(
     itemId: Long?,
     modifier: Modifier = Modifier,
     viewModel: CreateEditScreenViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    analyticsService: AnalyticsService
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val hasChanges by viewModel.hasChanges.collectAsState()
@@ -73,6 +79,7 @@ private fun CreateEditScreenContent(
                 enabled = if (isEditing) isValidData && hasChanges else isValidData,
                 onClick = {
                     if (isValidData) {
+                        analyticsService.log(AnalyticsEvent.UserAction(UserActionType.ITEM_SAVED))
                         val timestamp =
                             uiStates.selectedDate.value
                                 ?.atStartOfDay(ZoneId.systemDefault())
