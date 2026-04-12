@@ -1,7 +1,11 @@
 package com.dayscounter.di
 
 import android.content.Context
+import com.dayscounter.BuildConfig
 import com.dayscounter.DaysCounterApplication
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.FirebaseAnalyticsProvider
+import com.dayscounter.analytics.NoopAnalyticsProvider
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.data.provider.ResourceProvider
@@ -16,6 +20,35 @@ import com.dayscounter.domain.repository.ItemRepository
  * Создает экземпляры репозиториев и настроек.
  */
 object AppModule {
+    @Volatile
+    private var analyticsService: AnalyticsService? = null
+
+    /**
+     * Создает AnalyticsService с провайдерами в зависимости от типа сборки.
+     *
+     * @param context Контекст приложения
+     * @return Экземпляр AnalyticsService
+     */
+    fun createAnalyticsService(context: Context): AnalyticsService {
+        val cachedService = analyticsService
+        if (cachedService != null) return cachedService
+
+        return synchronized(this) {
+            val synchronizedCachedService = analyticsService
+            if (synchronizedCachedService != null) {
+                synchronizedCachedService
+            } else {
+                val providers =
+                    if (BuildConfig.DEBUG) {
+                        listOf(NoopAnalyticsProvider())
+                    } else {
+                        listOf(FirebaseAnalyticsProvider(context.applicationContext))
+                    }
+                AnalyticsService(providers).also { analyticsService = it }
+            }
+        }
+    }
+
     /**
      * Создает ResourceProvider для работы со строковыми ресурсами.
      *

@@ -1,6 +1,8 @@
 package com.dayscounter.ui.viewmodel
 
 import android.app.Application
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.NoopAnalyticsProvider
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
@@ -38,6 +40,7 @@ class ThemeIconViewModelTest {
     private lateinit var mockApplication: Application
     private lateinit var viewModel: ThemeIconViewModel
     private lateinit var testDispatcher: TestDispatcher
+    private lateinit var noOpAnalyticsService: AnalyticsService
 
     @BeforeEach
     fun setUp() {
@@ -46,6 +49,7 @@ class ThemeIconViewModelTest {
         mockLogger = mockk(relaxed = true)
         mockApplication = mockk(relaxed = true)
         testDispatcher = StandardTestDispatcher()
+        noOpAnalyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
         Dispatchers.setMain(testDispatcher)
     }
 
@@ -64,7 +68,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateTheme(AppTheme.LIGHT)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -89,7 +93,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             themes.forEach { theme ->
                 viewModel.updateTheme(theme)
             }
@@ -113,7 +117,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateIcon(AppIcon.ICON_2)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -145,7 +149,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             icons.forEach { icon ->
                 viewModel.updateIcon(icon)
             }
@@ -170,7 +174,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateIcon(AppIcon.ICON_2)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -191,7 +195,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateIcon(AppIcon.ICON_2)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -210,7 +214,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateTheme(AppTheme.LIGHT)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -228,7 +232,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateTheme(AppTheme.DARK)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -246,7 +250,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateTheme(AppTheme.SYSTEM)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -267,7 +271,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateTheme(AppTheme.LIGHT)
             viewModel.updateIcon(AppIcon.ICON_3)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -290,7 +294,7 @@ class ThemeIconViewModelTest {
             coEvery { mockDataStore.icon } returns flowOf(AppIcon.DEFAULT)
 
             // When
-            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, mockLogger)
+            viewModel = ThemeIconViewModel(mockDataStore, mockIconManager, noOpAnalyticsService, mockLogger)
             viewModel.updateIcon(AppIcon.ICON_2)
             testDispatcher.scheduler.advanceUntilIdle()
 

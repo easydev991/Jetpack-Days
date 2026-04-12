@@ -1,6 +1,8 @@
 package com.dayscounter.ui.screens.createedit
 
 import androidx.lifecycle.SavedStateHandle
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.NoopAnalyticsProvider
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
@@ -18,7 +20,8 @@ fun createTestViewModel(): CreateEditScreenViewModel =
     CreateEditScreenViewModel(
         repository = createTestItemRepository(),
         resourceProvider = createTestResourceProvider(),
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = SavedStateHandle(),
+        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
     )
 
 /**

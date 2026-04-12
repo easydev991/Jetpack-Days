@@ -7,6 +7,9 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.AppErrorOperation
 import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
@@ -31,12 +34,14 @@ class CreateEditScreenViewModel(
     private val repository: ItemRepository,
     private val resourceProvider: ResourceProvider,
     private val logger: Logger = AndroidLogger(),
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val analyticsService: AnalyticsService
 ) : ViewModel() {
     companion object {
         fun factory(
             repository: ItemRepository,
-            resourceProvider: ResourceProvider
+            resourceProvider: ResourceProvider,
+            analyticsService: AnalyticsService
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -48,7 +53,8 @@ class CreateEditScreenViewModel(
                                 createSavedStateHandle()
                             ) {
                                 "SavedStateHandle is required"
-                            }
+                            },
+                        analyticsService = analyticsService
                     )
                 }
             }
@@ -176,6 +182,7 @@ class CreateEditScreenViewModel(
                         e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_ITEM, e))
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }
@@ -201,6 +208,7 @@ class CreateEditScreenViewModel(
                         e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.UPDATE_ITEM, e))
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }

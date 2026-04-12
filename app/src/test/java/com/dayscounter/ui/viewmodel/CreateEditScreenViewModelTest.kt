@@ -1,6 +1,10 @@
 package com.dayscounter.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.AppErrorOperation
+import com.dayscounter.analytics.NoopAnalyticsProvider
 import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
@@ -8,6 +12,8 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.util.NoOpLogger
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +41,7 @@ class CreateEditScreenViewModelTest {
     private lateinit var resourceProvider: FakeResourceProvider
     private lateinit var viewModel: CreateEditScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
+    private lateinit var noOpAnalyticsService: AnalyticsService
 
     private val testItem =
         Item(
@@ -49,6 +56,7 @@ class CreateEditScreenViewModelTest {
     @BeforeEach
     fun setUp() {
         testDispatcher = StandardTestDispatcher()
+        noOpAnalyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeItemRepositoryWithLoggingDisabled()
@@ -60,7 +68,8 @@ class CreateEditScreenViewModelTest {
                 repository,
                 resourceProvider,
                 NoOpLogger(),
-                savedStateHandle = SavedStateHandle()
+                savedStateHandle = SavedStateHandle(),
+                analyticsService = noOpAnalyticsService
             )
     }
 
@@ -81,7 +90,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             // Then - Состояние должно быть Success с пустым Item
@@ -113,7 +123,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             // Then - Элемент должен быть загружен
@@ -144,7 +155,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             // Then - Должно быть состояние Error
@@ -181,7 +193,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -225,7 +238,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             createViewModel.createItem(errorItem)
@@ -239,6 +253,45 @@ class CreateEditScreenViewModelTest {
                 errorState.message.contains("Ошибка создания события"),
                 "Сообщение об ошибке должно содержать текст об ошибке"
             )
+        }
+    }
+
+    @Test
+    fun whenCreateItemFails_thenLogsAppError() {
+        runTest {
+            repository.shouldThrowOnInsert = true
+            val analyticsService = mockk<AnalyticsService>(relaxed = true)
+            val savedStateHandle = SavedStateHandle()
+            val errorItem =
+                Item(
+                    id = 0L,
+                    title = "Ошибка создания",
+                    details = "Описание",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = null,
+                    displayOption = DisplayOption.DAY
+                )
+
+            val createViewModel =
+                CreateEditScreenViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = analyticsService
+                )
+
+            createViewModel.createItem(errorItem)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analyticsService.log(
+                    match { event ->
+                        event is AnalyticsEvent.AppError &&
+                            event.operation == AppErrorOperation.CREATE_ITEM
+                    }
+                )
+            }
         }
     }
 
@@ -263,7 +316,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -308,7 +362,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             updateViewModel.updateItem(updatedItem)
@@ -326,6 +381,38 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
+    fun whenUpdateItemFails_thenLogsAppError() {
+        runTest {
+            repository.shouldThrowOnUpdate = true
+            val analyticsService = mockk<AnalyticsService>(relaxed = true)
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
+            repository.setItemForGetById(testItem)
+            val updatedItem = testItem.copy(title = "Ошибка обновления")
+
+            val updateViewModel =
+                CreateEditScreenViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = analyticsService
+                )
+
+            updateViewModel.updateItem(updatedItem)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analyticsService.log(
+                    match { event ->
+                        event is AnalyticsEvent.AppError &&
+                            event.operation == AppErrorOperation.UPDATE_ITEM
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
     fun whenLoadItemFails_thenShowsErrorState() {
         runTest {
             // Given - Repository выбрасывает ошибку при загрузке
@@ -338,7 +425,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -367,7 +455,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -397,7 +486,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -427,7 +517,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -457,7 +548,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -487,7 +579,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -517,7 +610,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -550,7 +644,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -586,7 +681,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -621,7 +717,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -656,7 +753,8 @@ class CreateEditScreenViewModelTest {
                     repository,
                     resourceProvider,
                     NoOpLogger(),
-                    savedStateHandle
+                    savedStateHandle,
+                    noOpAnalyticsService
                 )
 
             // Then - Сначала должно быть состояние Loading

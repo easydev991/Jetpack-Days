@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.R
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.AppErrorOperation
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.BackupException
 import com.dayscounter.domain.usecase.ExportBackupUseCase
@@ -43,6 +46,7 @@ class AppDataScreenViewModel(
     private val context: Context,
     private val exportBackupUseCase: ExportBackupUseCase,
     private val importBackupUseCase: ImportBackupUseCase,
+    private val analyticsService: AnalyticsService,
     private val logger: Logger = AndroidLogger()
 ) : ViewModel() {
     companion object {
@@ -51,11 +55,13 @@ class AppDataScreenViewModel(
          *
          * @param repository Repository для работы с данными
          * @param application Application контекст
+         * @param analyticsService Optional AnalyticsService для логирования
          * @return Factory для создания ViewModel
          */
         fun factory(
             repository: ItemRepository,
-            application: Application
+            application: Application,
+            analyticsService: AnalyticsService
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -63,7 +69,8 @@ class AppDataScreenViewModel(
                         repository = repository,
                         context = application,
                         exportBackupUseCase = ExportBackupUseCase(repository, application),
-                        importBackupUseCase = ImportBackupUseCase(repository, application)
+                        importBackupUseCase = ImportBackupUseCase(repository, application),
+                        analyticsService = analyticsService
                     )
                 }
             }
@@ -124,6 +131,7 @@ class AppDataScreenViewModel(
                             )
                     }.onFailure { e ->
                         logger.e(TAG, "Ошибка при экспорте данных", e)
+                        analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_BACKUP, e))
                         _uiState.value =
                             _uiState.value.copy(
                                 isExporting = false,
@@ -135,6 +143,7 @@ class AppDataScreenViewModel(
                     }
             } catch (e: BackupException) {
                 logger.e(TAG, "Ошибка при экспорте данных", e)
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_BACKUP, e))
                 _uiState.value =
                     _uiState.value.copy(
                         isExporting = false,
@@ -170,6 +179,7 @@ class AppDataScreenViewModel(
                             )
                     }.onFailure { e ->
                         logger.e(TAG, "Ошибка при импорте данных", e)
+                        analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.RESTORE_BACKUP, e))
                         _uiState.value =
                             _uiState.value.copy(
                                 isImporting = false,
@@ -181,6 +191,7 @@ class AppDataScreenViewModel(
                     }
             } catch (e: BackupException) {
                 logger.e(TAG, "Ошибка при импорте данных", e)
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.RESTORE_BACKUP, e))
                 _uiState.value =
                     _uiState.value.copy(
                         isImporting = false,
@@ -220,6 +231,7 @@ class AppDataScreenViewModel(
                     )
             } catch (e: SQLException) {
                 logger.e(TAG, "Ошибка при удалении данных", e)
+                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.DELETE_ALL_DATA, e))
                 _uiState.value =
                     _uiState.value.copy(
                         isDeleting = false,

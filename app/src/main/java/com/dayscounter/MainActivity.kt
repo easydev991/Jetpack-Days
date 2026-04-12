@@ -11,7 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.data.preferences.createAppSettingsDataStore
+import com.dayscounter.di.AppModule
 import com.dayscounter.ui.screens.root.RootScreen
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.ui.viewmodel.MainActivityViewModel
@@ -28,6 +30,9 @@ class MainActivity : ComponentActivity() {
         // Создаём DataStore для настроек приложения
         val dataStore = createAppSettingsDataStore(applicationContext)
 
+        // Создаём AnalyticsService
+        val analyticsService = AppModule.createAnalyticsService(applicationContext)
+
         setContent {
             // Создаём ViewModel для MainActivity
             val viewModel: MainActivityViewModel =
@@ -42,7 +47,8 @@ class MainActivity : ComponentActivity() {
             // Применяем тему приложения
             AppContent(
                 theme = theme,
-                useDynamicColors = useDynamicColors
+                useDynamicColors = useDynamicColors,
+                analyticsService = analyticsService
             )
         }
     }
@@ -52,11 +58,13 @@ class MainActivity : ComponentActivity() {
  * Основной контент Activity с применённой темой.
  *
  * @param theme Тема приложения из DataStore
+ * @param analyticsService Сервис аналитики
  */
 @Composable
 private fun AppContent(
     theme: com.dayscounter.domain.model.AppTheme,
-    useDynamicColors: Boolean
+    useDynamicColors: Boolean,
+    analyticsService: AnalyticsService
 ) {
     JetpackDaysTheme(
         appTheme = theme,
@@ -67,7 +75,7 @@ private fun AppContent(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            RootScreen()
+            RootScreen(analyticsService = analyticsService)
         }
     }
 }

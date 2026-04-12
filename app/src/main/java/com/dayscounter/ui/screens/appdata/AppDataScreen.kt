@@ -36,6 +36,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
+import com.dayscounter.analytics.AnalyticsEvent
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.analytics.UserActionType
 import com.dayscounter.ui.state.AppDataUiState
 import com.dayscounter.ui.viewmodel.AppDataScreenViewModel
 
@@ -73,7 +76,8 @@ internal data class AppDataScreenParams(
 @Composable
 fun AppDataScreen(
     viewModel: AppDataScreenViewModel,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    analyticsService: AnalyticsService
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
@@ -117,15 +121,18 @@ fun AppDataScreen(
                 uiState = uiState,
                 showDeleteDialog = showDeleteDialog,
                 onExportBackupClick = {
-                    // Запускаем FilePicker для сохранения файла
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.CREATE_BACKUP))
                     exportLauncher.launch("Days backup")
                 },
                 onImportBackupClick = {
-                    // Запускаем FilePicker для выбора файла
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.RESTORE_BACKUP))
                     importLauncher.launch(arrayOf("*/*"))
                 },
                 onDeleteAllDataClick = { viewModel.deleteAllData() },
-                onConfirmDeleteAllData = { viewModel.confirmDeleteAllData() },
+                onConfirmDeleteAllData = {
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.DELETE_ALL_DATA))
+                    viewModel.confirmDeleteAllData()
+                },
                 onCancelDeleteAllData = { viewModel.cancelDeleteAllData() },
                 onBackClick = onBackClick
             )
