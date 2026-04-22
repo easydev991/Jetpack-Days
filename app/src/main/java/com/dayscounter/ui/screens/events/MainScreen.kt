@@ -16,8 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -500,7 +501,12 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
             ) {
                 IconButton(onClick = state.onFilterClick) {
                     Icon(
-                        imageVector = Icons.Filled.FilterList,
+                        imageVector =
+                            if (state.selectedColorTag != null) {
+                                Icons.Filled.Palette
+                            } else {
+                                Icons.Outlined.Palette
+                            },
                         contentDescription = stringResource(R.string.open_filter)
                     )
                 }
