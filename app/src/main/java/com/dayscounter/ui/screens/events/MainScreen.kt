@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +25,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -137,14 +139,20 @@ fun MainScreen(
 private fun ScreenHeader(
     itemsCount: Int,
     sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit
+    onSortOrderChange: (SortOrder) -> Unit,
+    availableColorTags: List<Int>,
+    selectedColorTag: Int?,
+    onFilterClick: () -> Unit
 ) {
     MainScreenTopBar(
         state =
             MainScreenTopBarState(
                 itemsCount = itemsCount,
                 sortOrder = sortOrder,
-                onSortOrderChange = onSortOrderChange
+                onSortOrderChange = onSortOrderChange,
+                availableColorTags = availableColorTags,
+                selectedColorTag = selectedColorTag,
+                onFilterClick = onFilterClick
             )
     )
 }
@@ -236,6 +244,9 @@ private fun MainScreenContent(
     val itemsCount by params.viewModel.itemsCount.collectAsState()
     val listState = rememberLazyListState()
     val showDeleteDialog by params.viewModel.showDeleteDialog.collectAsState()
+    val showFilterDialog by params.viewModel.showFilterDialog.collectAsState()
+    val availableColorTags by params.viewModel.availableColorTags.collectAsState()
+    val selectedColorTag by params.viewModel.selectedColorTag.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -248,7 +259,10 @@ private fun MainScreenContent(
                         params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
                     }
                     params.viewModel.updateSortOrder(newSortOrder)
-                }
+                },
+                availableColorTags = availableColorTags,
+                selectedColorTag = selectedColorTag,
+                onFilterClick = { params.viewModel.toggleFilterDialog() }
             )
         },
         floatingActionButton = {
@@ -288,6 +302,18 @@ private fun MainScreenContent(
                 params.viewModel.confirmDelete()
             },
             onCancel = { params.viewModel.cancelDelete() }
+        )
+    }
+
+    if (showFilterDialog) {
+        ColorTagFilterDialog(
+            availableColors = availableColorTags,
+            currentFilter = selectedColorTag,
+            onApply = { colorTag ->
+                params.viewModel.updateSelectedColorTag(colorTag)
+                params.viewModel.toggleFilterDialog()
+            },
+            onDismiss = { params.viewModel.toggleFilterDialog() }
         )
     }
 }
@@ -437,7 +463,10 @@ private fun ItemsListContent(params: ItemsListParams) {
 private data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
-    val onSortOrderChange: (SortOrder) -> Unit
+    val onSortOrderChange: (SortOrder) -> Unit,
+    val availableColorTags: List<Int>,
+    val selectedColorTag: Int?,
+    val onFilterClick: () -> Unit
 )
 
 /**
@@ -454,6 +483,21 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
                     sortOrder = state.sortOrder,
                     onSortOrderChange = state.onSortOrderChange
                 )
+            }
+        },
+        actions = {
+            // Кнопка фильтра отображается только если есть достаточное количество записей и доступные цвета.
+            // При активном фильтре оставляем кнопку видимой, чтобы пользователь мог сбросить фильтр.
+            if (
+                (state.itemsCount >= 2 || state.selectedColorTag != null) &&
+                state.availableColorTags.isNotEmpty()
+            ) {
+                IconButton(onClick = state.onFilterClick) {
+                    Icon(
+                        imageVector = Icons.Filled.FilterList,
+                        contentDescription = stringResource(R.string.open_filter)
+                    )
+                }
             }
         },
         colors =

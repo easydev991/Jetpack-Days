@@ -51,6 +51,12 @@
     <string name="old_first">Сначала старые</string>
     <string name="new_first">Сначала новые</string>
 
+    <!-- Color Tag Filter -->
+    <string name="filter_by_color">Фильтр по цвету</string>
+    <string name="apply">Применить</string>
+    <string name="reset">Сбросить</string>
+    <string name="open_filter">Открыть фильтр</string>
+
     <!-- Item Screen -->
     <string name="title">Название</string>
     <string name="details">Детали</string>

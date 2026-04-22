@@ -104,6 +104,12 @@ class MainScreenViewModel(
     val showDeleteDialog: StateFlow<Item?> = _showDeleteDialog.asStateFlow()
 
     /**
+     * Показывать ли диалог фильтра по цвету.
+     */
+    private val _showFilterDialog = MutableStateFlow(false)
+    val showFilterDialog: StateFlow<Boolean> = _showFilterDialog.asStateFlow()
+
+    /**
      * Загружает события при создании ViewModel.
      */
     init {
@@ -236,6 +242,14 @@ class MainScreenViewModel(
             dataStore.setMainScreenColorTagFilter(null)
             logger.d(TAG, "Фильтр по цвету очищен и сохранен")
         }
+    }
+
+    /**
+     * Переключает видимость диалога фильтра.
+     */
+    fun toggleFilterDialog() {
+        _showFilterDialog.value = !_showFilterDialog.value
+        logger.d(TAG, "Диалог фильтра переключён: ${_showFilterDialog.value}")
     }
 
     /**
