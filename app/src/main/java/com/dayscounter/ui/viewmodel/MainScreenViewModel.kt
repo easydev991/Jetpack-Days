@@ -79,6 +79,18 @@ class MainScreenViewModel(
     val itemsCount: StateFlow<Int> = _itemsCount.asStateFlow()
 
     /**
+     * Выбранный цветовой фильтр (null = фильтр выключен).
+     */
+    private val _selectedColorTag = MutableStateFlow<Int?>(null)
+    val selectedColorTag: StateFlow<Int?> = _selectedColorTag.asStateFlow()
+
+    /**
+     * Доступные цвета из текущих записей (уникальные).
+     */
+    private val _availableColorTags = MutableStateFlow<List<Int>>(emptyList())
+    val availableColorTags: StateFlow<List<Int>> = _availableColorTags.asStateFlow()
+
+    /**
      * Элемент для удаления в диалоговом окне.
      */
     private val _showDeleteDialog = MutableStateFlow<Item?>(null)
@@ -99,32 +111,63 @@ class MainScreenViewModel(
         viewModelScope.launch {
             combine(
                 sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
-                _searchQuery
-            ) { items, query ->
+                _searchQuery,
+                _selectedColorTag
+            ) { items, query, selectedColor ->
                 logger.d(
                     TAG,
-                    "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\'"
+                    "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\', фильтр по цвету=$selectedColor"
                 )
-                if (query.isEmpty()) {
+
+                // Обновляем доступные цвета
+                val availableColors =
                     items
-                } else {
-                    val filteredItems =
-                        items.filter { item ->
-                            val titleContains = item.title.contains(query, ignoreCase = true)
-                            val detailsContains = item.details.contains(query, ignoreCase = true)
-                            logger.d(
-                                TAG,
-                                "Фильтрация: элемент=\'${item.title}\', " +
-                                    "детали=\'${item.details}\', " +
-                                    "запрос=\'$query\', " +
-                                    "titleContains=$titleContains, " +
-                                    "detailsContains=$detailsContains"
-                            )
-                            titleContains || detailsContains
-                        }
-                    logger.d(TAG, "После фильтрации: ${filteredItems.size} элементов")
-                    filteredItems
+                        .mapNotNull { it.colorTag }
+                        .distinct()
+                        .sorted()
+                _availableColorTags.value = availableColors
+
+                // Проверяем, что выбранный цвет ещё доступен; если нет — сбрасываем
+                val effectiveSelectedColor =
+                    selectedColor?.takeIf { availableColors.contains(it) }
+                if (selectedColor != null && effectiveSelectedColor == null) {
+                    logger.d(TAG, "Выбранный цвет $selectedColor более недоступен, сброс фильтра")
+                    _selectedColorTag.value = null
                 }
+
+                // Применяем фильтры: поиск -> цвет
+                var result =
+                    if (query.isEmpty()) {
+                        items
+                    } else {
+                        items
+                            .filter { item ->
+                                val titleContains = item.title.contains(query, ignoreCase = true)
+                                val detailsContains = item.details.contains(query, ignoreCase = true)
+                                logger.d(
+                                    TAG,
+                                    "Фильтрация: элемент=\'${item.title}\', " +
+                                        "детали=\'${item.details}\', " +
+                                        "запрос=\'$query\', " +
+                                        "titleContains=$titleContains, " +
+                                        "detailsContains=$detailsContains"
+                                )
+                                titleContains || detailsContains
+                            }.also {
+                                logger.d(TAG, "После поиска: ${it.size} элементов")
+                            }
+                    }
+
+                // Фильтр по цвету
+                if (effectiveSelectedColor != null) {
+                    result = result.filter { it.colorTag == effectiveSelectedColor }
+                    logger.d(
+                        TAG,
+                        "После фильтра по цвету $effectiveSelectedColor: ${result.size} элементов"
+                    )
+                }
+
+                result
             }.collect { items ->
                 logger.d(TAG, "Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
@@ -152,6 +195,24 @@ class MainScreenViewModel(
             dataStore.setSortOrder(order)
             logger.d(TAG, "Порядок сортировки обновлен и сохранен: $order")
         }
+    }
+
+    /**
+     * Обновляет фильтр по цветовому тегу.
+     *
+     * @param colorTag Выбранный цвет (null для сброса фильтра)
+     */
+    fun updateSelectedColorTag(colorTag: Int?) {
+        _selectedColorTag.value = colorTag
+        logger.d(TAG, "Фильтр по цвету обновлен: $colorTag")
+    }
+
+    /**
+     * Очищает фильтр по цветовому тегу.
+     */
+    fun clearColorTagFilter() {
+        _selectedColorTag.value = null
+        logger.d(TAG, "Фильтр по цвету очищен")
     }
 
     /**
