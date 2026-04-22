@@ -257,6 +257,9 @@ private fun MainScreenContent(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        contentWindowInsets =
+            androidx.compose.foundation.layout
+                .WindowInsets(0, 0, 0, 0),
         topBar = {
             ScreenHeader(
                 itemsCount = itemsCount,

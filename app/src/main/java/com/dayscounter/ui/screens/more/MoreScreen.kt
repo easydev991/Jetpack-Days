@@ -49,6 +49,9 @@ fun MoreScreen(navController: NavHostController? = null) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets =
+            androidx.compose.foundation.layout
+                .WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.more)) },
