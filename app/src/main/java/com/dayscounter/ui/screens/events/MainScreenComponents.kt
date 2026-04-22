@@ -46,8 +46,14 @@ internal fun SortMenu(
 
     Box {
         IconButton(onClick = { expanded = true }) {
+            val sortIconRes =
+                if (sortOrder == SortOrder.ASCENDING) {
+                    R.drawable.sort_24px
+                } else {
+                    R.drawable.sort_24px_desc
+                }
             Icon(
-                painter = painterResource(R.drawable.sort_24px),
+                painter = painterResource(sortIconRes),
                 contentDescription = stringResource(R.string.sort)
             )
         }
