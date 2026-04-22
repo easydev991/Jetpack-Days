@@ -39,6 +39,7 @@ class MainScreenViewModelTest {
     private lateinit var viewModel: MainScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
     private val sortOrderSlot = slot<SortOrder>()
+    private lateinit var colorTagFilterFlow: MutableStateFlow<Int?>
 
     @BeforeEach
     fun setUp() {
@@ -47,6 +48,7 @@ class MainScreenViewModelTest {
 
         repository = FakeItemRepository()
         sortOrderFlow = MutableStateFlow(SortOrder.DESCENDING)
+        colorTagFilterFlow = MutableStateFlow(null)
         dataStore = mockk(relaxed = true)
         logger = mockk(relaxed = true)
 
@@ -54,6 +56,11 @@ class MainScreenViewModelTest {
         every { dataStore.sortOrder } returns sortOrderFlow
         coEvery { dataStore.setSortOrder(capture(sortOrderSlot)) } answers {
             sortOrderFlow.value = sortOrderSlot.captured
+        }
+        // Настраиваем dataStore для colorTagFilter
+        every { dataStore.mainScreenColorTagFilter } returns colorTagFilterFlow
+        coEvery { dataStore.setMainScreenColorTagFilter(any()) } answers {
+            colorTagFilterFlow.value = firstArg()
         }
 
         viewModel = MainScreenViewModel(repository, dataStore, logger)
@@ -714,6 +721,100 @@ class MainScreenViewModelTest {
 
             // Then - фильтр сброшен
             assertEquals(null, viewModel.selectedColorTag.value, "Фильтр должен быть null")
+        }
+    }
+
+    // ========================================================================
+    // TDD-тесты для персистентности фильтра (Этап 2)
+    // ========================================================================
+
+    @Test
+    fun `when color filter saved in DataStore then restored after ViewModel init`() {
+        runTest {
+            // Given - элемент с цветом и пред установленный фильтр в DataStore
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Фиолетовое",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            colorTagFilterFlow.value = purple // Эмулируем сохранённый фильтр
+
+            // When - создаём ViewModel (имитирует перезапуск приложения)
+            val viewModel2 = MainScreenViewModel(repository, dataStore, logger)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр восстановлен из DataStore
+            assertEquals(purple, viewModel2.selectedColorTag.value, "Фильтр должен восстановиться из DataStore")
+        }
+    }
+
+    @Test
+    fun `when color filter changed then saved to DataStore`() {
+        runTest {
+            // Given - элемент с цветом
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Фиолетовое",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Синее",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - меняем фильтр
+            viewModel.updateSelectedColorTag(blue)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр сохранён в DataStore
+            coVerify { dataStore.setMainScreenColorTagFilter(blue) }
+        }
+    }
+
+    @Test
+    fun `when clearColorTagFilter called then null saved to DataStore`() {
+        runTest {
+            // Given - элемент с цветом и установленный фильтр
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Фиолетовое",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - очищаем фильтр
+            viewModel.clearColorTagFilter()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - null сохранён в DataStore
+            coVerify { dataStore.setMainScreenColorTagFilter(null) }
         }
     }
 

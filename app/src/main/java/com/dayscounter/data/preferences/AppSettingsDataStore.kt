@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dayscounter.domain.model.AppIcon
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * DataStore для хранения настроек приложения (тема, иконка и порядок сортировки).
+ * DataStore для хранения настроек приложения
+ * (тема, иконка, порядок сортировки, фильтр цвета на главном экране).
  *
  * Настройки сохраняются постоянно, чтобы при каждом запуске приложения
  * выбор пользователя не сбрасывался.
@@ -28,6 +30,7 @@ private object PreferencesKeys {
     val USE_DYNAMIC_COLORS_KEY = stringPreferencesKey("use_dynamic_colors")
     val ICON_KEY = stringPreferencesKey("icon")
     val SORT_ORDER_KEY = stringPreferencesKey("sort_order")
+    val COLOR_TAG_FILTER_KEY = intPreferencesKey("color_tag_filter")
 }
 
 /**
@@ -146,6 +149,31 @@ class AppSettingsDataStore(
                         SortOrder.DESCENDING
                     }
                 } ?: SortOrder.DESCENDING
+            }
+
+    /**
+     * Сохраняет выбранный фильтр по цветовому тегу.
+     *
+     * @param colorTag Выбранный цвет (null для сброса фильтра)
+     */
+    suspend fun setMainScreenColorTagFilter(colorTag: Int?) {
+        context.dataStore.edit { preferences ->
+            if (colorTag != null) {
+                preferences[PreferencesKeys.COLOR_TAG_FILTER_KEY] = colorTag
+            } else {
+                preferences.remove(PreferencesKeys.COLOR_TAG_FILTER_KEY)
+            }
+        }
+    }
+
+    /**
+     * Flow для отслеживания выбранного фильтра по цветовому тегу.
+     * При первом запуске возвращает null (фильтр выключен).
+     */
+    val mainScreenColorTagFilter: Flow<Int?> =
+        context.dataStore.data
+            .map { preferences ->
+                preferences[PreferencesKeys.COLOR_TAG_FILTER_KEY]
             }
 }
 

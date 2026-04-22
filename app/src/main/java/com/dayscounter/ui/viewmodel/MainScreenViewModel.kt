@@ -80,9 +80,16 @@ class MainScreenViewModel(
 
     /**
      * Выбранный цветовой фильтр (null = фильтр выключен).
+     * Источник данных - DataStore для сохранения между перезапусками.
      */
-    private val _selectedColorTag = MutableStateFlow<Int?>(null)
-    val selectedColorTag: StateFlow<Int?> = _selectedColorTag.asStateFlow()
+    val selectedColorTag: StateFlow<Int?> =
+        dataStore.mainScreenColorTagFilter.stateIn(
+            scope = viewModelScope,
+            started =
+                kotlinx.coroutines.flow.SharingStarted
+                    .WhileSubscribed(STATE_TIMEOUT_MS),
+            initialValue = null
+        )
 
     /**
      * Доступные цвета из текущих записей (уникальные).
@@ -112,11 +119,12 @@ class MainScreenViewModel(
             combine(
                 sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
                 _searchQuery,
-                _selectedColorTag
+                selectedColorTag
             ) { items, query, selectedColor ->
                 logger.d(
                     TAG,
-                    "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\', фильтр по цвету=$selectedColor"
+                    "Обновление списка: количество=${items.size}, " +
+                        "запрос='$query', фильтр=$selectedColor"
                 )
 
                 // Обновляем доступные цвета
@@ -132,48 +140,59 @@ class MainScreenViewModel(
                     selectedColor?.takeIf { availableColors.contains(it) }
                 if (selectedColor != null && effectiveSelectedColor == null) {
                     logger.d(TAG, "Выбранный цвет $selectedColor более недоступен, сброс фильтра")
-                    _selectedColorTag.value = null
+                    viewModelScope.launch {
+                        dataStore.setMainScreenColorTagFilter(null)
+                    }
                 }
 
                 // Применяем фильтры: поиск -> цвет
-                var result =
-                    if (query.isEmpty()) {
-                        items
-                    } else {
-                        items
-                            .filter { item ->
-                                val titleContains = item.title.contains(query, ignoreCase = true)
-                                val detailsContains = item.details.contains(query, ignoreCase = true)
-                                logger.d(
-                                    TAG,
-                                    "Фильтрация: элемент=\'${item.title}\', " +
-                                        "детали=\'${item.details}\', " +
-                                        "запрос=\'$query\', " +
-                                        "titleContains=$titleContains, " +
-                                        "detailsContains=$detailsContains"
-                                )
-                                titleContains || detailsContains
-                            }.also {
-                                logger.d(TAG, "После поиска: ${it.size} элементов")
-                            }
-                    }
-
-                // Фильтр по цвету
-                if (effectiveSelectedColor != null) {
-                    result = result.filter { it.colorTag == effectiveSelectedColor }
-                    logger.d(
-                        TAG,
-                        "После фильтра по цвету $effectiveSelectedColor: ${result.size} элементов"
-                    )
-                }
-
-                result
+                applyFilters(items, query, effectiveSelectedColor)
             }.collect { items ->
                 logger.d(TAG, "Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
                 _uiState.value = MainScreenState.Success(items)
             }
         }
+    }
+
+    /**
+     * Применяет фильтры поиска и цвета к списку элементов.
+     */
+    private fun applyFilters(
+        items: List<Item>,
+        query: String,
+        selectedColor: Int?
+    ): List<Item> {
+        // Фильтр по поиску
+        var result =
+            if (query.isEmpty()) {
+                items
+            } else {
+                items
+                    .filter { item ->
+                        val titleContains = item.title.contains(query, ignoreCase = true)
+                        val detailsContains = item.details.contains(query, ignoreCase = true)
+                        logger.d(
+                            TAG,
+                            "Фильтрация: элемент='${item.title}', " +
+                                "детали='${item.details}', " +
+                                "запрос='$query', " +
+                                "titleContains=$titleContains, " +
+                                "detailsContains=$detailsContains"
+                        )
+                        titleContains || detailsContains
+                    }.also {
+                        logger.d(TAG, "После поиска: ${it.size} элементов")
+                    }
+            }
+
+        // Фильтр по цвету
+        if (selectedColor != null) {
+            result = result.filter { it.colorTag == selectedColor }
+            logger.d(TAG, "После фильтра по цвету $selectedColor: ${result.size} элементов")
+        }
+
+        return result
     }
 
     /**
@@ -203,16 +222,20 @@ class MainScreenViewModel(
      * @param colorTag Выбранный цвет (null для сброса фильтра)
      */
     fun updateSelectedColorTag(colorTag: Int?) {
-        _selectedColorTag.value = colorTag
-        logger.d(TAG, "Фильтр по цвету обновлен: $colorTag")
+        viewModelScope.launch {
+            dataStore.setMainScreenColorTagFilter(colorTag)
+            logger.d(TAG, "Фильтр по цвету обновлен и сохранен: $colorTag")
+        }
     }
 
     /**
      * Очищает фильтр по цветовому тегу.
      */
     fun clearColorTagFilter() {
-        _selectedColorTag.value = null
-        logger.d(TAG, "Фильтр по цвету очищен")
+        viewModelScope.launch {
+            dataStore.setMainScreenColorTagFilter(null)
+            logger.d(TAG, "Фильтр по цвету очищен и сохранен")
+        }
     }
 
     /**
