@@ -24,6 +24,7 @@ enum class UserActionType(
     EDIT("edit"),
     DELETE("delete"),
     SORT("sort"),
+    OPEN_FILTER("open_filter"),
     ITEM_SAVED("item_saved"),
     ICON_SELECTED("icon_selected"),
     CREATE_BACKUP("create_backup"),

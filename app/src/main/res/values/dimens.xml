@@ -23,8 +23,8 @@
     <dimen name="icon_size_large">80dp</dimen>
     
     <!-- Color Tag Sizes -->
-    <dimen name="color_tag_size">48dp</dimen>
-    <dimen name="color_tag_size_small">12dp</dimen>
+    <dimen name="color_tag_size">42dp</dimen>
+    <dimen name="color_tag_size_small">16dp</dimen>
 
     <!-- Border Width -->
     <dimen name="border_width">2dp</dimen>
@@ -34,4 +34,3 @@
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="elevation_medium">4dp</dimen>
 </resources>
-

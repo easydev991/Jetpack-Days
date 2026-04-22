@@ -141,25 +141,8 @@ fun MainScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(
-    itemsCount: Int,
-    sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit,
-    availableColorTags: List<Int>,
-    selectedColorTag: Int?,
-    onFilterClick: () -> Unit
-) {
-    MainScreenTopBar(
-        state =
-            MainScreenTopBarState(
-                itemsCount = itemsCount,
-                sortOrder = sortOrder,
-                onSortOrderChange = onSortOrderChange,
-                availableColorTags = availableColorTags,
-                selectedColorTag = selectedColorTag,
-                onFilterClick = onFilterClick
-            )
-    )
+private fun ScreenHeader(state: MainScreenTopBarState) {
+    MainScreenTopBar(state = state)
 }
 
 /**
@@ -267,17 +250,23 @@ private fun MainScreenContent(
                 .only(WindowInsetsSides.Horizontal),
         topBar = {
             ScreenHeader(
-                itemsCount = itemsCount,
-                sortOrder = sortOrder,
-                onSortOrderChange = { newSortOrder ->
-                    if (newSortOrder != sortOrder) {
-                        params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
-                    }
-                    params.viewModel.updateSortOrder(newSortOrder)
-                },
-                availableColorTags = availableColorTags,
-                selectedColorTag = selectedColorTag,
-                onFilterClick = { params.viewModel.toggleFilterDialog() }
+                state =
+                    MainScreenTopBarState(
+                        itemsCount = itemsCount,
+                        sortOrder = sortOrder,
+                        onSortClick = {
+                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
+                        },
+                        onSortOrderChange = { newSortOrder ->
+                            params.viewModel.updateSortOrder(newSortOrder)
+                        },
+                        availableColorTags = availableColorTags,
+                        selectedColorTag = selectedColorTag,
+                        onFilterClick = {
+                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.OPEN_FILTER))
+                            params.viewModel.toggleFilterDialog()
+                        }
+                    )
             )
         },
         floatingActionButton = {
@@ -478,6 +467,7 @@ private fun ItemsListContent(params: ItemsListParams) {
 private data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
+    val onSortClick: () -> Unit,
     val onSortOrderChange: (SortOrder) -> Unit,
     val availableColorTags: List<Int>,
     val selectedColorTag: Int?,
@@ -496,6 +486,7 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
             if (state.itemsCount > 1) {
                 SortMenu(
                     sortOrder = state.sortOrder,
+                    onSortClick = state.onSortClick,
                     onSortOrderChange = state.onSortOrderChange
                 )
             }
