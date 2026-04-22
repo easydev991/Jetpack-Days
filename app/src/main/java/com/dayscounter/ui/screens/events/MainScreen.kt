@@ -177,8 +177,14 @@ private fun ScreenBody(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(
+                            PaddingValues(
+                                top = paddingValues.calculateTopPadding(),
+                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                                bottom = 0.dp
+                            )
+                        ).padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
         MainScreenContentByState(
