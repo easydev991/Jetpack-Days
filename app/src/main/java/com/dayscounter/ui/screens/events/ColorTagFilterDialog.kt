@@ -47,8 +47,23 @@ internal fun ColorTagFilterDialog(
     // Кнопка "Применить" активна только если выбранный цвет отличается от текущего фильтра
     val canApply = draftSelectedColor != currentFilter
 
-    // Кнопка "Сбросить" активна только если есть активный фильтр
-    val canReset = currentFilter != null
+    // Кнопка "Сбросить" активна когда есть применённый фильтр ИЛИ в черновике что-то выбрано
+    val canReset = currentFilter != null || draftSelectedColor != null
+
+    /**
+     * Обработчик сброса:
+     * - если есть применённый фильтр — сбросить фильтр и закрыть диалог;
+     * - если фильтра нет, но в черновике что-то выбрано — очистить только черновик, диалог остаётся открытым.
+     */
+    val onResetClick: () -> Unit = {
+        if (currentFilter != null) {
+            // Есть применённый фильтр — сбросить и закрыть
+            onApply(null)
+        } else {
+            // Фильтра нет, просто очищаем черновик
+            draftSelectedColor = null
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -74,7 +89,7 @@ internal fun ColorTagFilterDialog(
         },
         dismissButton = {
             TextButton(
-                onClick = { onApply(null) },
+                onClick = onResetClick,
                 enabled = canReset,
                 colors =
                     ButtonDefaults.textButtonColors(
