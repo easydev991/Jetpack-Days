@@ -51,6 +51,12 @@
     <string name="old_first">Old first</string>
     <string name="new_first">New first</string>
 
+    <!-- Color Tag Filter -->
+    <string name="filter_by_color">Filter by color</string>
+    <string name="apply">Apply</string>
+    <string name="reset">Reset</string>
+    <string name="open_filter">Open filter</string>
+
     <!-- Item Screen -->
     <string name="title">Title</string>
     <string name="details">Details</string>

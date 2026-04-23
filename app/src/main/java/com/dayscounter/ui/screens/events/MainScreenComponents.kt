@@ -40,14 +40,26 @@ import com.dayscounter.domain.model.SortOrder
 @Composable
 internal fun SortMenu(
     sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit
+    onSortOrderChange: (SortOrder) -> Unit,
+    onSortClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(
+            onClick = {
+                onSortClick()
+                expanded = true
+            }
+        ) {
+            val sortIconRes =
+                if (sortOrder == SortOrder.ASCENDING) {
+                    R.drawable.sort_24px
+                } else {
+                    R.drawable.sort_24px_desc
+                }
             Icon(
-                painter = painterResource(R.drawable.sort_24px),
+                painter = painterResource(sortIconRes),
                 contentDescription = stringResource(R.string.sort)
             )
         }

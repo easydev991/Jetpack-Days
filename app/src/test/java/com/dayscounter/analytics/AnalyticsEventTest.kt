@@ -20,6 +20,7 @@ class AnalyticsEventTest {
         assertEquals("edit", UserActionType.EDIT.value)
         assertEquals("delete", UserActionType.DELETE.value)
         assertEquals("sort", UserActionType.SORT.value)
+        assertEquals("open_filter", UserActionType.OPEN_FILTER.value)
         assertEquals("item_saved", UserActionType.ITEM_SAVED.value)
         assertEquals("icon_selected", UserActionType.ICON_SELECTED.value)
         assertEquals("create_backup", UserActionType.CREATE_BACKUP.value)

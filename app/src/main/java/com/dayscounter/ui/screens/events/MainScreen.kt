@@ -4,11 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -16,7 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -24,6 +30,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -134,19 +141,8 @@ fun MainScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(
-    itemsCount: Int,
-    sortOrder: SortOrder,
-    onSortOrderChange: (SortOrder) -> Unit
-) {
-    MainScreenTopBar(
-        state =
-            MainScreenTopBarState(
-                itemsCount = itemsCount,
-                sortOrder = sortOrder,
-                onSortOrderChange = onSortOrderChange
-            )
-    )
+private fun ScreenHeader(state: MainScreenTopBarState) {
+    MainScreenTopBar(state = state)
 }
 
 /**
@@ -169,8 +165,14 @@ private fun ScreenBody(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(
+                            PaddingValues(
+                                top = paddingValues.calculateTopPadding(),
+                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                                bottom = 0.dp
+                            )
+                        ).padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
         MainScreenContentByState(
@@ -236,19 +238,35 @@ private fun MainScreenContent(
     val itemsCount by params.viewModel.itemsCount.collectAsState()
     val listState = rememberLazyListState()
     val showDeleteDialog by params.viewModel.showDeleteDialog.collectAsState()
+    val showFilterDialog by params.viewModel.showFilterDialog.collectAsState()
+    val availableColorTags by params.viewModel.availableColorTags.collectAsState()
+    val selectedColorTag by params.viewModel.selectedColorTag.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        contentWindowInsets =
+            WindowInsets
+                .safeDrawing
+                .only(WindowInsetsSides.Horizontal),
         topBar = {
             ScreenHeader(
-                itemsCount = itemsCount,
-                sortOrder = sortOrder,
-                onSortOrderChange = { newSortOrder ->
-                    if (newSortOrder != sortOrder) {
-                        params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
-                    }
-                    params.viewModel.updateSortOrder(newSortOrder)
-                }
+                state =
+                    MainScreenTopBarState(
+                        itemsCount = itemsCount,
+                        sortOrder = sortOrder,
+                        onSortClick = {
+                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
+                        },
+                        onSortOrderChange = { newSortOrder ->
+                            params.viewModel.updateSortOrder(newSortOrder)
+                        },
+                        availableColorTags = availableColorTags,
+                        selectedColorTag = selectedColorTag,
+                        onFilterClick = {
+                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.OPEN_FILTER))
+                            params.viewModel.toggleFilterDialog()
+                        }
+                    )
             )
         },
         floatingActionButton = {
@@ -288,6 +306,18 @@ private fun MainScreenContent(
                 params.viewModel.confirmDelete()
             },
             onCancel = { params.viewModel.cancelDelete() }
+        )
+    }
+
+    if (showFilterDialog) {
+        ColorTagFilterDialog(
+            availableColors = availableColorTags,
+            currentFilter = selectedColorTag,
+            onApply = { colorTag ->
+                params.viewModel.updateSelectedColorTag(colorTag)
+                params.viewModel.toggleFilterDialog()
+            },
+            onDismiss = { params.viewModel.toggleFilterDialog() }
         )
     }
 }
@@ -437,7 +467,11 @@ private fun ItemsListContent(params: ItemsListParams) {
 private data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
-    val onSortOrderChange: (SortOrder) -> Unit
+    val onSortClick: () -> Unit,
+    val onSortOrderChange: (SortOrder) -> Unit,
+    val availableColorTags: List<Int>,
+    val selectedColorTag: Int?,
+    val onFilterClick: () -> Unit
 )
 
 /**
@@ -452,8 +486,29 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
             if (state.itemsCount > 1) {
                 SortMenu(
                     sortOrder = state.sortOrder,
+                    onSortClick = state.onSortClick,
                     onSortOrderChange = state.onSortOrderChange
                 )
+            }
+        },
+        actions = {
+            // Кнопка фильтра отображается только если есть достаточное количество записей и доступные цвета.
+            // При активном фильтре оставляем кнопку видимой, чтобы пользователь мог сбросить фильтр.
+            if (
+                (state.itemsCount >= 2 || state.selectedColorTag != null) &&
+                state.availableColorTags.isNotEmpty()
+            ) {
+                IconButton(onClick = state.onFilterClick) {
+                    Icon(
+                        imageVector =
+                            if (state.selectedColorTag != null) {
+                                Icons.Filled.Palette
+                            } else {
+                                Icons.Outlined.Palette
+                            },
+                        contentDescription = stringResource(R.string.open_filter)
+                    )
+                }
             }
         },
         colors =

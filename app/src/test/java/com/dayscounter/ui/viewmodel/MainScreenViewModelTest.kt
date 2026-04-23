@@ -39,6 +39,7 @@ class MainScreenViewModelTest {
     private lateinit var viewModel: MainScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
     private val sortOrderSlot = slot<SortOrder>()
+    private lateinit var colorTagFilterFlow: MutableStateFlow<Int?>
 
     @BeforeEach
     fun setUp() {
@@ -47,6 +48,7 @@ class MainScreenViewModelTest {
 
         repository = FakeItemRepository()
         sortOrderFlow = MutableStateFlow(SortOrder.DESCENDING)
+        colorTagFilterFlow = MutableStateFlow(null)
         dataStore = mockk(relaxed = true)
         logger = mockk(relaxed = true)
 
@@ -54,6 +56,11 @@ class MainScreenViewModelTest {
         every { dataStore.sortOrder } returns sortOrderFlow
         coEvery { dataStore.setSortOrder(capture(sortOrderSlot)) } answers {
             sortOrderFlow.value = sortOrderSlot.captured
+        }
+        // Настраиваем dataStore для colorTagFilter
+        every { dataStore.mainScreenColorTagFilter } returns colorTagFilterFlow
+        coEvery { dataStore.setMainScreenColorTagFilter(any()) } answers {
+            colorTagFilterFlow.value = firstArg()
         }
 
         viewModel = MainScreenViewModel(repository, dataStore, logger)
@@ -397,6 +404,417 @@ class MainScreenViewModelTest {
             assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
             val successState = uiState as MainScreenState.Success
             assertEquals(0, successState.items.size, "Список должен быть пустым")
+        }
+    }
+
+    // ========================================================================
+    // TDD-тесты для фильтрации по цветовым тегам (Этап 1)
+    // ========================================================================
+
+    @Test
+    fun `when color filter disabled then shows all items`() {
+        runTest {
+            // Given - элементы с разными colorTag
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Событие 1",
+                        details = "Детали 1",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Событие 2",
+                        details = "Детали 2",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - фильтр по цвету не установлен (по умолчанию null)
+            // Then - отображаются все записи
+            val uiState = viewModel.uiState.value
+            assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
+            val successState = uiState as MainScreenState.Success
+            assertEquals(2, successState.items.size, "Должны отображаться все 2 элемента")
+        }
+    }
+
+    @Test
+    fun `when color filter selected then shows only matching items`() {
+        runTest {
+            // Given - элементы с разными colorTag
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Фиолетовое событие",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Синее событие",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - выбираем фильтр по фиолетовому цвету
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - отображается только элемент с purple
+            val uiState = viewModel.uiState.value
+            assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
+            val successState = uiState as MainScreenState.Success
+            assertEquals(1, successState.items.size, "Должен быть 1 элемент")
+            assertEquals(purple, successState.items[0].colorTag, "Элемент должен иметь фиолетовый тег")
+        }
+    }
+
+    @Test
+    fun `when color filter AND search query then applies both filters`() {
+        runTest {
+            // Given - элементы с разными цветами и разными названиями
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Праздник",
+                        details = "Важное событие",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Встреча",
+                        details = "Рабочая встреча",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - выбираем фильтр по цвету + поисковый запрос
+            viewModel.updateSelectedColorTag(purple)
+            viewModel.updateSearchQuery("праздник")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - применяется пересечение фильтров (AND)
+            val uiState = viewModel.uiState.value
+            assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
+            val successState = uiState as MainScreenState.Success
+            assertEquals(1, successState.items.size, "Должен быть 1 элемент")
+            assertEquals("Праздник", successState.items[0].title)
+            assertEquals(purple, successState.items[0].colorTag)
+        }
+    }
+
+    @Test
+    fun `when items without colorTag then they do not appear in color filter results`() {
+        runTest {
+            // Given - элементы с colorTag и без
+            val purple = 0xFF570CF0.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "С тегом",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Без тега",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = null,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - выбираем фильтр по цвету
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - только элемент с colorTag
+            val uiState = viewModel.uiState.value
+            assertTrue(uiState is MainScreenState.Success, "Должно быть состояние Success")
+            val successState = uiState as MainScreenState.Success
+            assertEquals(1, successState.items.size, "Только элемент с colorTag")
+            assertEquals(purple, successState.items[0].colorTag)
+        }
+    }
+
+    @Test
+    fun `availableColorTags contains only unique colors from items`() {
+        runTest {
+            // Given - элементы с повторяющимися цветами
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Событие 1",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Событие 2",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 3L,
+                        title = "Событие 3",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 2 * 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - получаем доступные цвета
+            val availableColors = viewModel.availableColorTags.value
+
+            // Then - только уникальные цвета без повторений
+            assertEquals(2, availableColors.size, "Должны быть 2 уникальных цвета")
+            assertTrue(availableColors.contains(purple), "Должен содержать фиолетовый")
+            assertTrue(availableColors.contains(blue), "Должен содержать синий")
+        }
+    }
+
+    @Test
+    fun `when last item with color deleted then availableColors updates`() {
+        runTest {
+            // Given - два элемента с разными цветами
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val purpleItem =
+                Item(
+                    id = 1L,
+                    title = "Фиолетовое",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            val blueItem =
+                Item(
+                    id = 2L,
+                    title = "Синее",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis() - 86400000,
+                    colorTag = blue,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(purpleItem, blueItem))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Verify initial state - two colors available
+            assertEquals(2, viewModel.availableColorTags.value.size, "Изначально 2 цвета")
+
+            // When - удаляем фиолетовый элемент
+            viewModel.deleteItem(purpleItem)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - доступные цвета обновляются
+            val availableColors = viewModel.availableColorTags.value
+            assertEquals(1, availableColors.size, "После удаления должен остаться 1 цвет")
+            assertTrue(availableColors.contains(blue), "Должен остаться только синий")
+        }
+    }
+
+    @Test
+    fun `when selected color disappears then filter auto-resets`() {
+        runTest {
+            // Given - элемент с уникальным цветом
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Уникальное",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Select the filter
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(purple, viewModel.selectedColorTag.value, "Фильтр установлен")
+
+            // When - удаляем элемент с этим цветом
+            viewModel.deleteItem(item)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр автоматически сбрасывается на null
+            assertEquals(
+                null,
+                viewModel.selectedColorTag.value,
+                "Фильтр должен сброситься на null когда выбранный цвет исчезает"
+            )
+        }
+    }
+
+    @Test
+    fun `clearColorTagFilter resets selected color to null`() {
+        runTest {
+            // Given - элемент с цветом
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Событие",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Select filter
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - очищаем фильтр
+            viewModel.clearColorTagFilter()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр сброшен
+            assertEquals(null, viewModel.selectedColorTag.value, "Фильтр должен быть null")
+        }
+    }
+
+    // ========================================================================
+    // TDD-тесты для персистентности фильтра (Этап 2)
+    // ========================================================================
+
+    @Test
+    fun `when color filter saved in DataStore then restored after ViewModel init`() {
+        runTest {
+            // Given - элемент с цветом и пред установленный фильтр в DataStore
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Фиолетовое",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            colorTagFilterFlow.value = purple // Эмулируем сохранённый фильтр
+
+            // When - создаём ViewModel (имитирует перезапуск приложения)
+            val viewModel2 = MainScreenViewModel(repository, dataStore, logger)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр восстановлен из DataStore
+            assertEquals(purple, viewModel2.selectedColorTag.value, "Фильтр должен восстановиться из DataStore")
+        }
+    }
+
+    @Test
+    fun `when color filter changed then saved to DataStore`() {
+        runTest {
+            // Given - элемент с цветом
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                listOf(
+                    Item(
+                        id = 1L,
+                        title = "Фиолетовое",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis(),
+                        colorTag = purple,
+                        displayOption = DisplayOption.DAY
+                    ),
+                    Item(
+                        id = 2L,
+                        title = "Синее",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - 86400000,
+                        colorTag = blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                )
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - меняем фильтр
+            viewModel.updateSelectedColorTag(blue)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - фильтр сохранён в DataStore
+            coVerify { dataStore.setMainScreenColorTagFilter(blue) }
+        }
+    }
+
+    @Test
+    fun `when clearColorTagFilter called then null saved to DataStore`() {
+        runTest {
+            // Given - элемент с цветом и установленный фильтр
+            val purple = 0xFF570CF0.toInt()
+            val item =
+                Item(
+                    id = 1L,
+                    title = "Фиолетовое",
+                    details = "Детали",
+                    timestamp = System.currentTimeMillis(),
+                    colorTag = purple,
+                    displayOption = DisplayOption.DAY
+                )
+            repository.setItems(listOf(item))
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - очищаем фильтр
+            viewModel.clearColorTagFilter()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - null сохранён в DataStore
+            coVerify { dataStore.setMainScreenColorTagFilter(null) }
         }
     }
 

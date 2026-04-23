@@ -1,6 +1,5 @@
 package com.dayscounter.ui.screens.createedit
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,12 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -31,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.ui.ds.SelectableColorTag
 import com.dayscounter.ui.screens.common.DaysRadioButton
 import com.dayscounter.ui.theme.JetpackDaysTheme
 
@@ -127,32 +124,25 @@ internal fun ColorOptionSurface(
     onValueChange: () -> Unit = {},
     contentDescription: String = ""
 ) {
-    Surface(
+    val outerPadding = dimensionResource(R.dimen.spacing_xxsmall)
+    val isSelected = selectedColor.value == color
+
+    SelectableColorTag(
+        color = color,
+        isSelected = isSelected,
+        modifier =
+            Modifier
+                .padding(outerPadding)
+                .semantics { this.contentDescription = contentDescription },
         onClick = {
-            if (selectedColor.value == color) {
+            if (isSelected) {
                 selectedColor.value = null
             } else {
                 selectedColor.value = color
             }
             onValueChange()
-        },
-        modifier =
-            Modifier
-                .size(dimensionResource(R.dimen.color_tag_size))
-                .padding(dimensionResource(R.dimen.spacing_xxsmall))
-                .semantics { this.contentDescription = contentDescription },
-        shape = CircleShape,
-        color = color,
-        border =
-            if (selectedColor.value == color) {
-                BorderStroke(
-                    dimensionResource(R.dimen.border_width),
-                    MaterialTheme.colorScheme.outline
-                )
-            } else {
-                null
-            }
-    ) {}
+        }
+    )
 }
 
 /**

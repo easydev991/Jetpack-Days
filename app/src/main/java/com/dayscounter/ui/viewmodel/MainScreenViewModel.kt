@@ -79,10 +79,35 @@ class MainScreenViewModel(
     val itemsCount: StateFlow<Int> = _itemsCount.asStateFlow()
 
     /**
+     * Выбранный цветовой фильтр (null = фильтр выключен).
+     * Источник данных - DataStore для сохранения между перезапусками.
+     */
+    val selectedColorTag: StateFlow<Int?> =
+        dataStore.mainScreenColorTagFilter.stateIn(
+            scope = viewModelScope,
+            started =
+                kotlinx.coroutines.flow.SharingStarted
+                    .WhileSubscribed(STATE_TIMEOUT_MS),
+            initialValue = null
+        )
+
+    /**
+     * Доступные цвета из текущих записей (уникальные).
+     */
+    private val _availableColorTags = MutableStateFlow<List<Int>>(emptyList())
+    val availableColorTags: StateFlow<List<Int>> = _availableColorTags.asStateFlow()
+
+    /**
      * Элемент для удаления в диалоговом окне.
      */
     private val _showDeleteDialog = MutableStateFlow<Item?>(null)
     val showDeleteDialog: StateFlow<Item?> = _showDeleteDialog.asStateFlow()
+
+    /**
+     * Показывать ли диалог фильтра по цвету.
+     */
+    private val _showFilterDialog = MutableStateFlow(false)
+    val showFilterDialog: StateFlow<Boolean> = _showFilterDialog.asStateFlow()
 
     /**
      * Загружает события при создании ViewModel.
@@ -99,38 +124,81 @@ class MainScreenViewModel(
         viewModelScope.launch {
             combine(
                 sortOrder.flatMapLatest { order -> repository.getAllItems(order) },
-                _searchQuery
-            ) { items, query ->
+                _searchQuery,
+                selectedColorTag
+            ) { items, query, selectedColor ->
                 logger.d(
                     TAG,
-                    "Обновление списка: количество элементов=${items.size}, запрос поиска=\'$query\'"
+                    "Обновление списка: количество=${items.size}, " +
+                        "запрос='$query', фильтр=$selectedColor"
                 )
-                if (query.isEmpty()) {
+
+                // Обновляем доступные цвета
+                val availableColors =
                     items
-                } else {
-                    val filteredItems =
-                        items.filter { item ->
-                            val titleContains = item.title.contains(query, ignoreCase = true)
-                            val detailsContains = item.details.contains(query, ignoreCase = true)
-                            logger.d(
-                                TAG,
-                                "Фильтрация: элемент=\'${item.title}\', " +
-                                    "детали=\'${item.details}\', " +
-                                    "запрос=\'$query\', " +
-                                    "titleContains=$titleContains, " +
-                                    "detailsContains=$detailsContains"
-                            )
-                            titleContains || detailsContains
-                        }
-                    logger.d(TAG, "После фильтрации: ${filteredItems.size} элементов")
-                    filteredItems
+                        .mapNotNull { it.colorTag }
+                        .distinct()
+                        .sorted()
+                _availableColorTags.value = availableColors
+
+                // Проверяем, что выбранный цвет ещё доступен; если нет — сбрасываем
+                val effectiveSelectedColor =
+                    selectedColor?.takeIf { availableColors.contains(it) }
+                if (selectedColor != null && effectiveSelectedColor == null) {
+                    logger.d(TAG, "Выбранный цвет $selectedColor более недоступен, сброс фильтра")
+                    viewModelScope.launch {
+                        dataStore.setMainScreenColorTagFilter(null)
+                    }
                 }
+
+                // Применяем фильтры: поиск -> цвет
+                applyFilters(items, query, effectiveSelectedColor)
             }.collect { items ->
                 logger.d(TAG, "Обновление UI: количество элементов=${items.size}")
                 _itemsCount.value = items.size
                 _uiState.value = MainScreenState.Success(items)
             }
         }
+    }
+
+    /**
+     * Применяет фильтры поиска и цвета к списку элементов.
+     */
+    private fun applyFilters(
+        items: List<Item>,
+        query: String,
+        selectedColor: Int?
+    ): List<Item> {
+        // Фильтр по поиску
+        var result =
+            if (query.isEmpty()) {
+                items
+            } else {
+                items
+                    .filter { item ->
+                        val titleContains = item.title.contains(query, ignoreCase = true)
+                        val detailsContains = item.details.contains(query, ignoreCase = true)
+                        logger.d(
+                            TAG,
+                            "Фильтрация: элемент='${item.title}', " +
+                                "детали='${item.details}', " +
+                                "запрос='$query', " +
+                                "titleContains=$titleContains, " +
+                                "detailsContains=$detailsContains"
+                        )
+                        titleContains || detailsContains
+                    }.also {
+                        logger.d(TAG, "После поиска: ${it.size} элементов")
+                    }
+            }
+
+        // Фильтр по цвету
+        if (selectedColor != null) {
+            result = result.filter { it.colorTag == selectedColor }
+            logger.d(TAG, "После фильтра по цвету $selectedColor: ${result.size} элементов")
+        }
+
+        return result
     }
 
     /**
@@ -152,6 +220,36 @@ class MainScreenViewModel(
             dataStore.setSortOrder(order)
             logger.d(TAG, "Порядок сортировки обновлен и сохранен: $order")
         }
+    }
+
+    /**
+     * Обновляет фильтр по цветовому тегу.
+     *
+     * @param colorTag Выбранный цвет (null для сброса фильтра)
+     */
+    fun updateSelectedColorTag(colorTag: Int?) {
+        viewModelScope.launch {
+            dataStore.setMainScreenColorTagFilter(colorTag)
+            logger.d(TAG, "Фильтр по цвету обновлен и сохранен: $colorTag")
+        }
+    }
+
+    /**
+     * Очищает фильтр по цветовому тегу.
+     */
+    fun clearColorTagFilter() {
+        viewModelScope.launch {
+            dataStore.setMainScreenColorTagFilter(null)
+            logger.d(TAG, "Фильтр по цвету очищен и сохранен")
+        }
+    }
+
+    /**
+     * Переключает видимость диалога фильтра.
+     */
+    fun toggleFilterDialog() {
+        _showFilterDialog.value = !_showFilterDialog.value
+        logger.d(TAG, "Диалог фильтра переключён: ${_showFilterDialog.value}")
     }
 
     /**
