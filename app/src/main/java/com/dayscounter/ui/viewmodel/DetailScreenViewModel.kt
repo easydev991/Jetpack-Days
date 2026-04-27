@@ -10,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.reminder.NoOpReminderManager
+import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,29 +25,27 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel для управления состоянием экрана деталей события.
- *
- * @property repository Репозиторий для работы с данными
- * @property logger Логгер для записи логов
- * @property savedStateHandle SavedStateHandle для получения параметров навигации
  */
 class DetailScreenViewModel(
     private val repository: ItemRepository,
     private val logger: Logger = AndroidLogger(),
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val reminderManager: ReminderManager = NoOpReminderManager
 ) : ViewModel() {
     companion object {
-        /** Таймаут подписки на StateFlow в миллисекундах */
         private const val STATE_SUBSCRIPTION_TIMEOUT_MS = 5000L
 
-        fun factory(repository: ItemRepository): ViewModelProvider.Factory =
+        fun factory(
+            repository: ItemRepository,
+            reminderManager: ReminderManager = NoOpReminderManager
+        ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     DetailScreenViewModel(
                         repository = repository,
+                        reminderManager = reminderManager,
                         savedStateHandle =
-                            checkNotNull(
-                                createSavedStateHandle()
-                            ) {
+                            checkNotNull(createSavedStateHandle()) {
                                 "SavedStateHandle is required"
                             }
                     )
@@ -53,17 +53,11 @@ class DetailScreenViewModel(
             }
     }
 
-    /**
-     * Идентификатор события из параметров навигации.
-     */
     private val itemId: Long =
         checkNotNull(savedStateHandle["itemId"]) {
             "ItemId parameter is required"
         }
 
-    /**
-     * Состояние экрана.
-     */
     val uiState: StateFlow<DetailScreenState> =
         repository
             .getItemFlow(itemId)
@@ -76,20 +70,15 @@ class DetailScreenViewModel(
                 initialValue = DetailScreenState.Loading
             )
 
-    /**
-     * Показывать диалог подтверждения удаления.
-     */
     private val _showDeleteDialog = MutableStateFlow(false)
     val showDeleteDialog: StateFlow<Boolean> = _showDeleteDialog.asStateFlow()
 
-    /**
-     * Удаляет событие.
-     */
     fun deleteItem() {
         viewModelScope.launch {
             try {
                 val item = repository.getItemById(itemId)
                 if (item != null) {
+                    reminderManager.clearReminder(itemId)
                     repository.deleteItem(item)
                     logger.d(
                         "DetailScreenViewModel",
@@ -103,45 +92,30 @@ class DetailScreenViewModel(
         }
     }
 
-    /**
-     * Запрашивает подтверждение удаления записи.
-     */
     fun requestDelete() {
         _showDeleteDialog.value = true
         logger.d("DetailScreenViewModel", "Запрос на удаление")
     }
 
-    /**
-     * Подтверждает удаление записи.
-     */
     fun confirmDelete() {
         deleteItem()
         _showDeleteDialog.value = false
         logger.d("DetailScreenViewModel", "Удаление подтверждено")
     }
 
-    /**
-     * Отменяет удаление записи.
-     */
     fun cancelDelete() {
         _showDeleteDialog.value = false
         logger.d("DetailScreenViewModel", "Удаление отменено")
     }
 }
 
-/**
- * Состояние экрана деталей.
- */
 sealed class DetailScreenState {
-    /** Загрузка данных */
     data object Loading : DetailScreenState()
 
-    /** Успешная загрузка */
     data class Success(
         val item: Item
     ) : DetailScreenState()
 
-    /** Ошибка загрузки */
     data class Error(
         val message: String
     ) : DetailScreenState()

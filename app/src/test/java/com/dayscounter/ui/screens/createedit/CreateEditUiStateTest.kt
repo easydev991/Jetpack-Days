@@ -3,6 +3,8 @@ package com.dayscounter.ui.screens.createedit
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import com.dayscounter.domain.model.DisplayOption
+import com.dayscounter.domain.model.ReminderIntervalUnit
+import com.dayscounter.domain.model.ReminderMode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -247,5 +249,36 @@ class CreateEditUiStateTest {
 
         // Then - Дата должна быть валидной
         assertEquals(true, isValid, "Выбранная дата должна быть валидной")
+    }
+
+    @Test
+    fun whenUiStateCreated_thenReminderDefaultsAreApplied() {
+        // Given - UiState создан
+
+        // Then
+        assertEquals(false, uiState.reminder.isEnabled.value)
+        assertEquals(ReminderMode.AT_DATE, uiState.reminder.mode.value)
+        assertEquals("", uiState.reminder.intervalValue.value)
+        assertEquals(ReminderIntervalUnit.DAY, uiState.reminder.intervalUnit.value)
+    }
+
+    @Test
+    fun whenReminderFieldsChanged_thenReminderStateIsUpdated() {
+        // Given
+        val targetDate = LocalDate.of(2027, 1, 1)
+
+        // When
+        uiState.reminder.isEnabled.value = true
+        uiState.reminder.mode.value = ReminderMode.AFTER_INTERVAL
+        uiState.reminder.intervalValue.value = "5"
+        uiState.reminder.intervalUnit.value = ReminderIntervalUnit.WEEK
+        uiState.reminder.selectedDate.value = targetDate
+
+        // Then
+        assertEquals(true, uiState.reminder.isEnabled.value)
+        assertEquals(ReminderMode.AFTER_INTERVAL, uiState.reminder.mode.value)
+        assertEquals("5", uiState.reminder.intervalValue.value)
+        assertEquals(ReminderIntervalUnit.WEEK, uiState.reminder.intervalUnit.value)
+        assertEquals(targetDate, uiState.reminder.selectedDate.value)
     }
 }

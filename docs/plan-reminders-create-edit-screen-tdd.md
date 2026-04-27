@@ -1,7 +1,7 @@
 # План доработки: напоминания для Create/Edit экрана (TDD)
 
 Дата: 2026-04-27  
-Статус: Draft
+Статус: In Progress
 
 ## 1. Цель
 
@@ -9,189 +9,123 @@
 
 1. Тоггл `Добавить напоминание` (по умолчанию выключен).
 2. При включении тоггла:
-1. Режим `На дату`:
-дата из календаря + отдельная настройка времени.
-2. Режим `Через N`:
-целое число + единица периода (`дней`, `недель`, `месяцев`, `лет`).
+1. Режим `На дату`: дата из календаря + отдельная настройка времени.
+2. Режим `Через N`: целое число + единица периода (`дней`, `недель`, `месяцев`, `лет`).
 
-После сохранения записи должно создаваться одноразовое уведомление для конкретной записи.  
-По тапу на уведомление приложение открывает экран этой записи и удаляет/деактивирует это напоминание, чтобы пользователь мог создать новое.
+После сохранения записи создается одноразовое уведомление для конкретной записи.  
+По тапу на уведомление приложение открывает экран этой записи и помечает напоминание как использованное (`CONSUMED`).
 
-## 2. Подтвержденные продуктовые правила
+## 2. Фактически реализовано
 
-1. Для режима `Через N ...` время срабатывания берется из текущего времени устройства в момент сохранения (часы/минуты/секунды).
-2. Для режима `На дату` пользователь дополнительно настраивает время (Date + Time).
-3. Напоминание одноразовое.
-4. По нажатию на уведомление открывается экран просмотра именно этой записи (`itemId`).
-5. После открытия по уведомлению это напоминание удаляется (или помечается как использованное и больше не планируется).
+1. [x] Домен напоминаний: модели `Reminder`, `ReminderMode`, `ReminderIntervalUnit`, `ReminderStatus`.
+2. [x] Доменная валидация/расчет времени: `BuildReminderUseCase` + `ReminderRequest`.
+3. [x] Data слой: `ReminderEntity`, `ReminderDao`, `ReminderMapper`, `ReminderRepository`, `ReminderRepositoryImpl`.
+4. [x] Миграция БД `1 -> 2`: таблица `reminders`, индекс, подключение миграции в `DaysDatabase`.
+5. [x] Инфраструктура уведомлений: `AlarmReminderScheduler`, `ReminderAlarmReceiver`, `ReminderBootReceiver`, `ReminderManager`/`DefaultReminderManager`.
+6. [x] Навигация по уведомлению: обработка intent в `MainActivity`, переход на `Detail`, consume + cancel notification.
+7. [x] Интеграция в Create/Edit:
+1. вынесена секция `ReminderSettingsSection`,
+2. состояние в `CreateEditUiState.reminder`,
+3. `saveItem(...)` во ViewModel с сохранением/очисткой reminder,
+4. `hasChanges` учитывает fingerprint напоминания.
+8. [x] Локализация новых строк (`values`/`values-ru`) для UI и notification channel/content.
+9. [x] Превью секции напоминаний (enabled/disabled).
 
-## 3. Архитектурное решение
+## 3. TDD-прогресс по фазам
 
-## 3.1 Хранение данных
+### Фаза A. Доменная логика и валидация
 
-Добавить отдельную сущность/таблицу напоминаний, чтобы не менять формат существующего `Item` и не рисковать iOS-совместимостью backup-модели.
+1. [x] Unit-тесты на расчет `targetEpochMillis` для `На дату` и `Через N`.
+2. [x] Unit-тесты валидации (невалидный `N`, прошедшая дата/время).
 
-Минимальные поля напоминания:
+Реализация/тесты:
+- `BuildReminderUseCaseTest`
+- `BuildReminderUseCase`
 
-1. `id`
-2. `itemId` (FK на запись)
-3. `type` (`AT_DATE`, `AFTER_INTERVAL`)
-4. `targetEpochMillis` (фактическое время срабатывания)
-5. `amount` (для `AFTER_INTERVAL`)
-6. `unit` (`DAY`, `WEEK`, `MONTH`, `YEAR`) для `AFTER_INTERVAL`
-7. `selectedDateEpochMillis` и `selectedTime` (для UI-восстановления `AT_DATE`)
-8. `status` (`ACTIVE`, `CONSUMED`, `CANCELLED`)
-9. `createdAt`, `updatedAt`
+### Фаза B. Data слой
 
-Ограничение: максимум одно `ACTIVE`-напоминание на `itemId`.
+1. [x] Тест миграции БД (`DaysDatabaseMigrationTest`).
+2. [x] Тесты entity/mapper/repository (`ReminderEntityTest`, `ReminderMapperTest`, `ReminderRepositoryImplTest`).
+3. [x] Реализация Room + repository.
 
-## 3.2 Планирование уведомлений
+Примечание: DAO покрыт через repository/fake DAO и migration-тест, отдельного Android instrumentation DAO-теста пока нет.
 
-Использовать `AlarmManager` + `BroadcastReceiver` + `NotificationManager`:
+### Фаза C. Scheduler/Notification
 
-1. При `create/update` записи:
-1. отмена старого активного напоминания для `itemId` (если есть),
-2. сохранение нового (если тоггл включен),
-3. постановка exact alarm на `targetEpochMillis`.
-2. При удалении записи:
-1. отмена alarm,
-2. удаление/деактивация напоминания.
-3. После перезагрузки устройства:
-рескейджул будущих `ACTIVE` напоминаний через `BOOT_COMPLETED` receiver.
+1. [x] Реализация scheduler/receiver/channel/boot-reschedule.
+2. [x] Unit-тесты на orchestration в `DefaultReminderManagerTest`.
+3. [ ] Unit/robolectric тесты непосредственно для `AlarmReminderScheduler` и `ReminderAlarmReceiver` (PendingIntent/extras/канал).
 
-## 3.3 Открытие нужного экрана по уведомлению
+### Фаза D. Навигация из уведомления
 
-1. В `PendingIntent` прокидывать `itemId` и `reminderId`.
-2. `MainActivity`/root-навигация при старте из уведомления:
-1. переход на `Screen.ItemDetail.createRoute(itemId)`,
-2. пометка напоминания как `CONSUMED` (или delete),
-3. отмена notification id.
+1. [x] Реализована обработка intent + переход в `DetailScreen(itemId)`.
+2. [x] Реализовано consume/removal эффекта после открытия из уведомления.
+3. [ ] Добавить unit/integration тесты для `MainActivity` intent-flow и регресса обычного старта.
 
-## 3.4 UI/UX поведения
+### Фаза E. ViewModel + форма Create/Edit
 
-1. Новый блок внизу формы, после текущих секций.
-2. Toggle off:
-блок параметров скрыт.
-3. Toggle on:
-выбор режима:
-1. `На дату` -> date picker + time picker.
-2. `Через N` -> integer поле + picker единицы.
-4. Поле `N`:
-1. только цифры,
-2. минимум `1`,
-3. пустое/некорректное значение блокирует сохранение.
-5. Для режима `На дату`:
-1. нельзя сохранить прошедшую дату/время,
-2. показывать понятную ошибку валидации.
+1. [x] `hasChanges` учитывает поля напоминания.
+2. [x] Сохранение создает/очищает reminder через `ReminderManager`.
+3. [x] Тесты на новый save-flow (`CreateEditScreenViewModelReminderTest`).
+4. [x] Дефолты reminder-состояния в `CreateEditUiStateTest`.
 
-## 4. TDD-план реализации
+### Фаза F. UI тесты Compose
 
-## Фаза A. Доменная логика и валидация (сначала тесты)
+1. [ ] Toggle по умолчанию выключен.
+2. [ ] При включении показываются параметры.
+3. [ ] Режим `На дату`: доступны date/time picker.
+4. [ ] Режим `Через N`: только цифры + переключение единиц.
+5. [ ] Невалидные значения блокируют сохранение.
 
-1. Добавить unit-тесты на модель конфигурации напоминаний:
-1. toggle off -> `None`.
-2. toggle on + `Через N` валидный -> корректная команда создания.
-3. toggle on + невалидный `N` -> ошибка валидации.
-4. toggle on + `На дату` без времени/с прошлым временем -> ошибка.
-2. Добавить unit-тесты на расчет `targetEpochMillis`:
-1. `Через N дней/недель/месяцев/лет` от текущего момента.
-2. `На дату` + выбранное время.
-3. корректность с `ZoneId.systemDefault()`.
+### Фаза G. Сквозные сценарии (integration)
 
-## Фаза B. Data слой (сначала тесты)
+1. [ ] E2E/интеграционный сценарий: create/edit + schedule/cancel reschedule.
+2. [ ] Сценарий: тап по notification -> detail(itemId) -> reminder consumed.
+3. [ ] Сценарий повторной постановки напоминания после consume.
 
-1. Тесты Room migration:
-1. версия БД повышена,
-2. новая таблица напоминаний создана.
-2. DAO-тесты:
-1. upsert по `itemId`,
-2. выборка только `ACTIVE`,
-3. пометка `CONSUMED`,
-4. удаление по `itemId`.
-3. Repository-тесты:
-1. create/update/delete lifecycle напоминания,
-2. корректная синхронизация с записью.
+## 4. Изменяемые зоны кода (актуализировано)
 
-## Фаза C. Scheduler/Notification (сначала тесты)
+1. [x] UI: `ui/screens/createedit/*`.
+2. [x] ViewModel: `ui/viewmodel/CreateEditScreenViewModel.kt`, `ui/viewmodel/DetailScreenViewModel.kt`.
+3. [x] Навигация: `ui/screens/common/RootScreenComponents.kt`, `ui/screens/root/RootScreen.kt`.
+4. [x] Activity entrypoint: `MainActivity.kt`.
+5. [x] Data/DB/domain: `data/database/*`, `data/repository/*`, `domain/*`, `domain/usecase/*`.
+6. [x] Android infrastructure: `AndroidManifest.xml`, `reminder/*`.
+7. [x] Ресурсы: `res/values/strings.xml`, `res/values-ru/strings.xml`.
 
-1. Unit-тесты адаптера планировщика:
-1. `schedule(reminder)` -> создается корректный `PendingIntent`.
-2. `cancel(itemId/reminderId)` -> alarm снимается.
-2. Тесты receiver:
-1. создание notification с правильными extras,
-2. одноразовость (после fire не происходит повторная постановка).
-3. Тесты канала уведомлений:
-1. канал создается один раз,
-2. локализованные строки корректны (RU по умолчанию).
+## 5. Риски и технический долг
 
-## Фаза D. Навигация из уведомления (сначала тесты)
+1. Backup-совместимость:
+- Статус: [x] учтено (модель backup не менялась).
 
-1. Unit/integration тест обработки intent в `MainActivity` или навигационном слое:
-1. при extras с `itemId` открывается `DetailScreen(itemId)`.
-2. после открытия напоминание помечается `CONSUMED`/удаляется.
-2. Регрессионный тест обычного запуска приложения без extras.
+2. Timezone/летнее время:
+- Статус: [x] базово покрыто в domain-тестах.
+- Остаток: [ ] добавить edge-case тесты переходов DST для нескольких зон.
 
-## Фаза E. ViewModel + форма Create/Edit (сначала тесты)
+3. Дубли alarm:
+- Статус: [x] реализован `cancel-before-schedule` в scheduler.
 
-1. Unit-тесты `CreateEditScreenViewModel`:
-1. `hasChanges` учитывает поля напоминания.
-2. при сохранении формируется правильная команда для reminder use case.
-3. при toggle off в edit-режиме старое напоминание снимается.
-2. Unit-тесты `CreateEditUiState`:
-1. дефолты reminder-полей,
-2. корректный reset/restore состояния.
+4. Android 13+ permission на уведомления:
+- Статус: [~] частично (permissions добавлены в manifest; UI-запрос runtime permission не реализован в этом этапе).
+- Остаток: [ ] добавить UX-поток запроса/обработки `POST_NOTIFICATIONS`.
 
-## Фаза F. UI тесты Compose (сначала тесты)
+5. Тестовое покрытие платформенной части:
+- Статус: [ ] нужно расширить (receiver/scheduler/MainActivity intent tests).
 
-1. Toggle по умолчанию выключен.
-2. При включении показываются параметры.
-3. Режим `На дату`: доступен date picker и time picker.
-4. Режим `Через N`: поле принимает только цифры.
-5. Переключение `дней/недель/месяцев/лет` обновляет состояние.
-6. Невалидные значения блокируют кнопку сохранения.
+## 6. Актуальные следующие шаги
 
-## Фаза G. Сквозные сценарии (integration)
+1. Добавить тесты фазы C/D/F/G (приоритет: C -> D -> F -> G).
+2. Добавить runtime-permission UX для `POST_NOTIFICATIONS`.
+3. Добавить UI-сообщения об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
+4. После расширения покрытия прогнать полный `make test` и зафиксировать финальный DoD.
 
-1. Создать запись + `Через N` -> напоминание сохраняется и планируется.
-2. Редактировать запись и поменять reminder -> старый alarm отменяется, новый создается.
-3. Тап по уведомлению -> открываются детали нужного `itemId`.
-4. После открытия reminder удален/consumed.
-5. Можно снова поставить новое напоминание для этой же записи.
+## 7. Definition of Done (обновленный)
 
-## 5. Изменяемые зоны кода
-
-1. UI:
-`ui/screens/createedit/*`
-2. ViewModel:
-`ui/viewmodel/CreateEditScreenViewModel.kt`
-3. Навигация:
-`ui/screens/common/RootScreenComponents.kt`
-4. Activity entrypoint:
-`MainActivity.kt`
-5. Data/DB:
-`data/database/*`, `data/repository/*`, `domain/*` (новые модели/use cases reminder)
-6. Android infrastructure:
-`AndroidManifest.xml` (receiver/permission), новые классы notification/alarm.
-7. Ресурсы:
-`res/values/strings.xml`, `res/values-ru/strings.xml`.
-
-## 6. Риски и меры
-
-1. Риск: нарушение совместимости backup.
-Мера: не менять существующий формат `BackupItem`; reminder хранить отдельно и не включать в iOS-совместимый backup по умолчанию.
-2. Риск: timezone/летнее время.
-Мера: единый helper расчета `targetEpochMillis` + отдельные тесты граничных дат.
-3. Риск: дублирующиеся alarm при repeated save.
-Мера: идемпотентный `cancel-before-schedule`.
-4. Риск: Android 13+ permission на уведомления.
-Мера: graceful-degradation (данные reminder сохраняются, но пользователь информируется, если permission нет).
-
-## 7. Критерии готовности (Definition of Done)
-
-1. Все новые unit/integration/UI тесты зелёные.
-2. `make format` и `make test` проходят.
-3. На форме есть новый блок напоминаний внизу с описанным поведением.
-4. Уведомление одноразовое и открывает детали нужной записи.
-5. После открытия из уведомления reminder удаляется/consumed и можно поставить новый.
-6. Нет `!!`, соблюдены текущие архитектурные паттерны проекта.
-
+1. [~] Все новые unit/integration/UI тесты зелёные.
+Сейчас: unit/часть integration закрыты, compose/integration сценарии в плане.
+2. [~] `make format` и `make test` проходят.
+Сейчас: `make format` проходит, запускались целевые test suites, полный `make test` еще не выполнялся после всех изменений.
+3. [x] На форме есть новый блок напоминаний внизу с требуемым поведением.
+4. [x] Уведомление одноразовое и открывает детали нужной записи.
+5. [x] После открытия из уведомления reminder помечается как `CONSUMED`; повторная постановка возможна.
+6. [x] Нет `!!`, архитектурные паттерны проекта сохранены.

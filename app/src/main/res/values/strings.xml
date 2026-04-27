@@ -84,6 +84,13 @@
     <string name="reminder_unit_weeks">weeks</string>
     <string name="reminder_unit_months">months</string>
     <string name="reminder_unit_years">years</string>
+    <string name="reminder_channel_name">Reminders</string>
+    <string name="reminder_channel_description">One-time reminders for events</string>
+    <string name="reminder_notification_title">Reminder</string>
+    <string name="reminder_notification_title_with_item">Reminder: %1$s</string>
+    <string name="reminder_notification_text">Tap to open event details</string>
+    <string name="reminder_error_invalid_amount">Enter number greater than 0</string>
+    <string name="reminder_error_past_datetime">Choose a future date and time</string>
 
     <!-- Display format options -->
     <string name="days_only">Days only</string>

@@ -31,6 +31,7 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
+import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.ui.screens.appdata.AppDataScreen
 import com.dayscounter.ui.screens.createedit.CreateEditScreen
 import com.dayscounter.ui.screens.detail.DetailScreen
@@ -109,6 +110,7 @@ private fun NavGraphBuilder.mainScreenDestination(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.detailScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
+    reminderManager: ReminderManager,
     analyticsService: AnalyticsService,
     navController: NavHostController
 ) {
@@ -129,7 +131,7 @@ private fun NavGraphBuilder.detailScreenDestination(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = DetailScreenViewModel.factory(repository)
+                    factory = DetailScreenViewModel.factory(repository, reminderManager)
                 ),
             onBackClick = { navController.popBackStack() },
             onEditClick = { id ->
@@ -144,9 +146,11 @@ private fun NavGraphBuilder.detailScreenDestination(
  * Навигационное назначение для экрана создания/редактирования события.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongMethod")
 private fun NavGraphBuilder.createEditScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
     resourceProvider: com.dayscounter.data.provider.ResourceProvider,
+    reminderManager: ReminderManager,
     analyticsService: AnalyticsService,
     navController: NavHostController
 ) {
@@ -163,7 +167,13 @@ private fun NavGraphBuilder.createEditScreenDestination(
             itemId = null,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider, analyticsService)
+                    factory =
+                        CreateEditScreenViewModel.factory(
+                            repository = repository,
+                            resourceProvider = resourceProvider,
+                            analyticsService = analyticsService,
+                            reminderManager = reminderManager
+                        )
                 ),
             onBackClick = { navController.popBackStack() },
             analyticsService = analyticsService
@@ -191,7 +201,13 @@ private fun NavGraphBuilder.createEditScreenDestination(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = CreateEditScreenViewModel.factory(repository, resourceProvider, analyticsService)
+                    factory =
+                        CreateEditScreenViewModel.factory(
+                            repository = repository,
+                            resourceProvider = resourceProvider,
+                            analyticsService = analyticsService,
+                            reminderManager = reminderManager
+                        )
                 ),
             onBackClick = { navController.popBackStack() },
             analyticsService = analyticsService
@@ -280,6 +296,7 @@ internal fun NavHostContent(
         }
     val database = DaysDatabase.getDatabase(context)
     val repository = AppModule.createItemRepository(database)
+    val reminderManager = AppModule.createReminderManager(context, database)
     val resourceProvider = AppModule.resourceProvider
     val dataStore = AppModule.createAppSettingsDataStore(context)
 
@@ -289,10 +306,11 @@ internal fun NavHostContent(
         modifier = Modifier.padding(paddingValues)
     ) {
         this.mainScreenDestination(analyticsService, navController)
-        this.detailScreenDestination(repository, analyticsService, navController)
+        this.detailScreenDestination(repository, reminderManager, analyticsService, navController)
         this.createEditScreenDestination(
             repository,
             resourceProvider,
+            reminderManager,
             analyticsService,
             navController
         )

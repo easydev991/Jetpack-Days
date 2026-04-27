@@ -16,17 +16,11 @@ import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.UserActionType
 import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
  * Экран создания/редактирования события.
- *
- * Использует [CreateEditScreenViewModel] для управления состоянием.
- *
- * @param itemId Идентификатор события (null для создания нового)
- * @param modifier Modifier для экрана
- * @param viewModel ViewModel для управления состоянием
- * @param onBackClick Обработчик клика "Назад"
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +45,7 @@ fun CreateEditScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongMethod")
 private fun CreateEditScreenContent(
     itemId: Long?,
     modifier: Modifier = Modifier,
@@ -63,10 +58,10 @@ private fun CreateEditScreenContent(
     val uiStates = rememberCreateEditUiStates()
     val showDatePicker = rememberSaveable { mutableStateOf(false) }
 
-    // Загружаем данные при редактировании
     loadItemData(itemId, uiState, uiStates)
 
-    val isValidData = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null
+    val isReminderValid = uiStates.reminder.isInputValid(LocalDateTime.now())
+    val isValidData = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null && isReminderValid
     val isEditing = itemId != null
 
     Scaffold(
@@ -78,31 +73,35 @@ private fun CreateEditScreenContent(
             SaveButton(
                 enabled = if (isEditing) isValidData && hasChanges else isValidData,
                 onClick = {
-                    if (isValidData) {
-                        analyticsService.log(AnalyticsEvent.UserAction(UserActionType.ITEM_SAVED))
-                        val timestamp =
-                            uiStates.selectedDate.value
-                                ?.atStartOfDay(ZoneId.systemDefault())
-                                ?.toInstant()
-                                ?.toEpochMilli() ?: System.currentTimeMillis()
-
-                        val item =
-                            Item(
-                                id = itemId ?: 0L,
-                                title = uiStates.title.value,
-                                details = uiStates.details.value,
-                                timestamp = timestamp,
-                                colorTag = uiStates.selectedColor.value?.toArgb(),
-                                displayOption = uiStates.selectedDisplayOption.value
-                            )
-
-                        if (isEditing) {
-                            viewModel.updateItem(item.copy(id = itemId))
-                        } else {
-                            viewModel.createItem(item)
-                        }
-                        onBackClick()
+                    if (!isValidData) {
+                        return@SaveButton
                     }
+
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.ITEM_SAVED))
+
+                    val timestamp =
+                        uiStates.selectedDate.value
+                            ?.atStartOfDay(ZoneId.systemDefault())
+                            ?.toInstant()
+                            ?.toEpochMilli() ?: System.currentTimeMillis()
+
+                    val item =
+                        Item(
+                            id = itemId ?: 0L,
+                            title = uiStates.title.value,
+                            details = uiStates.details.value,
+                            timestamp = timestamp,
+                            colorTag = uiStates.selectedColor.value?.toArgb(),
+                            displayOption = uiStates.selectedDisplayOption.value
+                        )
+
+                    val reminderRequest = uiStates.reminder.toReminderRequest(item.id)
+
+                    viewModel.saveItem(
+                        item = item,
+                        reminderRequest = reminderRequest,
+                        onSaved = onBackClick
+                    )
                 }
             )
         }
@@ -120,7 +119,6 @@ private fun CreateEditScreenContent(
         )
     }
 
-    // DatePicker Dialog
     if (showDatePicker.value) {
         DatePickerDialogSection(
             selectedDate = uiStates.selectedDate,
@@ -138,7 +136,8 @@ private fun CreateEditScreenContent(
                         details = uiStates.details.value,
                         timestamp = timestamp,
                         colorTag = uiStates.selectedColor.value?.toArgb(),
-                        displayOption = uiStates.selectedDisplayOption.value
+                        displayOption = uiStates.selectedDisplayOption.value,
+                        reminderFingerprint = uiStates.reminder.toChangeFingerprint()
                     )
                 }
             }

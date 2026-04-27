@@ -84,6 +84,13 @@
     <string name="reminder_unit_weeks">недель</string>
     <string name="reminder_unit_months">месяцев</string>
     <string name="reminder_unit_years">лет</string>
+    <string name="reminder_channel_name">Напоминания</string>
+    <string name="reminder_channel_description">Одноразовые напоминания о событиях</string>
+    <string name="reminder_notification_title">Напоминание</string>
+    <string name="reminder_notification_title_with_item">Напоминание: %1$s</string>
+    <string name="reminder_notification_text">Нажмите, чтобы открыть запись</string>
+    <string name="reminder_error_invalid_amount">Введите число больше 0</string>
+    <string name="reminder_error_past_datetime">Выберите будущие дату и время</string>
 
     <!-- Display format options -->
     <string name="days_only">Только дни</string>
