@@ -198,7 +198,7 @@ class CreateEditScreenViewModelTest {
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
-            createViewModel.createItem(newItem)
+            createViewModel.saveItem(item = newItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элемент должен быть сохранен и состояние Success
@@ -242,7 +242,7 @@ class CreateEditScreenViewModelTest {
                     noOpAnalyticsService
                 )
 
-            createViewModel.createItem(errorItem)
+            createViewModel.saveItem(item = errorItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Должно быть состояние Error
@@ -281,7 +281,7 @@ class CreateEditScreenViewModelTest {
                     analyticsService = analyticsService
                 )
 
-            createViewModel.createItem(errorItem)
+            createViewModel.saveItem(item = errorItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
@@ -321,7 +321,7 @@ class CreateEditScreenViewModelTest {
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
-            updateViewModel.updateItem(updatedItem)
+            updateViewModel.saveItem(item = updatedItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Элемент должен быть обновлен и состояние Success
@@ -366,7 +366,7 @@ class CreateEditScreenViewModelTest {
                     noOpAnalyticsService
                 )
 
-            updateViewModel.updateItem(updatedItem)
+            updateViewModel.saveItem(item = updatedItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Должно быть состояние Error
@@ -398,7 +398,7 @@ class CreateEditScreenViewModelTest {
                     analyticsService = analyticsService
                 )
 
-            updateViewModel.updateItem(updatedItem)
+            updateViewModel.saveItem(item = updatedItem, reminderRequest = null)
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {

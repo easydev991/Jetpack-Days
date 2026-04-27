@@ -30,6 +30,7 @@
 4. `hasChanges` учитывает fingerprint напоминания.
 8. [x] Локализация новых строк (`values`/`values-ru`) для UI и notification channel/content.
 9. [x] Превью секции напоминаний (enabled/disabled).
+10. [x] На `DetailScreen` показывается предстоящая дата/время активного reminder для записи.
 
 ## 3. TDD-прогресс по фазам
 
@@ -119,12 +120,26 @@
 3. Добавить UI-сообщения об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
 4. После расширения покрытия прогнать полный `make test` и зафиксировать финальный DoD.
 
+## 6.1. Исправления по ревью (новый инкремент)
+
+1. [x] Убрать дублирование fingerprint-логики:
+   `CreateEditScreenViewModel` должен использовать `toChangeFingerprint()` из `CreateEditReminderState.kt` как единый источник.
+2. [x] Исключить риск обхода reminder-flow:
+   удалить legacy-методы `createItem`/`updateItem` из `CreateEditScreenViewModel` и перевести тесты на `saveItem(...)`.
+3. [x] Добавить прямые unit-тесты для `ReminderFormUiState`:
+   `toReminderRequest`, `isInputValid`, fingerprint-конвертация.
+4. [x] Показать в `DetailScreen` предстоящую дату/время активного reminder для текущей записи.
+5. [x] Расширить `DetailScreenViewModel` тестами для reminder-поля в `Success` и проверкой совместимости удаления записи с очисткой reminder.
+6. [x] Проверить регрессии по бэкапам и существующим сценариям:
+   обязательный прогон `make test` после форматирования.
+7. [x] Статус инкремента: выполнено, тесты зелёные (`make format`, таргетные reminder/detail-тесты, `make test`).
+
 ## 7. Definition of Done (обновленный)
 
 1. [~] Все новые unit/integration/UI тесты зелёные.
 Сейчас: unit/часть integration закрыты, compose/integration сценарии в плане.
-2. [~] `make format` и `make test` проходят.
-Сейчас: `make format` проходит, запускались целевые test suites, полный `make test` еще не выполнялся после всех изменений.
+2. [x] `make format` и `make test` проходят.
+Сейчас: `make format` и полный `make test` выполнены после инкремента с исправлениями по ревью.
 3. [x] На форме есть новый блок напоминаний внизу с требуемым поведением.
 4. [x] Уведомление одноразовое и открывает детали нужной записи.
 5. [x] После открытия из уведомления reminder помечается как `CONSUMED`; повторная постановка возможна.

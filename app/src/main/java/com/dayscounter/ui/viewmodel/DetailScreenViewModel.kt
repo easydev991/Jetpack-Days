@@ -9,18 +9,16 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.reminder.NoOpReminderManager
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -30,11 +28,10 @@ class DetailScreenViewModel(
     private val repository: ItemRepository,
     private val logger: Logger = AndroidLogger(),
     savedStateHandle: SavedStateHandle,
-    private val reminderManager: ReminderManager = NoOpReminderManager
+    private val reminderManager: ReminderManager = NoOpReminderManager,
+    private val currentTimeMillisProvider: () -> Long = { System.currentTimeMillis() }
 ) : ViewModel() {
     companion object {
-        private const val STATE_SUBSCRIPTION_TIMEOUT_MS = 5000L
-
         fun factory(
             repository: ItemRepository,
             reminderManager: ReminderManager = NoOpReminderManager
@@ -58,20 +55,30 @@ class DetailScreenViewModel(
             "ItemId parameter is required"
         }
 
-    val uiState: StateFlow<DetailScreenState> =
-        repository
-            .getItemFlow(itemId)
-            .filterNotNull()
-            .map { item ->
-                DetailScreenState.Success(item)
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_TIMEOUT_MS),
-                initialValue = DetailScreenState.Loading
-            )
+    private val _uiState = MutableStateFlow<DetailScreenState>(DetailScreenState.Loading)
+    val uiState: StateFlow<DetailScreenState> = _uiState.asStateFlow()
 
     private val _showDeleteDialog = MutableStateFlow(false)
     val showDeleteDialog: StateFlow<Boolean> = _showDeleteDialog.asStateFlow()
+
+    init {
+        observeItem()
+    }
+
+    private fun observeItem() {
+        viewModelScope.launch {
+            repository
+                .getItemFlow(itemId)
+                .filterNotNull()
+                .collect { item ->
+                    val upcomingReminder =
+                        reminderManager
+                            .getActiveReminder(itemId)
+                            ?.takeIf { it.targetEpochMillis > currentTimeMillisProvider() }
+                    _uiState.value = DetailScreenState.Success(item = item, reminder = upcomingReminder)
+                }
+        }
+    }
 
     fun deleteItem() {
         viewModelScope.launch {
@@ -113,7 +120,8 @@ sealed class DetailScreenState {
     data object Loading : DetailScreenState()
 
     data class Success(
-        val item: Item
+        val item: Item,
+        val reminder: Reminder? = null
     ) : DetailScreenState()
 
     data class Error(

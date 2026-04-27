@@ -92,8 +92,14 @@ internal fun Reminder?.toChangeFingerprint(): String? {
     }
 
     return when (mode) {
-        ReminderMode.AT_DATE ->
-            "${mode.name}:${selectedDateEpochMillis.orEmptyDatePart()}:${selectedHour ?: -1}:${selectedMinute ?: -1}"
+        ReminderMode.AT_DATE -> {
+            val zoneId = ZoneId.systemDefault()
+            val datePart =
+                selectedDateEpochMillis?.let { millis ->
+                    Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate().toString()
+                } ?: Instant.ofEpochMilli(targetEpochMillis).atZone(zoneId).toLocalDate().toString()
+            "${mode.name}:$datePart:${selectedHour ?: -1}:${selectedMinute ?: -1}"
+        }
 
         ReminderMode.AFTER_INTERVAL ->
             "${mode.name}:${intervalAmount ?: -1}:${intervalUnit?.name.orEmpty()}"
@@ -129,5 +135,3 @@ internal fun ReminderFormUiState.applyReminder(reminder: Reminder?) {
         }
     }
 }
-
-private fun Long?.orEmptyDatePart(): String = this?.toString().orEmpty()

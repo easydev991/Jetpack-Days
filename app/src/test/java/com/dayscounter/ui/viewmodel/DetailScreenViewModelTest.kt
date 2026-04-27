@@ -2,13 +2,17 @@ package com.dayscounter.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.Reminder
+import com.dayscounter.domain.model.ReminderMode
+import com.dayscounter.domain.model.ReminderStatus
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.domain.usecase.ReminderRequest
+import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.NoOpLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.Test
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class DetailScreenViewModelTest {
     private lateinit var repository: FakeItemRepository
+    private lateinit var reminderManager: FakeReminderManager
     private lateinit var viewModel: DetailScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
 
@@ -47,6 +52,7 @@ class DetailScreenViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeItemRepository()
+        reminderManager = FakeReminderManager()
     }
 
     @AfterEach
@@ -59,7 +65,13 @@ class DetailScreenViewModelTest {
         runTest {
             // Given - ViewModel создан без элемента
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
 
             // Then - Начальное состояние должно быть Loading
             val initialState = viewModel.uiState.value
@@ -75,7 +87,13 @@ class DetailScreenViewModelTest {
         runTest {
             // Given - Repository не содержит элемент
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
 
             // When - Пытаемся загрузить несуществующий элемент
             testDispatcher.scheduler.advanceUntilIdle()
@@ -97,12 +115,13 @@ class DetailScreenViewModelTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
 
             // When - Создаем ViewModel
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
-            // Создаем подписку на StateFlow, чтобы запустить stateIn (WhileSubscribed требует наблюдателей)
-            backgroundScope.launch {
-                viewModel.uiState.collect {}
-            }
-            testDispatcher.scheduler.runCurrent()
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Then - Состояние должно измениться на Success с загруженным элементом
@@ -113,6 +132,77 @@ class DetailScreenViewModelTest {
             )
             val successState = currentState as DetailScreenState.Success
             assertEquals(testItem, successState.item, "Элемент должен совпадать")
+            assertEquals(null, successState.reminder, "Активного напоминания быть не должно")
+        }
+    }
+
+    @Test
+    fun `whenFutureReminderExists_thenSuccessStateContainsReminder`() {
+        runTest {
+            val nowMillis = 1_800_000_000_000L
+            val futureReminder =
+                Reminder(
+                    itemId = testItemId,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis + 3_600_000L,
+                    selectedDateEpochMillis = nowMillis + 3_600_000L,
+                    selectedHour = 12,
+                    selectedMinute = 30,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 1_000L,
+                    updatedAt = nowMillis - 1_000L
+                )
+
+            repository.setItem(testItem)
+            reminderManager.activeReminder = futureReminder
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val currentState = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(futureReminder, currentState.reminder, "Будущее напоминание должно отображаться")
+        }
+    }
+
+    @Test
+    fun `whenReminderIsPast_thenSuccessStateDoesNotContainReminder`() {
+        runTest {
+            val nowMillis = 1_800_000_000_000L
+            val pastReminder =
+                Reminder(
+                    itemId = testItemId,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis - 60_000L,
+                    selectedDateEpochMillis = nowMillis - 60_000L,
+                    selectedHour = 12,
+                    selectedMinute = 30,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 120_000L,
+                    updatedAt = nowMillis - 120_000L
+                )
+
+            repository.setItem(testItem)
+            reminderManager.activeReminder = pastReminder
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val currentState = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(null, currentState.reminder, "Прошедшее напоминание не должно отображаться")
         }
     }
 
@@ -122,11 +212,13 @@ class DetailScreenViewModelTest {
             // Given - ViewModel с загруженным элементом
             repository.setItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
-            // Создаем подписку на StateFlow, чтобы запустить stateIn
-            backgroundScope.launch {
-                viewModel.uiState.collect {}
-            }
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
             testDispatcher.scheduler.advanceUntilIdle()
 
             // When - Запрашиваем удаление
@@ -143,33 +235,29 @@ class DetailScreenViewModelTest {
             // Given - ViewModel с загруженным элементом
             repository.setItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
-            // Создаем подписку на StateFlow, чтобы запустить stateIn
-            backgroundScope.launch {
-                viewModel.uiState.collect {}
-            }
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
             // Ждем загрузки элемента
-            testDispatcher.scheduler.runCurrent()
             testDispatcher.scheduler.advanceUntilIdle()
 
             // When - Подтверждаем удаление
             viewModel.confirmDelete()
             testDispatcher.scheduler.advanceUntilIdle()
-            testDispatcher.scheduler.runCurrent()
 
             // Then - Элемент должен быть удален и диалог скрыт
             assertFalse(
                 repository.containsItem(testItemId),
                 "Элемент должен быть удален из repository"
             )
+            assertEquals(listOf(testItemId), reminderManager.clearedItemIds, "Reminder должен очищаться при удалении")
             assertFalse(viewModel.showDeleteDialog.value, "Диалог удаления должен быть скрыт")
-            // stateIn кэширует последнее значение, поэтому состояние остается Success
             val currentState = viewModel.uiState.value
-            assertTrue(
-                currentState is DetailScreenState.Success,
-                "После удаления состояние остается Success " +
-                    "(stateIn кэширует последнее значение), фактическое: $currentState"
-            )
+            assertTrue(currentState is DetailScreenState.Success, "После удаления состояние остается Success")
         }
     }
 
@@ -179,7 +267,13 @@ class DetailScreenViewModelTest {
             // Given - ViewModel с показанным диалогом
             repository.setItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
             viewModel.requestDelete()
 
             // When - Отменяем удаление
@@ -244,5 +338,26 @@ class DetailScreenViewModelTest {
         }
 
         override suspend fun getItemsCount(): Int = items.value.size
+    }
+
+    private class FakeReminderManager : ReminderManager {
+        var activeReminder: Reminder? = null
+        val clearedItemIds = mutableListOf<Long>()
+
+        override suspend fun saveReminder(
+            request: ReminderRequest,
+            itemTitle: String
+        ): Result<Unit> = Result.success(Unit)
+
+        override suspend fun clearReminder(itemId: Long) {
+            clearedItemIds += itemId
+            activeReminder = null
+        }
+
+        override suspend fun getActiveReminder(itemId: Long): Reminder? = activeReminder?.takeIf { it.itemId == itemId }
+
+        override suspend fun consumeReminder(itemId: Long) = Unit
+
+        override suspend fun rescheduleFutureReminders() = Unit
     }
 }

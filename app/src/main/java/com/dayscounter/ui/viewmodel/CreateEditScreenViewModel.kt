@@ -15,11 +15,11 @@ import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
-import com.dayscounter.domain.model.ReminderMode
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ReminderRequest
 import com.dayscounter.reminder.NoOpReminderManager
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.ui.screens.createedit.toChangeFingerprint
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -130,7 +130,7 @@ class CreateEditScreenViewModel(
                     val reminder = reminderManager.getActiveReminder(nonNullItemId)
                     _uiState.value = CreateEditScreenState.Success(item, reminder)
                     _originalItem.value = item
-                    originalReminderFingerprint.value = reminder.toFingerprint()
+                    originalReminderFingerprint.value = reminder.toChangeFingerprint()
                     _hasChanges.value = false
                     logger.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
                 } else {
@@ -147,46 +147,6 @@ class CreateEditScreenViewModel(
                         e.message
                     )
                 logger.e("CreateEditScreenViewModel", message, e)
-                _uiState.value = CreateEditScreenState.Error(message)
-            }
-        }
-    }
-
-    fun createItem(item: Item) {
-        viewModelScope.launch {
-            try {
-                repository.insertItem(item)
-                _uiState.value = CreateEditScreenState.Success(item)
-                logger.d("CreateEditScreenViewModel", "Событие создано: ${item.title}")
-            } catch (e: ItemException.SaveFailed) {
-                val message =
-                    resourceProvider.getString(
-                        ResourceIds.ERROR_CREATING_EVENT,
-                        e.message
-                    )
-                logger.e("CreateEditScreenViewModel", message, e)
-                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_ITEM, e))
-                _uiState.value = CreateEditScreenState.Error(message)
-            }
-        }
-    }
-
-    fun updateItem(item: Item) {
-        viewModelScope.launch {
-            try {
-                repository.updateItem(item)
-                _uiState.value = CreateEditScreenState.Success(item)
-                _originalItem.value = item
-                _hasChanges.value = false
-                logger.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
-            } catch (e: ItemException.UpdateFailed) {
-                val message =
-                    resourceProvider.getString(
-                        ResourceIds.ERROR_UPDATING_EVENT,
-                        e.message
-                    )
-                logger.e("CreateEditScreenViewModel", message, e)
-                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.UPDATE_ITEM, e))
                 _uiState.value = CreateEditScreenState.Error(message)
             }
         }
@@ -237,7 +197,7 @@ class CreateEditScreenViewModel(
 
                 _uiState.value = CreateEditScreenState.Success(persistedItem, activeReminder)
                 _originalItem.value = persistedItem
-                originalReminderFingerprint.value = activeReminder.toFingerprint()
+                originalReminderFingerprint.value = activeReminder.toChangeFingerprint()
                 _hasChanges.value = false
                 onSaved()
             } catch (e: ItemException.SaveFailed) {
@@ -261,22 +221,6 @@ class CreateEditScreenViewModel(
             }
         }
     }
-
-    private fun Reminder?.toFingerprint(): String? {
-        if (this == null) {
-            return null
-        }
-
-        return when (mode) {
-            ReminderMode.AT_DATE ->
-                "${mode.name}:${selectedDateEpochMillis.orEmpty()}:${selectedHour ?: -1}:${selectedMinute ?: -1}"
-
-            ReminderMode.AFTER_INTERVAL ->
-                "${mode.name}:${intervalAmount ?: -1}:${intervalUnit?.name.orEmpty()}"
-        }
-    }
-
-    private fun Long?.orEmpty(): String = this?.toString().orEmpty()
 }
 
 /**
