@@ -262,6 +262,50 @@ class DetailScreenViewModelTest {
     }
 
     @Test
+    fun `whenStaleEmissionAfterDelete_thenReminderIsNotRestored`() {
+        runTest {
+            val nowMillis = 1_800_000_000_000L
+            val futureReminder =
+                Reminder(
+                    itemId = testItemId,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis + 60_000L,
+                    selectedDateEpochMillis = nowMillis + 60_000L,
+                    selectedHour = 12,
+                    selectedMinute = 30,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 1_000L,
+                    updatedAt = nowMillis - 1_000L
+                )
+
+            repository.setItem(testItem)
+            reminderManager.activeReminder = futureReminder
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            viewModel.confirmDelete()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Имитируем "позднюю" повторную эмиссию элемента из потока.
+            repository.setItem(testItem)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val currentState = viewModel.uiState.value
+            assertTrue(currentState is DetailScreenState.Success, "Состояние должно оставаться Success")
+            val successState = currentState as DetailScreenState.Success
+            assertEquals(null, successState.reminder, "Напоминание не должно восстанавливаться")
+            assertEquals(listOf(testItemId), reminderManager.clearedItemIds, "Reminder должен очищаться один раз")
+        }
+    }
+
+    @Test
     fun `whenCancelDelete_thenHidesDeleteDialog`() {
         runTest {
             // Given - ViewModel с показанным диалогом

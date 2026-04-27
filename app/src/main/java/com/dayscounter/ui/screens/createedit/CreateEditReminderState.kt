@@ -96,8 +96,16 @@ internal fun Reminder?.toChangeFingerprint(): String? {
             val zoneId = ZoneId.systemDefault()
             val datePart =
                 selectedDateEpochMillis?.let { millis ->
-                    Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate().toString()
-                } ?: Instant.ofEpochMilli(targetEpochMillis).atZone(zoneId).toLocalDate().toString()
+                    Instant
+                        .ofEpochMilli(millis)
+                        .atZone(zoneId)
+                        .toLocalDate()
+                        .toString()
+                } ?: Instant
+                    .ofEpochMilli(targetEpochMillis)
+                    .atZone(zoneId)
+                    .toLocalDate()
+                    .toString()
             "${mode.name}:$datePart:${selectedHour ?: -1}:${selectedMinute ?: -1}"
         }
 
