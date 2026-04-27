@@ -70,6 +70,20 @@
     <string name="title_for_the_item">Название для записи</string>
     <string name="details_for_the_item">Подробное описание</string>
     <string name="add_color_tag">Добавить цветовой тег</string>
+    <string name="reminder_settings">Напоминание</string>
+    <string name="add_reminder">Добавить напоминание</string>
+    <string name="reminder_mode_on_date">На дату</string>
+    <string name="reminder_mode_after">Через N</string>
+    <string name="reminder_date">Дата напоминания</string>
+    <string name="reminder_time">Время напоминания</string>
+    <string name="select_time">Выбрать время</string>
+    <string name="remind_after_label">Напомнить через</string>
+    <string name="reminder_period_unit">Период</string>
+    <string name="select_period_unit">Выбрать период</string>
+    <string name="reminder_unit_days">дней</string>
+    <string name="reminder_unit_weeks">недель</string>
+    <string name="reminder_unit_months">месяцев</string>
+    <string name="reminder_unit_years">лет</string>
 
     <!-- Display format options -->
     <string name="days_only">Только дни</string>
@@ -178,4 +192,3 @@
         <item quantity="other">%d л.</item>
     </plurals>
 </resources>
-

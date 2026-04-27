@@ -70,6 +70,20 @@
     <string name="title_for_the_item">Title for the Item</string>
     <string name="details_for_the_item">Details for the Item</string>
     <string name="add_color_tag">Add color tag</string>
+    <string name="reminder_settings">Reminder</string>
+    <string name="add_reminder">Add reminder</string>
+    <string name="reminder_mode_on_date">On date</string>
+    <string name="reminder_mode_after">After N</string>
+    <string name="reminder_date">Reminder date</string>
+    <string name="reminder_time">Reminder time</string>
+    <string name="select_time">Select time</string>
+    <string name="remind_after_label">Remind after</string>
+    <string name="reminder_period_unit">Period</string>
+    <string name="select_period_unit">Select period</string>
+    <string name="reminder_unit_days">days</string>
+    <string name="reminder_unit_weeks">weeks</string>
+    <string name="reminder_unit_months">months</string>
+    <string name="reminder_unit_years">years</string>
 
     <!-- Display format options -->
     <string name="days_only">Days only</string>
