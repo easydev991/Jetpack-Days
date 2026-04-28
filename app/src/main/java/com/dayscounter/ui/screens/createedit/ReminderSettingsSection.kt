@@ -54,7 +54,8 @@ private const val PREVIEW_INTERVAL = "3"
 @Composable
 internal fun ReminderSettingsSection(
     reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit
+    onValueChange: () -> Unit,
+    onReminderToggleRequested: ((Boolean) -> Unit)? = null
 ) {
     Text(
         text = stringResource(R.string.reminder_settings),
@@ -76,8 +77,10 @@ internal fun ReminderSettingsSection(
         Switch(
             checked = reminderUiState.isEnabled.value,
             onCheckedChange = {
-                reminderUiState.isEnabled.value = it
-                onValueChange()
+                onReminderToggleRequested?.invoke(it) ?: run {
+                    reminderUiState.isEnabled.value = it
+                    onValueChange()
+                }
             }
         )
     }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
  */
 class DaysDifferenceTest {
     @Test
-    fun `Today корректно хранит timestamp`() {
+    fun today_корректно_хранит_timestamp() {
         // Given
         val timestamp = System.currentTimeMillis()
 
@@ -21,7 +21,7 @@ class DaysDifferenceTest {
     }
 
     @Test
-    fun `Calculated корректно хранит период`() {
+    fun calculated_корректно_хранит_период() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 3)
         val totalDays = 400
@@ -37,7 +37,7 @@ class DaysDifferenceTest {
     }
 
     @Test
-    fun `DaysDifference поддерживает when выражение`() {
+    fun daysdifference_поддерживает_when_выражение() {
         // Given
         val differences: List<DaysDifference> =
             listOf(
@@ -60,7 +60,7 @@ class DaysDifferenceTest {
     }
 
     @Test
-    fun `Calculated с нулевым периодом сохраняется корректно`() {
+    fun calculated_с_нулевым_периодом_сохраняется_корректно() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 0)
         val totalDays = 0
@@ -75,7 +75,7 @@ class DaysDifferenceTest {
     }
 
     @Test
-    fun `Calculated с периодом из одних лет сохраняется корректно`() {
+    fun calculated_с_периодом_из_одних_лет_сохраняется_корректно() {
         // Given
         val period = TimePeriod(years = 5, months = 0, days = 0)
 

@@ -32,7 +32,7 @@ class GetFormattedDaysForItemUseCaseTest {
         )
 
     @Test
-    fun `invoke when event in future and showMinus true then shows minus sign`() {
+    fun invoke_when_event_in_future_and_showminus_true_then_shows_minus_sign() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(7)
@@ -74,7 +74,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in future and showMinus false then shows absolute value`() {
+    fun invoke_when_event_in_future_and_showminus_false_then_shows_absolute_value() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(7)
@@ -112,7 +112,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in past and showMinus true then shows positive number`() {
+    fun invoke_when_event_in_past_and_showminus_true_then_shows_positive_number() {
         // Given
         val now = LocalDate.now()
         val pastDate = now.minusDays(10)
@@ -150,7 +150,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in past and showMinus false then shows positive number`() {
+    fun invoke_when_event_in_past_and_showminus_false_then_shows_positive_number() {
         // Given
         val now = LocalDate.now()
         val pastDate = now.minusDays(10)
@@ -188,7 +188,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when event today and showMinus true then returns today string`() {
+    fun invoke_when_event_today_and_showminus_true_then_returns_today_string() {
         // Given
         val now = LocalDate.now()
         val timestamp = now.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -221,7 +221,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when event today and showMinus false then returns today string`() {
+    fun invoke_when_event_today_and_showminus_false_then_returns_today_string() {
         // Given
         val now = LocalDate.now()
         val timestamp = now.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -254,7 +254,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when MONTH_DAY option and showMinus true then passes correct parameter`() {
+    fun invoke_when_month_day_option_and_showminus_true_then_passes_correct_parameter() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(40)
@@ -292,7 +292,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when MONTH_DAY option and showMinus false then passes correct parameter`() {
+    fun invoke_when_month_day_option_and_showminus_false_then_passes_correct_parameter() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(40)
@@ -330,7 +330,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when YEAR_MONTH_DAY option and showMinus true then passes correct parameter`() {
+    fun invoke_when_year_month_day_option_and_showminus_true_then_passes_correct_parameter() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(800)
@@ -368,7 +368,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when YEAR_MONTH_DAY option and showMinus false then passes correct parameter`() {
+    fun invoke_when_year_month_day_option_and_showminus_false_then_passes_correct_parameter() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(800)
@@ -406,7 +406,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when custom date provided and showMinus true then uses custom date`() {
+    fun invoke_when_custom_date_provided_and_showminus_true_then_uses_custom_date() {
         // Given
         val customDate = LocalDate.of(2025, 1, 1)
         val eventDate = LocalDate.of(2025, 1, 8)
@@ -444,7 +444,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when custom date provided and showMinus false then uses custom date`() {
+    fun invoke_when_custom_date_provided_and_showminus_false_then_uses_custom_date() {
         // Given
         val customDate = LocalDate.of(2025, 1, 1)
         val eventDate = LocalDate.of(2025, 1, 8)
@@ -482,7 +482,7 @@ class GetFormattedDaysForItemUseCaseTest {
     }
 
     @Test
-    fun `invoke when defaultDisplayOption DAY and showMinus true then uses default`() {
+    fun invoke_when_defaultdisplayoption_day_and_showminus_true_then_uses_default() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(7)

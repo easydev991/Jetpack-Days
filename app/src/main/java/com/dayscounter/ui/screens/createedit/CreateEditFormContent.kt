@@ -1,5 +1,9 @@
 package com.dayscounter.ui.screens.createedit
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
@@ -164,7 +169,8 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
             .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
         ReminderSettingsSection(
             reminderUiState = params.uiStates.reminder,
-            onValueChange = onValueChange
+            onValueChange = onValueChange,
+            onReminderToggleRequested = rememberReminderToggleHandler(params, onValueChange)
         )
     }
 
@@ -174,6 +180,45 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
             showDatePicker = params.uiStates.reminder.showDatePicker,
             onDateSelected = onValueChange
         )
+    }
+}
+
+@Composable
+private fun rememberReminderToggleHandler(
+    params: CreateEditFormParams,
+    onValueChange: () -> Unit
+): (Boolean) -> Unit {
+    val context = LocalContext.current
+    val reminderPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            params.uiStates.reminder.isEnabled.value = isGranted
+            onValueChange()
+        }
+
+    return { isChecked ->
+        when (
+            decideReminderToggle(
+                isChecked = isChecked,
+                sdkInt = Build.VERSION.SDK_INT,
+                hasPostNotificationsPermission = context.hasPostNotificationsPermission()
+            )
+        ) {
+            ReminderToggleDecision.ENABLE -> {
+                params.uiStates.reminder.isEnabled.value = true
+                onValueChange()
+            }
+
+            ReminderToggleDecision.DISABLE -> {
+                params.uiStates.reminder.isEnabled.value = false
+                onValueChange()
+            }
+
+            ReminderToggleDecision.REQUEST_PERMISSION -> {
+                reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 }
 

@@ -39,7 +39,7 @@ make test                        # All unit tests with report
 ./gradlew test                   # Unit tests only
 ./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"  # Single test class
 ./gradlew test --tests "*DaysDifferenceTest"  # Pattern matching
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate when same day then returns Today"  # Single test method
+./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate_when_same_day_then_returns_today"  # Single test method
 make android-test                # Instrumentation tests (requires device)
 ```
 
@@ -143,18 +143,21 @@ sealed class Screen(val route: String, val icon: ImageVector? = null, val titleR
 
 ```kotlin
 @Test
-fun functionName_whenCondition_thenExpectedResult() {
+fun function_name_when_condition_then_expected_result() {
     // Given
     // When
     // Then
 }
 ```
 
+- Используй `snake_case` для имен тестовых методов
+- Обратные кавычки в именах тестовых методов не использовать
+
 ### Test Example
 
 ```kotlin
 @Test
-fun `calculate when same day then returns Today`() {
+fun calculate_when_same_day_then_returns_today() {
     // Given
     val today = LocalDate.now()
     val timestamp = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()

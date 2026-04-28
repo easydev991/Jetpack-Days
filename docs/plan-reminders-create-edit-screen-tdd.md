@@ -33,6 +33,8 @@
 10. [x] На `DetailScreen` показывается предстоящая дата/время активного reminder для записи.
 11. [x] `DetailScreenViewModel` стабилизирован для дублирующих эмиссий (`distinctUntilChanged` до `filterNotNull`) и обновляет state только при фактическом изменении.
 12. [x] Добавлен unit-тест на сценарий поздней повторной эмиссии после удаления, подтверждающий что reminder не восстанавливается.
+13. [x] Реализован runtime UX-поток запроса `POST_NOTIFICATIONS` при включении reminder на Android 13+.
+14. [x] Добавлены unit-тесты policy принятия решения по переключению reminder с учетом runtime permission.
 
 ## 3. TDD-прогресс по фазам
 
@@ -86,6 +88,13 @@
 2. [ ] Сценарий: тап по notification -> detail(itemId) -> reminder consumed.
 3. [ ] Сценарий повторной постановки напоминания после consume.
 
+### Фаза H. Runtime permission уведомлений
+
+1. [x] Добавлен policy-слой для решения по toggle (`ENABLE` / `DISABLE` / `REQUEST_PERMISSION`) без UI-зависимостей.
+2. [x] Интегрирован runtime-запрос `POST_NOTIFICATIONS` через `ActivityResultContracts.RequestPermission` при включении reminder.
+3. [x] Добавлены unit-тесты на policy (`ReminderNotificationPermissionPolicyTest`).
+4. [x] Прогнаны проверки качества после внедрения (`make format`, таргетные тесты, `make test`).
+
 ## 4. Изменяемые зоны кода (актуализировано)
 
 1. [x] UI: `ui/screens/createedit/*`.
@@ -109,8 +118,8 @@
 - Статус: [x] реализован `cancel-before-schedule` в scheduler.
 
 4. Android 13+ permission на уведомления:
-- Статус: [~] частично (permissions добавлены в manifest; UI-запрос runtime permission не реализован в этом этапе).
-- Остаток: [ ] добавить UX-поток запроса/обработки `POST_NOTIFICATIONS`.
+- Статус: [x] реализовано (добавлен runtime-запрос `POST_NOTIFICATIONS` при включении reminder на Android 13+).
+- Остаток: [ ] при необходимости добавить отдельный UX-фидбек после отказа в разрешении.
 
 5. Тестовое покрытие платформенной части:
 - Статус: [ ] нужно расширить (receiver/scheduler/MainActivity intent tests).
@@ -118,9 +127,8 @@
 ## 6. Актуальные следующие шаги
 
 1. Добавить тесты фазы C/D/F/G (приоритет: C -> D -> F -> G).
-2. Добавить runtime-permission UX для `POST_NOTIFICATIONS`.
-3. Добавить UI-сообщения об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
-4. После расширения покрытия прогнать полный `make test` и зафиксировать финальный DoD.
+2. Добавить UI-сообщения об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
+3. После расширения покрытия прогнать полный `make test` и зафиксировать финальный DoD.
 
 ## 6.1. Исправления по ревью (новый инкремент)
 

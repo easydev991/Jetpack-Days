@@ -47,7 +47,7 @@ class ExportBackupUseCaseTest {
     // MARK: - Экспорт содержит format: "android"
 
     @Test
-    fun `invoke whenExporting_thenContainsFormatAndroid`() =
+    fun invoke_whenexporting_thencontainsformatandroid() =
         runBlocking {
             // Given
             val items =
@@ -79,7 +79,7 @@ class ExportBackupUseCaseTest {
     // MARK: - Структура JSON соответствует BackupWrapper
 
     @Test
-    fun `invoke whenExporting_thenStructureMatchesBackupWrapper`() =
+    fun invoke_whenexporting_thenstructurematchesbackupwrapper() =
         runBlocking {
             // Given
             val items =
@@ -123,7 +123,7 @@ class ExportBackupUseCaseTest {
     // MARK: - Timestamp экспортируется в миллисекундах с 1970-01-01
 
     @Test
-    fun `invoke whenExporting_thenTimestampInMillisecondsSince1970`() =
+    fun invoke_whenexporting_thentimestampinmillisecondssince1970() =
         runBlocking {
             // Given
             val testTimestamp = 1609459200000L // 2021-01-01 00:00:00 UTC
@@ -156,7 +156,7 @@ class ExportBackupUseCaseTest {
     // MARK: - ColorTag экспортируется в hex формате (#RRGGBB)
 
     @Test
-    fun `invoke whenExporting_thenColorTagInHexFormat`() =
+    fun invoke_whenexporting_thencolortaginhexformat() =
         runBlocking {
             // Given
             val items =
@@ -208,7 +208,7 @@ class ExportBackupUseCaseTest {
     // MARK: - Null colorTag обрабатывается корректно
 
     @Test
-    fun `invoke whenNullColorTag_thenExportsNullInJson`() =
+    fun invoke_whennullcolortag_thenexportsnullinjson() =
         runBlocking {
             // Given
             val items =
@@ -240,7 +240,7 @@ class ExportBackupUseCaseTest {
     // MARK: - Пустой список
 
     @Test
-    fun `invoke whenEmptyList_thenExportsEmptyItemsArray`() =
+    fun invoke_whenemptylist_thenexportsemptyitemsarray() =
         runBlocking {
             // Given
             val items = emptyList<Item>()
@@ -266,7 +266,7 @@ class ExportBackupUseCaseTest {
     // MARK: - displayOption конвертируется корректно
 
     @Test
-    fun `invoke whenDifferentDisplayOptions_thenExportsCorrectStrings`() =
+    fun invoke_whendifferentdisplayoptions_thenexportscorrectstrings() =
         runBlocking {
             // Given
             val items =
@@ -323,7 +323,7 @@ class ExportBackupUseCaseTest {
     // MARK: - details null и empty обрабатываются корректно
 
     @Test
-    fun `invoke whenEmptyDetails_thenExportsEmptyStringInJson`() =
+    fun invoke_whenemptydetails_thenexportsemptystringinjson() =
         runBlocking {
             // Given
             val items =

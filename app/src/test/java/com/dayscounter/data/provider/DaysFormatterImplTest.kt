@@ -16,7 +16,7 @@ class DaysFormatterImplTest {
     private val formatter = DaysFormatterImpl()
 
     @Test
-    fun `formatDays when singular then returns singular form`() {
+    fun formatdays_when_singular_then_returns_singular_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -33,7 +33,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatDays when plural few then returns few form for ru`() {
+    fun formatdays_when_plural_few_then_returns_few_form_for_ru() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -50,7 +50,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatDays when plural many then returns many form for ru`() {
+    fun formatdays_when_plural_many_then_returns_many_form_for_ru() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -67,7 +67,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatMonths when singular then returns singular form`() {
+    fun formatmonths_when_singular_then_returns_singular_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -84,7 +84,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when singular then returns singular form`() {
+    fun formatyears_when_singular_then_returns_singular_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -101,7 +101,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 2 then returns few form`() {
+    fun formatyears_when_quantity_2_then_returns_few_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -118,7 +118,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 3 then returns few form`() {
+    fun formatyears_when_quantity_3_then_returns_few_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -135,7 +135,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 4 then returns few form`() {
+    fun formatyears_when_quantity_4_then_returns_few_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -152,7 +152,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 5 then returns many form`() {
+    fun formatyears_when_quantity_5_then_returns_many_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -169,7 +169,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 11 then returns many form`() {
+    fun formatyears_when_quantity_11_then_returns_many_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -186,7 +186,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 21 then returns one form`() {
+    fun formatyears_when_quantity_21_then_returns_one_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -203,7 +203,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 22 then returns few form`() {
+    fun formatyears_when_quantity_22_then_returns_few_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -220,7 +220,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatYears when quantity 25 then returns many form`() {
+    fun formatyears_when_quantity_25_then_returns_many_form() {
         // Given
         every {
             resourceProvider.getQuantityString(
@@ -237,7 +237,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when DAY option then returns days only`() {
+    fun formatcomposite_when_day_option_then_returns_days_only() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 3)
         val totalDays = 365 // 1 год + 2 месяца + 3 дня ≈ 365 дней
@@ -263,7 +263,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option and both values then returns abbreviated format`() {
+    fun formatcomposite_when_month_day_option_and_both_values_then_returns_abbreviated_format() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         every {
@@ -294,7 +294,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option with years then converts years to months`() {
+    fun formatcomposite_when_month_day_option_with_years_then_converts_years_to_months() {
         // Given - 4 года конвертируются в 48 месяцев
         val period = TimePeriod(years = 4, months = 0, days = 10)
         every {
@@ -329,7 +329,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option with years and months then sums all months`() {
+    fun formatcomposite_when_month_day_option_with_years_and_months_then_sums_all_months() {
         // Given - 1 год + 2 месяца = 14 месяцев
         val period = TimePeriod(years = 1, months = 2, days = 3)
         every {
@@ -363,7 +363,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option and only months then returns full format`() {
+    fun formatcomposite_when_month_day_option_and_only_months_then_returns_full_format() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 0)
         every {
@@ -388,7 +388,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option and all values then returns abbreviated format`() {
+    fun formatcomposite_when_year_month_day_option_and_all_values_then_returns_abbreviated_format() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 5)
         every {
@@ -425,7 +425,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option and two values then returns short format`() {
+    fun formatcomposite_when_year_month_day_option_and_two_values_then_returns_short_format() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         every {
@@ -456,7 +456,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option and one value then returns full format`() {
+    fun formatcomposite_when_year_month_day_option_and_one_value_then_returns_full_format() {
         // Given
         val period = TimePeriod(years = 1, months = 0, days = 0)
         every {
@@ -483,7 +483,7 @@ class DaysFormatterImplTest {
     // Тесты с showMinus = true
 
     @Test
-    fun `formatComposite when DAY option and showMinus true with positive days then returns positive days`() {
+    fun formatcomposite_when_day_option_and_showminus_true_with_positive_days_then_returns_positive_days() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 10)
         val totalDays = 10
@@ -509,7 +509,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when DAY option and showMinus true with negative days then returns negative days`() {
+    fun formatcomposite_when_day_option_and_showminus_true_with_negative_days_then_returns_negative_days() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 7)
         val totalDays = -7
@@ -535,7 +535,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option and showMinus true with positive values`() {
+    fun formatcomposite_when_month_day_option_and_showminus_true_with_positive_values() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         every {
@@ -566,7 +566,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option and showMinus true with negative values`() {
+    fun formatcomposite_when_month_day_option_and_showminus_true_with_negative_values() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         val totalDays = -65
@@ -598,7 +598,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option and showMinus true with positive values`() {
+    fun formatcomposite_when_year_month_day_option_and_showminus_true_with_positive_values() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 5)
         every {
@@ -639,7 +639,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option and showMinus true with negative values`() {
+    fun formatcomposite_when_year_month_day_option_and_showminus_true_with_negative_values() {
         // Given
         val period = TimePeriod(years = 1, months = 2, days = 5)
         val totalDays = -800
@@ -683,7 +683,7 @@ class DaysFormatterImplTest {
     // Тесты для будущих дат с showMinus = false (исправление бага)
 
     @Test
-    fun `formatComposite when MONTH_DAY option with future date and showMinus false then shows no minus`() {
+    fun formatcomposite_when_month_day_option_with_future_date_and_showminus_false_then_shows_no_minus() {
         // Given - будущая дата (через 1 месяц 2 дня)
         val period = TimePeriod(years = 0, months = -1, days = -2)
         val totalDays = -30
@@ -719,7 +719,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option with future date and showMinus false then shows no minus`() {
+    fun formatcomposite_when_year_month_day_option_with_future_date_and_showminus_false_then_shows_no_minus() {
         // Given - будущая дата (через 1 год 2 месяца 5 дней)
         val period = TimePeriod(years = -1, months = -2, days = -5)
         val totalDays = -400
@@ -761,7 +761,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when MONTH_DAY option with future date and showMinus true then shows minus`() {
+    fun formatcomposite_when_month_day_option_with_future_date_and_showminus_true_then_shows_minus() {
         // Given - будущая дата (через 1 месяц 2 дня)
         val period = TimePeriod(years = 0, months = -1, days = -2)
         val totalDays = -30
@@ -797,7 +797,7 @@ class DaysFormatterImplTest {
     }
 
     @Test
-    fun `formatComposite when YEAR_MONTH_DAY option with future date and showMinus true then shows minus`() {
+    fun formatcomposite_when_year_month_day_option_with_future_date_and_showminus_true_then_shows_minus() {
         // Given - будущая дата (через 1 год 2 месяца 5 дней)
         val period = TimePeriod(years = -1, months = -2, days = -5)
         val totalDays = -400

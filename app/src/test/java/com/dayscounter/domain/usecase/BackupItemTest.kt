@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
  */
 class BackupItemTest {
     @Test
-    fun `toHexColor converts Int color to hex string`() {
+    fun tohexcolor_converts_int_color_to_hex_string() {
         // Given
         val redColor = 0xFFFF0000.toInt() // Красный цвет в ARGB
         val greenColor = 0xFF00FF00.toInt() // Зеленый цвет в ARGB
@@ -31,7 +31,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `fromHexColor converts hex string to Int color`() {
+    fun fromhexcolor_converts_hex_string_to_int_color() {
         // Given
         val redHex = "#FF0000"
         val greenHex = "#00FF00"
@@ -53,7 +53,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `fromHexColor returns null for invalid hex string`() {
+    fun fromhexcolor_returns_null_for_invalid_hex_string() {
         // Given
         val invalidHex = "INVALID"
 
@@ -65,7 +65,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `Item to BackupItem with colorTag`() {
+    fun item_to_backupitem_with_colortag() {
         // Given
         val item =
             Item(
@@ -89,7 +89,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `Item to BackupItem without colorTag`() {
+    fun item_to_backupitem_without_colortag() {
         // Given
         val item =
             Item(
@@ -113,7 +113,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `Item to BackupItem with monthDay displayOption`() {
+    fun item_to_backupitem_with_monthday_displayoption() {
         // Given
         val item =
             Item(
@@ -137,7 +137,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `Item to BackupItem with yearMonthDay displayOption`() {
+    fun item_to_backupitem_with_yearmonthday_displayoption() {
         // Given
         val item =
             Item(
@@ -161,7 +161,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item with colorTag`() {
+    fun backupitem_to_item_with_colortag() {
         // Given
         val backupItem =
             BackupItem(
@@ -185,7 +185,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item without colorTag`() {
+    fun backupitem_to_item_without_colortag() {
         // Given
         val backupItem =
             BackupItem(
@@ -209,7 +209,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item with monthDay displayOption`() {
+    fun backupitem_to_item_with_monthday_displayoption() {
         // Given
         val backupItem =
             BackupItem(
@@ -233,7 +233,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item with yearMonthDay displayOption`() {
+    fun backupitem_to_item_with_yearmonthday_displayoption() {
         // Given
         val backupItem =
             BackupItem(
@@ -257,7 +257,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item with invalid displayOption returns null`() {
+    fun backupitem_to_item_with_invalid_displayoption_returns_null() {
         // Given
         val backupItem =
             BackupItem(
@@ -276,7 +276,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `round-trip conversion preserves item data`() {
+    fun round_trip_conversion_preserves_item_data() {
         // Given
         val originalItem =
             Item(
@@ -305,7 +305,7 @@ class BackupItemTest {
     // MARK: - parseColorTag Tests (hex and Base64 formats)
 
     @Test
-    fun `parseColorTag with hex format returns correct color`() {
+    fun parsecolortag_with_hex_format_returns_correct_color() {
         // Given
         val hexColor = "#FF0000"
 
@@ -318,7 +318,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `parseColorTag with Base64 iOS format returns correct color`() {
+    fun parsecolortag_with_base64_ios_format_returns_correct_color() {
         // Given - используем строку из NsKeyedArchiverParserTest напрямую
         @Suppress("MaxLineLength")
         val base64FromParserTest =
@@ -349,7 +349,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `parseColorTag with null returns null`() {
+    fun parsecolortag_with_null_returns_null() {
         // Given
         val nullColor: String? = null
 
@@ -361,7 +361,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `parseColorTag with empty string returns null`() {
+    fun parsecolortag_with_empty_string_returns_null() {
         // Given
         val emptyColor = ""
 
@@ -373,7 +373,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `parseColorTag with invalid format returns null`() {
+    fun parsecolortag_with_invalid_format_returns_null() {
         // Given
         val invalidColor = "INVALID_COLOR"
 
@@ -385,7 +385,7 @@ class BackupItemTest {
     }
 
     @Test
-    fun `BackupItem to Item with iOS Base64 colorTag`() {
+    fun backupitem_to_item_with_ios_base64_colortag() {
         // Given - BackupItem с colorTag в формате iOS Base64
         @Suppress("MaxLineLength")
         val base64Color =

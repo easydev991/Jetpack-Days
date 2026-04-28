@@ -61,7 +61,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenViewModelCreated_thenStartsWithLoadingState`() {
+    fun whenviewmodelcreated_thenstartswithloadingstate() {
         runTest {
             // Given - ViewModel создан без элемента
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
@@ -83,7 +83,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenItemNotFound_thenRemainsInLoadingState`() {
+    fun whenitemnotfound_thenremainsinloadingstate() {
         runTest {
             // Given - Repository не содержит элемент
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
@@ -108,7 +108,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenItemLoadedSuccessfully_thenUpdatesToSuccessState`() {
+    fun whenitemloadedsuccessfully_thenupdatestosuccessstate() {
         runTest {
             // Given - Repository содержит элемент
             repository.setItem(testItem)
@@ -137,7 +137,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenFutureReminderExists_thenSuccessStateContainsReminder`() {
+    fun whenfuturereminderexists_thensuccessstatecontainsreminder() {
         runTest {
             val nowMillis = 1_800_000_000_000L
             val futureReminder =
@@ -172,7 +172,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenReminderIsPast_thenSuccessStateDoesNotContainReminder`() {
+    fun whenreminderispast_thensuccessstatedoesnotcontainreminder() {
         runTest {
             val nowMillis = 1_800_000_000_000L
             val pastReminder =
@@ -207,7 +207,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenRequestDelete_thenShowsDeleteDialog`() {
+    fun whenrequestdelete_thenshowsdeletedialog() {
         runTest {
             // Given - ViewModel с загруженным элементом
             repository.setItem(testItem)
@@ -230,7 +230,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenConfirmDelete_thenDeletesItem`() {
+    fun whenconfirmdelete_thendeletesitem() {
         runTest {
             // Given - ViewModel с загруженным элементом
             repository.setItem(testItem)
@@ -262,7 +262,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenStaleEmissionAfterDelete_thenReminderIsNotRestored`() {
+    fun whenstaleemissionafterdelete_thenreminderisnotrestored() {
         runTest {
             val nowMillis = 1_800_000_000_000L
             val futureReminder =
@@ -306,7 +306,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun `whenCancelDelete_thenHidesDeleteDialog`() {
+    fun whencanceldelete_thenhidesdeletedialog() {
         runTest {
             // Given - ViewModel с показанным диалогом
             repository.setItem(testItem)

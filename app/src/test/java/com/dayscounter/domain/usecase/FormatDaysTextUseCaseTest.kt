@@ -24,7 +24,7 @@ class FormatDaysTextUseCaseTest {
     private val useCase = FormatDaysTextUseCase(daysFormatter = daysFormatter)
 
     @Test
-    fun `invoke when Today then returns today string`() {
+    fun invoke_when_today_then_returns_today_string() {
         // Given
         val difference = DaysDifference.Today(timestamp = 1234567890000L)
 
@@ -42,7 +42,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when Today and showMinus false then returns today string`() {
+    fun invoke_when_today_and_showminus_false_then_returns_today_string() {
         // Given
         val difference = DaysDifference.Today(timestamp = 1234567890000L)
 
@@ -60,7 +60,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when Calculated positive days and showMinus true then shows number with sign`() {
+    fun invoke_when_calculated_positive_days_and_showminus_true_then_shows_number_with_sign() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 10)
         val difference =
@@ -93,7 +93,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when Calculated positive days and showMinus false then shows number without sign`() {
+    fun invoke_when_calculated_positive_days_and_showminus_false_then_shows_number_without_sign() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 10)
         val difference =
@@ -126,7 +126,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when Calculated negative days and showMinus true then shows negative number`() {
+    fun invoke_when_calculated_negative_days_and_showminus_true_then_shows_negative_number() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 7)
         val difference =
@@ -160,7 +160,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when Calculated negative days and showMinus false then shows absolute value`() {
+    fun invoke_when_calculated_negative_days_and_showminus_false_then_shows_absolute_value() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 7)
         val difference =
@@ -195,7 +195,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when MONTH_DAY option and showMinus true then passes correct parameter`() {
+    fun invoke_when_month_day_option_and_showminus_true_then_passes_correct_parameter() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         val difference =
@@ -228,7 +228,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when MONTH_DAY option and showMinus false then passes correct parameter`() {
+    fun invoke_when_month_day_option_and_showminus_false_then_passes_correct_parameter() {
         // Given
         val period = TimePeriod(years = 0, months = 2, days = 5)
         val difference =
@@ -263,7 +263,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when YEAR_MONTH_DAY option and showMinus true then passes correct parameter`() {
+    fun invoke_when_year_month_day_option_and_showminus_true_then_passes_correct_parameter() {
         // Given
         val period = TimePeriod(years = 2, months = 2, days = 10)
         val difference =
@@ -296,7 +296,7 @@ class FormatDaysTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when YEAR_MONTH_DAY option and showMinus false then passes correct parameter`() {
+    fun invoke_when_year_month_day_option_and_showminus_false_then_passes_correct_parameter() {
         // Given
         val period = TimePeriod(years = 2, months = 2, days = 10)
         val difference =

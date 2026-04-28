@@ -412,7 +412,7 @@ class MainScreenViewModelTest {
     // ========================================================================
 
     @Test
-    fun `when color filter disabled then shows all items`() {
+    fun when_color_filter_disabled_then_shows_all_items() {
         runTest {
             // Given - элементы с разными colorTag
             val purple = 0xFF570CF0.toInt()
@@ -449,7 +449,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when color filter selected then shows only matching items`() {
+    fun when_color_filter_selected_then_shows_only_matching_items() {
         runTest {
             // Given - элементы с разными colorTag
             val purple = 0xFF570CF0.toInt()
@@ -490,7 +490,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when color filter AND search query then applies both filters`() {
+    fun when_color_filter_and_search_query_then_applies_both_filters() {
         runTest {
             // Given - элементы с разными цветами и разными названиями
             val purple = 0xFF570CF0.toInt()
@@ -533,7 +533,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when items without colorTag then they do not appear in color filter results`() {
+    fun when_items_without_colortag_then_they_do_not_appear_in_color_filter_results() {
         runTest {
             // Given - элементы с colorTag и без
             val purple = 0xFF570CF0.toInt()
@@ -573,7 +573,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `availableColorTags contains only unique colors from items`() {
+    fun availablecolortags_contains_only_unique_colors_from_items() {
         runTest {
             // Given - элементы с повторяющимися цветами
             val purple = 0xFF570CF0.toInt()
@@ -619,7 +619,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when last item with color deleted then availableColors updates`() {
+    fun when_last_item_with_color_deleted_then_availablecolors_updates() {
         runTest {
             // Given - два элемента с разными цветами
             val purple = 0xFF570CF0.toInt()
@@ -660,7 +660,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when selected color disappears then filter auto-resets`() {
+    fun when_selected_color_disappears_then_filter_auto_resets() {
         runTest {
             // Given - элемент с уникальным цветом
             val purple = 0xFF570CF0.toInt()
@@ -695,7 +695,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `clearColorTagFilter resets selected color to null`() {
+    fun clearcolortagfilter_resets_selected_color_to_null() {
         runTest {
             // Given - элемент с цветом
             val purple = 0xFF570CF0.toInt()
@@ -729,7 +729,7 @@ class MainScreenViewModelTest {
     // ========================================================================
 
     @Test
-    fun `when color filter saved in DataStore then restored after ViewModel init`() {
+    fun when_color_filter_saved_in_datastore_then_restored_after_viewmodel_init() {
         runTest {
             // Given - элемент с цветом и пред установленный фильтр в DataStore
             val purple = 0xFF570CF0.toInt()
@@ -755,7 +755,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when color filter changed then saved to DataStore`() {
+    fun when_color_filter_changed_then_saved_to_datastore() {
         runTest {
             // Given - элемент с цветом
             val purple = 0xFF570CF0.toInt()
@@ -792,7 +792,7 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `when clearColorTagFilter called then null saved to DataStore`() {
+    fun when_clearcolortagfilter_called_then_null_saved_to_datastore() {
         runTest {
             // Given - элемент с цветом и установленный фильтр
             val purple = 0xFF570CF0.toInt()

@@ -37,7 +37,7 @@ class IosBackupIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `full cycle - parse ios-backup-sample json and convert to items`() {
+    fun full_cycle_parse_ios_backup_sample_json_and_convert_to_items() {
         // Given - читаем JSON из ресурсов
         val inputStream =
             javaClass.classLoader
@@ -85,7 +85,7 @@ class IosBackupIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `full cycle - convert all ios items to backup items`() {
+    fun full_cycle_convert_all_ios_items_to_backup_items() {
         // Given
         val inputStream =
             javaClass.classLoader
@@ -116,7 +116,7 @@ class IosBackupIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `full cycle - parse colorTag from base64 to hex`() {
+    fun full_cycle_parse_colortag_from_base64_to_hex() {
         // Given
         val inputStream =
             javaClass.classLoader
@@ -150,7 +150,7 @@ class IosBackupIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `full cycle - convert backup items to domain items`() {
+    fun full_cycle_convert_backup_items_to_domain_items() {
         // Given
         val inputStream =
             javaClass.classLoader
@@ -186,7 +186,7 @@ class IosBackupIntegrationTest {
     // MARK: - Timestamp Conversion Tests
 
     @Test
-    fun `timestamp conversion - seconds to milliseconds`() {
+    fun timestamp_conversion_seconds_to_milliseconds() {
         // Given - iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
         // -278889600.0 сек с 2001 = 699417600000 мс с 1970
         val iosItem =
@@ -207,7 +207,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `timestamp conversion - preserves date correctly`() {
+    fun timestamp_conversion_preserves_date_correctly() {
         // Given - 1 января 2000 года 00:00:00 UTC в секундах с 2001-01-01
         // 946684800 сек с 1970 - 978307200 = -31622400 сек с 2001
         val timestamp2000 = -31622400.0
@@ -239,7 +239,7 @@ class IosBackupIntegrationTest {
     // MARK: - ColorTag Parsing Tests
 
     @Test
-    fun `colorTag parsing - null colorTag remains null`() {
+    fun colortag_parsing_null_colortag_remains_null() {
         // Given
         val iosItem =
             IosBackupItem(
@@ -259,7 +259,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `colorTag parsing - valid base64 converts to hex`() {
+    fun colortag_parsing_valid_base64_converts_to_hex() {
         // Given - Base64 для зеленого цвета (из существующих тестов)
         val greenBase64 =
             "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05T" +
@@ -291,7 +291,7 @@ class IosBackupIntegrationTest {
     // MARK: - DisplayOption Validation Tests
 
     @Test
-    fun `displayOption validation - valid options convert correctly`() {
+    fun displayoption_validation_valid_options_convert_correctly() {
         // Given
         val validOptions = listOf("day", "monthDay", "yearMonthDay")
 
@@ -315,7 +315,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `displayOption validation - invalid option returns null`() {
+    fun displayoption_validation_invalid_option_returns_null() {
         // Given
         val iosItem =
             IosBackupItem(
@@ -337,7 +337,7 @@ class IosBackupIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `round trip - item to iOS backup and back preserves data`() {
+    fun round_trip_item_to_ios_backup_and_back_preserves_data() {
         // Given
         val inputStream =
             javaClass.classLoader
@@ -367,7 +367,7 @@ class IosBackupIntegrationTest {
     // MARK: - Edge Cases Tests
 
     @Test
-    fun `edge case - empty details converts to empty string in item`() {
+    fun edge_case_empty_details_converts_to_empty_string_in_item() {
         // Given
         val iosItem =
             IosBackupItem(
@@ -388,7 +388,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `edge case - empty title is preserved`() {
+    fun edge_case_empty_title_is_preserved() {
         // Given
         val iosItem =
             IosBackupItem(
@@ -411,7 +411,7 @@ class IosBackupIntegrationTest {
     // MARK: - NSKeyedArchiver Detection Tests
 
     @Test
-    fun `nsKeyedArchiver detection - valid base64 is detected`() {
+    fun nskeyedarchiver_detection_valid_base64_is_detected() {
         // Given
         val greenBase64 =
             "YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMSAAGGoF8QD05T" +
@@ -427,7 +427,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `nsKeyedArchiver detection - hex color is not detected as nsKeyedArchiver`() {
+    fun nskeyedarchiver_detection_hex_color_is_not_detected_as_nskeyedarchiver() {
         // Given
         val hexColor = "#FF0000"
 
@@ -436,7 +436,7 @@ class IosBackupIntegrationTest {
     }
 
     @Test
-    fun `nsKeyedArchiver detection - empty string is not detected`() {
+    fun nskeyedarchiver_detection_empty_string_is_not_detected() {
         // Given
         val empty = ""
 

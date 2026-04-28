@@ -22,7 +22,7 @@ class IosBackupItemTest {
             "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
 
     @Test
-    fun `toBackupItem converts iOS timestamp (seconds) to Android timestamp (milliseconds)`() {
+    fun tobackupitem_converts_ios_timestamp_seconds_to_android_timestamp_milliseconds() {
         // Given
         // iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
         // -278889600.0 сек с 2001 = 699417600000 мс с 1970
@@ -44,7 +44,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem converts iOS timestamp with fractional seconds`() {
+    fun tobackupitem_converts_ios_timestamp_with_fractional_seconds() {
         // Given
         // iOS использует секунды с 2001-01-01 (timeIntervalSinceReferenceDate)
         // -208943530.470082 сек с 2001 = 769363669529 мс с 1970
@@ -66,7 +66,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem preserves title and details`() {
+    fun tobackupitem_preserves_title_and_details() {
         // Given
         val iosBackupItem =
             IosBackupItem(
@@ -87,7 +87,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem preserves displayOption`() {
+    fun tobackupitem_preserves_displayoption() {
         // Given
         val iosBackupItem =
             IosBackupItem(
@@ -107,7 +107,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem preserves colorTag as null when not present`() {
+    fun tobackupitem_preserves_colortag_as_null_when_not_present() {
         // Given
         val iosBackupItem =
             IosBackupItem(
@@ -127,7 +127,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem returns null for invalid displayOption`() {
+    fun tobackupitem_returns_null_for_invalid_displayoption() {
         // Given
         val iosBackupItem =
             IosBackupItem(
@@ -146,7 +146,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem with iOS colorTag Base64 parses to hex format`() {
+    fun tobackupitem_with_ios_colortag_base64_parses_to_hex_format() {
         // Given - реальный пример из iOS с Base64 NSKeyedArchiver
         val iosBackupItem =
             IosBackupItem(
@@ -166,7 +166,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem handles null details`() {
+    fun tobackupitem_handles_null_details() {
         // Given
         val iosBackupItem =
             IosBackupItem(
@@ -186,7 +186,7 @@ class IosBackupItemTest {
     }
 
     @Test
-    fun `toBackupItem handles yearMonthDay displayOption`() {
+    fun tobackupitem_handles_yearmonthday_displayoption() {
         // Given
         val iosBackupItem =
             IosBackupItem(
