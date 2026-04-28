@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,12 +51,14 @@ private const val PREVIEW_DAY = 27
 private const val PREVIEW_HOUR = 16
 private const val PREVIEW_MINUTE = 8
 private const val PREVIEW_INTERVAL = "3"
+internal const val REMINDER_TOGGLE_TEST_TAG = "reminder_toggle"
 
 @Composable
 internal fun ReminderSettingsSection(
     reminderUiState: ReminderFormUiState,
     onValueChange: () -> Unit,
-    onReminderToggleRequested: ((Boolean) -> Unit)? = null
+    onReminderToggleRequested: ((Boolean) -> Unit)? = null,
+    expandedContentModifier: Modifier = Modifier
 ) {
     Text(
         text = stringResource(R.string.reminder_settings),
@@ -63,7 +66,29 @@ internal fun ReminderSettingsSection(
         color = MaterialTheme.colorScheme.onSurface
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
+    ReminderToggleRow(
+        reminderUiState = reminderUiState,
+        onValueChange = onValueChange,
+        onReminderToggleRequested = onReminderToggleRequested
+    )
 
+    if (!reminderUiState.isEnabled.value) {
+        return
+    }
+
+    ReminderExpandedContent(
+        reminderUiState = reminderUiState,
+        onValueChange = onValueChange,
+        expandedContentModifier = expandedContentModifier
+    )
+}
+
+@Composable
+private fun ReminderToggleRow(
+    reminderUiState: ReminderFormUiState,
+    onValueChange: () -> Unit,
+    onReminderToggleRequested: ((Boolean) -> Unit)?
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -75,6 +100,7 @@ internal fun ReminderSettingsSection(
             modifier = Modifier.weight(1f)
         )
         Switch(
+            modifier = Modifier.testTag(REMINDER_TOGGLE_TEST_TAG),
             checked = reminderUiState.isEnabled.value,
             onCheckedChange = {
                 onReminderToggleRequested?.invoke(it) ?: run {
@@ -84,39 +110,44 @@ internal fun ReminderSettingsSection(
             }
         )
     }
+}
 
-    if (!reminderUiState.isEnabled.value) {
-        return
-    }
+@Composable
+private fun ReminderExpandedContent(
+    reminderUiState: ReminderFormUiState,
+    onValueChange: () -> Unit,
+    expandedContentModifier: Modifier
+) {
+    Column(modifier = expandedContentModifier) {
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+        DaysRadioButton(
+            text = stringResource(R.string.reminder_mode_on_date),
+            selected = reminderUiState.mode.value == ReminderMode.AT_DATE,
+            onClick = {
+                reminderUiState.mode.value = ReminderMode.AT_DATE
+                onValueChange()
+            }
+        )
+        DaysRadioButton(
+            text = stringResource(R.string.reminder_mode_after),
+            selected = reminderUiState.mode.value == ReminderMode.AFTER_INTERVAL,
+            onClick = {
+                reminderUiState.mode.value = ReminderMode.AFTER_INTERVAL
+                onValueChange()
+            }
+        )
 
-    DaysRadioButton(
-        text = stringResource(R.string.reminder_mode_on_date),
-        selected = reminderUiState.mode.value == ReminderMode.AT_DATE,
-        onClick = {
-            reminderUiState.mode.value = ReminderMode.AT_DATE
-            onValueChange()
-        }
-    )
-    DaysRadioButton(
-        text = stringResource(R.string.reminder_mode_after),
-        selected = reminderUiState.mode.value == ReminderMode.AFTER_INTERVAL,
-        onClick = {
-            reminderUiState.mode.value = ReminderMode.AFTER_INTERVAL
-            onValueChange()
-        }
-    )
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+        when (reminderUiState.mode.value) {
+            ReminderMode.AT_DATE -> {
+                ReminderDateTimeSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
+            }
 
-    when (reminderUiState.mode.value) {
-        ReminderMode.AT_DATE -> {
-            ReminderDateTimeSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
-        }
-
-        ReminderMode.AFTER_INTERVAL -> {
-            ReminderAfterSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
+            ReminderMode.AFTER_INTERVAL -> {
+                ReminderAfterSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
+            }
         }
     }
 }

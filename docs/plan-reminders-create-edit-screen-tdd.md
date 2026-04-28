@@ -17,24 +17,12 @@
 
 ## 2. Фактически реализовано
 
-1. [x] Домен напоминаний: модели `Reminder`, `ReminderMode`, `ReminderIntervalUnit`, `ReminderStatus`.
-2. [x] Доменная валидация/расчет времени: `BuildReminderUseCase` + `ReminderRequest`.
-3. [x] Data слой: `ReminderEntity`, `ReminderDao`, `ReminderMapper`, `ReminderRepository`, `ReminderRepositoryImpl`.
-4. [x] Миграция БД `1 -> 2`: таблица `reminders`, индекс, подключение миграции в `DaysDatabase`.
-5. [x] Инфраструктура уведомлений: `AlarmReminderScheduler`, `ReminderAlarmReceiver`, `ReminderBootReceiver`, `ReminderManager`/`DefaultReminderManager`.
-6. [x] Навигация по уведомлению: обработка intent в `MainActivity`, переход на `Detail`, consume + cancel notification.
-7. [x] Интеграция в Create/Edit:
-1. вынесена секция `ReminderSettingsSection`,
-2. состояние в `CreateEditUiState.reminder`,
-3. `saveItem(...)` во ViewModel с сохранением/очисткой reminder,
-4. `hasChanges` учитывает fingerprint напоминания.
-8. [x] Локализация новых строк (`values`/`values-ru`) для UI и notification channel/content.
-9. [x] Превью секции напоминаний (enabled/disabled).
-10. [x] На `DetailScreen` показывается предстоящая дата/время активного reminder для записи.
-11. [x] `DetailScreenViewModel` стабилизирован для дублирующих эмиссий (`distinctUntilChanged` до `filterNotNull`) и обновляет state только при фактическом изменении.
-12. [x] Добавлен unit-тест на сценарий поздней повторной эмиссии после удаления, подтверждающий что reminder не восстанавливается.
-13. [x] Реализован runtime UX-поток запроса `POST_NOTIFICATIONS` при включении reminder на Android 13+.
-14. [x] Добавлены unit-тесты policy принятия решения по переключению reminder с учетом runtime permission.
+1. [x] Реализованы domain/data/DB слои напоминаний, включая миграцию `1 -> 2`.
+2. [x] Реализована инфраструктура уведомлений и одноразовый flow: schedule -> tap -> `Detail` -> consume/cancel.
+3. [x] Интегрирован reminder в Create/Edit и Detail (состояние, сохранение, `hasChanges`, показ предстоящего напоминания).
+4. [x] Добавлены локализации, превью и UX-улучшения секции reminder (title из записи, default date +1 день, auto-scroll).
+5. [x] Реализован runtime-запрос `POST_NOTIFICATIONS` на Android 13+.
+6. [x] Добавлено покрытие unit/integration/compose тестами для reminder-flow.
 
 ## 3. TDD-прогресс по фазам
 
@@ -42,10 +30,6 @@
 
 1. [x] Unit-тесты на расчет `targetEpochMillis` для `На дату` и `Через N`.
 2. [x] Unit-тесты валидации (невалидный `N`, прошедшая дата/время).
-
-Реализация/тесты:
-- `BuildReminderUseCaseTest`
-- `BuildReminderUseCase`
 
 ### Фаза B. Data слой
 
@@ -59,13 +43,15 @@
 
 1. [x] Реализация scheduler/receiver/channel/boot-reschedule.
 2. [x] Unit-тесты на orchestration в `DefaultReminderManagerTest`.
-3. [ ] Unit/robolectric тесты непосредственно для `AlarmReminderScheduler` и `ReminderAlarmReceiver` (PendingIntent/extras/канал).
+3. [~] Платформенные тесты scheduler/receiver:
+   - [x] `ReminderAlarmReceiverInstrumentedTest` (валидный/невалидный payload + канал).
+   - [~] `AlarmReminderSchedulerInstrumentedTest`: покрыт сценарий cancel/remove `PendingIntent`, проверка exact-fire всё ещё pending.
 
 ### Фаза D. Навигация из уведомления
 
 1. [x] Реализована обработка intent + переход в `DetailScreen(itemId)`.
 2. [x] Реализовано consume/removal эффекта после открытия из уведомления.
-3. [ ] Добавить unit/integration тесты для `MainActivity` intent-flow и регресса обычного старта.
+3. [x] Добавлены unit-тесты intent-flow обычного старта (`ReminderIntentParserTest`) и интеграция parser в `MainActivity`.
 
 ### Фаза E. ViewModel + форма Create/Edit
 
@@ -76,11 +62,12 @@
 
 ### Фаза F. UI тесты Compose
 
-1. [ ] Toggle по умолчанию выключен.
-2. [ ] При включении показываются параметры.
-3. [ ] Режим `На дату`: доступны date/time picker.
-4. [ ] Режим `Через N`: только цифры + переключение единиц.
-5. [ ] Невалидные значения блокируют сохранение.
+1. [x] Toggle по умолчанию выключен (параметры скрыты).
+2. [x] При включении показываются параметры.
+3. [x] Режим `На дату`: отображаются поля даты/времени.
+4. [~] Режим `Через N`: отображение interval/unit закрыто compose-тестом, фильтрация only-digits покрыта unit-тестами состояния.
+5. [ ] Невалидные значения блокируют сохранение (нужен отдельный compose/integration сценарий кнопки Save).
+6. [x] Для маленького экрана добавлен auto-scroll к настройкам reminder при включении (покрыт `CreateEditReminderAutoScrollUiTest`).
 
 ### Фаза G. Сквозные сценарии (integration)
 
@@ -122,35 +109,37 @@
 - Остаток: [ ] при необходимости добавить отдельный UX-фидбек после отказа в разрешении.
 
 5. Тестовое покрытие платформенной части:
-- Статус: [ ] нужно расширить (receiver/scheduler/MainActivity intent tests).
+- Статус: [~] расширено частично (receiver + MainActivity intent parser tests).
+- Остаток: [ ] дополнить scheduler-тест проверкой exact-fire/schedule сценария на API 36.
 
 ## 6. Актуальные следующие шаги
 
-1. Добавить тесты фазы C/D/F/G (приоритет: C -> D -> F -> G).
-2. Добавить UI-сообщения об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
-3. После расширения покрытия прогнать полный `make test` и зафиксировать финальный DoD.
+1. Добавить оставшиеся тесты фазы C/F/G:
+   - расширить `AlarmReminderScheduler`-тест проверкой exact-fire/schedule,
+   - compose/integration тест блокировки Save при невалидном reminder,
+   - минимум один сквозной integration-сценарий create/edit -> consume -> повторная постановка reminder.
+2. Добавить UI-сообщение об ошибке валидации reminder (сейчас сохранение блокируется, но без явного текстового фидбека в форме).
+3. После закрытия пункта 1 прогнать полный цикл проверок: `make format`, `make test`, `make lint`.
 
 ## 6.1. Исправления по ревью (новый инкремент)
 
-1. [x] Убрать дублирование fingerprint-логики:
-   `CreateEditScreenViewModel` должен использовать `toChangeFingerprint()` из `CreateEditReminderState.kt` как единый источник.
-2. [x] Исключить риск обхода reminder-flow:
-   удалить legacy-методы `createItem`/`updateItem` из `CreateEditScreenViewModel` и перевести тесты на `saveItem(...)`.
-3. [x] Добавить прямые unit-тесты для `ReminderFormUiState`:
-   `toReminderRequest`, `isInputValid`, fingerprint-конвертация.
-4. [x] Показать в `DetailScreen` предстоящую дату/время активного reminder для текущей записи.
-5. [x] Расширить `DetailScreenViewModel` тестами для reminder-поля в `Success` и проверкой совместимости удаления записи с очисткой reminder.
-6. [x] Проверить регрессии по бэкапам и существующим сценариям:
-   обязательный прогон `make test` после форматирования.
-7. [x] Статус инкремента: выполнено, тесты зелёные (`make format`, таргетные reminder/detail-тесты, `make test`).
-8. [x] Дополнительно закрыты микро-улучшения из ревью: защита от лишних обновлений state и тест на stale emission после удаления.
+1. [x] Устранено дублирование fingerprint-логики через единый `toChangeFingerprint()`.
+2. [x] Удалены legacy `createItem`/`updateItem`; сохранение унифицировано через `saveItem(...)`.
+3. [x] Добавлены прямые unit-тесты `ReminderFormUiState` (`toReminderRequest`, `isInputValid`, fingerprint).
+4. [x] Добавлен показ предстоящего reminder в `DetailScreen` и расширены тесты `DetailScreenViewModel`.
+5. [x] Выполнены регрессионные проверки (форматирование и тесты), внесены микро-улучшения state-flow.
+
+## 6.2. Инкремент UX напоминаний (2026-04-29)
+
+1. [x] Улучшен UX reminder: title уведомления из записи, default date +1 день, auto-scroll на малых экранах.
+2. [x] Пройдены проверки качества: `make format`, `make test`, `make lint`, таргетные `connectedDebugAndroidTest`.
 
 ## 7. Definition of Done (обновленный)
 
 1. [~] Все новые unit/integration/UI тесты зелёные.
-Сейчас: unit/часть integration закрыты, compose/integration сценарии в плане.
+Сейчас: unit + новые reminder compose/instrumentation тесты зелёные; остаётся scheduler-test и отдельный сценарий Save-disable в compose/integration.
 2. [x] `make format` и `make test` проходят.
-Сейчас: `make format` и полный `make test` выполнены после инкремента с исправлениями по ревью.
+Сейчас: `make format` и полный `make test` выполнены после инкремента с исправлениями по ревью; `make lint` также проходит без новых предупреждений.
 3. [x] На форме есть новый блок напоминаний внизу с требуемым поведением.
 4. [x] Уведомление одноразовое и открывает детали нужной записи.
 5. [x] После открытия из уведомления reminder помечается как `CONSUMED`; повторная постановка возможна.

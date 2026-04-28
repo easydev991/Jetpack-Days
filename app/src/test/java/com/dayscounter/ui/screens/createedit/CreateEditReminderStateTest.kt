@@ -15,6 +15,21 @@ import java.time.LocalTime
 
 class CreateEditReminderStateTest {
     @Test
+    fun defaultReminderDate_whenCalled_thenReturnsNextDay() {
+        val result = defaultReminderDate(today = LocalDate.of(2026, 4, 29))
+
+        assertEquals(LocalDate.of(2026, 4, 30), result)
+    }
+
+    @Test
+    fun reminderFormUiState_whenCreated_thenDefaultSelectedDateIsNextDay() {
+        val expected = LocalDate.now().plusDays(1)
+        val state = ReminderFormUiState()
+
+        assertEquals(expected, state.selectedDate.value)
+    }
+
+    @Test
     fun toreminderrequest_when_disabled_then_returns_null() {
         val state = ReminderFormUiState()
         state.isEnabled.value = false

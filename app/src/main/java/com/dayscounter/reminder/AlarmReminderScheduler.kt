@@ -20,8 +20,13 @@ class AlarmReminderScheduler(
         itemTitle: String
     ) {
         val alarm = alarmManager ?: return
-        val pendingIntent = buildPendingIntent(reminder.itemId, itemTitle)
         cancel(reminder.itemId)
+        val pendingIntent =
+            buildPendingIntent(
+                itemId = reminder.itemId,
+                itemTitle = itemTitle,
+                flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            ) ?: return
 
         try {
             alarm.setExactAndAllowWhileIdle(
@@ -41,13 +46,21 @@ class AlarmReminderScheduler(
 
     override fun cancel(itemId: Long) {
         val alarm = alarmManager ?: return
-        alarm.cancel(buildPendingIntent(itemId, itemTitle = null))
+        val pendingIntent =
+            buildPendingIntent(
+                itemId = itemId,
+                itemTitle = null,
+                flags = PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            ) ?: return
+        alarm.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 
     private fun buildPendingIntent(
         itemId: Long,
-        itemTitle: String?
-    ): PendingIntent {
+        itemTitle: String?,
+        flags: Int
+    ): PendingIntent? {
         val intent =
             Intent(context, ReminderAlarmReceiver::class.java).apply {
                 action = ReminderIntentContract.ACTION_FIRE_REMINDER
@@ -61,7 +74,7 @@ class AlarmReminderScheduler(
             context,
             ReminderIntentContract.requestCodeForItem(itemId),
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            flags
         )
     }
 }

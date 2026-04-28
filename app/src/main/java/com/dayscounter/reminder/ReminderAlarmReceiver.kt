@@ -49,9 +49,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
             )
 
         val title =
-            if (itemTitle.isNotBlank()) {
-                context.getString(R.string.reminder_notification_title_with_item, itemTitle)
-            } else {
+            itemTitle.ifBlank {
                 context.getString(R.string.reminder_notification_title)
             }
 

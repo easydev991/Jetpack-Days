@@ -20,6 +20,7 @@ import com.dayscounter.data.preferences.createAppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.reminder.ReminderIntentContract
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.reminder.extractReminderOpenItemId
 import com.dayscounter.ui.screens.root.RootScreen
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.ui.viewmodel.MainActivityViewModel
@@ -74,20 +75,7 @@ class MainActivity : ComponentActivity() {
         intent: Intent?,
         reminderManager: ReminderManager
     ) {
-        val currentIntent = intent ?: return
-        val hasReminderAction = currentIntent.action == ReminderIntentContract.ACTION_OPEN_FROM_REMINDER
-        val hasReminderExtra = currentIntent.hasExtra(ReminderIntentContract.EXTRA_ITEM_ID)
-
-        val itemId =
-            if (hasReminderAction || hasReminderExtra) {
-                currentIntent.getLongExtra(ReminderIntentContract.EXTRA_ITEM_ID, -1L)
-            } else {
-                -1L
-            }
-
-        if (itemId <= 0L) {
-            return
-        }
+        val itemId = intent.extractReminderOpenItemId() ?: return
 
         pendingOpenDetailItemId.value = itemId
 

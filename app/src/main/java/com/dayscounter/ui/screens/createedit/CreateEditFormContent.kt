@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,8 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -131,6 +135,9 @@ private fun ColorAndDisplayOptionSection(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun CreateEditFormContent(params: CreateEditFormParams) {
+    val reminderSettingsBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val previousReminderEnabled = rememberSaveable { mutableStateOf(params.uiStates.reminder.isEnabled.value) }
+
     val onValueChange: () -> Unit = {
         if (params.itemId != null) {
             val timestamp =
@@ -170,8 +177,17 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
         ReminderSettingsSection(
             reminderUiState = params.uiStates.reminder,
             onValueChange = onValueChange,
-            onReminderToggleRequested = rememberReminderToggleHandler(params, onValueChange)
+            onReminderToggleRequested = rememberReminderToggleHandler(params = params, onValueChange = onValueChange),
+            expandedContentModifier = Modifier.bringIntoViewRequester(reminderSettingsBringIntoViewRequester)
         )
+    }
+
+    val isReminderEnabled = params.uiStates.reminder.isEnabled.value
+    LaunchedEffect(isReminderEnabled) {
+        if (!previousReminderEnabled.value && isReminderEnabled) {
+            reminderSettingsBringIntoViewRequester.bringIntoView()
+        }
+        previousReminderEnabled.value = isReminderEnabled
     }
 
     if (params.uiStates.reminder.showDatePicker.value) {
@@ -313,7 +329,7 @@ internal fun rememberCreateEditUiStates(): CreateEditUiState =
                 mode = rememberSaveable { mutableStateOf(com.dayscounter.domain.model.ReminderMode.AT_DATE) },
                 selectedDate =
                     rememberSaveable(stateSaver = NullableLocalDateSaver) {
-                        mutableStateOf(java.time.LocalDate.now())
+                        mutableStateOf(defaultReminderDate())
                     },
                 showDatePicker = rememberSaveable { mutableStateOf(false) },
                 hour =

@@ -18,7 +18,7 @@ import java.time.ZoneId
 data class ReminderFormUiState(
     val isEnabled: MutableState<Boolean> = mutableStateOf(false),
     val mode: MutableState<ReminderMode> = mutableStateOf(ReminderMode.AT_DATE),
-    val selectedDate: MutableState<LocalDate?> = mutableStateOf(LocalDate.now()),
+    val selectedDate: MutableState<LocalDate?> = mutableStateOf(defaultReminderDate()),
     val showDatePicker: MutableState<Boolean> = mutableStateOf(false),
     val hour: MutableState<Int> = mutableStateOf(LocalTime.now().hour),
     val minute: MutableState<Int> = mutableStateOf(LocalTime.now().minute),
@@ -26,6 +26,8 @@ data class ReminderFormUiState(
     val intervalUnit: MutableState<ReminderIntervalUnit> = mutableStateOf(ReminderIntervalUnit.DAY),
     val isInitializedFromSource: MutableState<Boolean> = mutableStateOf(false)
 )
+
+internal fun defaultReminderDate(today: LocalDate = LocalDate.now()): LocalDate = today.plusDays(1)
 
 internal fun isCreateEditFormValid(
     title: String,
