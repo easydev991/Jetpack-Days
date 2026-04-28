@@ -27,6 +27,13 @@ data class ReminderFormUiState(
     val isInitializedFromSource: MutableState<Boolean> = mutableStateOf(false)
 )
 
+internal fun isCreateEditFormValid(
+    title: String,
+    selectedDate: LocalDate?,
+    reminderUiState: ReminderFormUiState,
+    currentDateTime: LocalDateTime = LocalDateTime.now()
+): Boolean = title.isNotEmpty() && selectedDate != null && reminderUiState.isInputValid(currentDateTime)
+
 internal fun ReminderFormUiState.toReminderRequest(itemId: Long): ReminderRequest? {
     if (!isEnabled.value) {
         return null

@@ -16,7 +16,6 @@ import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.UserActionType
 import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
@@ -60,8 +59,12 @@ private fun CreateEditScreenContent(
 
     loadItemData(itemId, uiState, uiStates)
 
-    val isReminderValid = uiStates.reminder.isInputValid(LocalDateTime.now())
-    val isValidData = uiStates.title.value.isNotEmpty() && uiStates.selectedDate.value != null && isReminderValid
+    val isValidData =
+        isCreateEditFormValid(
+            title = uiStates.title.value,
+            selectedDate = uiStates.selectedDate.value,
+            reminderUiState = uiStates.reminder
+        )
     val isEditing = itemId != null
 
     Scaffold(

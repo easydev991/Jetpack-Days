@@ -144,4 +144,56 @@ class CreateEditReminderStateTest {
 
         assertEquals(domainFingerprint, uiFingerprint)
     }
+
+    @Test
+    fun `isCreateEditFormValid when title and date valid and reminder disabled then true`() {
+        val state = ReminderFormUiState()
+        state.isEnabled.value = false
+
+        val isValid =
+            isCreateEditFormValid(
+                title = "Запись",
+                selectedDate = LocalDate.of(2026, 5, 10),
+                reminderUiState = state,
+                currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0)
+            )
+
+        assertTrue(isValid)
+    }
+
+    @Test
+    fun `isCreateEditFormValid when reminder enabled and at date is not configured then false`() {
+        val state = ReminderFormUiState()
+        state.isEnabled.value = true
+        state.mode.value = ReminderMode.AT_DATE
+        state.selectedDate.value = null
+
+        val isValid =
+            isCreateEditFormValid(
+                title = "Запись",
+                selectedDate = LocalDate.of(2026, 5, 10),
+                reminderUiState = state,
+                currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0)
+            )
+
+        assertFalse(isValid)
+    }
+
+    @Test
+    fun `isCreateEditFormValid when reminder enabled and interval is empty then false`() {
+        val state = ReminderFormUiState()
+        state.isEnabled.value = true
+        state.mode.value = ReminderMode.AFTER_INTERVAL
+        state.intervalValue.value = ""
+
+        val isValid =
+            isCreateEditFormValid(
+                title = "Запись",
+                selectedDate = LocalDate.of(2026, 5, 10),
+                reminderUiState = state,
+                currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0)
+            )
+
+        assertFalse(isValid)
+    }
 }
