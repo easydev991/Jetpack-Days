@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".DaysCounterApplication"
@@ -23,6 +25,19 @@
             android:exported="true"
             android:theme="@style/Theme.JetpackDays">
         </activity>
+
+        <receiver
+            android:name=".reminder.ReminderAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".reminder.ReminderBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Activity Aliases для смены иконки приложения -->
         <!-- Activity Alias для DEFAULT иконки (светлая тема, включен по умолчанию) -->

@@ -1,3 +1,5 @@
+@file:Suppress("MaxLineLength")
+
 package com.dayscounter.di
 
 import android.content.Context
@@ -10,25 +12,20 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
+import com.dayscounter.data.repository.ReminderRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.domain.repository.ReminderRepository
+import com.dayscounter.reminder.AlarmReminderScheduler
+import com.dayscounter.reminder.DefaultReminderManager
+import com.dayscounter.reminder.ReminderManager
 
 /**
  * Модуль внедрения зависимостей для приложения.
- *
- * Использует ручной подход к DI через factory методы.
- *
- * Создает экземпляры репозиториев и настроек.
  */
 object AppModule {
     @Volatile
     private var analyticsService: AnalyticsService? = null
 
-    /**
-     * Создает AnalyticsService с провайдерами в зависимости от типа сборки.
-     *
-     * @param context Контекст приложения
-     * @return Экземпляр AnalyticsService
-     */
     fun createAnalyticsService(context: Context): AnalyticsService {
         val cachedService = analyticsService
         if (cachedService != null) return cachedService
@@ -49,28 +46,23 @@ object AppModule {
         }
     }
 
-    /**
-     * Создает ResourceProvider для работы со строковыми ресурсами.
-     *
-     * @return Экземпляр ResourceProvider
-     */
     val resourceProvider: ResourceProvider by lazy {
         FormatterModule.createResourceProvider(DaysCounterApplication.instance)
     }
 
-    /**
-     * Создает репозиторий для работы с событиями.
-     *
-     * @param database База данных Room
-     * @return Экземпляр ItemRepository
-     */
     fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao())
 
-    /**
-     * Создает DataStore для хранения настроек приложения.
-     *
-     * @param context Контекст приложения
-     * @return Экземпляр AppSettingsDataStore
-     */
+    fun createReminderRepository(database: DaysDatabase): ReminderRepository = ReminderRepositoryImpl(database.reminderDao())
+
+    fun createReminderManager(
+        context: Context,
+        database: DaysDatabase
+    ): ReminderManager =
+        DefaultReminderManager(
+            reminderRepository = createReminderRepository(database),
+            itemRepository = createItemRepository(database),
+            reminderScheduler = AlarmReminderScheduler(context.applicationContext)
+        )
+
     fun createAppSettingsDataStore(context: Context): AppSettingsDataStore = AppSettingsDataStore(context)
 }

@@ -36,7 +36,7 @@ class GetDaysAnalysisTextUseCaseTest {
         )
 
     @Test
-    fun `invoke when event in future with DAY option then returns text without minus`() {
+    fun invoke_when_event_in_future_with_day_option_then_returns_text_without_minus() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(7)
@@ -69,7 +69,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in future with MONTH_DAY option then returns correct text`() {
+    fun invoke_when_event_in_future_with_month_day_option_then_returns_correct_text() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(40)
@@ -116,7 +116,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in future with YEAR_MONTH_DAY option then returns correct text`() {
+    fun invoke_when_event_in_future_with_year_month_day_option_then_returns_correct_text() {
         // Given
         val now = LocalDate.now()
         val futureDate = now.plusDays(800)
@@ -150,7 +150,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in past with DAY option then returns correct text`() {
+    fun invoke_when_event_in_past_with_day_option_then_returns_correct_text() {
         // Given
         val now = LocalDate.now()
         val pastDate = now.minusDays(10)
@@ -183,7 +183,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in past with MONTH_DAY option then returns correct text`() {
+    fun invoke_when_event_in_past_with_month_day_option_then_returns_correct_text() {
         // Given
         val now = LocalDate.now()
         val pastDate = now.minusDays(70)
@@ -223,7 +223,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event in past with YEAR_MONTH_DAY option then returns correct text`() {
+    fun invoke_when_event_in_past_with_year_month_day_option_then_returns_correct_text() {
         // Given
         val now = LocalDate.now()
         val pastDate = now.minusDays(400)
@@ -262,7 +262,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event is today then returns today string`() {
+    fun invoke_when_event_is_today_then_returns_today_string() {
         // Given
         val now = Instant.now().toEpochMilli()
         val item =
@@ -288,7 +288,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when event is today with zero totalDays then returns today string`() {
+    fun invoke_when_event_is_today_with_zero_totaldays_then_returns_today_string() {
         // Given
         val now = LocalDate.now()
         val timestamp = now.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -311,7 +311,7 @@ class GetDaysAnalysisTextUseCaseTest {
     }
 
     @Test
-    fun `invoke when custom date provided then uses custom date for calculation`() {
+    fun invoke_when_custom_date_provided_then_uses_custom_date_for_calculation() {
         // Given
         val customDate = LocalDate.of(2025, 1, 1)
         val eventDate = LocalDate.of(2025, 1, 8)

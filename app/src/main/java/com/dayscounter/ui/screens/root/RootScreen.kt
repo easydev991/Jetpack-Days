@@ -3,6 +3,7 @@ package com.dayscounter.ui.screens.root
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,6 +27,8 @@ import com.dayscounter.ui.viewmodel.RootScreenViewModel
 fun RootScreen(
     modifier: Modifier = Modifier,
     analyticsService: AnalyticsService,
+    pendingOpenDetailItemId: Long? = null,
+    onPendingOpenHandled: () -> Unit = {},
     viewModel: RootScreenViewModel =
         androidx.lifecycle.viewmodel.compose
             .viewModel()
@@ -33,7 +36,9 @@ fun RootScreen(
     RootScreenContent(
         modifier = modifier,
         analyticsService = analyticsService,
-        viewModel = viewModel
+        viewModel = viewModel,
+        pendingOpenDetailItemId = pendingOpenDetailItemId,
+        onPendingOpenHandled = onPendingOpenHandled
     )
 }
 
@@ -45,7 +50,9 @@ fun RootScreen(
 private fun RootScreenContent(
     modifier: Modifier = Modifier,
     analyticsService: AnalyticsService,
-    viewModel: RootScreenViewModel
+    viewModel: RootScreenViewModel,
+    pendingOpenDetailItemId: Long?,
+    onPendingOpenHandled: () -> Unit
 ) {
     val navController = rememberNavController()
     val items =
@@ -65,6 +72,12 @@ private fun RootScreenContent(
 
     // Обновляем вкладку при изменении маршрута
     UpdateTabBasedOnRoute(navController, viewModel)
+
+    LaunchedEffect(pendingOpenDetailItemId) {
+        val itemId = pendingOpenDetailItemId ?: return@LaunchedEffect
+        navController.navigate(Screen.ItemDetail.createRoute(itemId))
+        onPendingOpenHandled()
+    }
 
     Scaffold(
         modifier = modifier,

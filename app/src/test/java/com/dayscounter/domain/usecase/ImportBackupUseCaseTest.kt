@@ -37,7 +37,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Импорт Android-бекапа с полем format: "android"
 
     @Test
-    fun `invoke whenAndroidFormatWithWrapper_thenImportsCorrectly`() =
+    fun invoke_whenandroidformatwithwrapper_thenimportscorrectly() =
         runBlocking {
             // Given
             val json =
@@ -76,7 +76,7 @@ class ImportBackupUseCaseTest {
     // должен конвертироваться в миллисекунды с 1970-01-01
 
     @Test
-    fun `invoke whenIosFormatWithWrapper_thenConvertsTimestampAndImports`() =
+    fun invoke_wheniosformatwithwrapper_thenconvertstimestampandimports() =
         runBlocking {
             // Given
             // iOS timestamp: -1756176000 сек с 2001-01-01 (как Double)
@@ -113,7 +113,7 @@ class ImportBackupUseCaseTest {
         }
 
     @Test
-    fun `invoke whenIosFormatWithIntegerTimestamp_thenConvertsAndImports`() =
+    fun invoke_wheniosformatwithintegertimestamp_thenconvertsandimports() =
         runBlocking {
             // Given
             // iOS timestamp: 631152000 сек с 2001-01-01 (как целое число)
@@ -152,7 +152,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Импорт старого Android-бекапа без поля format (массив напрямую)
 
     @Test
-    fun `invoke whenOldAndroidFormatArray_thenFallsBackAndImports`() =
+    fun invoke_whenoldandroidformatarray_thenfallsbackandimports() =
         runBlocking {
             // Given
             val json =
@@ -193,7 +193,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Импорт бекапа без формата в wrapper (format == null)
 
     @Test
-    fun `invoke whenWrapperWithNullFormat_thenImportsAsAndroid`() =
+    fun invoke_whenwrapperwithnullformat_thenimportsasandroid() =
         runBlocking {
             // Given
             val json =
@@ -229,7 +229,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Дубликаты
 
     @Test
-    fun `invoke whenDuplicateItems_thenSkipsDuplicates`() =
+    fun invoke_whenduplicateitems_thenskipsduplicates() =
         runBlocking {
             // Given
             val json =
@@ -276,7 +276,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Несколько элементов
 
     @Test
-    fun `invoke whenMultipleItems_thenImportsAllNonDuplicates`() =
+    fun invoke_whenmultipleitems_thenimportsallnonduplicates() =
         runBlocking {
             // Given
             val json =
@@ -327,7 +327,7 @@ class ImportBackupUseCaseTest {
     // MARK: - Элементы с null values
 
     @Test
-    fun `invoke whenItemsWithNullValues_thenImportsCorrectly`() =
+    fun invoke_whenitemswithnullvalues_thenimportscorrectly() =
         runBlocking {
             // Given
             val json =

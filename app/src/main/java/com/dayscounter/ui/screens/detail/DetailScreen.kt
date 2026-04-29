@@ -10,11 +10,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
@@ -70,6 +74,7 @@ fun DetailScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
+    RefreshReminderOnResume(viewModel = viewModel)
 
     DetailScreenContent(
         params =
@@ -93,6 +98,23 @@ fun DetailScreen(
         modifier = modifier,
         uiState = uiState
     )
+}
+
+@Composable
+private fun RefreshReminderOnResume(viewModel: DetailScreenViewModel) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refreshReminder()
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 }
 
 /**

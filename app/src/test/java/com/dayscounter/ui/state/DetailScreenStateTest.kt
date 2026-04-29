@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
  */
 class DetailScreenStateTest {
     @Test
-    fun `whenLoadingState_thenIsLoadingInstance`() {
+    fun whenloadingstate_thenisloadinginstance() {
         // Given
         val state = DetailScreenState.Loading
 
@@ -21,7 +21,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenSuccessState_thenContainsCorrectItem`() {
+    fun whensuccessstate_thencontainscorrectitem() {
         // Given
         val testItem =
             Item(
@@ -41,7 +41,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenSuccessState_thenCanAccessItemProperties`() {
+    fun whensuccessstate_thencanaccessitemproperties() {
         // Given
         val testItem =
             Item(
@@ -65,7 +65,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenErrorState_thenContainsCorrectMessage`() {
+    fun whenerrorstate_thencontainscorrectmessage() {
         // Given
         val errorMessage = "Ошибка загрузки данных"
         val state = DetailScreenState.Error(errorMessage)
@@ -75,7 +75,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenDifferentSuccessStates_thenAreNotEqual`() {
+    fun whendifferentsuccessstates_thenarenotequal() {
         // Given
         val item1 =
             Item(
@@ -106,7 +106,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenSameSuccessState_thenAreEqual`() {
+    fun whensamesuccessstate_thenareequal() {
         // Given
         val item =
             Item(
@@ -129,7 +129,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenSuccessStateWithEmptyDetails_thenIsStillSuccess`() {
+    fun whensuccessstatewithemptydetails_thenisstillsuccess() {
         // Given
         val item =
             Item(
@@ -147,7 +147,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenSuccessStateWithoutColorTag_thenIsStillSuccess`() {
+    fun whensuccessstatewithoutcolortag_thenisstillsuccess() {
         // Given
         val item =
             Item(
@@ -165,7 +165,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenErrorStateWithDifferentMessages_thenAreNotEqual`() {
+    fun whenerrorstatewithdifferentmessages_thenarenotequal() {
         // Given
         val state1 = DetailScreenState.Error("Ошибка 1")
         val state2 = DetailScreenState.Error("Ошибка 2")
@@ -178,7 +178,7 @@ class DetailScreenStateTest {
     }
 
     @Test
-    fun `whenErrorStateWithSameMessage_thenAreEqual`() {
+    fun whenerrorstatewithsamemessage_thenareequal() {
         // Given
         val errorMessage = "Ошибка загрузки"
         val state1 = DetailScreenState.Error(errorMessage)

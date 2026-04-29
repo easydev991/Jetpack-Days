@@ -70,6 +70,29 @@
     <string name="title_for_the_item">Title for the Item</string>
     <string name="details_for_the_item">Details for the Item</string>
     <string name="add_color_tag">Add color tag</string>
+    <string name="reminder_settings">Reminder</string>
+    <string name="add_reminder">Add reminder</string>
+    <string name="reminder_mode_on_date">On date</string>
+    <string name="reminder_mode_after">After N</string>
+    <string name="reminder_date">Reminder date</string>
+    <string name="reminder_time">Reminder time</string>
+    <string name="select_time">Select time</string>
+    <string name="remind_after_label">Remind after</string>
+    <string name="reminder_period_unit">Period</string>
+    <string name="select_period_unit">Select period</string>
+    <string name="reminder_unit_days">days</string>
+    <string name="reminder_unit_weeks">weeks</string>
+    <string name="reminder_unit_months">months</string>
+    <string name="reminder_unit_years">years</string>
+    <string name="reminder_channel_name">Reminders</string>
+    <string name="reminder_channel_description">One-time reminders for events</string>
+    <string name="reminder_notification_title">Reminder</string>
+    <string name="reminder_notification_title_with_item">Reminder: %1$s</string>
+    <string name="reminder_notification_text">Tap to open event details</string>
+    <string name="reminder_error_invalid_amount">Enter number greater than 0</string>
+    <string name="reminder_error_past_datetime">Choose a future date and time</string>
+    <string name="reminder_notifications_disabled_message">Notifications are disabled for the app. Enable them in system settings.</string>
+    <string name="open_notification_settings">Settings</string>
 
     <!-- Display format options -->
     <string name="days_only">Days only</string>

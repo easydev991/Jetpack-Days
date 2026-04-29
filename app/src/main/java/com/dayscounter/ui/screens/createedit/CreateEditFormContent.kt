@@ -1,13 +1,18 @@
 package com.dayscounter.ui.screens.createedit
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,18 +27,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.ui.viewmodel.CreateEditScreenState
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /**
  * TopAppBar для экрана создания/редактирования.
@@ -84,12 +94,14 @@ private fun MainFormSections(
         title = params.uiStates.title,
         onValueChange = { onValueChange() }
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+    androidx.compose.foundation.layout
+        .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DetailsSection(
         details = params.uiStates.details,
         onValueChange = { onValueChange() }
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+    androidx.compose.foundation.layout
+        .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DateSection(
         selectedDate = params.uiStates.selectedDate,
         showDatePicker = params.showDatePicker
@@ -108,7 +120,8 @@ private fun ColorAndDisplayOptionSection(
         selectedColor = params.uiStates.selectedColor,
         onValueChange = onValueChange
     )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+    androidx.compose.foundation.layout
+        .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
     DisplayOptionSelector(
         selectedDisplayOption = params.uiStates.selectedDisplayOption,
         onValueChange = onValueChange
@@ -121,26 +134,9 @@ private fun ColorAndDisplayOptionSection(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun CreateEditFormContent(params: CreateEditFormParams) {
-    // Функция для отслеживания изменений
-    val onValueChange: () -> Unit = {
-        if (params.itemId != null) {
-            val timestamp =
-                params.uiStates.selectedDate.value
-                    ?.atStartOfDay(java.time.ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
-
-            params.viewModel.checkHasChanges(
-                title = params.uiStates.title.value,
-                details = params.uiStates.details.value,
-                timestamp = timestamp,
-                colorTag =
-                    params.uiStates.selectedColor.value
-                        ?.toArgb(),
-                displayOption = params.uiStates.selectedDisplayOption.value
-            )
-        }
-    }
+    val reminderSettingsBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val previousReminderEnabled = rememberSaveable { mutableStateOf(params.uiStates.reminder.isEnabled.value) }
+    val onValueChange = rememberOnCreateEditValueChange(params = params)
 
     Column(
         modifier =
@@ -152,8 +148,104 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
                 .padding(dimensionResource(R.dimen.spacing_regular))
     ) {
         MainFormSections(params, onValueChange)
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+        androidx.compose.foundation.layout
+            .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
         ColorAndDisplayOptionSection(params, onValueChange)
+        androidx.compose.foundation.layout
+            .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+        ReminderSettingsSection(
+            reminderUiState = params.uiStates.reminder,
+            onValueChange = onValueChange,
+            onReminderToggleRequested = rememberReminderToggleHandler(params = params, onValueChange = onValueChange),
+            expandedContentModifier = Modifier.bringIntoViewRequester(reminderSettingsBringIntoViewRequester)
+        )
+    }
+
+    val isReminderEnabled = params.uiStates.reminder.isEnabled.value
+    LaunchedEffect(isReminderEnabled) {
+        if (!previousReminderEnabled.value && isReminderEnabled) {
+            reminderSettingsBringIntoViewRequester.bringIntoView()
+        }
+        previousReminderEnabled.value = isReminderEnabled
+    }
+
+    ObserveReminderStateOnResume(params = params, onValueChange = onValueChange)
+
+    if (params.uiStates.reminder.showDatePicker.value) {
+        DatePickerDialogSection(
+            selectedDate = params.uiStates.reminder.selectedDate,
+            showDatePicker = params.uiStates.reminder.showDatePicker,
+            onDateSelected = onValueChange
+        )
+    }
+}
+
+@Composable
+private fun rememberReminderToggleHandler(
+    params: CreateEditFormParams,
+    onValueChange: () -> Unit
+): (Boolean) -> Unit {
+    val context = LocalContext.current
+    val reminderPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            val activationDecision =
+                decideReminderActivation(
+                    hasPostNotificationsPermission = isGranted,
+                    areReminderNotificationsEnabled = context.areReminderNotificationsEnabled()
+                )
+
+            when (activationDecision) {
+                ReminderActivationDecision.ENABLE -> {
+                    params.uiStates.reminder.isEnabled.value = true
+                }
+
+                ReminderActivationDecision.SHOW_NOTIFICATION_SETTINGS_FEEDBACK -> {
+                    params.uiStates.reminder.isEnabled.value = false
+                    params.onReminderNotificationsUnavailable()
+                }
+            }
+
+            onValueChange()
+        }
+
+    return { isChecked ->
+        when (
+            decideReminderToggle(
+                isChecked = isChecked,
+                sdkInt = Build.VERSION.SDK_INT,
+                hasPostNotificationsPermission = context.hasPostNotificationsPermission()
+            )
+        ) {
+            ReminderToggleDecision.ENABLE -> {
+                when (
+                    decideReminderActivation(
+                        hasPostNotificationsPermission = true,
+                        areReminderNotificationsEnabled = context.areReminderNotificationsEnabled()
+                    )
+                ) {
+                    ReminderActivationDecision.ENABLE -> {
+                        params.uiStates.reminder.isEnabled.value = true
+                    }
+
+                    ReminderActivationDecision.SHOW_NOTIFICATION_SETTINGS_FEEDBACK -> {
+                        params.uiStates.reminder.isEnabled.value = false
+                        params.onReminderNotificationsUnavailable()
+                    }
+                }
+                onValueChange()
+            }
+
+            ReminderToggleDecision.DISABLE -> {
+                params.uiStates.reminder.isEnabled.value = false
+                onValueChange()
+            }
+
+            ReminderToggleDecision.REQUEST_PERMISSION -> {
+                reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 }
 
@@ -207,23 +299,18 @@ internal fun DateSection(
 ) {
     val configuration = LocalConfiguration.current
     val formatter =
-        java.time.format.DateTimeFormatter
-            .ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+        DateTimeFormatter
+            .ofLocalizedDate(FormatStyle.MEDIUM)
             .withLocale(configuration.locales[0])
-    // Выбор даты
+
     OutlinedTextField(
-        value =
-            selectedDate.value?.format(formatter) ?: "",
-        onValueChange = { },
+        value = selectedDate.value?.format(formatter).orEmpty(),
+        onValueChange = {},
         label = { Text(stringResource(R.string.date)) },
         readOnly = true,
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
-            IconButton(
-                onClick = {
-                    showDatePicker.value = true
-                }
-            ) {
+            IconButton(onClick = { showDatePicker.value = true }) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
                     contentDescription = stringResource(R.string.select_date)
@@ -245,10 +332,40 @@ internal fun rememberCreateEditUiStates(): CreateEditUiState =
         selectedColor = rememberSaveable(stateSaver = NullableColorSaver) { mutableStateOf(null) },
         selectedDisplayOption =
             rememberSaveable(stateSaver = DisplayOptionSaver) {
-                mutableStateOf(
-                    DisplayOption.DAY
-                )
-            }
+                mutableStateOf(DisplayOption.DAY)
+            },
+        reminder =
+            ReminderFormUiState(
+                isEnabled = rememberSaveable { mutableStateOf(false) },
+                mode = rememberSaveable { mutableStateOf(com.dayscounter.domain.model.ReminderMode.AT_DATE) },
+                selectedDate =
+                    rememberSaveable(stateSaver = NullableLocalDateSaver) {
+                        mutableStateOf(defaultReminderDate())
+                    },
+                showDatePicker = rememberSaveable { mutableStateOf(false) },
+                hour =
+                    rememberSaveable {
+                        mutableStateOf(
+                            java.time.LocalTime
+                                .now()
+                                .hour
+                        )
+                    },
+                minute =
+                    rememberSaveable {
+                        mutableStateOf(
+                            java.time.LocalTime
+                                .now()
+                                .minute
+                        )
+                    },
+                intervalValue = rememberSaveable { mutableStateOf("") },
+                intervalUnit =
+                    rememberSaveable {
+                        mutableStateOf(com.dayscounter.domain.model.ReminderIntervalUnit.DAY)
+                    },
+                isInitializedFromSource = rememberSaveable { mutableStateOf(false) }
+            )
     )
 
 /**
@@ -259,20 +376,22 @@ fun loadItemData(
     uiState: CreateEditScreenState,
     uiStates: CreateEditUiState
 ) {
-    val isEditingExistingItem = itemId != null
-    val isStateSuccess = uiState is CreateEditScreenState.Success
-    val isTitleEmpty = uiStates.title.value.isEmpty()
+    val successState = uiState as? CreateEditScreenState.Success ?: return
 
-    if (isEditingExistingItem && isStateSuccess && isTitleEmpty) {
-        val item = uiState.item
+    if (itemId != null && uiStates.title.value.isEmpty()) {
+        val item = successState.item
         uiStates.title.value = item.title
         uiStates.details.value = item.details
         uiStates.selectedDate.value =
             java.time.Instant
                 .ofEpochMilli(item.timestamp)
-                .atZone(java.time.ZoneId.systemDefault())
+                .atZone(ZoneId.systemDefault())
                 .toLocalDate()
         uiStates.selectedColor.value = item.colorTag?.let { Color(it) }
         uiStates.selectedDisplayOption.value = item.displayOption
+    }
+
+    if (itemId != null && !uiStates.reminder.isInitializedFromSource.value) {
+        uiStates.reminder.applyReminder(successState.reminder)
     }
 }

@@ -25,11 +25,14 @@ import androidx.compose.ui.text.font.FontWeight
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.usecase.GetDaysAnalysisTextUseCase
 import com.dayscounter.ui.viewmodel.DetailScreenState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 /**
  * Контент по состоянию.
@@ -52,6 +55,7 @@ fun DetailContentByState(
         is DetailScreenState.Success -> {
             DetailContentInner(
                 item = uiState.item,
+                reminder = uiState.reminder,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
                 modifier = modifier
             )
@@ -77,6 +81,7 @@ fun DetailContentByState(
 @Composable
 internal fun DetailContentInner(
     item: Item,
+    reminder: Reminder? = null,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier
 ) {
@@ -117,6 +122,9 @@ internal fun DetailContentInner(
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
         DetailDisplayOptionPicker(displayOption = item.displayOption)
+        reminder?.let { activeReminder ->
+            UpcomingReminderSection(reminder = activeReminder)
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }
@@ -262,4 +270,31 @@ fun DetailDisplayOptionPicker(
             color = MaterialTheme.colorScheme.onSurface
         )
     }
+}
+
+@Composable
+private fun UpcomingReminderSection(
+    reminder: Reminder,
+    modifier: Modifier = Modifier
+) {
+    val formatter =
+        remember {
+            DateTimeFormatter
+                .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                .withLocale(Locale.getDefault())
+        }
+    val formattedDateTime =
+        remember(reminder.targetEpochMillis) {
+            Instant
+                .ofEpochMilli(reminder.targetEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(formatter)
+        }
+
+    ReadSectionView(
+        headerText = stringResource(R.string.reminder_settings),
+        bodyText = formattedDateTime,
+        modifier = modifier
+    )
 }

@@ -14,7 +14,7 @@ class CalculateDaysDifferenceUseCaseTest {
     private val useCase = CalculateDaysDifferenceUseCase()
 
     @Test
-    fun `calculate when same day then returns Today`() {
+    fun calculate_when_same_day_then_returns_today() {
         // Given
         val today = LocalDate.now()
         val timestamp = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -27,7 +27,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 1 day difference then returns 1 day`() {
+    fun calculate_when_1_day_difference_then_returns_1_day() {
         // Given
         val currentDate = LocalDate.now()
         val eventDate = currentDate.minusDays(1)
@@ -45,7 +45,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 5 days difference then returns 5 days`() {
+    fun calculate_when_5_days_difference_then_returns_5_days() {
         // Given
         val currentDate = LocalDate.now()
         val eventDate = currentDate.minusDays(5)
@@ -63,7 +63,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 30 days difference then returns 30 days`() {
+    fun calculate_when_30_days_difference_then_returns_30_days() {
         // Given - используем даты в пределах одного месяца для точного подсчёта 30 дней
         val currentDate = LocalDate.of(2024, 3, 31)
         val eventDate = LocalDate.of(2024, 3, 1)
@@ -81,7 +81,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 365 days difference then returns 1 year`() {
+    fun calculate_when_365_days_difference_then_returns_1_year() {
         // Given
         val currentDate = LocalDate.now()
         val eventDate = currentDate.minusDays(365)
@@ -97,7 +97,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 1 month then returns 1 month 0 days`() {
+    fun calculate_when_1_month_then_returns_1_month_0_days() {
         // Given
         val currentDate = LocalDate.of(2024, 1, 15)
         val eventDate = LocalDate.of(2023, 12, 15)
@@ -115,7 +115,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 2 months 5 days then returns 2 months 5 days`() {
+    fun calculate_when_2_months_5_days_then_returns_2_months_5_days() {
         // Given
         val currentDate = LocalDate.of(2024, 3, 20)
         val eventDate = LocalDate.of(2024, 1, 15)
@@ -133,7 +133,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 11 months 30 days then returns 11 months 30 days`() {
+    fun calculate_when_11_months_30_days_then_returns_11_months_30_days() {
         // Given
         val currentDate = LocalDate.of(2024, 12, 31)
         val eventDate = LocalDate.of(2024, 1, 1)
@@ -151,7 +151,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 1 year then returns 1 year 0 months 0 days`() {
+    fun calculate_when_1_year_then_returns_1_year_0_months_0_days() {
         // Given
         val currentDate = LocalDate.of(2025, 1, 15)
         val eventDate = LocalDate.of(2024, 1, 15)
@@ -169,7 +169,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 1 year 2 months then returns 1 year 2 months 0 days`() {
+    fun calculate_when_1_year_2_months_then_returns_1_year_2_months_0_days() {
         // Given
         val currentDate = LocalDate.of(2025, 3, 15)
         val eventDate = LocalDate.of(2024, 1, 15)
@@ -187,7 +187,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when 1 year 2 months 5 days then returns correct period`() {
+    fun calculate_when_1_year_2_months_5_days_then_returns_correct_period() {
         // Given
         val currentDate = LocalDate.of(2025, 3, 20)
         val eventDate = LocalDate.of(2024, 1, 15)
@@ -205,7 +205,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when leap year February 29 then calculates correctly`() {
+    fun calculate_when_leap_year_february_29_then_calculates_correctly() {
         // Given - 29 февраля 2024 (високосный год)
         val currentDate = LocalDate.of(2024, 3, 1)
         val eventDate = LocalDate.of(2024, 2, 29)
@@ -221,7 +221,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `calculate when current date is provided then uses it`() {
+    fun calculate_when_current_date_is_provided_then_uses_it() {
         // Given
         val providedDate = LocalDate.of(2024, 6, 15)
         val eventDate = LocalDate.of(2024, 6, 10)
@@ -237,7 +237,7 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
-    fun `totalDays в Calculated содержит общее количество дней`() {
+    fun totaldays_в_calculated_содержит_общее_количество_дней() {
         // Given
         val currentDate = LocalDate.of(2024, 1, 16)
         val eventDate = LocalDate.of(2024, 1, 10)

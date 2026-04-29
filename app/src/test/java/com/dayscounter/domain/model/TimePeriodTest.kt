@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
  */
 class TimePeriodTest {
     @Test
-    fun `isEmpty возвращает true при всех нулях`() {
+    fun isempty_возвращает_true_при_всех_нулях() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 0)
 
@@ -22,7 +22,7 @@ class TimePeriodTest {
     }
 
     @Test
-    fun `isEmpty возвращает false при ненулевом period`() {
+    fun isempty_возвращает_false_при_ненулевом_period() {
         // Given - ненулевые годы
         val period1 = TimePeriod(years = 1, months = 0, days = 0)
         val period2 = TimePeriod(years = 0, months = 1, days = 0)
@@ -43,7 +43,7 @@ class TimePeriodTest {
     }
 
     @Test
-    fun `isNotEmpty возвращает true при ненулевом period`() {
+    fun isnotempty_возвращает_true_при_ненулевом_period() {
         // Given
         val period = TimePeriod(years = 1, months = 0, days = 0)
 
@@ -55,7 +55,7 @@ class TimePeriodTest {
     }
 
     @Test
-    fun `isNotEmpty возвращает false при всех нулях`() {
+    fun isnotempty_возвращает_false_при_всех_нулях() {
         // Given
         val period = TimePeriod(years = 0, months = 0, days = 0)
 
@@ -67,7 +67,7 @@ class TimePeriodTest {
     }
 
     @Test
-    fun `isNotEmpty обратный метод для isEmpty`() {
+    fun isnotempty_обратный_метод_для_isempty() {
         // Given
         val periodEmpty = TimePeriod(years = 0, months = 0, days = 0)
         val periodNotEmpty = TimePeriod(years = 1, months = 0, days = 0)
@@ -86,7 +86,7 @@ class TimePeriodTest {
     }
 
     @Test
-    fun `TimePeriod корректно хранит значения`() {
+    fun timeperiod_корректно_хранит_значения() {
         // Given
         val years = 5
         val months = 3

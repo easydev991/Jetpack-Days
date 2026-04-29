@@ -1,10 +1,10 @@
 # Счётчик дней
 
 <!-- BEGIN_VERSIONS -->
-[<img alt="Kotlin Version" src="https://img.shields.io/badge/Kotlin_Version-2.3.20-purple">](https://kotlinlang.org/)
+[<img alt="Kotlin Version" src="https://img.shields.io/badge/Kotlin_Version-2.3.21-purple">](https://kotlinlang.org/)
 [<img alt="Android SDK" src="https://img.shields.io/badge/Android_SDK-36-green">](https://developer.android.com/)
 [<img alt="Min SDK" src="https://img.shields.io/badge/Min_SDK-26-informational">](https://developer.android.com/)
-[<img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.4.1-blue">](https://gradle.org/)
+[<img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.5.0-blue">](https://gradle.org/)
 [<img alt="AGP" src="https://img.shields.io/badge/AGP-9.2.0-green">](https://developer.android.com/tools/releases/gradle-plugin)
 <!-- END_VERSIONS -->
 [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/easydev991/Jetpack-Days)](https://gitmcp.io/easydev991/Jetpack-Days)
@@ -38,7 +38,7 @@ make help
 
 | Список записей | Создание новой записи | Выбор опции отображения | Перед сохранением | Сортировка на главном экране |
 | --- | --- | --- | --- | --- |
-| <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/1-demoList_1776922671142.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/2-chooseDate_1776922676468.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/3-chooseDisplayOption_1776922677274.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/4-beforeSave_1776922678970.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/5-sortByDate_1776922681541.png" alt=""> |
+| <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/1-demoList_1777492307100.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/2-chooseDate_1777492312447.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/3-chooseDisplayOption_1777492313205.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/4-beforeSave_1777492314955.png" alt=""> | <img src="./fastlane/metadata/android/ru-RU/images/phoneScreenshots/5-sortByDate_1777492317536.png" alt=""> |
 
 ### Релизный процесс
 

@@ -1,201 +1,68 @@
 # Экран 3.1: Item Screen (Просмотр записи)
 
-## Обзор
-
-Item Screen предназначен для просмотра полной информации о событии и количестве прошедших дней. Экран отображает все детали записи в структурированном виде.
+Дата обновления: 2026-04-29  
+Статус: Реализован и используется в навигации (`Screen.ItemDetail`)
 
 ## Назначение
 
-Просмотр полной информации о событии и количества прошедших дней с возможностью перехода к редактированию записи.
+Экран отображает полную информацию о записи и позволяет:
 
-## Компоненты
+1. Просматривать все поля записи в read-only виде.
+2. Перейти к редактированию.
+3. Удалить запись с подтверждением.
+4. Увидеть предстоящее напоминание для записи, если оно активно и еще не наступило.
 
-- DetailScreen.kt — главный экран детализации (`ui/screens/detail/DetailScreen.kt`)
-- DetailScreenParams.kt — параметры экрана для передачи зависимостей
-- DetailAppBar.kt — TopAppBar с кнопками "Назад", "Редактировать", "Удалить"
-- DetailContent.kt — секции экрана: цветовая метка, название, дата, количество дней, описание, опция отображения
-- DetailContentPreviews.kt — preview компонентов секций
-- DetailStates.kt — состояния экрана: загрузка, ошибка
-- DetailScreenViewModel.kt — ViewModel с factory методом для DI (`ui/viewmodel/DetailScreenViewModel.kt`)
+## Текущее поведение
 
-## Статус выполнения
+1. `TopAppBar`:
+   - кнопка `Назад` возвращает на предыдущий экран;
+   - кнопка `Редактировать` открывает `Create/Edit` для текущей записи;
+   - кнопка `Удалить` открывает диалог подтверждения.
+2. Контент:
+   - название;
+   - описание (если не пустое);
+   - цветовая метка (если есть);
+   - дата записи + текст анализа количества дней;
+   - формат отображения (`DAY`, `MONTH_DAY`, `YEAR_MONTH_DAY`).
+3. Секция напоминания:
+   - показывается только при наличии активного будущего reminder;
+   - заголовок — `R.string.reminder_settings`;
+   - значение — локализованные дата и время напоминания.
+4. Удаление:
+   - при подтверждении запись удаляется;
+   - связанное напоминание очищается через `ReminderManager.clearReminder(itemId)`.
 
-✅ **ВЕСЬ ФУНКЦИОНАЛ РЕАЛИЗОВАН** (100%)
+## Состояние и логика
 
-### Выполнено
+1. `DetailScreenViewModel` хранит состояние в `StateFlow<DetailScreenState>` (`Loading`, `Success`, `Error`).
+2. Основные данные записи читаются из `ItemRepository.getItemFlow(itemId)`.
+3. Напоминание подмешивается отдельно через `ReminderManager.getActiveReminder(itemId)`.
+4. Просроченное напоминание не показывается: используется фильтр `targetEpochMillis > currentTimeMillis`.
+5. Для актуализации данных напоминания при возврате на экран используется `refreshReminder()`.
 
-- ✅ Навигация, ViewModel, UI State, UI компоненты (DetailScreen, DetailAppBar, DetailContent, DetailStates), удаление с диалогом, локализация, Preview, unit-тесты, исправлено отображение отрицательного количества дней (showMinus)
+## Навигация
 
-### Осталось (опционально, не требуется для завершения)
+1. Маршрут: `Screen.ItemDetail.createRoute(itemId)`.
+2. Подключение экрана: `app/src/main/java/com/dayscounter/ui/screens/common/RootScreenComponents.kt`.
+3. Переход на редактирование передает текущие данные записи и текущее reminder-состояние для быстрого prefill формы.
 
-- ⚠️ UI-тесты для DetailScreen (не начаты)
-- ⚠️ Проверка линтеров (ktlint, detekt) — опционально
+## Тестирование (фактическое покрытие)
 
----
+1. Unit:
+   - `app/src/test/java/com/dayscounter/ui/viewmodel/DetailScreenViewModelTest.kt`
+   - `app/src/test/java/com/dayscounter/ui/state/DetailScreenStateTest.kt`
+2. Покрыты ключевые сценарии:
+   - успешная загрузка записи;
+   - отображение/скрытие reminder (будущее/прошедшее);
+   - удаление записи и очистка reminder;
+   - обработка базовых переходов состояния.
 
-## Зависимости от других этапов
-
-- ✅ **Этап 7**: Модель данных (Entity, Domain model, Room Database, DAO) — **ЗАВЕРШЕН**, готов к использованию
-- ✅ **Этап 6**: Форматирование количества дней — **РЕАЛИЗОВАНО**, используется для отображения количества дней
-- ✅ **Экран 2.1**: Main Screen — **ВЫПОЛНЕН**, навигация к Item Screen настроена
-
----
-
-## Подробный план реализации по TDD
-
-### Предварительные требования
-
-Перед началом реализации этого экрана должны быть выполнены:
-
-1. ✅ **Этап 7**: Модель данных (Entity, Domain model, Room Database, DAO) — **ЗАВЕРШЕН**
-2. ✅ **Этап 6**: Форматирование количества дней (GetFormattedDaysForItemUseCase) — **РЕАЛИЗОВАНО**
-3. ✅ **Экран 2.1**: Main Screen — **ВЫПОЛНЕН**, навигация настроена
-
----
-
-### Шаг 1-6: Подготовка и реализация ✅
-
-**Выполнено:** Навигация, Domain (ItemRepository.getItemFlow), UI State, UI компоненты (DetailContent, DetailStates, DetailContentPreviews), DetailAppBar, DetailScreen, обработка ошибок, локализация
-
----
-
-### Шаг 7: Финальное тестирование ✅
-
-**Задачи:**
-
-1. ✅ Проверить правильное отображение всех полей записи (unit тесты реализованы)
-2. ✅ Проверить корректное вычисление и отображение количества дней (unit тесты реализованы)
-3. ⚠️ Проверить отображение цветовой метки (UI тесты не начаты)
-4. ⚠️ Проверить функциональность кнопки редактирования и удаления (UI тесты не начаты)
-5. ⚠️ Проверить корректную навигацию назад (UI тесты не начаты)
-6. ✅ Проверить обработку ошибок (запись не найдена) (unit тесты реализованы)
-7. ⚠️ Проверить условное отображение секций (если поля пустые) (UI тесты не начаты)
-
-**Критерии готовности:**
-
-- ✅ Unit-тесты реализованы (DetailScreenViewModelTest, DetailScreenStateTest)
-- ✅ Все функции работают корректно
-
----
-
-## Реализация ✅
-
-DetailScreen.kt с Scaffold и DetailScreenParams, DetailContent (все секции), DetailStates, DetailAppBar с кнопками, Material Design 3.
-
-**Архитектура:** Clean Architecture, ItemRepository.getItemFlow, Flow для реактивности, SavedStateHandle, Factory метод для DI
-
----
-
-## Тестирование ✅
-
-### Критически важное предупреждение
-
-**Запрещено:** Писать интеграционные тесты с ViewModels
-
-**Причина:**
-
-- Конфликт между `runBlocking` и `viewModelScope.launch`
-- Flow репозитория не активируется корректно в тестах
-- Тесты зависают бесконечно или падают
-- Это фундаментальная проблема архитектуры, которая требует глубокого анализа
-
-**Рабочий подход:**
-
-- ✅ Писать unit-тесты для ViewModels с MockK
-- ✅ Писать интеграционные тесты только для DAO и Repository (без ViewModels)
-- ✅ Писать UI-тесты для Compose компонентов (без ViewModels)
-
-Подробнее см. в документе `Testing_Status_Plan.md`
-
-### Unit-тесты
-
-**Unit-тесты:** DetailScreenViewModel, DetailScreenState — **РЕАЛИЗОВАНО**
-
-- `DetailScreenViewModelTest.kt` (2 теста с MockK) в `test/java/com/dayscounter/ui/viewmodel/`
-- `DetailScreenStateTest.kt` (10 тестов) в `test/java/com/dayscounter/ui/state/`
-
-### Интеграционные тесты
-
-**Важно:** Только для DAO и Repository, БЕЗ ViewModels
-
-**Интеграционные тесты:** ViewModel с Repository — **ПОКРЫТО В UNIT-ТЕСТАХ** (FakeRepository в DetailScreenViewModelTest)
-
-**Примечание:** Интеграционные тесты ViewModels (DetailScreenViewModelIntegrationTest) НЕ создаются из-за фундаментальной архитектурной проблемы (см. выше).
-
-### UI-тесты
-
-**UI-тесты:** отображение полей, дней, цветовой метки, кнопок редактирования/удаления, навигации, ошибок, условное отображение секций — **НЕ НАЧАТЫ**
-
----
-
-## Критерии завершения
-
-✅ Компоненты созданы и работают
-✅ Код соответствует правилам проекта
-✅ Навигация работает корректно
-✅ Обработка ошибок реализована
-✅ Unit-тесты реализованы (с MockK)
-
-**Примечание:** При написании новых тестов следуйте правилам из `.cursor/rules/tdd.mdc`
-
-**Статус:** ✅ ВЫПОЛНЕНО (100%)
-
----
-
-## Блокируемые этапы
-
-✅ Экран 4.1: Create/Edit Item Screen уже реализован
-
----
-
-## Примечания и файлы
-
-1. **Динамическое обновление:** Количество дней вычисляется при отображении с помощью GetFormattedDaysForItemUseCase, использующего Flow для реактивности
-2. **Условное отображение:** ✅ Секции с пустым содержимым (colorTag, details) не отображаются
-3. **Обработка ошибок:** ✅ Можно вернуться к списку через кнопку "Назад"
-4. **Preview:** ✅ Preview реализованы для всех секций в DetailContentPreviews.kt и для TopAppBar в DetailAppBar.kt, ⚠️ но отсутствует preview для полного DetailScreen
-5. **Тестирование:** ✅ Unit-тесты реализованы для ViewModel и UI State, ⚠️ UI-тесты не начаты
-6. **Зависимости:** ✅ Все этапы завершены (Этап 7, Этап 6, Экран 2.1)
-
-**Текущие файлы:**
+## Ключевые файлы
 
 - `app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreen.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreenParams.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/detail/DetailAppBar.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/detail/DetailContent.kt`
-- `app/src/main/java/com/dayscounter/ui/screens/detail/DetailContentPreviews.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/detail/DetailStates.kt`
 - `app/src/main/java/com/dayscounter/ui/viewmodel/DetailScreenViewModel.kt`
-- `app/src/test/java/com/dayscounter/ui/viewmodel/DetailScreenViewModelTest.kt`
-- `app/src/test/java/com/dayscounter/ui/state/DetailScreenStateTest.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/common/RootScreenComponents.kt`
-
----
-
-## История изменений
-
-- 2025-01-01: Первоначальный план создания Item Screen
-- 2026-01-01: Полная реализация функционала
-- 2026-01-11: Актуализация плана (100% готовности)
-- 2026-01-15: Добавление краткого анализа дней под датой
-- 2026-01-15: Исправлен баг с отображением отрицательного количества дней (параметр `showMinus`)
-- 2026-01-16: Обнаружен баг: минус отображается для MONTH_DAY и YEAR_MONTH_DAY при дате в будущем
-- 2026-01-16: Исправлен баг: минус не отображается для MONTH_DAY и YEAR_MONTH_DAY при дате в будущем
-
----
-
-## Баг: Минус отображается для MONTH_DAY и YEAR_MONTH_DAY при дате в будущем ✅ ИСПРАВЛЕН
-
-**Симптомы:** Минус отображался перед количеством дней на DetailScreen для `displayOption = MONTH_DAY` или `YEAR_MONTH_DAY` при дате в будущем, но не для `displayOption = DAY`.
-
-**Корневая причина:** 1) Параметр `showMinus` не использовался в методах `formatMonthDay()` и `formatYearMonthDay()`. 2) В `FormatDaysTextUseCase` происходило преобразование `totalDays` в абсолютное значение.
-
-**Исправление:** Обновлен `DaysFormatterImpl.formatComposite()` для передачи `showMinus` и `totalDays` в методы форматирования. Обновлен `FormatDaysTextUseCase` для передачи оригинального `totalDays`.
-
-**Измененные файлы:** `DaysFormatterImpl.kt`, `FormatDaysTextUseCase.kt`, `FormatDaysTextUseCaseTest.kt`.
-
-**Результат:** Все тесты проходят, ручное тестирование подтверждает исправление.
-
-**Уроки:** Использовать оригинальное `totalDays` для определения будущего, все методы форматирования должны учитывать `showMinus`, тесты проверять комбинации параметров.
-
----

@@ -29,7 +29,7 @@ class BackupImportRealFilesTest {
     // MARK: - old-backup-sample.json — старый Android формат
 
     @Test
-    fun `parse old-backup-sample json as List of BackupItem`() {
+    fun parse_old_backup_sample_json_as_list_of_backupitem() {
         // Given
         val jsonString = loadResource("/old-backup-sample.json")
 
@@ -59,7 +59,7 @@ class BackupImportRealFilesTest {
     }
 
     @Test
-    fun `parse old-backup-sample and convert to domain Items`() {
+    fun parse_old_backup_sample_and_convert_to_domain_items() {
         // Given
         val jsonString = loadResource("/old-backup-sample.json")
         val backupItems = json.decodeFromString<List<BackupItem>>(jsonString)
@@ -80,7 +80,7 @@ class BackupImportRealFilesTest {
     // Примечание: iOS файлы содержат timestamp как Double, поэтому парсятся через IosBackupItem
 
     @Test
-    fun `parse old-ios-backup-sample json as List of IosBackupItem`() {
+    fun parse_old_ios_backup_sample_json_as_list_of_iosbackupitem() {
         // Given
         val jsonString = loadResource("/old-ios-backup-sample.json")
 
@@ -102,7 +102,7 @@ class BackupImportRealFilesTest {
     }
 
     @Test
-    fun `parse old-ios-backup-sample and convert colorTag successfully`() {
+    fun parse_old_ios_backup_sample_and_convert_colortag_successfully() {
         // Given
         val jsonString = loadResource("/old-ios-backup-sample.json")
         val iosItems = json.decodeFromString<List<IosBackupItem>>(jsonString)
@@ -124,7 +124,7 @@ class BackupImportRealFilesTest {
     // MARK: - new-backup-sample.json — новый Android формат с wrapper
 
     @Test
-    fun `parse new-backup-sample json as BackupWrapper`() {
+    fun parse_new_backup_sample_json_as_backupwrapper() {
         // Given
         val jsonString = loadResource("/new-backup-sample.json")
 
@@ -145,7 +145,7 @@ class BackupImportRealFilesTest {
     }
 
     @Test
-    fun `parse new-backup-sample and convert to domain Items`() {
+    fun parse_new_backup_sample_and_convert_to_domain_items() {
         // Given
         val jsonString = loadResource("/new-backup-sample.json")
         val wrapper = json.decodeFromString<BackupWrapper>(jsonString)
@@ -176,7 +176,7 @@ class BackupImportRealFilesTest {
     )
 
     @Test
-    fun `parse new-ios-backup json as IosBackupWrapper`() {
+    fun parse_new_ios_backup_json_as_iosbackupwrapper() {
         // Given
         val jsonString = loadResource("/new-ios-backup.json")
 
@@ -195,7 +195,7 @@ class BackupImportRealFilesTest {
     }
 
     @Test
-    fun `parse new-ios-backup and convert timestamps correctly`() {
+    fun parse_new_ios_backup_and_convert_timestamps_correctly() {
         // Given
         val jsonString = loadResource("/new-ios-backup.json")
         val wrapper = json.decodeFromString<IosBackupWrapper>(jsonString)
@@ -216,7 +216,7 @@ class BackupImportRealFilesTest {
     }
 
     @Test
-    fun `parse new-ios-backup and convert colorTags successfully`() {
+    fun parse_new_ios_backup_and_convert_colortags_successfully() {
         // Given
         val jsonString = loadResource("/new-ios-backup.json")
         val wrapper = json.decodeFromString<IosBackupWrapper>(jsonString)

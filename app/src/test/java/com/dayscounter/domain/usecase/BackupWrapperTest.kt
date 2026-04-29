@@ -15,7 +15,7 @@ class BackupWrapperTest {
     // MARK: - Десериализация BackupWrapper
 
     @Test
-    fun `decode BackupWrapper with format android`() {
+    fun decode_backupwrapper_with_format_android() {
         // Given
         val jsonString =
             """
@@ -44,7 +44,7 @@ class BackupWrapperTest {
     }
 
     @Test
-    fun `decode BackupWrapper with format ios`() {
+    fun decode_backupwrapper_with_format_ios() {
         // Given
         val jsonString =
             """
@@ -73,7 +73,7 @@ class BackupWrapperTest {
     }
 
     @Test
-    fun `decode BackupWrapper with format null`() {
+    fun decode_backupwrapper_with_format_null() {
         // Given
         val jsonString =
             """
@@ -100,7 +100,7 @@ class BackupWrapperTest {
     }
 
     @Test
-    fun `decode BackupWrapper with multiple items`() {
+    fun decode_backupwrapper_with_multiple_items() {
         // Given
         val jsonString =
             """
@@ -146,7 +146,7 @@ class BackupWrapperTest {
     // MARK: - Сериализация BackupWrapper
 
     @Test
-    fun `encode BackupWrapper with format android`() {
+    fun encode_backupwrapper_with_format_android() {
         // Given
         val wrapper =
             BackupWrapper(
@@ -173,7 +173,7 @@ class BackupWrapperTest {
     }
 
     @Test
-    fun `encode BackupWrapper with format null`() {
+    fun encode_backupwrapper_with_format_null() {
         // Given
         val wrapper =
             BackupWrapper(
@@ -201,7 +201,7 @@ class BackupWrapperTest {
     // MARK: - Round-trip тесты
 
     @Test
-    fun `round-trip BackupWrapper with android format`() {
+    fun round_trip_backupwrapper_with_android_format() {
         // Given
         val original =
             BackupWrapper(
@@ -231,7 +231,7 @@ class BackupWrapperTest {
     }
 
     @Test
-    fun `round-trip BackupWrapper with ios format`() {
+    fun round_trip_backupwrapper_with_ios_format() {
         // Given
         val original =
             BackupWrapper(
@@ -260,7 +260,7 @@ class BackupWrapperTest {
     // MARK: - Fallback на List<BackupItem> (старый формат)
 
     @Test
-    fun `decode old format as List of BackupItem`() {
+    fun decode_old_format_as_list_of_backupitem() {
         // Given - старый формат без обёртки (массив напрямую)
         val jsonString =
             """

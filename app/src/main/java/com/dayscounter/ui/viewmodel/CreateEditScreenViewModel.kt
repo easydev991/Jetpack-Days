@@ -14,7 +14,12 @@ import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.domain.usecase.ReminderRequest
+import com.dayscounter.reminder.NoOpReminderManager
+import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.ui.screens.createedit.toChangeFingerprint
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,24 +29,22 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel для управления состоянием экрана создания/редактирования события.
- *
- * @property repository Репозиторий для работы с данными
- * @property resourceProvider Провайдер строковых ресурсов для локализации
- * @property logger Логгер для записи логов
- * @property savedStateHandle SavedStateHandle для получения параметров навигации
  */
 class CreateEditScreenViewModel(
     private val repository: ItemRepository,
     private val resourceProvider: ResourceProvider,
     private val logger: Logger = AndroidLogger(),
     savedStateHandle: SavedStateHandle,
-    private val analyticsService: AnalyticsService
+    private val analyticsService: AnalyticsService,
+    private val reminderManager: ReminderManager = NoOpReminderManager,
+    private val currentTimeMillisProvider: () -> Long = System::currentTimeMillis
 ) : ViewModel() {
     companion object {
         fun factory(
             repository: ItemRepository,
             resourceProvider: ResourceProvider,
-            analyticsService: AnalyticsService
+            analyticsService: AnalyticsService,
+            reminderManager: ReminderManager = NoOpReminderManager
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -49,37 +52,26 @@ class CreateEditScreenViewModel(
                         repository = repository,
                         resourceProvider = resourceProvider,
                         savedStateHandle =
-                            checkNotNull(
-                                createSavedStateHandle()
-                            ) {
+                            checkNotNull(createSavedStateHandle()) {
                                 "SavedStateHandle is required"
                             },
-                        analyticsService = analyticsService
+                        analyticsService = analyticsService,
+                        reminderManager = reminderManager
                     )
                 }
             }
     }
 
-    /**
-     * Идентификатор события из параметров навигации (null для создания нового).
-     */
     private val itemId: Long? = savedStateHandle["itemId"]
 
-    /**
-     * Состояние экрана.
-     */
     private val _uiState = MutableStateFlow<CreateEditScreenState>(CreateEditScreenState.Loading)
     val uiState: StateFlow<CreateEditScreenState> = _uiState.asStateFlow()
 
-    /**
-     * Оригинальные данные события (для отслеживания изменений при редактировании).
-     */
     private val _originalItem = MutableStateFlow<Item?>(null)
     val originalItem: StateFlow<Item?> = _originalItem.asStateFlow()
 
-    /**
-     * Признак наличия изменений по сравнению с оригинальными данными.
-     */
+    private val originalReminderFingerprint = MutableStateFlow<String?>(null)
+
     private val _hasChanges = MutableStateFlow(false)
     val hasChanges: StateFlow<Boolean> = _hasChanges.asStateFlow()
 
@@ -89,50 +81,37 @@ class CreateEditScreenViewModel(
         } else {
             _uiState.value =
                 CreateEditScreenState.Success(
-                    Item(
-                        id = 0L,
-                        title = "",
-                        details = "",
-                        timestamp = System.currentTimeMillis(),
-                        colorTag = null,
-                        displayOption = com.dayscounter.domain.model.DisplayOption.DAY
-                    )
+                    item =
+                        Item(
+                            id = 0L,
+                            title = "",
+                            details = "",
+                            timestamp = System.currentTimeMillis(),
+                            colorTag = null,
+                            displayOption = com.dayscounter.domain.model.DisplayOption.DAY
+                        ),
+                    reminder = null
                 )
         }
     }
 
-    /**
-     * Проверяет наличие изменений по сравнению с оригинальными данными.
-     */
-    fun checkHasChanges(
-        title: String,
-        details: String,
-        timestamp: Long,
-        colorTag: Int?,
-        displayOption: com.dayscounter.domain.model.DisplayOption
-    ) {
+    fun checkHasChanges(changeInput: CreateEditChangeInput) {
         val original = _originalItem.value ?: return
         val hasChanges =
-            title != original.title ||
-                details != original.details ||
-                timestamp != original.timestamp ||
-                colorTag != original.colorTag ||
-                displayOption != original.displayOption
+            changeInput.title != original.title ||
+                changeInput.details != original.details ||
+                changeInput.timestamp != original.timestamp ||
+                changeInput.colorTag != original.colorTag ||
+                changeInput.displayOption != original.displayOption ||
+                changeInput.reminderFingerprint != originalReminderFingerprint.value
         _hasChanges.value = hasChanges
     }
 
-    /**
-     * Сбрасывает состояние изменений.
-     */
     fun resetHasChanges() {
         _hasChanges.value = false
     }
 
-    /**
-     * Загружает событие из репозитория (для редактирования).
-     */
     private fun loadItem() {
-        // itemId уже проверен в блоке init на null, но компилятор не может это доказать
         val nonNullItemId = checkNotNull(itemId)
 
         viewModelScope.launch {
@@ -141,8 +120,13 @@ class CreateEditScreenViewModel(
                 val item = repository.getItemById(nonNullItemId)
 
                 if (item != null) {
-                    _uiState.value = CreateEditScreenState.Success(item)
+                    val reminder =
+                        reminderManager
+                            .getActiveReminder(nonNullItemId)
+                            ?.takeIf { it.targetEpochMillis > currentTimeMillisProvider() }
+                    _uiState.value = CreateEditScreenState.Success(item, reminder)
                     _originalItem.value = item
+                    originalReminderFingerprint.value = reminder.toChangeFingerprint()
                     _hasChanges.value = false
                     logger.d("CreateEditScreenViewModel", "Событие загружено: ${item.title}")
                 } else {
@@ -164,17 +148,24 @@ class CreateEditScreenViewModel(
         }
     }
 
-    /**
-     * Создает новое событие.
-     *
-     * @param item Событие для создания
-     */
-    fun createItem(item: Item) {
+    fun saveItem(
+        item: Item,
+        reminderRequest: ReminderRequest?,
+        onSaved: () -> Unit = {}
+    ) {
         viewModelScope.launch {
             try {
-                repository.insertItem(item)
-                _uiState.value = CreateEditScreenState.Success(item)
-                logger.d("CreateEditScreenViewModel", "Событие создано: ${item.title}")
+                val persistedItem = persistItem(item = item)
+                val isReminderApplied =
+                    applyReminderChange(
+                        persistedItem = persistedItem,
+                        reminderRequest = reminderRequest
+                    )
+                if (!isReminderApplied) {
+                    return@launch
+                }
+
+                completeSuccessfulSave(persistedItem = persistedItem, onSaved = onSaved)
             } catch (e: ItemException.SaveFailed) {
                 val message =
                     resourceProvider.getString(
@@ -184,23 +175,6 @@ class CreateEditScreenViewModel(
                 logger.e("CreateEditScreenViewModel", message, e)
                 analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_ITEM, e))
                 _uiState.value = CreateEditScreenState.Error(message)
-            }
-        }
-    }
-
-    /**
-     * Обновляет существующее событие.
-     *
-     * @param item Событие для обновления
-     */
-    fun updateItem(item: Item) {
-        viewModelScope.launch {
-            try {
-                repository.updateItem(item)
-                _uiState.value = CreateEditScreenState.Success(item)
-                _originalItem.value = item
-                _hasChanges.value = false
-                logger.d("CreateEditScreenViewModel", "Событие обновлено: ${item.title}")
             } catch (e: ItemException.UpdateFailed) {
                 val message =
                     resourceProvider.getString(
@@ -213,21 +187,80 @@ class CreateEditScreenViewModel(
             }
         }
     }
+
+    private suspend fun persistItem(item: Item): Item =
+        if (itemId != null) {
+            val updatedItem = item.copy(id = itemId)
+            repository.updateItem(updatedItem)
+            updatedItem
+        } else {
+            val insertedId = repository.insertItem(item.copy(id = 0L))
+            item.copy(id = insertedId)
+        }
+
+    private suspend fun applyReminderChange(
+        persistedItem: Item,
+        reminderRequest: ReminderRequest?
+    ): Boolean {
+        val reminderResult =
+            if (reminderRequest == null) {
+                reminderManager.clearReminder(persistedItem.id)
+                Result.success(Unit)
+            } else {
+                reminderManager.saveReminder(
+                    request = reminderRequest.copy(itemId = persistedItem.id),
+                    itemTitle = persistedItem.title
+                )
+            }
+
+        if (reminderResult.isFailure) {
+            val error = reminderResult.exceptionOrNull()
+            _uiState.value =
+                CreateEditScreenState.Error(
+                    error?.message
+                        ?: resourceProvider.getString(
+                            ResourceIds.ERROR_UPDATING_EVENT,
+                            "Reminder save failed"
+                        )
+                )
+        }
+
+        return reminderResult.isSuccess
+    }
+
+    private suspend fun completeSuccessfulSave(
+        persistedItem: Item,
+        onSaved: () -> Unit
+    ) {
+        val activeReminder = reminderManager.getActiveReminder(persistedItem.id)
+        _uiState.value = CreateEditScreenState.Success(persistedItem, activeReminder)
+        _originalItem.value = persistedItem
+        originalReminderFingerprint.value = activeReminder.toChangeFingerprint()
+        _hasChanges.value = false
+        onSaved()
+    }
 }
+
+data class CreateEditChangeInput(
+    val title: String,
+    val details: String,
+    val timestamp: Long,
+    val colorTag: Int?,
+    val displayOption: com.dayscounter.domain.model.DisplayOption,
+    val reminderFingerprint: String? = null
+)
 
 /**
  * Состояние экрана создания/редактирования.
  */
 sealed class CreateEditScreenState {
-    /** Загрузка данных */
     data object Loading : CreateEditScreenState()
 
-    /** Успешная загрузка */
     data class Success(
-        val item: Item
+        val item: Item,
+        val reminder: Reminder? = null
     ) : CreateEditScreenState()
 
-    /** Ошибка загрузки */
     data class Error(
         val message: String
     ) : CreateEditScreenState()
