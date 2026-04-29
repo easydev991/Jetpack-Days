@@ -207,6 +207,97 @@ class DetailScreenViewModelTest {
     }
 
     @Test
+    fun whenappresumesandreminderbecamespast_thenstateupdatesandhidesreminder() {
+        runTest {
+            var nowMillis = 1_800_000_000_000L
+            val reminder =
+                Reminder(
+                    itemId = testItemId,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis + 60_000L,
+                    selectedDateEpochMillis = nowMillis + 60_000L,
+                    selectedHour = 12,
+                    selectedMinute = 30,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 120_000L,
+                    updatedAt = nowMillis - 120_000L
+                )
+
+            repository.setItem(testItem)
+            reminderManager.activeReminder = reminder
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val stateBeforeResume = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(reminder, stateBeforeResume.reminder, "До resume напоминание должно отображаться")
+
+            nowMillis += 120_000L
+            viewModel.refreshReminder()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val stateAfterResume = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(null, stateAfterResume.reminder, "После resume прошедшее напоминание должно скрываться")
+        }
+    }
+
+    @Test
+    fun when_item_reemits_then_reminder_is_refetched() {
+        runTest {
+            val nowMillis = 1_800_000_000_000L
+
+            // Given — initial load with no active reminder
+            repository.setItem(testItem)
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val initialState = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(null, initialState.reminder, "Изначально напоминания нет")
+
+            // When — item re-emits (simulates Room invalidation after Edit screen saves)
+            val futureReminder =
+                Reminder(
+                    itemId = testItemId,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis + 3_600_000L,
+                    selectedDateEpochMillis = nowMillis + 3_600_000L,
+                    selectedHour = 12,
+                    selectedMinute = 30,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 1_000L,
+                    updatedAt = nowMillis
+                )
+            reminderManager.activeReminder = futureReminder
+            // Re-emit item with slightly different data to simulate Room re-query
+            // (Room always re-emits after table invalidation even if data is the same)
+            repository.setItem(testItem.copy(timestamp = testItem.timestamp + 1))
+
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — reminder must be re-fetched and shown
+            val currentState = viewModel.uiState.value as DetailScreenState.Success
+            assertEquals(
+                futureReminder,
+                currentState.reminder,
+                "Напоминание должно отображаться после переэмиссии item"
+            )
+        }
+    }
+
+    @Test
     fun whenrequestdelete_thenshowsdeletedialog() {
         runTest {
             // Given - ViewModel с загруженным элементом

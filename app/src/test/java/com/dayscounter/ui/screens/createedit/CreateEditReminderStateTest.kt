@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screens.createedit
 
+import com.dayscounter.R
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
@@ -210,5 +211,31 @@ class CreateEditReminderStateTest {
             )
 
         assertFalse(isValid)
+    }
+
+    @Test
+    fun validationerrorresid_when_interval_invalid_then_returns_amount_error() {
+        val state = ReminderFormUiState()
+        state.isEnabled.value = true
+        state.mode.value = ReminderMode.AFTER_INTERVAL
+        state.intervalValue.value = ""
+
+        val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
+
+        assertEquals(R.string.reminder_error_invalid_amount, errorResId)
+    }
+
+    @Test
+    fun validationerrorresid_when_at_date_valid_then_returns_null() {
+        val state = ReminderFormUiState()
+        state.isEnabled.value = true
+        state.mode.value = ReminderMode.AT_DATE
+        state.selectedDate.value = LocalDate.of(2026, 5, 12)
+        state.hour.value = 10
+        state.minute.value = 0
+
+        val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
+
+        assertNull(errorResId)
     }
 }

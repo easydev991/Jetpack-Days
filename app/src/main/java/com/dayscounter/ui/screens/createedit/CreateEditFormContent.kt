@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -137,27 +136,7 @@ private fun ColorAndDisplayOptionSection(
 internal fun CreateEditFormContent(params: CreateEditFormParams) {
     val reminderSettingsBringIntoViewRequester = remember { BringIntoViewRequester() }
     val previousReminderEnabled = rememberSaveable { mutableStateOf(params.uiStates.reminder.isEnabled.value) }
-
-    val onValueChange: () -> Unit = {
-        if (params.itemId != null) {
-            val timestamp =
-                params.uiStates.selectedDate.value
-                    ?.atStartOfDay(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
-
-            params.viewModel.checkHasChanges(
-                title = params.uiStates.title.value,
-                details = params.uiStates.details.value,
-                timestamp = timestamp,
-                colorTag =
-                    params.uiStates.selectedColor.value
-                        ?.toArgb(),
-                displayOption = params.uiStates.selectedDisplayOption.value,
-                reminderFingerprint = params.uiStates.reminder.toChangeFingerprint()
-            )
-        }
-    }
+    val onValueChange = rememberOnCreateEditValueChange(params = params)
 
     Column(
         modifier =
@@ -190,6 +169,8 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
         previousReminderEnabled.value = isReminderEnabled
     }
 
+    ObserveReminderStateOnResume(params = params, onValueChange = onValueChange)
+
     if (params.uiStates.reminder.showDatePicker.value) {
         DatePickerDialogSection(
             selectedDate = params.uiStates.reminder.selectedDate,
@@ -209,7 +190,23 @@ private fun rememberReminderToggleHandler(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { isGranted ->
-            params.uiStates.reminder.isEnabled.value = isGranted
+            val activationDecision =
+                decideReminderActivation(
+                    hasPostNotificationsPermission = isGranted,
+                    areReminderNotificationsEnabled = context.areReminderNotificationsEnabled()
+                )
+
+            when (activationDecision) {
+                ReminderActivationDecision.ENABLE -> {
+                    params.uiStates.reminder.isEnabled.value = true
+                }
+
+                ReminderActivationDecision.SHOW_NOTIFICATION_SETTINGS_FEEDBACK -> {
+                    params.uiStates.reminder.isEnabled.value = false
+                    params.onReminderNotificationsUnavailable()
+                }
+            }
+
             onValueChange()
         }
 
@@ -222,7 +219,21 @@ private fun rememberReminderToggleHandler(
             )
         ) {
             ReminderToggleDecision.ENABLE -> {
-                params.uiStates.reminder.isEnabled.value = true
+                when (
+                    decideReminderActivation(
+                        hasPostNotificationsPermission = true,
+                        areReminderNotificationsEnabled = context.areReminderNotificationsEnabled()
+                    )
+                ) {
+                    ReminderActivationDecision.ENABLE -> {
+                        params.uiStates.reminder.isEnabled.value = true
+                    }
+
+                    ReminderActivationDecision.SHOW_NOTIFICATION_SETTINGS_FEEDBACK -> {
+                        params.uiStates.reminder.isEnabled.value = false
+                        params.onReminderNotificationsUnavailable()
+                    }
+                }
                 onValueChange()
             }
 

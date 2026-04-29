@@ -158,4 +158,56 @@ class BuildReminderUseCaseTest {
                 .toEpochMilli()
         assertEquals(expectedMillis, reminder.targetEpochMillis)
     }
+
+    @Test
+    fun invoke_whenAfterIntervalCrossesDstForward_thenKeepsLocalTime() {
+        // Given
+        val berlinZone = ZoneId.of("Europe/Berlin")
+        val dstForwardClock = Clock.fixed(Instant.parse("2026-03-28T10:15:00Z"), berlinZone)
+        val useCase = BuildReminderUseCase(clock = dstForwardClock)
+        val request =
+            ReminderRequest(
+                itemId = 55L,
+                mode = ReminderMode.AFTER_INTERVAL,
+                afterAmount = 1,
+                afterUnit = ReminderIntervalUnit.DAY
+            )
+
+        // When
+        val result = useCase(request)
+
+        // Then
+        val reminder = result.getOrThrow()
+        val base = ZonedDateTime.ofInstant(dstForwardClock.instant(), berlinZone)
+        val target = Instant.ofEpochMilli(reminder.targetEpochMillis).atZone(berlinZone)
+        assertEquals(base.plusDays(1).toInstant().toEpochMilli(), reminder.targetEpochMillis)
+        assertEquals(base.hour, target.hour)
+        assertEquals(base.minute, target.minute)
+    }
+
+    @Test
+    fun invoke_whenAfterIntervalCrossesDstBackward_thenKeepsLocalTime() {
+        // Given
+        val berlinZone = ZoneId.of("Europe/Berlin")
+        val dstBackwardClock = Clock.fixed(Instant.parse("2026-10-24T10:15:00Z"), berlinZone)
+        val useCase = BuildReminderUseCase(clock = dstBackwardClock)
+        val request =
+            ReminderRequest(
+                itemId = 56L,
+                mode = ReminderMode.AFTER_INTERVAL,
+                afterAmount = 1,
+                afterUnit = ReminderIntervalUnit.DAY
+            )
+
+        // When
+        val result = useCase(request)
+
+        // Then
+        val reminder = result.getOrThrow()
+        val base = ZonedDateTime.ofInstant(dstBackwardClock.instant(), berlinZone)
+        val target = Instant.ofEpochMilli(reminder.targetEpochMillis).atZone(berlinZone)
+        assertEquals(base.plusDays(1).toInstant().toEpochMilli(), reminder.targetEpochMillis)
+        assertEquals(base.hour, target.hour)
+        assertEquals(base.minute, target.minute)
+    }
 }

@@ -57,7 +57,8 @@ class CreateEditReminderAutoScrollUiTest {
                             uiStates = uiStates,
                             showDatePicker = showDatePicker,
                             viewModel = createTestViewModel(),
-                            onBackClick = {}
+                            onBackClick = {},
+                            onReminderNotificationsUnavailable = {}
                         )
 
                     CreateEditFormContent(params)

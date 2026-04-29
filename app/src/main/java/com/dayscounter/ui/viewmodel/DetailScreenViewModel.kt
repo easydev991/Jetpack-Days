@@ -18,7 +18,6 @@ import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -70,18 +69,29 @@ class DetailScreenViewModel(
         viewModelScope.launch {
             repository
                 .getItemFlow(itemId)
-                .distinctUntilChanged()
                 .filterNotNull()
                 .collect { item ->
-                    val upcomingReminder =
-                        reminderManager
-                            .getActiveReminder(itemId)
-                            ?.takeIf { it.targetEpochMillis > currentTimeMillisProvider() }
-                    val nextState = DetailScreenState.Success(item = item, reminder = upcomingReminder)
-                    if (_uiState.value != nextState) {
-                        _uiState.value = nextState
-                    }
+                    updateSuccessState(item = item)
                 }
+        }
+    }
+
+    fun refreshReminder() {
+        val currentState = _uiState.value as? DetailScreenState.Success ?: return
+
+        viewModelScope.launch {
+            updateSuccessState(item = currentState.item)
+        }
+    }
+
+    private suspend fun updateSuccessState(item: Item) {
+        val upcomingReminder =
+            reminderManager
+                .getActiveReminder(itemId)
+                ?.takeIf { it.targetEpochMillis > currentTimeMillisProvider() }
+        val nextState = DetailScreenState.Success(item = item, reminder = upcomingReminder)
+        if (_uiState.value != nextState) {
+            _uiState.value = nextState
         }
     }
 

@@ -91,6 +91,8 @@
     <string name="reminder_notification_text">Нажмите, чтобы открыть запись</string>
     <string name="reminder_error_invalid_amount">Введите число больше 0</string>
     <string name="reminder_error_past_datetime">Выберите будущие дату и время</string>
+    <string name="reminder_notifications_disabled_message">Уведомления для приложения отключены. Включите их в системных настройках.</string>
+    <string name="open_notification_settings">Настройки</string>
 
     <!-- Display format options -->
     <string name="days_only">Только дни</string>

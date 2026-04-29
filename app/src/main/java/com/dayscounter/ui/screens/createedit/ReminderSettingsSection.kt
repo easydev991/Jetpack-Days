@@ -41,6 +41,7 @@ import com.dayscounter.domain.model.ReminderMode
 import com.dayscounter.ui.screens.common.DaysRadioButton
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -118,6 +119,8 @@ private fun ReminderExpandedContent(
     onValueChange: () -> Unit,
     expandedContentModifier: Modifier
 ) {
+    val validationErrorResId = reminderUiState.validationErrorResId(currentDateTime = LocalDateTime.now())
+
     Column(modifier = expandedContentModifier) {
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
@@ -148,6 +151,15 @@ private fun ReminderExpandedContent(
             ReminderMode.AFTER_INTERVAL -> {
                 ReminderAfterSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
             }
+        }
+
+        if (validationErrorResId != null) {
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
+            Text(
+                text = stringResource(validationErrorResId),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
         }
     }
 }

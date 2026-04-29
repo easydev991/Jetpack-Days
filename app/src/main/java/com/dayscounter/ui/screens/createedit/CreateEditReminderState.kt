@@ -2,6 +2,7 @@ package com.dayscounter.ui.screens.createedit
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.dayscounter.R
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
@@ -76,6 +77,32 @@ internal fun ReminderFormUiState.isInputValid(currentDateTime: LocalDateTime = L
             intervalValue.value
                 .toIntOrNull()
                 ?.let { amount -> amount >= 1 } ?: false
+    }
+}
+
+internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDateTime = LocalDateTime.now()): Int? {
+    if (!isEnabled.value) {
+        return null
+    }
+
+    return when (mode.value) {
+        ReminderMode.AT_DATE -> {
+            val isFuture =
+                selectedDate.value?.let { date ->
+                    LocalDateTime.of(date, LocalTime.of(hour.value, minute.value)).isAfter(currentDateTime)
+                } == true
+            if (isFuture) {
+                null
+            } else {
+                R.string.reminder_error_past_datetime
+            }
+        }
+
+        ReminderMode.AFTER_INTERVAL ->
+            intervalValue.value
+                .toIntOrNull()
+                ?.takeIf { amount -> amount >= 1 }
+                ?.let { null } ?: R.string.reminder_error_invalid_amount
     }
 }
 

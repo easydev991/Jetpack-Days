@@ -91,6 +91,8 @@
     <string name="reminder_notification_text">Tap to open event details</string>
     <string name="reminder_error_invalid_amount">Enter number greater than 0</string>
     <string name="reminder_error_past_datetime">Choose a future date and time</string>
+    <string name="reminder_notifications_disabled_message">Notifications are disabled for the app. Enable them in system settings.</string>
+    <string name="open_notification_settings">Settings</string>
 
     <!-- Display format options -->
     <string name="days_only">Days only</string>

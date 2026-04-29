@@ -94,6 +94,24 @@ class ReminderSettingsSectionUiTest {
         composeTestRule.onNodeWithText(context.getString(R.string.reminder_period_unit)).assertIsDisplayed()
     }
 
+    @Test
+    fun reminderSection_whenAfterModeAndInvalidInterval_thenShowsValidationError() {
+        val reminderState =
+            createReminderUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = ""
+            )
+
+        composeTestRule.setContent {
+            JetpackDaysTheme {
+                ReminderSettingsSection(reminderUiState = reminderState, onValueChange = {})
+            }
+        }
+
+        composeTestRule.onNodeWithText(context.getString(R.string.reminder_error_invalid_amount)).assertIsDisplayed()
+    }
+
     private fun createReminderUiState(
         isEnabled: Boolean,
         mode: ReminderMode = ReminderMode.AT_DATE,

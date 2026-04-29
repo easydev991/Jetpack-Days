@@ -121,10 +121,10 @@ internal fun DetailContentInner(
             item = item,
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
+        DetailDisplayOptionPicker(displayOption = item.displayOption)
         reminder?.let { activeReminder ->
             UpcomingReminderSection(reminder = activeReminder)
         }
-        DetailDisplayOptionPicker(displayOption = item.displayOption)
         Spacer(modifier = Modifier.weight(1f))
     }
 }

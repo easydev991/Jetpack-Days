@@ -131,26 +131,148 @@ class DefaultReminderManagerTest {
         }
     }
 
+    @Test
+    fun consumeReminder_whenCalled_thenMarksAsConsumedAndCancelsAlarm() {
+        runTest {
+            // Given
+            val reminderRepository = FakeReminderRepository()
+            val scheduler = FakeReminderScheduler()
+            val manager =
+                DefaultReminderManager(
+                    reminderRepository = reminderRepository,
+                    itemRepository = FakeItemRepository(),
+                    reminderScheduler = scheduler,
+                    buildReminderUseCase = BuildReminderUseCase(clock = fixedClock)
+                )
+
+            // When
+            manager.consumeReminder(33L)
+
+            // Then
+            assertEquals(33L, reminderRepository.lastConsumedItemId)
+            assertEquals(33L, scheduler.lastCancelledItemId)
+        }
+    }
+
+    @Test
+    fun reminderFlow_whenConsumed_thenCanBeScheduledAgain() {
+        runTest {
+            // Given
+            val reminderRepository = FakeReminderRepository()
+            val scheduler = FakeReminderScheduler()
+            val manager =
+                DefaultReminderManager(
+                    reminderRepository = reminderRepository,
+                    itemRepository = FakeItemRepository(),
+                    reminderScheduler = scheduler,
+                    buildReminderUseCase = BuildReminderUseCase(clock = fixedClock)
+                )
+
+            val request =
+                ReminderRequest(
+                    itemId = 50L,
+                    mode = ReminderMode.AFTER_INTERVAL,
+                    afterAmount = 2,
+                    afterUnit = ReminderIntervalUnit.DAY
+                )
+
+            // When
+            val firstSave = manager.saveReminder(request, itemTitle = "Задача")
+            manager.consumeReminder(50L)
+            val secondSave = manager.saveReminder(request, itemTitle = "Задача")
+
+            // Then
+            assertTrue(firstSave.isSuccess)
+            assertTrue(secondSave.isSuccess)
+            assertEquals(2, scheduler.scheduled.size)
+            assertEquals(50L, reminderRepository.lastConsumedItemId)
+            assertEquals(50L, scheduler.lastCancelledItemId)
+        }
+    }
+
+    @Test
+    fun reminderFlow_whenCleared_thenRescheduleSkipsDeletedReminder() {
+        runTest {
+            // Given
+            val reminderRepository = FakeReminderRepository()
+            val scheduler = FakeReminderScheduler()
+            val itemRepository =
+                FakeItemRepository().apply {
+                    itemById[99L] =
+                        Item(
+                            id = 99L,
+                            title = "Удаляемое напоминание",
+                            details = "",
+                            timestamp = 1_700_000_000_000L,
+                            colorTag = null,
+                            displayOption = DisplayOption.DAY
+                        )
+                }
+            val manager =
+                DefaultReminderManager(
+                    reminderRepository = reminderRepository,
+                    itemRepository = itemRepository,
+                    reminderScheduler = scheduler,
+                    buildReminderUseCase = BuildReminderUseCase(clock = fixedClock),
+                    currentTimeMillisProvider = { 1_700_000_000_000L }
+                )
+            val request =
+                ReminderRequest(
+                    itemId = 99L,
+                    mode = ReminderMode.AT_DATE,
+                    atDate = LocalDate.of(2026, 5, 2),
+                    atTime = LocalTime.of(10, 0)
+                )
+
+            // When
+            val saveResult = manager.saveReminder(request, itemTitle = "Удаляемое напоминание")
+            manager.clearReminder(99L)
+            manager.rescheduleFutureReminders()
+
+            // Then
+            assertTrue(saveResult.isSuccess)
+            assertEquals(99L, reminderRepository.lastDeletedItemId)
+            assertEquals(1, scheduler.scheduled.size)
+        }
+    }
+
     private class FakeReminderRepository : ReminderRepository {
         var lastSavedReminder: Reminder? = null
         var lastDeletedItemId: Long? = null
+        var lastConsumedItemId: Long? = null
         var futureReminders: List<Reminder> = emptyList()
+        private val remindersByItemId = mutableMapOf<Long, Reminder>()
 
-        override suspend fun getReminderByItemId(itemId: Long): Reminder? = null
+        override suspend fun getReminderByItemId(itemId: Long): Reminder? = remindersByItemId[itemId]
 
         override suspend fun saveReminder(reminder: Reminder) {
             lastSavedReminder = reminder
+            remindersByItemId[reminder.itemId] = reminder
         }
 
-        override suspend fun markAsConsumed(itemId: Long) = Unit
+        override suspend fun markAsConsumed(itemId: Long) {
+            lastConsumedItemId = itemId
+            val reminder = remindersByItemId[itemId] ?: return
+            remindersByItemId[itemId] = reminder.copy(status = ReminderStatus.CONSUMED)
+        }
 
-        override suspend fun cancelReminder(itemId: Long) = Unit
+        override suspend fun cancelReminder(itemId: Long) {
+            remindersByItemId.remove(itemId)
+        }
 
         override suspend fun deleteReminder(itemId: Long) {
             lastDeletedItemId = itemId
+            remindersByItemId.remove(itemId)
         }
 
-        override suspend fun getFutureActiveReminders(nowEpochMillis: Long): List<Reminder> = futureReminders
+        override suspend fun getFutureActiveReminders(nowEpochMillis: Long): List<Reminder> =
+            if (futureReminders.isNotEmpty()) {
+                futureReminders
+            } else {
+                remindersByItemId.values.filter { reminder ->
+                    reminder.status == ReminderStatus.ACTIVE && reminder.targetEpochMillis > nowEpochMillis
+                }
+            }
     }
 
     private class FakeReminderScheduler : ReminderScheduler {

@@ -10,7 +10,12 @@ import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.domain.model.Reminder
+import com.dayscounter.domain.model.ReminderMode
+import com.dayscounter.domain.model.ReminderStatus
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.domain.usecase.ReminderRequest
+import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.NoOpLogger
 import io.mockk.mockk
 import io.mockk.verify
@@ -461,11 +466,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = "Измененное название",
-                details = testItem.details,
-                timestamp = testItem.timestamp,
-                colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = "Измененное название",
+                    details = testItem.details,
+                    timestamp = testItem.timestamp,
+                    colorTag = testItem.colorTag,
+                    displayOption = testItem.displayOption
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -492,11 +499,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = testItem.title,
-                details = "Измененное описание",
-                timestamp = testItem.timestamp,
-                colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = testItem.title,
+                    details = "Измененное описание",
+                    timestamp = testItem.timestamp,
+                    colorTag = testItem.colorTag,
+                    displayOption = testItem.displayOption
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -523,11 +532,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = testItem.title,
-                details = testItem.details,
-                timestamp = testItem.timestamp + 86400000L,
-                colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = testItem.title,
+                    details = testItem.details,
+                    timestamp = testItem.timestamp + 86400000L,
+                    colorTag = testItem.colorTag,
+                    displayOption = testItem.displayOption
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -554,11 +565,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = testItem.title,
-                details = testItem.details,
-                timestamp = testItem.timestamp,
-                colorTag = 0xFFFF0000.toInt(),
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = testItem.title,
+                    details = testItem.details,
+                    timestamp = testItem.timestamp,
+                    colorTag = 0xFFFF0000.toInt(),
+                    displayOption = testItem.displayOption
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -585,11 +598,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = testItem.title,
-                details = testItem.details,
-                timestamp = testItem.timestamp,
-                colorTag = testItem.colorTag,
-                displayOption = DisplayOption.YEAR_MONTH_DAY
+                CreateEditChangeInput(
+                    title = testItem.title,
+                    details = testItem.details,
+                    timestamp = testItem.timestamp,
+                    colorTag = testItem.colorTag,
+                    displayOption = DisplayOption.YEAR_MONTH_DAY
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -616,11 +631,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = testItem.title,
-                details = testItem.details,
-                timestamp = testItem.timestamp,
-                colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = testItem.title,
+                    details = testItem.details,
+                    timestamp = testItem.timestamp,
+                    colorTag = testItem.colorTag,
+                    displayOption = testItem.displayOption
+                )
             )
 
             // Then - Изменений не должно быть
@@ -650,11 +667,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = itemWithFixedTimestamp.title,
-                details = itemWithFixedTimestamp.details,
-                timestamp = fixedTimestamp, // Тот же самый timestamp
-                colorTag = itemWithFixedTimestamp.colorTag,
-                displayOption = itemWithFixedTimestamp.displayOption
+                CreateEditChangeInput(
+                    title = itemWithFixedTimestamp.title,
+                    details = itemWithFixedTimestamp.details,
+                    timestamp = fixedTimestamp, // Тот же самый timestamp
+                    colorTag = itemWithFixedTimestamp.colorTag,
+                    displayOption = itemWithFixedTimestamp.displayOption
+                )
             )
 
             // Then - Изменений не должно быть обнаружено
@@ -689,11 +708,13 @@ class CreateEditScreenViewModelTest {
             val nextDayTimestamp =
                 fixedTimestamp + (24 * 60 * 60 * 1000) // +1 день (86400000 мс)
             newViewModel.checkHasChanges(
-                title = itemWithFixedTimestamp.title,
-                details = itemWithFixedTimestamp.details,
-                timestamp = nextDayTimestamp, // На 1 день позже
-                colorTag = itemWithFixedTimestamp.colorTag,
-                displayOption = itemWithFixedTimestamp.displayOption
+                CreateEditChangeInput(
+                    title = itemWithFixedTimestamp.title,
+                    details = itemWithFixedTimestamp.details,
+                    timestamp = nextDayTimestamp, // На 1 день позже
+                    colorTag = itemWithFixedTimestamp.colorTag,
+                    displayOption = itemWithFixedTimestamp.displayOption
+                )
             )
 
             // Then - Изменения должны быть обнаружены
@@ -723,11 +744,13 @@ class CreateEditScreenViewModelTest {
 
             testDispatcher.scheduler.advanceUntilIdle()
             newViewModel.checkHasChanges(
-                title = "Измененное название",
-                details = testItem.details,
-                timestamp = testItem.timestamp,
-                colorTag = testItem.colorTag,
-                displayOption = testItem.displayOption
+                CreateEditChangeInput(
+                    title = "Измененное название",
+                    details = testItem.details,
+                    timestamp = testItem.timestamp,
+                    colorTag = testItem.colorTag,
+                    displayOption = testItem.displayOption
+                )
             )
             assertTrue(newViewModel.hasChanges.value, "Изменения должны быть обнаружены")
 
@@ -773,6 +796,53 @@ class CreateEditScreenViewModelTest {
             )
             val successState = uiState as CreateEditScreenState.Success
             assertEquals("Тестовое событие", successState.item.title, "Название должно совпадать")
+        }
+    }
+
+    @Test
+    fun whenEditingItemWithPastReminder_thenUiStateContainsNoReminder() {
+        runTest {
+            val nowMillis = 1_800_000_000_000L
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
+            repository.setItemForGetById(testItem)
+
+            val pastReminder =
+                Reminder(
+                    itemId = 1L,
+                    mode = ReminderMode.AT_DATE,
+                    targetEpochMillis = nowMillis - 60_000L,
+                    selectedDateEpochMillis = nowMillis - 60_000L,
+                    selectedHour = 10,
+                    selectedMinute = 0,
+                    status = ReminderStatus.ACTIVE,
+                    createdAt = nowMillis - 120_000L,
+                    updatedAt = nowMillis - 60_000L
+                )
+            val reminderManager =
+                FakeReminderManager().apply {
+                    activeReminder = pastReminder
+                }
+
+            val newViewModel =
+                CreateEditScreenViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService,
+                    reminderManager = reminderManager,
+                    currentTimeMillisProvider = { nowMillis }
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val state = newViewModel.uiState.value
+            assertTrue(state is CreateEditScreenState.Success, "Должно быть состояние Success")
+            val successState = state as CreateEditScreenState.Success
+            assertNull(
+                successState.reminder,
+                "Прошедшее напоминание не должно пробрасываться в edit-форму"
+            )
         }
     }
 
@@ -870,5 +940,22 @@ class CreateEditScreenViewModelTest {
         override fun getYearsString(quantity: Int): String = "$quantity год"
 
         override fun getMonthsString(quantity: Int): String = "$quantity месяц"
+    }
+
+    private class FakeReminderManager : ReminderManager {
+        var activeReminder: Reminder? = null
+
+        override suspend fun saveReminder(
+            request: ReminderRequest,
+            itemTitle: String
+        ): Result<Unit> = Result.failure(UnsupportedOperationException("Not used in this test"))
+
+        override suspend fun getActiveReminder(itemId: Long): Reminder? = activeReminder?.takeIf { it.itemId == itemId }
+
+        override suspend fun clearReminder(itemId: Long) = Unit
+
+        override suspend fun consumeReminder(itemId: Long) = Unit
+
+        override suspend fun rescheduleFutureReminders() = Unit
     }
 }

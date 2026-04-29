@@ -70,7 +70,8 @@ class CreateEditScreenCustomColorTest {
                         uiStates = uiStates,
                         showDatePicker = showDatePicker,
                         viewModel = createTestViewModel(),
-                        onBackClick = {}
+                        onBackClick = {},
+                        onReminderNotificationsUnavailable = {}
                     )
 
                 CreateEditFormContent(params)
@@ -124,7 +125,8 @@ class CreateEditScreenCustomColorTest {
                         uiStates = uiStates,
                         showDatePicker = showDatePicker,
                         viewModel = createTestViewModel(),
-                        onBackClick = {}
+                        onBackClick = {},
+                        onReminderNotificationsUnavailable = {}
                     )
 
                 CreateEditFormContent(params)
