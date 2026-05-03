@@ -61,7 +61,6 @@ class CreateEditScreenCustomColorTest {
                         itemId = 1L,
                         paddingValues = PaddingValues(),
                         uiStates = uiState,
-                        showDatePicker = false,
                         onShowDatePickerChange = {},
                         onTitleChange = { title -> selectedColor = null },
                         onDetailsChange = {},
@@ -72,6 +71,7 @@ class CreateEditScreenCustomColorTest {
                         },
                         onDisplayOptionChange = {},
                         onReminderChange = {},
+                        onValueChange = {},
                         viewModel = createTestViewModel(),
                         onBackClick = {},
                         onReminderNotificationsUnavailable = {}
@@ -119,7 +119,6 @@ class CreateEditScreenCustomColorTest {
                         itemId = 1L,
                         paddingValues = PaddingValues(),
                         uiStates = uiState,
-                        showDatePicker = false,
                         onShowDatePickerChange = {},
                         onTitleChange = { selectedColor = null },
                         onDetailsChange = {},
@@ -127,6 +126,7 @@ class CreateEditScreenCustomColorTest {
                         onColorChange = { newColor -> selectedColor = newColor },
                         onDisplayOptionChange = {},
                         onReminderChange = {},
+                        onValueChange = {},
                         viewModel = createTestViewModel(),
                         onBackClick = {},
                         onReminderNotificationsUnavailable = {}

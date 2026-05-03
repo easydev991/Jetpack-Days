@@ -1,9 +1,6 @@
 package com.dayscounter.ui.screens.createedit
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -29,13 +26,13 @@ class ReminderSettingsSectionUiTest {
 
     @Test
     fun reminderSection_whenToggleOffByDefault_thenSettingsAreHidden() {
-        var reminderState by remember { mutableStateOf(createReminderUiState(isEnabled = false)) }
+        val reminderState = mutableStateOf(createReminderUiState(isEnabled = false))
 
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ReminderSettingsSection(
-                    reminder = reminderState,
-                    onReminderChange = { reminderState = it }
+                    reminder = reminderState.value,
+                    onReminderChange = { reminderState.value = it }
                 )
             }
         }
@@ -47,19 +44,19 @@ class ReminderSettingsSectionUiTest {
 
     @Test
     fun reminderSection_whenToggleTurnedOn_thenModeOptionsBecomeVisible() {
-        var reminderState by remember { mutableStateOf(createReminderUiState(isEnabled = false)) }
+        val reminderState = mutableStateOf(createReminderUiState(isEnabled = false))
 
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ReminderSettingsSection(
-                    reminder = reminderState,
-                    onReminderChange = { reminderState = it }
+                    reminder = reminderState.value,
+                    onReminderChange = { reminderState.value = it }
                 )
             }
         }
 
         composeTestRule.runOnIdle {
-            reminderState = reminderState.copy(isEnabled = true)
+            reminderState.value = reminderState.value.copy(isEnabled = true)
         }
 
         composeTestRule.onNodeWithText(context.getString(R.string.reminder_mode_on_date)).assertIsDisplayed()
@@ -68,20 +65,19 @@ class ReminderSettingsSectionUiTest {
 
     @Test
     fun reminderSection_whenAtDateModeSelected_thenDateAndTimeFieldsAreVisible() {
-        var reminderState by remember {
+        val reminderState =
             mutableStateOf(
                 createReminderUiState(
                     isEnabled = true,
                     mode = ReminderMode.AT_DATE
                 )
             )
-        }
 
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ReminderSettingsSection(
-                    reminder = reminderState,
-                    onReminderChange = { reminderState = it }
+                    reminder = reminderState.value,
+                    onReminderChange = { reminderState.value = it }
                 )
             }
         }
@@ -92,7 +88,7 @@ class ReminderSettingsSectionUiTest {
 
     @Test
     fun reminderSection_whenAfterModeSelected_thenShowsIntervalAndUnitFields() {
-        var reminderState by remember {
+        val reminderState =
             mutableStateOf(
                 createReminderUiState(
                     isEnabled = true,
@@ -100,13 +96,12 @@ class ReminderSettingsSectionUiTest {
                     intervalValue = ""
                 )
             )
-        }
 
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ReminderSettingsSection(
-                    reminder = reminderState,
-                    onReminderChange = { reminderState = it }
+                    reminder = reminderState.value,
+                    onReminderChange = { reminderState.value = it }
                 )
             }
         }
@@ -117,7 +112,7 @@ class ReminderSettingsSectionUiTest {
 
     @Test
     fun reminderSection_whenAfterModeAndInvalidInterval_thenShowsValidationError() {
-        var reminderState by remember {
+        val reminderState =
             mutableStateOf(
                 createReminderUiState(
                     isEnabled = true,
@@ -125,13 +120,12 @@ class ReminderSettingsSectionUiTest {
                     intervalValue = ""
                 )
             )
-        }
 
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ReminderSettingsSection(
-                    reminder = reminderState,
-                    onReminderChange = { reminderState = it }
+                    reminder = reminderState.value,
+                    onReminderChange = { reminderState.value = it }
                 )
             }
         }
