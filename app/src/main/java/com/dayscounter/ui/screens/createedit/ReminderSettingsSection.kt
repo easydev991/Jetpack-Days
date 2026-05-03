@@ -252,9 +252,9 @@ private fun ReminderAfterSection(
     OutlinedTextField(
         value = reminder.intervalValue,
         onValueChange = { newValue ->
-            val onlyDigits = newValue.filter { it.isDigit() }
-            if (onlyDigits != reminder.intervalValue) {
-                onReminderChange(reminder.copy(intervalValue = onlyDigits))
+            val sanitized = sanitizeIntervalValue(newValue)
+            if (sanitized != reminder.intervalValue) {
+                onReminderChange(reminder.copy(intervalValue = sanitized))
             }
         },
         label = { Text(stringResource(R.string.remind_after_label)) },

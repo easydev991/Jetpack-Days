@@ -272,4 +272,29 @@ class CreateEditReminderStateTest {
 
         assertNull(errorResId)
     }
+
+    @Test
+    fun sanitizeintervalvalue_when_leading_zero_then_strips_it() {
+        assertEquals("3", sanitizeIntervalValue("03"))
+        assertEquals("3", sanitizeIntervalValue("003"))
+        assertEquals("10", sanitizeIntervalValue("010"))
+        assertEquals("100", sanitizeIntervalValue("100"))
+        assertEquals("5", sanitizeIntervalValue("5"))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_single_zero_then_returns_empty() {
+        assertEquals("", sanitizeIntervalValue("0"))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_empty_then_returns_empty() {
+        assertEquals("", sanitizeIntervalValue(""))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_letters_then_keeps_only_digits() {
+        assertEquals("3", sanitizeIntervalValue("a03b"))
+        assertEquals("", sanitizeIntervalValue("abc"))
+    }
 }

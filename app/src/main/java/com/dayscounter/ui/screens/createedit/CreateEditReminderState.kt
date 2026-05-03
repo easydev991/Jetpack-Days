@@ -31,6 +31,20 @@ data class ReminderFormUiState(
 
 internal fun defaultReminderDate(today: LocalDate = LocalDate.now()): LocalDate = today.plusDays(1)
 
+/**
+ * Удаляет ведущие нули из строки, содержащей только цифры.
+ * Одиночный "0" превращается в "" — ведущий ноль не имеет смысла в числовом поле.
+ * Нецифровые символы отфильтровываются.
+ *
+ * Примеры:
+ *   sanitizeIntervalValue("03")   → "3"
+ *   sanitizeIntervalValue("0")    → ""
+ *   sanitizeIntervalValue("010")  → "10"
+ *   sanitizeIntervalValue("a5b")  → "5"
+ *   sanitizeIntervalValue("")     → ""
+ */
+internal fun sanitizeIntervalValue(raw: String): String = raw.filter { it.isDigit() }.trimStart('0')
+
 internal fun isCreateEditFormValid(
     title: String,
     selectedDate: LocalDate?,

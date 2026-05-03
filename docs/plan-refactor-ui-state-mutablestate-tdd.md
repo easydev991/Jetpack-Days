@@ -363,6 +363,48 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
 - [x] `make test` — 446 unit-тестов зелёные
 - [x] `connectedDebugAndroidTest` — 79/79 зелёные (включая screenshot test)
 
+#### 5.8.4 Баг #4: Ведущие нули в поле "Напомнить через" не отбрасываются ✅ (исправлено)
+
+**Проблема:** В поле `intervalValue` (`ReminderSettingsSection.kt:252-258`) можно ввести "0", а затем другое число, получив "03" — это значение проходит валидацию (`toIntOrNull()` = 3 ≥ 1) и сохраняется. Ведущий ноль не имеет смысла в числовом поле.
+
+**Решение (TDD):**
+
+1. **Red:** Написаны 4 теста на новую функцию `sanitizeIntervalValue`:
+   - `sanitizeintervalvalue_when_leading_zero_then_strips_it` — "03"→"3", "003"→"3", "010"→"10"
+   - `sanitizeintervalvalue_when_single_zero_then_returns_empty` — "0"→""
+   - `sanitizeintervalvalue_when_empty_then_returns_empty`
+   - `sanitizeintervalvalue_when_letters_then_keeps_only_digits`
+
+   Тесты не компилируются — `sanitizeIntervalValue` не существует.
+
+2. **Green:** Реализована `sanitizeIntervalValue` в `CreateEditReminderState.kt`:
+   ```kotlin
+   internal fun sanitizeIntervalValue(raw: String): String =
+       raw.filter { it.isDigit() }.trimStart('0')
+   ```
+
+3. **Применение:** В `ReminderSettingsSection.kt:254-258` заменена фильтрация цифр на `sanitizeIntervalValue`:
+   ```kotlin
+   val sanitized = sanitizeIntervalValue(newValue)
+   if (sanitized != reminder.intervalValue) {
+       onReminderChange(reminder.copy(intervalValue = sanitized))
+   }
+   ```
+
+**Поведение после фикса:**
+| Ввод | Результат | Валидация |
+|------|-----------|-----------|
+| "0"  | "" (отброшен) | невалидно (пусто) |
+| "03" | "3" | ✅ 3 ≥ 1 |
+| "0" → "3" | "" → "3" | ✅ |
+| "10" | "10" | ✅ 10 ≥ 1 |
+| "abc" | "" | невалидно |
+
+- [x] TDD: Red (compile error) → Green (tests pass) → Apply
+- [x] 4 новых теста в `CreateEditReminderStateTest.kt`
+- [x] `ReminderSettingsSection.kt` — `sanitizeIntervalValue` вместо `filter { isDigit() }`
+- [x] `make format` + `make test` + `connectedDebugAndroidTest` — всё зелёное
+
 ## 6. Риски и меры снижения
 
 - [x] **Риск поломки сохранения состояния при повороте экрана.**
