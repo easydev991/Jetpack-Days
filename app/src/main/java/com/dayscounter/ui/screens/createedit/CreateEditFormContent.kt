@@ -153,7 +153,9 @@ private fun ColorAndDisplayOptionSection(
 @Composable
 internal fun CreateEditFormContent(params: CreateEditFormParams) {
     val reminderSettingsBringIntoViewRequester = remember { BringIntoViewRequester() }
-    var previousReminderEnabled by remember { mutableStateOf(params.uiStates.reminder.isEnabled) }
+    var previousReminderEnabled by remember(params.uiStates.reminder.isInitializedFromSource) {
+        mutableStateOf(params.uiStates.reminder.isEnabled)
+    }
     val onValueChange =
         rememberOnCreateEditValueChange(
             itemId = params.itemId,
