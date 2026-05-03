@@ -19,7 +19,7 @@ import com.dayscounter.R
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 /**
  * DatePicker Dialog.
@@ -36,7 +36,7 @@ internal fun DatePickerDialogSection(
         rememberDatePickerState(
             initialSelectedDateMillis =
                 selectedDate
-                    ?.atStartOfDay(ZoneId.systemDefault())
+                    ?.atStartOfDay(ZoneOffset.UTC)
                     ?.toInstant()
                     ?.toEpochMilli()
         )
@@ -50,7 +50,7 @@ internal fun DatePickerDialogSection(
                         onDateSelected(
                             Instant
                                 .ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
+                                .atZone(ZoneOffset.UTC)
                                 .toLocalDate()
                         )
                     }

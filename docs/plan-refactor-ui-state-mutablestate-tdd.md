@@ -378,12 +378,14 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
    Тесты не компилируются — `sanitizeIntervalValue` не существует.
 
 2. **Green:** Реализована `sanitizeIntervalValue` в `CreateEditReminderState.kt`:
+
    ```kotlin
    internal fun sanitizeIntervalValue(raw: String): String =
        raw.filter { it.isDigit() }.trimStart('0')
    ```
 
 3. **Применение:** В `ReminderSettingsSection.kt:254-258` заменена фильтрация цифр на `sanitizeIntervalValue`:
+
    ```kotlin
    val sanitized = sanitizeIntervalValue(newValue)
    if (sanitized != reminder.intervalValue) {
@@ -392,6 +394,7 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
    ```
 
 **Поведение после фикса:**
+
 | Ввод | Результат | Валидация |
 |------|-----------|-----------|
 | "0"  | "" (отброшен) | невалидно (пусто) |
@@ -404,6 +407,45 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
 - [x] 4 новых теста в `CreateEditReminderStateTest.kt`
 - [x] `ReminderSettingsSection.kt` — `sanitizeIntervalValue` вместо `filter { isDigit() }`
 - [x] `make format` + `make test` + `connectedDebugAndroidTest` — всё зелёное
+
+#### 5.8.5 Баг #5: DatePicker показывает предыдущий день (timezone mismatch) ✅ (исправлено)
+
+**Проблема:** При повторном открытии DatePicker (для даты события или даты напоминания) календарь показывает предыдущий день относительно выбранной даты. Например, выбрано 29 апреля, а открывается 28 апреля. Если нажать «ОК» без ручного выбора, применяется 28 апреля.
+
+**Root Cause:** Material3 `DatePicker` внутри интерпретирует `selectedDateMillis` как UTC-полночь. Но `DatePickerDialogSection` передаёт millis через `ZoneId.systemDefault()`:
+
+```kotlin
+// MSK (UTC+3): 29 апр 00:00 MSK = 28 апр 21:00 UTC
+selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+```
+
+DatePicker получает millis = 28 апр 21:00 UTC, думает «это 28 апреля», показывает 28-е. При подтверждении без ручного выбора применяется 28 апреля.
+
+**Фикс (TDD):**
+
+1. **Red:** Написаны 4 теста в `DatePickerConversionTest.kt`, демонстрирующие проблему:
+   - `oldConversion_whenNonUtcOffset_thenDateShiftsWhenReadAsUtc` — с MSK (UTC+3) дата сдвигается на день назад
+   - `fixedConversion_whenUtcOffset_thenPreservesDateThroughUtcLens` — с UTC дата сохраняется
+   - `oldConversion_whenNegativeUtcOffset_thenDatePreservedButMillisNotMidnight` — с UTC-5 millis не соответствует полночи
+   - `roundtrip_with_utc_preserves_any_date` — roundtrip с UTC работает для любых дат
+
+2. **Green:** В `CreateEditButtons.kt:37-41,52-53` заменён `ZoneId.systemDefault()` на `ZoneOffset.UTC`:
+   ```kotlin
+   // Запись в DatePicker:
+   selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+   
+   // Чтение из DatePicker:
+   Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+   ```
+
+**Поведение после фикса:** DatePicker всегда показывает фактически выбранную дату (или сегодня, если дата не выбрана), независимо от часового пояса устройства.
+
+**Важно:** Конверсия `atStartOfDay(ZoneId.systemDefault())` сохранена в `StateSavers.kt` и `CreateEditScreen.kt:toItem` — там она используется для persistence и timestamp, где timezone-зависимость корректна.
+
+- [x] TDD: Red (bug demo) → Green (UTC-конверсия) → Apply
+- [x] 4 теста в `DatePickerConversionTest.kt`
+- [x] `CreateEditButtons.kt` — `ZoneOffset.UTC` вместо `ZoneId.systemDefault()`
+- [x] `make format` + `make test` (455 unit) + `connectedDebugAndroidTest` (79/79) — всё зелёное
 
 ## 6. Риски и меры снижения
 
@@ -424,7 +466,7 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
 - [x] В проекте нет UI-state с `MutableState<T>` внутри data-классов.
 - [x] `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
 - [x] Все ViewModel/Compose экраны работают на иммутабельном контракте.
-- [x] `make format` и `make test` проходят (451 unit-тест зелёный).
+- [x] `make format` и `make test` проходят (455 unit-тестов зелёные).
 - [x] Напоминания, backup/restore и существующая навигация не деградировали.
 - [ ] Документация по состояниям обновлена.
 - [x] Android-тесты (`app/src/androidTest/`) скомпилированы и проходят (79/79).
