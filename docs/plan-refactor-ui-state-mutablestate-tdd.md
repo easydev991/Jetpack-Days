@@ -235,7 +235,7 @@ var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
 - [x] Прогнать `./gradlew compileDebugAndroidTestKotlin` — компиляция без ошибок
 - [x] Прогнать `./gradlew connectedDebugAndroidTest` — 79/79 тестов зелёные
 
-### 5.7 Устаревший вызов createComposeRule (androidTest, 8 файлов) ✅ (необходимо исправить)
+### 5.7 Устаревший вызов createComposeRule (androidTest, 8 файлов) ✅ (исправлено)
 
 **Проблема:** 8 androidTest-файлов используют устаревший `androidx.compose.ui.test.junit4.createComposeRule`:
 
@@ -257,14 +257,14 @@ Deprecation: используйте `androidx.compose.ui.test.junit4.v2.createCo
 
 **Решение:** Заменить импорт на `import androidx.compose.ui.test.junit4.v2.createComposeRule` в каждом файле. Для простых тестов (рендер + проверка текста) `StandardTestDispatcher` не меняет поведение.
 
-- [ ] `DaysCountTextTest.kt` — замена импорта
-- [ ] `ColorSelectorUiTest.kt` — замена импорта
-- [ ] `CreateEditSaveValidationUiTest.kt` — замена импорта
-- [ ] `CreateEditScreenCustomColorTest.kt` — замена импорта
-- [ ] `ReminderSettingsSectionUiTest.kt` — замена импорта
-- [ ] `ColorTagFilterDialogTest.kt` — замена импорта
-- [ ] `MoreScreenTest.kt` — замена импорта
-- [ ] `ThemeIconScreenTest.kt` — замена импорта
+- [x] `DaysCountTextTest.kt` — замена импорта
+- [x] `ColorSelectorUiTest.kt` — замена импорта
+- [x] `CreateEditSaveValidationUiTest.kt` — замена импорта
+- [x] `CreateEditScreenCustomColorTest.kt` — замена импорта
+- [x] `ReminderSettingsSectionUiTest.kt` — замена импорта
+- [x] `ColorTagFilterDialogTest.kt` — замена импорта
+- [x] `MoreScreenTest.kt` — замена импорта
+- [x] `ThemeIconScreenTest.kt` — замена импорта
 
 ### 5.8 Регрессии после рефакторинга: исправление багов ✅ (исправлено)
 
