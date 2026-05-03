@@ -21,13 +21,4 @@ alwaysApply: true
 
 **ВАЖНО:** Сетевые библиотеки (Retrofit, OkHttp, Ktor) НЕ используются.
 
-## Версии
-
-- AGP: 9.0.0
-- Kotlin: 2.3.0
-- Compile SDK: 36
-- Target SDK: 35
-- Min SDK: 26
-- KSP: 2.3.2 (KSP2)
-
-Зависимости: `gradle/libs.versions.toml`
+Версии зависимостей автоматически обновляются в `gradle/libs.versions.toml` и отображаются в `README.md`. Ручное указание версий здесь не требуется.

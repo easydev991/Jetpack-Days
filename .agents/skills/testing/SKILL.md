@@ -87,7 +87,6 @@ ItemRepositoryImplTest                            1      15       16
 ### Другие команды тестирования
 
 - `make android-test` - запуск интеграционных тестов на Android устройстве
-- `make test-all` - запуск всех тестов (unit + интеграционные)
 - `make android-test-report` - открыть HTML отчет интеграционных тестов в браузере
 
 ## Структура

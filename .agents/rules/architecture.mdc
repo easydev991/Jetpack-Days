@@ -41,7 +41,7 @@ Presentation (UI, ViewModel)
 
 - **Room**: `ItemEntity`, `ItemDao`, `DaysDatabase`, конвертеры
 - **Repository**: `ItemRepositoryImpl` - реализация репозитория
-- **Formatter**: `DaysFormatter`, `ResourceProvider` - локализация
+- **Provider**: `DaysFormatter`, `ResourceProvider` - форматирование и локализация
 - **Preferences**: `AppSettingsDataStore` - хранение настроек (тема, иконка, сортировка)
 
 ### Domain
@@ -57,9 +57,14 @@ Presentation (UI, ViewModel)
 
 - **ViewModels**: `MainScreenViewModel`, `CreateEditScreenViewModel`, `DetailScreenViewModel`, `RootScreenViewModel`, `AppDataScreenViewModel`, `ThemeIconViewModel`, `MainActivityViewModel`
 - **UI State**: sealed классы (Loading/Success/Error), `AppDataUiState`, `RootScreenState`, `ThemeIconUiState`
-- **Screens**: Compose экраны в `ui/screen/`
+- **Screens**: Compose экраны в `ui/screens/`
 - **Navigation**: `navigation/Screen.kt`
 - **Theme**: тема в `ui/theme/`
+
+### Reminder
+
+- **ReminderWorker**: периодическая проверка и уведомления о прошедших событиях
+- **NotificationHelper**: создание и управление уведомлениями
 
 ### Utilities
 

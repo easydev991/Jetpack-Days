@@ -19,7 +19,7 @@ alwaysApply: true
 
 ### UI
 
-- `LazyColumn` с `key = { it.id }` для стабильной идентификации (MainScreen.kt:376)
+- `LazyColumn` с `key = { it.id }` для стабильной идентификации
 - `rememberLazyListState()` для сохранения состояния прокрутки
 - `verticalScroll(rememberScrollState())` для форм
 - `rememberSaveable` для локального состояния (title, details, selectedDate, selectedColor)

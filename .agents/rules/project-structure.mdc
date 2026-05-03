@@ -8,7 +8,7 @@ alwaysApply: true
 app/src/main/java/com/dayscounter/
 ├── data/
 │   ├── database/         # Room entities, DAO, DB, converters, mappers
-│   ├── formatter/        # DaysFormatter, ResourceProvider
+│   ├── provider/         # DaysFormatter, ResourceProvider
 │   ├── preferences/      # AppSettingsDataStore
 │   └── repository/       # ItemRepositoryImpl
 ├── domain/
@@ -17,12 +17,13 @@ app/src/main/java/com/dayscounter/
 │   ├── repository/       # ItemRepository interface
 │   └── usecase/          # Use cases, IconManager, BackupException, BackupItem
 ├── ui/
-│   ├── component/        # Reusable components
-│   ├── screen/           # Compose screens
+│   ├── ds/               # Design System components (reusable)
+│   ├── screens/          # Compose screens
 │   ├── state/            # UI state classes
-│   └── theme/            # App theme
-├── viewmodel/            # ViewModels
+│   ├── theme/            # App theme
+│   └── viewmodel/        # ViewModels
 ├── navigation/           # Navigation routes
+├── reminder/             # Reminder logic (worker, notification)
 ├── analytics/            # FirebaseAnalyticsHelper
 ├── crash/                # CrashlyticsHelper
 ├── di/                   # AppModule, FormatterModule
@@ -33,8 +34,8 @@ app/src/main/java/com/dayscounter/
 
 ## Правила
 
-- Экраны → `ui/screen/`
-- Компоненты UI → `ui/component/`
-- ViewModels → `viewmodel/` (отдельная папка)
+- Экраны → `ui/screens/`
+- Компоненты UI → `ui/ds/`
+- ViewModels → `ui/viewmodel/`
 - UI State → `ui/state/`
 - Тесты → `test/` (unit), `androidTest/` (integration/UI), структура зеркалит код
