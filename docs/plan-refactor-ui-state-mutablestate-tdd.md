@@ -424,7 +424,7 @@ formState.value = formState.value.copy(selectedDate = date, showDatePicker = fal
 - [x] В проекте нет UI-state с `MutableState<T>` внутри data-классов.
 - [x] `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
 - [x] Все ViewModel/Compose экраны работают на иммутабельном контракте.
-- [x] `make format` и `make test` проходят (446 unit-тестов зелёные).
+- [x] `make format` и `make test` проходят (451 unit-тест зелёный).
 - [x] Напоминания, backup/restore и существующая навигация не деградировали.
 - [ ] Документация по состояниям обновлена.
 - [x] Android-тесты (`app/src/androidTest/`) скомпилированы и проходят (79/79).
