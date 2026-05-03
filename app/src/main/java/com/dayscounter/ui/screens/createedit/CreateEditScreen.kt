@@ -75,6 +75,26 @@ private fun CreateEditScreenContent(
         loadItemData(itemId, uiState, formState)
     }
 
+    val onValueChange = {
+        if (itemId != null) {
+            val s = formState.value
+            viewModel.checkHasChanges(
+                CreateEditChangeInput(
+                    title = s.title,
+                    details = s.details,
+                    timestamp =
+                        s.selectedDate
+                            ?.atStartOfDay(ZoneId.systemDefault())
+                            ?.toInstant()
+                            ?.toEpochMilli() ?: 0L,
+                    colorTag = s.selectedColor?.toArgb(),
+                    displayOption = s.selectedDisplayOption,
+                    reminderFingerprint = s.reminder.toChangeFingerprint()
+                )
+            )
+        }
+    }
+
     val screenActions =
         rememberCreateEditScreenActions(
             params =
@@ -115,6 +135,7 @@ private fun CreateEditScreenContent(
                         formState.value = formState.value.copy(selectedDisplayOption = option)
                     },
                     onReminderChange = { reminder -> formState.value = formState.value.copy(reminder = reminder) },
+                    onValueChange = onValueChange,
                     viewModel = viewModel,
                     onBackClick = onBackClick,
                     onReminderNotificationsUnavailable = onReminderNotificationsUnavailable
@@ -127,7 +148,23 @@ private fun CreateEditScreenContent(
         selectedDate = formState.value.selectedDate,
         onDateSelected = { date ->
             formState.value = formState.value.copy(selectedDate = date)
-            screenActions.onDateSelected()
+            if (itemId != null) {
+                val s = formState.value
+                viewModel.checkHasChanges(
+                    CreateEditChangeInput(
+                        title = s.title,
+                        details = s.details,
+                        timestamp =
+                            s.selectedDate
+                                ?.atStartOfDay(ZoneId.systemDefault())
+                                ?.toInstant()
+                                ?.toEpochMilli() ?: 0L,
+                        colorTag = s.selectedColor?.toArgb(),
+                        displayOption = s.selectedDisplayOption,
+                        reminderFingerprint = s.reminder.toChangeFingerprint()
+                    )
+                )
+            }
         },
         onDismiss = { formState.value = formState.value.copy(showDatePicker = false) }
     )
@@ -169,33 +206,6 @@ private fun rememberCreateEditSaveAction(params: CreateEditSaveActionParams): ()
                 item = item,
                 reminderRequest = reminderRequest,
                 onSaved = params.onBackClick
-            )
-        }
-    }
-
-@Composable
-private fun rememberCreateEditDateSelectedAction(
-    itemId: Long?,
-    uiState: CreateEditUiState,
-    viewModel: CreateEditScreenViewModel
-): () -> Unit =
-    {
-        if (itemId != null) {
-            val timestamp =
-                uiState.selectedDate
-                    ?.atStartOfDay(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
-
-            viewModel.checkHasChanges(
-                CreateEditChangeInput(
-                    title = uiState.title,
-                    details = uiState.details,
-                    timestamp = timestamp,
-                    colorTag = uiState.selectedColor?.toArgb(),
-                    displayOption = uiState.selectedDisplayOption,
-                    reminderFingerprint = uiState.reminder.toChangeFingerprint()
-                )
             )
         }
     }
@@ -263,23 +273,15 @@ private fun rememberCreateEditScreenActions(params: CreateEditScreenActionsParam
                     onBackClick = params.onBackClick
                 )
         )
-    val onDateSelected =
-        rememberCreateEditDateSelectedAction(
-            itemId = params.itemId,
-            uiState = params.uiStates,
-            viewModel = params.viewModel
-        )
     return CreateEditScreenActions(
         isSaveEnabled = isSaveEnabled,
-        onSaveClick = onSaveClick,
-        onDateSelected = onDateSelected
+        onSaveClick = onSaveClick
     )
 }
 
 private data class CreateEditScreenActions(
     val isSaveEnabled: Boolean,
-    val onSaveClick: () -> Unit,
-    val onDateSelected: () -> Unit
+    val onSaveClick: () -> Unit
 )
 
 private data class CreateEditScreenActionsParams(

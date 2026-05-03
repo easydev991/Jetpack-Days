@@ -213,12 +213,14 @@ var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
 **Проблема:** Android-тесты (`app/src/androidTest/`) не компилируются из-за двух типов ошибок:
 
 #### 5.6.1 `By remember` вне `@Composable` контекста (Kotlin 2.0+)
+
 - `CreateEditReminderAutoScrollUiTest.kt:31` — `var uiState by remember` на уровне класса
 - `ReminderSettingsSectionUiTest.kt:31` — `var reminderState by remember` на уровне класса
 
 Kotlin 2.0+ требует `@Composable` для вызова `remember`. Решение: перенести объявление состояния внутрь `setContent {}` или добавить `@Composable`.
 
 #### 5.6.2 `showDatePicker` удалён из `CreateEditFormParams`
+
 - `CreateEditReminderAutoScrollUiTest.kt:42` — `showDatePicker = false`
 - `CreateEditScreenCustomColorTest.kt:64, 122` — `showDatePicker = false`
 

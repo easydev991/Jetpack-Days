@@ -23,6 +23,7 @@ data class CreateEditFormParams(
     val onColorChange: (Color?) -> Unit,
     val onDisplayOptionChange: (DisplayOption) -> Unit,
     val onReminderChange: (ReminderFormUiState) -> Unit,
+    val onValueChange: () -> Unit,
     val viewModel: CreateEditScreenViewModel,
     val onBackClick: () -> Unit,
     val onReminderNotificationsUnavailable: () -> Unit

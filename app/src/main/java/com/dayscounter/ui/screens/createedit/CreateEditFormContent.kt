@@ -156,12 +156,7 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
     var previousReminderEnabled by remember(params.uiStates.reminder.isInitializedFromSource) {
         mutableStateOf(params.uiStates.reminder.isEnabled)
     }
-    val onValueChange =
-        rememberOnCreateEditValueChange(
-            itemId = params.itemId,
-            uiState = params.uiStates,
-            viewModel = params.viewModel
-        )
+    val onValueChange = params.onValueChange
 
     Column(
         modifier =
