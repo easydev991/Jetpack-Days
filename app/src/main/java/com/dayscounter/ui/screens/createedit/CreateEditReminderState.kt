@@ -1,7 +1,5 @@
 package com.dayscounter.ui.screens.createedit
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import com.dayscounter.R
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderIntervalUnit
@@ -15,17 +13,20 @@ import java.time.ZoneId
 
 /**
  * UI-состояние блока напоминания на форме Create/Edit.
+ *
+ * Plain data class без MutableState — иммутабельный контракт.
+ * Мутация через copy().
  */
 data class ReminderFormUiState(
-    val isEnabled: MutableState<Boolean> = mutableStateOf(false),
-    val mode: MutableState<ReminderMode> = mutableStateOf(ReminderMode.AT_DATE),
-    val selectedDate: MutableState<LocalDate?> = mutableStateOf(defaultReminderDate()),
-    val showDatePicker: MutableState<Boolean> = mutableStateOf(false),
-    val hour: MutableState<Int> = mutableStateOf(LocalTime.now().hour),
-    val minute: MutableState<Int> = mutableStateOf(LocalTime.now().minute),
-    val intervalValue: MutableState<String> = mutableStateOf(""),
-    val intervalUnit: MutableState<ReminderIntervalUnit> = mutableStateOf(ReminderIntervalUnit.DAY),
-    val isInitializedFromSource: MutableState<Boolean> = mutableStateOf(false)
+    val isEnabled: Boolean = false,
+    val mode: ReminderMode = ReminderMode.AT_DATE,
+    val selectedDate: LocalDate? = defaultReminderDate(),
+    val showDatePicker: Boolean = false,
+    val hour: Int = LocalTime.now().hour,
+    val minute: Int = LocalTime.now().minute,
+    val intervalValue: String = "",
+    val intervalUnit: ReminderIntervalUnit = ReminderIntervalUnit.DAY,
+    val isInitializedFromSource: Boolean = false
 )
 
 internal fun defaultReminderDate(today: LocalDate = LocalDate.now()): LocalDate = today.plusDays(1)
@@ -38,58 +39,55 @@ internal fun isCreateEditFormValid(
 ): Boolean = title.isNotEmpty() && selectedDate != null && reminderUiState.isInputValid(currentDateTime)
 
 internal fun ReminderFormUiState.toReminderRequest(itemId: Long): ReminderRequest? {
-    if (!isEnabled.value) {
+    if (!isEnabled) {
         return null
     }
 
-    return when (mode.value) {
+    return when (mode) {
         ReminderMode.AT_DATE ->
             ReminderRequest(
                 itemId = itemId,
                 mode = ReminderMode.AT_DATE,
-                atDate = selectedDate.value,
-                atTime = LocalTime.of(hour.value, minute.value)
+                atDate = selectedDate,
+                atTime = LocalTime.of(hour, minute)
             )
 
         ReminderMode.AFTER_INTERVAL ->
             ReminderRequest(
                 itemId = itemId,
                 mode = ReminderMode.AFTER_INTERVAL,
-                afterAmount = intervalValue.value.toIntOrNull(),
-                afterUnit = intervalUnit.value
+                afterAmount = intervalValue.toIntOrNull(),
+                afterUnit = intervalUnit
             )
     }
 }
 
 internal fun ReminderFormUiState.isInputValid(currentDateTime: LocalDateTime = LocalDateTime.now()): Boolean {
-    val isReminderEnabled = isEnabled.value
-    val currentMode = mode.value
+    if (!isEnabled) return true
 
-    if (!isReminderEnabled) return true
-
-    return when (currentMode) {
+    return when (mode) {
         ReminderMode.AT_DATE ->
-            selectedDate.value?.let { date ->
-                LocalDateTime.of(date, LocalTime.of(hour.value, minute.value)).isAfter(currentDateTime)
+            selectedDate?.let { date ->
+                LocalDateTime.of(date, LocalTime.of(hour, minute)).isAfter(currentDateTime)
             } ?: false
 
         ReminderMode.AFTER_INTERVAL ->
-            intervalValue.value
+            intervalValue
                 .toIntOrNull()
                 ?.let { amount -> amount >= 1 } ?: false
     }
 }
 
 internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDateTime = LocalDateTime.now()): Int? {
-    if (!isEnabled.value) {
+    if (!isEnabled) {
         return null
     }
 
-    return when (mode.value) {
+    return when (mode) {
         ReminderMode.AT_DATE -> {
             val isFuture =
-                selectedDate.value?.let { date ->
-                    LocalDateTime.of(date, LocalTime.of(hour.value, minute.value)).isAfter(currentDateTime)
+                selectedDate?.let { date ->
+                    LocalDateTime.of(date, LocalTime.of(hour, minute)).isAfter(currentDateTime)
                 } == true
             if (isFuture) {
                 null
@@ -99,7 +97,7 @@ internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDate
         }
 
         ReminderMode.AFTER_INTERVAL ->
-            intervalValue.value
+            intervalValue
                 .toIntOrNull()
                 ?.takeIf { amount -> amount >= 1 }
                 ?.let { null } ?: R.string.reminder_error_invalid_amount
@@ -107,18 +105,18 @@ internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDate
 }
 
 internal fun ReminderFormUiState.toChangeFingerprint(): String? {
-    if (!isEnabled.value) {
+    if (!isEnabled) {
         return null
     }
 
-    return when (mode.value) {
+    return when (mode) {
         ReminderMode.AT_DATE -> {
-            val datePart = selectedDate.value?.toString().orEmpty()
-            "${mode.value.name}:$datePart:${hour.value}:${minute.value}"
+            val datePart = selectedDate?.toString().orEmpty()
+            "${mode.name}:$datePart:$hour:$minute"
         }
 
         ReminderMode.AFTER_INTERVAL ->
-            "${mode.value.name}:${intervalValue.value}:${intervalUnit.value.name}"
+            "${mode.name}:$intervalValue:${intervalUnit.name}"
     }
 }
 
@@ -150,32 +148,40 @@ internal fun Reminder?.toChangeFingerprint(): String? {
     }
 }
 
-internal fun ReminderFormUiState.applyReminder(reminder: Reminder?) {
-    isInitializedFromSource.value = true
-
+/**
+ * Применяет данные напоминания к UI-состоянию.
+ * Возвращает новое состояние через copy().
+ */
+internal fun ReminderFormUiState.applyReminder(reminder: Reminder?): ReminderFormUiState {
     if (reminder == null) {
-        isEnabled.value = false
-        mode.value = ReminderMode.AT_DATE
-        return
+        return copy(isInitializedFromSource = true, isEnabled = false, mode = ReminderMode.AT_DATE)
     }
 
-    isEnabled.value = true
-    mode.value = reminder.mode
-
-    when (reminder.mode) {
+    return when (reminder.mode) {
         ReminderMode.AT_DATE -> {
             val zoneId = ZoneId.systemDefault()
-            selectedDate.value =
+            val date =
                 reminder.selectedDateEpochMillis?.let { millis ->
                     Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
                 } ?: Instant.ofEpochMilli(reminder.targetEpochMillis).atZone(zoneId).toLocalDate()
-            hour.value = reminder.selectedHour ?: 0
-            minute.value = reminder.selectedMinute ?: 0
+
+            copy(
+                isInitializedFromSource = true,
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = date,
+                hour = reminder.selectedHour ?: 0,
+                minute = reminder.selectedMinute ?: 0
+            )
         }
 
-        ReminderMode.AFTER_INTERVAL -> {
-            intervalValue.value = reminder.intervalAmount?.toString().orEmpty()
-            intervalUnit.value = reminder.intervalUnit ?: ReminderIntervalUnit.DAY
-        }
+        ReminderMode.AFTER_INTERVAL ->
+            copy(
+                isInitializedFromSource = true,
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = reminder.intervalAmount?.toString().orEmpty(),
+                intervalUnit = reminder.intervalUnit ?: ReminderIntervalUnit.DAY
+            )
     }
 }

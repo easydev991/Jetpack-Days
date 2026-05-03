@@ -63,6 +63,7 @@
 - `CreateEditScreenViewModelReminderTest.kt` — аналогично
 
 **Тесты, завязанные на старый MutableState-паттерн (требуют миграции):**
+
 | Тест | Что делает | Строк |
 |---|---|---|
 | `CreateEditUiStateTest.kt` | Создаёт `CreateEditUiState` с `mutableStateOf()`, пишет/читает `.value` | 284 / 14 тестов |
@@ -82,7 +83,7 @@
 | `CreateEditScreen.kt` | `CreateEditDatePickerIfNeeded` принимает MutableState; `toItem()`, `rememberCreateEditSaveAction()`, `rememberCreateEditDateSelectedAction()`, `rememberCreateEditScreenActions()` читают `.value` |
 | `CreateEditReminderEffects.kt` | `rememberOnCreateEditValueChange()`, `ObserveReminderStateOnResume()` читают/пишут `.value` |
 | `ReminderSettingsSection.kt` | `ReminderSettingsSection`, `ReminderToggleRow`, `ReminderExpandedContent`, `ReminderDateTimeSection`, `ReminderTimeField`, `ReminderAfterSection` принимают `ReminderFormUiState` и читают/пишут `.value` |
-| `StateSavers.kt` | 4 кастомных Saver: `LocalDateSaver`, `NullableColorSaver`, `DisplayOptionSaver`, `NullableLocalDateSaver`
+| `StateSavers.kt` | 4 кастомных Saver: `LocalDateSaver`, `NullableColorSaver`, `DisplayOptionSaver`, `NullableLocalDateSaver` |
 
 ### 5.2 Инкремент B: Миграция CreateEdit (единственный оставшийся)
 
@@ -100,6 +101,7 @@
 Новый контракт тестов:
 - [ ] Убрать `import androidx.compose.runtime.mutableStateOf` (не нужен в unit-тесте)
 - [ ] Все тесты создают `CreateEditUiState` через data class конструктор с plain-значениями:
+
   ```kotlin
   val state = CreateEditUiState(
       title = "Test",
@@ -109,6 +111,7 @@
       selectedDisplayOption = DisplayOption.DAY
   )
   ```
+
 - [ ] Проверка значений: `assertEquals("Test", state.title)` — без `.value`
 - [ ] Мутация через `copy()`: `val newState = state.copy(title = "New")`
 - [ ] Тесты на:
@@ -128,10 +131,12 @@
 - [ ] Убрать `import androidx.compose.runtime.mutableStateOf` (не нужен)
 - [ ] `ReminderFormUiState` создаётся с plain-значениями без MutableState
 - [ ] `toReminderRequest` — принимает `itemId: Long`, возвращает `ReminderRequest?` на основе plain-полей
+
   ```kotlin
   val state = ReminderFormUiState(isEnabled = true, mode = ReminderMode.AT_DATE, ...)
   val request = state.toReminderRequest(itemId = 42L)
   ```
+
 - [ ] `isInputValid` — принимает `currentDateTime`, использует plain-поля
 - [ ] `validationErrorResId` — принимает `currentDateTime`, возвращает `Int?`
 - [ ] `toChangeFingerprint` — возвращает `String?` на основе plain-полей
@@ -151,6 +156,7 @@
 - [ ] Вместо `var selectedColorStateHolder: MutableState<Color?>?`
   → `var selectedColor: Color? = null` с отдельным `onColorChange` callback
 - [ ] Создание `CreateEditUiState` с plain-значениями:
+
   ```kotlin
   var selectedColor by remember { mutableStateOf<Color?>(customColor) }
   val uiState = CreateEditUiState(
@@ -161,13 +167,16 @@
       selectedDisplayOption = DisplayOption.DAY
   )
   ```
+
 - [ ] Компоненты принимают callback'и вместо MutableState:
+
   ```kotlin
   ColorSelector(
       selectedColor = selectedColor,
       onColorSelected = { newColor -> selectedColor = newColor }
   )
   ```
+
 - [ ] `CreateEditFormParams` принимает `showDatePicker: Boolean` + `onShowDatePickerChange: (Boolean) -> Unit`
 - [ ] `selectedColorStateHolder` → `var latestSelectedColor: Color?` и обновляется в callback
 
@@ -177,6 +186,7 @@
 
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] Заменить 5 полей `MutableState<T>` на `T`:
+
   ```kotlin
   data class CreateEditUiState(
       val title: String = "",
@@ -187,6 +197,7 @@
       val reminder: ReminderFormUiState = ReminderFormUiState()
   )
   ```
+
 - [ ] **Добавить** `import java.time.LocalDate` (сейчас используется полный путь `java.time.LocalDate?`)
 
 ##### B.2.2 `CreateEditReminderState.kt` — замена MutableState на plain-поля
@@ -194,6 +205,7 @@
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] Убрать `import androidx.compose.runtime.mutableStateOf`
 - [ ] Заменить 9 полей на plain:
+
   ```kotlin
   data class ReminderFormUiState(
       val isEnabled: Boolean = false,
@@ -207,12 +219,14 @@
       val isInitializedFromSource: Boolean = false
   )
   ```
+
 - [ ] **Функции-расширения переписать с plain-полями:**
   - `toReminderRequest()`: `if (!isEnabled) return null` (без `.value`)
   - `isInputValid()`: `if (!isEnabled) return true` (без `.value`)
   - `validationErrorResId()`: `if (!isEnabled) return null` (без `.value`)
   - `toChangeFingerprint()`: `if (!isEnabled) return null` (без `.value`)
   - **`applyReminder()`**: из `Unit` → `ReminderFormUiState`, возвращает новое состояние через `copy()`:
+
     ```kotlin
     fun ReminderFormUiState.applyReminder(reminder: Reminder?): ReminderFormUiState =
         if (reminder == null) {
@@ -231,6 +245,7 @@
 
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] Заменить `showDatePicker: MutableState<Boolean>` на два поля:
+
   ```kotlin
   data class CreateEditFormParams(
       val itemId: Long?,
@@ -249,7 +264,9 @@
       val onReminderNotificationsUnavailable: () -> Unit
   )
   ```
+
   **ИЛИ** альтернативно: один общий callback:
+
   ```kotlin
   data class CreateEditFormParams(
       ...
@@ -264,6 +281,7 @@
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] Убрать `import androidx.compose.runtime.mutableStateOf`
 - [ ] `rememberCreateEditUiStates()`: заменить 14 отдельных MutableState на один:
+
   ```kotlin
   @Composable
   internal fun rememberCreateEditUiState(): MutableState<CreateEditUiState> =
@@ -271,8 +289,10 @@
           mutableStateOf(CreateEditUiState())
       }
   ```
+
   Где `CreateEditUiStateSaver` — кастомный Saver для всего `CreateEditUiState` (или Saver для каждого поля, если используем `Saver` композицию).
 - [ ] `MainFormSections` — принимать plain-поля + callback'и:
+
   ```kotlin
   private fun MainFormSections(
       title: String,
@@ -284,6 +304,7 @@
       onShowDatePickerChange: (Boolean) -> Unit,
   )
   ```
+
 - [ ] `TitleSection(title: String, onValueChange: (String) -> Unit)` — убрать MutableState
 - [ ] `DetailsSection(details: String, onValueChange: (String) -> Unit)` — убрать MutableState
 - [ ] `DateSection(selectedDate: LocalDate?, showDatePicker: Boolean, onShowDatePickerChange: (Boolean) -> Unit)` — убрать MutableState
@@ -291,11 +312,14 @@
 - [ ] `CreateEditFormContent` — адаптировать вызов `rememberOnCreateEditValueChange`: передавать `uiStateMutable` вместо `params`; вызов `ObserveReminderStateOnResume`: передавать `isReminderEnabled: Boolean` + `onReminderDisabled: () -> Unit` вместо `params` (см. B.2.8)
 - [ ] `previousReminderEnabled` — адаптировать: локальный `remember { mutableStateOf(uiState.value.reminder.isEnabled) }` вместо `rememberSaveable { mutableStateOf(params.uiStates.reminder.isEnabled.value) }`
 - [ ] `rememberReminderToggleHandler` — переписать на работу с `onReminderChange: (ReminderFormUiState) -> Unit` вместо прямого доступа к `.value`:
+
   ```kotlin
   // Было: params.uiStates.reminder.isEnabled.value = true
   // Стало: onReminderChange(reminder.copy(isEnabled = true))
   ```
+
 - [ ] `loadItemData` — переписать на работу с `MutableState<CreateEditUiState>.value = value.copy(...)`:
+
   ```kotlin
   fun loadItemData(
       itemId: Long?,
@@ -323,6 +347,7 @@
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] `ColorSelector(selectedColor: Color?, onColorSelected: (Color?) -> Unit)` — убрать MutableState
 - [ ] `ColorOptionSurface(color: Color, selectedColor: Color?, onColorSelected: (Color?) -> Unit)` — убрать MutableState
+
   ```kotlin
   onClick = {
       if (isSelected) {
@@ -333,6 +358,7 @@
       onValueChange()
   }
   ```
+
 - [ ] `DisplayOptionSelector(selectedDisplayOption: DisplayOption, onDisplayOptionSelected: (DisplayOption) -> Unit)` — убрать MutableState
 - [ ] `isCustomColor()` — проверить, не зависит ли от MutableState (должна быть чистой функцией)
 - [ ] Обновить превью: `val selectedColor = remember { mutableStateOf<Color?>(...) }` → `var selectedColor by remember { mutableStateOf(...) }` и передача plain-значения + callback
@@ -341,6 +367,7 @@
 
 - [ ] Убрать `import androidx.compose.runtime.MutableState`
 - [ ] `DatePickerDialogSection(selectedDate: LocalDate?, showDatePicker: Boolean, onDateSelected: (LocalDate) -> Unit, onDismiss: () -> Unit)` — убрать MutableState
+
   ```kotlin
   onClick = {
       datePickerState.selectedDateMillis?.let { millis ->
@@ -359,6 +386,7 @@
   - Передавать в `CreateEditFormParams` plain-значения + callback'и
 - [ ] `CreateEditDatePickerIfNeeded(shouldShowDatePicker: Boolean, selectedDate: LocalDate?, onDateSelected: (LocalDate) -> Unit, onDismiss: () -> Unit)` — убрать MutableState
 - [ ] `CreateEditUiState.toItem()` — читать plain-поля:
+
   ```kotlin
   private fun CreateEditUiState.toItem(itemId: Long?): Item {
       val timestamp = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
@@ -373,6 +401,7 @@
       )
   }
   ```
+
 - [ ] `rememberCreateEditDateSelectedAction` — читать plain-поля
 - [ ] `rememberCreateEditSaveAction` — читать plain-поля
 - [ ] `rememberCreateEditScreenActions` — читать plain-поля из `uiStateMutable.value`
@@ -380,6 +409,7 @@
 ##### B.2.8 `CreateEditReminderEffects.kt` — адаптация
 
 - [ ] `rememberOnCreateEditValueChange` — переписать на работу с `MutableState<CreateEditUiState>`:
+
   ```kotlin
   @Composable
   internal fun rememberOnCreateEditValueChange(
@@ -403,7 +433,9 @@
       }
   }
   ```
+
 - [ ] `ObserveReminderStateOnResume` — переписать:
+
   ```kotlin
   @Composable
   internal fun ObserveReminderStateOnResume(
@@ -412,6 +444,7 @@
       onReminderNotificationsUnavailable: () -> Unit
   ) { ... }
   ```
+
   Вместо `params.uiStates.reminder.isEnabled.value` используем `isReminderEnabled`.
   Вместо `params.uiStates.reminder.isEnabled.value = false` вызываем `onReminderDisabled()`.
 
@@ -419,6 +452,7 @@
 
 - [ ] Убрать `import androidx.compose.runtime.mutableStateOf` (может остаться для `showUnitsMenu`)
 - [ ] `ReminderSettingsSection` — принимать `reminder: ReminderFormUiState` (plain) + `onReminderChange: (ReminderFormUiState) -> Unit`
+
   ```kotlin
   internal fun ReminderSettingsSection(
       reminder: ReminderFormUiState,
@@ -427,6 +461,7 @@
       ...
   )
   ```
+
 - [ ] Все внутренние функции (`ReminderToggleRow`, `ReminderExpandedContent`, `ReminderDateTimeSection`, `ReminderTimeField`, `ReminderAfterSection`):
   - Принимать plain-значения + callback'и
   - Вместо `reminderUiState.isEnabled.value = false` → `onReminderChange(reminder.copy(isEnabled = false))`
@@ -450,7 +485,8 @@
 - [ ] Упростить валидацию — функции над plain-значениями без `.value`
 - [ ] Обновить превью во всех затронутых файлах
 
-#### Критерий завершения B:
+#### Критерий завершения B
+
 - [ ] `CreateEditUiState` — data class без MutableState (5 plain-полей)
 - [ ] `ReminderFormUiState` — data class без MutableState (9 plain-полей)
 - [ ] `CreateEditFormParams` — без MutableState (plain-поля + callback'и)
@@ -469,7 +505,8 @@
 - [ ] Проверить, что архитектурный паттерн единообразен с остальными экранами.
 - [ ] Обновить документацию по паттерну состояния.
 
-#### Критерий завершения C:
+#### Критерий завершения C
+
 - [ ] Новый паттерн формализован и защищён от регрессии.
 
 ### 5.4 Инкремент D: Финальная регрессия и приемка
@@ -484,7 +521,8 @@
   - backup/restore.
 - [ ] Сверить UX до/после на отсутствие изменений поведения.
 
-#### Критерий завершения D:
+#### Критерий завершения D
+
 - [ ] Все тесты зелёные, ручная проверка без блокирующих дефектов.
 
 ## 6. Риски и меры снижения

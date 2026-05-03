@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +28,7 @@ import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.viewmodel.CreateEditChangeInput
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.ZoneId
 
 /**
@@ -52,7 +54,9 @@ fun CreateEditScreen(
 
 /**
  * Основной контент экрана создания/редактирования.
+ * Использует единственный MutableState<CreateEditUiState> для всей формы.
  */
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateEditScreenContent(
@@ -64,20 +68,21 @@ private fun CreateEditScreenContent(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val hasChanges by viewModel.hasChanges.collectAsState()
-    val uiStates = rememberCreateEditUiStates()
-    val showDatePicker = rememberSaveable { mutableStateOf(false) }
+    val formState = rememberCreateEditUiState()
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val onReminderNotificationsUnavailable =
         rememberReminderNotificationsUnavailableHandler(snackbarHostState = snackbarHostState)
 
-    loadItemData(itemId, uiState, uiStates)
+    loadItemData(itemId, uiState, formState)
+
     val screenActions =
         rememberCreateEditScreenActions(
             params =
                 CreateEditScreenActionsParams(
                     itemId = itemId,
                     hasChanges = hasChanges,
-                    uiStates = uiStates,
+                    uiStates = formState.value,
                     viewModel = viewModel,
                     analyticsService = analyticsService,
                     onBackClick = onBackClick
@@ -101,8 +106,17 @@ private fun CreateEditScreenContent(
                 CreateEditFormParams(
                     itemId = itemId,
                     paddingValues = paddingValues,
-                    uiStates = uiStates,
+                    uiStates = formState.value,
                     showDatePicker = showDatePicker,
+                    onShowDatePickerChange = { showDatePicker = it },
+                    onTitleChange = { title -> formState.value = formState.value.copy(title = title) },
+                    onDetailsChange = { details -> formState.value = formState.value.copy(details = details) },
+                    onDateChange = { date -> formState.value = formState.value.copy(selectedDate = date) },
+                    onColorChange = { color -> formState.value = formState.value.copy(selectedColor = color) },
+                    onDisplayOptionChange = { option ->
+                        formState.value = formState.value.copy(selectedDisplayOption = option)
+                    },
+                    onReminderChange = { reminder -> formState.value = formState.value.copy(reminder = reminder) },
                     viewModel = viewModel,
                     onBackClick = onBackClick,
                     onReminderNotificationsUnavailable = onReminderNotificationsUnavailable
@@ -111,10 +125,13 @@ private fun CreateEditScreenContent(
     }
 
     CreateEditDatePickerIfNeeded(
-        shouldShowDatePicker = showDatePicker.value,
-        selectedDate = uiStates.selectedDate,
-        showDatePicker = showDatePicker,
-        onDateSelected = screenActions.onDateSelected
+        shouldShowDatePicker = showDatePicker,
+        selectedDate = formState.value.selectedDate,
+        onDateSelected = { date ->
+            formState.value = formState.value.copy(selectedDate = date)
+            screenActions.onDateSelected()
+        },
+        onDismiss = { showDatePicker = false }
     )
 }
 
@@ -161,25 +178,25 @@ private fun rememberCreateEditSaveAction(params: CreateEditSaveActionParams): ()
 @Composable
 private fun rememberCreateEditDateSelectedAction(
     itemId: Long?,
-    uiStates: CreateEditUiState,
+    uiState: CreateEditUiState,
     viewModel: CreateEditScreenViewModel
 ): () -> Unit =
     {
         if (itemId != null) {
             val timestamp =
-                uiStates.selectedDate.value
+                uiState.selectedDate
                     ?.atStartOfDay(ZoneId.systemDefault())
                     ?.toInstant()
                     ?.toEpochMilli() ?: 0L
 
             viewModel.checkHasChanges(
                 CreateEditChangeInput(
-                    title = uiStates.title.value,
-                    details = uiStates.details.value,
+                    title = uiState.title,
+                    details = uiState.details,
                     timestamp = timestamp,
-                    colorTag = uiStates.selectedColor.value?.toArgb(),
-                    displayOption = uiStates.selectedDisplayOption.value,
-                    reminderFingerprint = uiStates.reminder.toChangeFingerprint()
+                    colorTag = uiState.selectedColor?.toArgb(),
+                    displayOption = uiState.selectedDisplayOption,
+                    reminderFingerprint = uiState.reminder.toChangeFingerprint()
                 )
             )
         }
@@ -187,33 +204,33 @@ private fun rememberCreateEditDateSelectedAction(
 
 private fun CreateEditUiState.toItem(itemId: Long?): Item {
     val timestamp =
-        selectedDate.value
+        selectedDate
             ?.atStartOfDay(ZoneId.systemDefault())
             ?.toInstant()
             ?.toEpochMilli() ?: System.currentTimeMillis()
 
     return Item(
         id = itemId ?: 0L,
-        title = title.value,
-        details = details.value,
+        title = title,
+        details = details,
         timestamp = timestamp,
-        colorTag = selectedColor.value?.toArgb(),
-        displayOption = selectedDisplayOption.value
+        colorTag = selectedColor?.toArgb(),
+        displayOption = selectedDisplayOption
     )
 }
 
 @Composable
 private fun CreateEditDatePickerIfNeeded(
     shouldShowDatePicker: Boolean,
-    selectedDate: androidx.compose.runtime.MutableState<java.time.LocalDate?>,
-    showDatePicker: androidx.compose.runtime.MutableState<Boolean>,
-    onDateSelected: () -> Unit
+    selectedDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
 ) {
     if (shouldShowDatePicker) {
         DatePickerDialogSection(
             selectedDate = selectedDate,
-            showDatePicker = showDatePicker,
-            onDateSelected = onDateSelected
+            onDateSelected = onDateSelected,
+            onDismiss = onDismiss
         )
     }
 }
@@ -231,8 +248,8 @@ private data class CreateEditSaveActionParams(
 private fun rememberCreateEditScreenActions(params: CreateEditScreenActionsParams): CreateEditScreenActions {
     val isValidData =
         isCreateEditFormValid(
-            title = params.uiStates.title.value,
-            selectedDate = params.uiStates.selectedDate.value,
+            title = params.uiStates.title,
+            selectedDate = params.uiStates.selectedDate,
             reminderUiState = params.uiStates.reminder
         )
     val isSaveEnabled = if (params.itemId != null) isValidData && params.hasChanges else isValidData
@@ -251,7 +268,7 @@ private fun rememberCreateEditScreenActions(params: CreateEditScreenActionsParam
     val onDateSelected =
         rememberCreateEditDateSelectedAction(
             itemId = params.itemId,
-            uiStates = params.uiStates,
+            uiState = params.uiStates,
             viewModel = params.viewModel
         )
     return CreateEditScreenActions(

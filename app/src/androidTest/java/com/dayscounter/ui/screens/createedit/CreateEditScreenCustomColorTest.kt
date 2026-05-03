@@ -1,10 +1,10 @@
 package com.dayscounter.ui.screens.createedit
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -37,38 +37,41 @@ class CreateEditScreenCustomColorTest {
      */
     @Test
     fun createEditForm_whenPresetColorSelected_thenSelectsPresetColor() {
-        // Given - сначала выбран кастомный цвет
         @Suppress("MagicNumber")
         val customColor = Color(0xFF123456)
 
-        var selectedColorStateHolder: MutableState<Color?>? = null
+        var latestSelectedColor: Color? = customColor
 
         composeTestRule.setContent {
             JetpackDaysTheme {
-                val title = rememberSaveable { mutableStateOf("Test Title") }
-                val details = rememberSaveable { mutableStateOf("") }
-                val selectedDate = rememberSaveable { mutableStateOf(java.time.LocalDate.now()) }
-                val selectedColorState = remember { mutableStateOf<Color?>(customColor) }
-                selectedColorStateHolder = selectedColorState
-                val selectedDisplayOption =
-                    rememberSaveable { mutableStateOf(DisplayOption.DAY) }
-                val showDatePicker = remember { mutableStateOf(false) }
+                var selectedColor by remember { mutableStateOf<Color?>(customColor) }
+                latestSelectedColor = selectedColor
 
-                val uiStates =
+                val uiState =
                     CreateEditUiState(
-                        title = title,
-                        details = details,
-                        selectedDate = selectedDate,
-                        selectedColor = selectedColorState,
-                        selectedDisplayOption = selectedDisplayOption
+                        title = "Test Title",
+                        details = "",
+                        selectedDate = java.time.LocalDate.now(),
+                        selectedColor = selectedColor,
+                        selectedDisplayOption = DisplayOption.DAY
                     )
 
                 val params =
                     CreateEditFormParams(
                         itemId = 1L,
                         paddingValues = PaddingValues(),
-                        uiStates = uiStates,
-                        showDatePicker = showDatePicker,
+                        uiStates = uiState,
+                        showDatePicker = false,
+                        onShowDatePickerChange = {},
+                        onTitleChange = { title -> selectedColor = null },
+                        onDetailsChange = {},
+                        onDateChange = {},
+                        onColorChange = { newColor ->
+                            selectedColor = newColor
+                            latestSelectedColor = newColor
+                        },
+                        onDisplayOptionChange = {},
+                        onReminderChange = {},
                         viewModel = createTestViewModel(),
                         onBackClick = {},
                         onReminderNotificationsUnavailable = {}
@@ -85,8 +88,8 @@ class CreateEditScreenCustomColorTest {
             .performClick()
 
         // Then - выбранный цвет должен быть Red
-        assert(selectedColorStateHolder?.value == PresetColors.Red) {
-            "Expected Red but got ${selectedColorStateHolder?.value}"
+        assert(latestSelectedColor == PresetColors.Red) {
+            "Expected Red but got $latestSelectedColor"
         }
     }
 
@@ -95,35 +98,35 @@ class CreateEditScreenCustomColorTest {
      */
     @Test
     fun createEditForm_whenPresetColorSelected_thenHidesCustomColorChip() {
-        // Given - сначала выбран кастомный цвет (7 чипов)
         @Suppress("MagicNumber")
         val customColor = Color(0xFF123456)
 
         composeTestRule.setContent {
             JetpackDaysTheme {
-                val title = rememberSaveable { mutableStateOf("Test Title") }
-                val details = rememberSaveable { mutableStateOf("") }
-                val selectedDate = rememberSaveable { mutableStateOf(java.time.LocalDate.now()) }
-                val selectedColor = remember { mutableStateOf<Color?>(customColor) }
-                val selectedDisplayOption =
-                    rememberSaveable { mutableStateOf(DisplayOption.DAY) }
-                val showDatePicker = remember { mutableStateOf(false) }
+                var selectedColor by remember { mutableStateOf<Color?>(customColor) }
 
-                val uiStates =
+                val uiState =
                     CreateEditUiState(
-                        title = title,
-                        details = details,
-                        selectedDate = selectedDate,
+                        title = "Test Title",
+                        details = "",
+                        selectedDate = java.time.LocalDate.now(),
                         selectedColor = selectedColor,
-                        selectedDisplayOption = selectedDisplayOption
+                        selectedDisplayOption = DisplayOption.DAY
                     )
 
                 val params =
                     CreateEditFormParams(
                         itemId = 1L,
                         paddingValues = PaddingValues(),
-                        uiStates = uiStates,
-                        showDatePicker = showDatePicker,
+                        uiStates = uiState,
+                        showDatePicker = false,
+                        onShowDatePickerChange = {},
+                        onTitleChange = { selectedColor = null },
+                        onDetailsChange = {},
+                        onDateChange = {},
+                        onColorChange = { newColor -> selectedColor = newColor },
+                        onDisplayOptionChange = {},
+                        onReminderChange = {},
                         viewModel = createTestViewModel(),
                         onBackClick = {},
                         onReminderNotificationsUnavailable = {}

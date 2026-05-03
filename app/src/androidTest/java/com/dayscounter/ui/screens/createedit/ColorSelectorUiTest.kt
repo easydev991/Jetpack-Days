@@ -1,6 +1,8 @@
 package com.dayscounter.ui.screens.createedit
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -14,6 +16,7 @@ import org.junit.Test
  * UI тесты для ColorSelector.
  *
  * Проверяет отображение кастомного цвета и взаимодействие с селектором.
+ * ColorSelector принимает plain-значение и callback.
  */
 class ColorSelectorUiTest {
     @get:Rule
@@ -24,19 +27,19 @@ class ColorSelectorUiTest {
      */
     @Test
     fun colorSelector_whenCustomColorSelected_thenShowsCustomColorChip() {
-        // Given
         @Suppress("MagicNumber")
-        val customColor = Color(0xFF123456) // Синий — точно не в preset
-        val selectedColor = mutableStateOf<Color?>(customColor)
+        val customColor = Color(0xFF123456)
+        var selectedColor by mutableStateOf<Color?>(customColor)
 
-        // When
         composeTestRule.setContent {
             JetpackDaysTheme {
-                ColorSelector(selectedColor = selectedColor)
+                ColorSelector(
+                    selectedColor = selectedColor,
+                    onColorSelected = { selectedColor = it }
+                )
             }
         }
 
-        // Then - должен быть 7 чипов (6 preset + 1 custom)
         composeTestRule
             .onAllNodesWithContentDescription("Цвет")
             .assertCountEquals(7)
@@ -47,18 +50,17 @@ class ColorSelectorUiTest {
      */
     @Test
     fun colorSelector_whenPresetColorSelected_thenHidesCustomColorChip() {
-        // Given
-        val presetColor = PresetColors.Red
-        val selectedColor = mutableStateOf<Color?>(presetColor)
+        var selectedColor by mutableStateOf<Color?>(PresetColors.Red)
 
-        // When
         composeTestRule.setContent {
             JetpackDaysTheme {
-                ColorSelector(selectedColor = selectedColor)
+                ColorSelector(
+                    selectedColor = selectedColor,
+                    onColorSelected = { selectedColor = it }
+                )
             }
         }
 
-        // Then - должен быть только 6 preset чипов
         composeTestRule
             .onAllNodesWithContentDescription("Цвет")
             .assertCountEquals(6)
@@ -69,17 +71,17 @@ class ColorSelectorUiTest {
      */
     @Test
     fun colorSelector_whenNoColorSelected_thenHidesCustomColorChip() {
-        // Given
-        val selectedColor = mutableStateOf<Color?>(null)
+        var selectedColor by mutableStateOf<Color?>(null)
 
-        // When
         composeTestRule.setContent {
             JetpackDaysTheme {
-                ColorSelector(selectedColor = selectedColor)
+                ColorSelector(
+                    selectedColor = selectedColor,
+                    onColorSelected = { selectedColor = it }
+                )
             }
         }
 
-        // Then - должен быть только 6 preset чипов
         composeTestRule
             .onAllNodesWithContentDescription("Цвет")
             .assertCountEquals(6)
@@ -90,23 +92,23 @@ class ColorSelectorUiTest {
      */
     @Test
     fun colorSelector_whenCustomColorClicked_thenDeselects() {
-        // Given
         @Suppress("MagicNumber")
-        val customColor = Color(0xFF123456) // Синий
-        val selectedColor = mutableStateOf<Color?>(customColor)
+        val customColor = Color(0xFF123456)
+        var selectedColor by mutableStateOf<Color?>(customColor)
 
         composeTestRule.setContent {
             JetpackDaysTheme {
-                ColorSelector(selectedColor = selectedColor)
+                ColorSelector(
+                    selectedColor = selectedColor,
+                    onColorSelected = { selectedColor = it }
+                )
             }
         }
 
-        // When - кликаем на первый чип (кастомный цвет в начале списка)
         composeTestRule
             .onAllNodesWithContentDescription("Цвет")[0]
             .performClick()
 
-        // Then - цвет должен быть null
-        assert(selectedColor.value == null)
+        assert(selectedColor == null)
     }
 }
