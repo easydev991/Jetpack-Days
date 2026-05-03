@@ -1,8 +1,7 @@
 package com.dayscounter.ui.screens.createedit
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -27,14 +26,14 @@ class CreateEditSaveValidationUiTest {
     fun savebutton_whenReminderEnabledAndIntervalInvalid_thenDisabled() {
         val reminderState =
             ReminderFormUiState(
-                isEnabled = mutableStateOf(true),
-                mode = mutableStateOf(ReminderMode.AFTER_INTERVAL),
-                selectedDate = mutableStateOf(LocalDate.of(2026, 5, 2)),
-                showDatePicker = mutableStateOf(false),
-                hour = mutableStateOf(12),
-                minute = mutableStateOf(0),
-                intervalValue = mutableStateOf(""),
-                intervalUnit = mutableStateOf(ReminderIntervalUnit.DAY)
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                selectedDate = LocalDate.of(2026, 5, 2),
+                showDatePicker = false,
+                hour = 12,
+                minute = 0,
+                intervalValue = "",
+                intervalUnit = ReminderIntervalUnit.DAY
             )
 
         composeTestRule.setContent {

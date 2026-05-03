@@ -1,6 +1,6 @@
 # Экран 4.1: Create/Edit Item Screen (Создание и редактирование записей)
 
-Дата обновления: 2026-04-29  
+Дата обновления: 2026-05-03
 Статус: Реализован и используется в навигации (`Screen.CreateItem`, `Screen.EditItem`)
 
 ## Назначение
@@ -21,7 +21,7 @@
 2. Поля формы:
    - название (обязательное);
    - описание (необязательное);
-   - дата записи (через `DatePickerDialog`);
+   - дата записи (через `DatePickerDialog`, конвертация дат для Material3 выполняется через UTC);
    - цветовая метка;
    - формат отображения (`DAY`, `MONTH_DAY`, `YEAR_MONTH_DAY`).
 3. Блок напоминания (внизу формы):
@@ -40,11 +40,11 @@
 
 ## Валидация
 
-1. Базовая: `title.isNotBlank()` и выбранная дата записи.
+1. Базовая: `title.isNotEmpty()` и выбранная дата записи.
 2. Reminder-валидация:
    - toggle выключен: reminder валиден;
    - `На дату`: дата/время reminder должны быть в будущем;
-   - `Через N`: только цифры и значение `> 0`.
+   - `Через N`: ввод очищается через `sanitizeIntervalValue`, остаются только цифры без ведущих нулей; значение должно быть `> 0`.
 3. Если reminder включен и невалиден, кнопка сохранения отключена и показывается локализованная ошибка.
 4. Дефолт для режима `На дату`: текущая дата + 1 день.
 5. В режиме `Через N` используется текущее время суток; в режиме `На дату` время задается отдельно.
@@ -77,6 +77,11 @@
 
 1. Presentation:
    - `CreateEditScreen`, `CreateEditFormContent`, `ReminderSettingsSection`, эффекты/политики reminder.
+   - `CreateEditUiState` и `ReminderFormUiState` — plain `data class` без `MutableState`.
+   - В композиции используется единый `MutableState<CreateEditUiState>` через `rememberSaveable(stateSaver = CreateEditUiStateSaver)`.
+   - Все дочерние Composable получают plain-значения и callback'и; изменения применяются через `copy()`.
+   - `showDatePicker` даты записи хранится в `CreateEditUiState`, `showDatePicker` reminder — в `ReminderFormUiState`.
+   - `loadItemData` запускается из `LaunchedEffect`, чтобы загрузка редактируемой записи не выполнялась из тела композиции.
 2. ViewModel:
    - `CreateEditScreenViewModel` хранит состояние, отслеживает `hasChanges`, выполняет `saveItem(...)`.
 3. Domain:
@@ -99,12 +104,16 @@
    - `app/src/test/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModelTest.kt`
    - `app/src/test/java/com/dayscounter/ui/screens/createedit/CreateEditUiStateTest.kt`
    - `app/src/test/java/com/dayscounter/ui/screens/createedit/CreateEditReminderStateTest.kt`
+   - `app/src/test/java/com/dayscounter/ui/screens/createedit/DatePickerConversionTest.kt`
    - `app/src/test/java/com/dayscounter/ui/screens/createedit/ReminderNotificationPermissionPolicyTest.kt`
    - saver-тесты (`LocalDateSaverTest`, `ColorSaverTest`, `DisplayOptionSaverTest`)
    - domain/data/manager тесты для reminder-цепочки.
 2. Instrumentation/UI:
+   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/ColorSelectorUiTest.kt`
    - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditScreenCustomColorTest.kt`
-   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/ReminderSettingsSectionTest.kt`
+   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditReminderAutoScrollUiTest.kt`
+   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditSaveValidationUiTest.kt`
+   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/ReminderSettingsSectionUiTest.kt`
    - reminder receiver/scheduler сценарии в reminder instrumentation-тестах.
 
 ## Совместимость и ограничения
@@ -120,6 +129,8 @@
 - `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditReminderEffects.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/createedit/ReminderSettingsSection.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditReminderState.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditUiState.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/createedit/StateSavers.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/createedit/ReminderNotificationPermissionPolicy.kt`
 - `app/src/main/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModel.kt`
 - `app/src/main/java/com/dayscounter/reminder/DefaultReminderManager.kt`

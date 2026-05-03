@@ -1,284 +1,178 @@
 package com.dayscounter.ui.screens.createedit
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotSame
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 /**
  * Unit-тесты для CreateEditUiState.
+ *
+ * CreateEditUiState — plain data class без MutableState.
+ * Мутация через copy(), чтение напрямую через поля.
  */
 class CreateEditUiStateTest {
-    private lateinit var uiState: CreateEditUiState
+    @Test
+    fun whenDefaultState_thenAllFieldsHaveDefaultValues() {
+        val state = CreateEditUiState()
 
-    @BeforeEach
-    fun setUp() {
-        uiState =
+        assertEquals("", state.title)
+        assertEquals("", state.details)
+        assertNull(state.selectedDate)
+        assertNull(state.selectedColor)
+        assertEquals(DisplayOption.DAY, state.selectedDisplayOption)
+    }
+
+    @Test
+    fun whenCustomValues_thenFieldsPreserveValues() {
+        val date = LocalDate.of(2024, 3, 20)
+        val color = Color.Green
+        val state =
             CreateEditUiState(
-                title = mutableStateOf(""),
-                details = mutableStateOf(""),
-                selectedDate = mutableStateOf(null),
-                selectedColor = mutableStateOf(null),
-                selectedDisplayOption = mutableStateOf(DisplayOption.DAY)
-            )
-    }
-
-    @Test
-    fun whenUiStateCreated_thenHasDefaultValues() {
-        // Given - UiState создан
-
-        // Then - Значения должны быть по умолчанию
-        assertEquals("", uiState.title.value, "Название должно быть пустым")
-        assertEquals("", uiState.details.value, "Описание должно быть пустым")
-        assertNull(uiState.selectedDate.value, "Дата должна быть null")
-        assertNull(uiState.selectedColor.value, "Цвет должен быть null")
-        assertEquals(
-            DisplayOption.DAY,
-            uiState.selectedDisplayOption.value,
-            "Опция отображения должна быть DAY"
-        )
-    }
-
-    @Test
-    fun whenTitleChanged_thenUpdatesTitleState() {
-        // Given - UiState с пустым названием
-
-        // When - Изменяем название
-        uiState.title.value = "Новое название"
-
-        // Then - Название должно быть обновлено
-        assertEquals("Новое название", uiState.title.value, "Название должно быть обновлено")
-    }
-
-    @Test
-    fun whenDetailsChanged_thenUpdatesDetailsState() {
-        // Given - UiState с пустым описанием
-
-        // When - Изменяем описание
-        uiState.details.value = "Новое описание"
-
-        // Then - Описание должно быть обновлено
-        assertEquals("Новое описание", uiState.details.value, "Описание должно быть обновлено")
-    }
-
-    @Test
-    fun whenSelectedDateChanged_thenUpdatesDateState() {
-        // Given - UiState с null датой
-        val testDate = LocalDate.of(2024, 1, 15)
-
-        // When - Выбираем дату
-        uiState.selectedDate.value = testDate
-
-        // Then - Дата должна быть обновлена
-        assertEquals(testDate, uiState.selectedDate.value, "Дата должна быть обновлена")
-    }
-
-    @Test
-    fun whenSelectedColorChanged_thenUpdatesColorState() {
-        // Given - UiState с null цветом
-        val testColor = Color.Red
-
-        // When - Выбираем цвет
-        uiState.selectedColor.value = testColor
-
-        // Then - Цвет должен быть обновлен
-        assertEquals(testColor, uiState.selectedColor.value, "Цвет должен быть обновлен")
-    }
-
-    @Test
-    fun whenSelectedColorResetToNull_thenColorIsReset() {
-        // Given - UiState с выбранным цветом
-        uiState.selectedColor.value = Color.Red
-
-        // When - Сбрасываем цвет
-        uiState.selectedColor.value = null
-
-        // Then - Цвет должен быть null
-        assertNull(uiState.selectedColor.value, "Цвет должен быть null")
-    }
-
-    @Test
-    fun whenDisplayOptionChanged_thenUpdatesDisplayOptionState() {
-        // Given - UiState с опцией DAY
-
-        // When - Меняем опцию отображения
-        uiState.selectedDisplayOption.value = DisplayOption.MONTH_DAY
-
-        // Then - Опция отображения должна быть обновлена
-        assertEquals(
-            DisplayOption.MONTH_DAY,
-            uiState.selectedDisplayOption.value,
-            "Опция отображения должна быть обновлена"
-        )
-    }
-
-    @Test
-    fun whenAllFieldsChanged_thenAllStatesUpdated() {
-        // Given - UiState с значениями по умолчанию
-        val testDate = LocalDate.of(2024, 6, 15)
-        val testColor = Color.Blue
-
-        // When - Обновляем все поля
-        uiState.title.value = "Тестовое событие"
-        uiState.details.value = "Тестовое описание"
-        uiState.selectedDate.value = testDate
-        uiState.selectedColor.value = testColor
-        uiState.selectedDisplayOption.value = DisplayOption.YEAR_MONTH_DAY
-
-        // Then - Все состояния должны быть обновлены
-        assertEquals("Тестовое событие", uiState.title.value, "Название должно быть обновлено")
-        assertEquals("Тестовое описание", uiState.details.value, "Описание должно быть обновлено")
-        assertEquals(testDate, uiState.selectedDate.value, "Дата должна быть обновлена")
-        assertEquals(testColor, uiState.selectedColor.value, "Цвет должен быть обновлен")
-        assertEquals(
-            DisplayOption.YEAR_MONTH_DAY,
-            uiState.selectedDisplayOption.value,
-            "Опция отображения должна быть обновлена"
-        )
-    }
-
-    @Test
-    fun whenCreateUiStateWithValues_thenValuesArePreserved() {
-        // Given - Значения для создания UiState
-        val initialTitle = "Исходное название"
-        val initialDetails = "Исходное описание"
-        val initialDate = LocalDate.of(2024, 3, 20)
-        val initialColor = Color.Green
-        val initialDisplayOption = DisplayOption.MONTH_DAY
-
-        // When - Создаем UiState с начальными значениями
-        val uiStateWithValues =
-            CreateEditUiState(
-                title = mutableStateOf(initialTitle),
-                details = mutableStateOf(initialDetails),
-                selectedDate = mutableStateOf(initialDate),
-                selectedColor = mutableStateOf(initialColor),
-                selectedDisplayOption = mutableStateOf(initialDisplayOption)
+                title = "Исходное название",
+                details = "Исходное описание",
+                selectedDate = date,
+                selectedColor = color,
+                selectedDisplayOption = DisplayOption.MONTH_DAY
             )
 
-        // Then - Значения должны быть сохранены
-        assertEquals(initialTitle, uiStateWithValues.title.value, "Название должно быть сохранено")
-        assertEquals(
-            initialDetails,
-            uiStateWithValues.details.value,
-            "Описание должно быть сохранено"
-        )
-        assertEquals(
-            initialDate,
-            uiStateWithValues.selectedDate.value,
-            "Дата должна быть сохранена"
-        )
-        assertEquals(
-            initialColor,
-            uiStateWithValues.selectedColor.value,
-            "Цвет должен быть сохранен"
-        )
-        assertEquals(
-            initialDisplayOption,
-            uiStateWithValues.selectedDisplayOption.value,
-            "Опция отображения должна быть сохранена"
-        )
+        assertEquals("Исходное название", state.title)
+        assertEquals("Исходное описание", state.details)
+        assertEquals(date, state.selectedDate)
+        assertEquals(color, state.selectedColor)
+        assertEquals(DisplayOption.MONTH_DAY, state.selectedDisplayOption)
     }
 
     @Test
-    fun whenUiStateMutableStates_thenAreModifiable() {
-        // Given - UiState создан
+    fun whenCopyWithTitle_thenNewStateHasUpdatedTitle() {
+        val state = CreateEditUiState()
+        val newState = state.copy(title = "Новое название")
 
-        // When - Модифицируем все состояния
-        uiState.title.value = "Модифицированное название"
-        uiState.details.value = "Модифицированное описание"
-        uiState.selectedDate.value = LocalDate.now()
-        uiState.selectedColor.value = Color.Yellow
-        uiState.selectedDisplayOption.value = DisplayOption.YEAR_MONTH_DAY
-
-        // Then - Все изменения должны примениться
-        assertNotNull(uiState.title.value, "Название должно быть не null")
-        assertNotNull(uiState.details.value, "Описание должно быть не null")
-        assertNotNull(uiState.selectedDate.value, "Дата должна быть не null")
-        assertNotNull(uiState.selectedColor.value, "Цвет должен быть не null")
+        assertEquals("Новое название", newState.title)
+        assertEquals("", newState.details)
     }
 
     @Test
-    fun whenTitleIsEmpty_thenTitleStateIsNotValid() {
-        // Given - UiState с пустым названием
+    fun whenCopyWithDetails_thenNewStateHasUpdatedDetails() {
+        val state = CreateEditUiState()
+        val newState = state.copy(details = "Новое описание")
 
-        // When - Проверяем валидность (пустое название)
-        val isValid = uiState.title.value.isNotEmpty()
-
-        // Then - Название не должно быть валидным
-        assertEquals(false, isValid, "Пустое название не должно быть валидным")
+        assertEquals("Новое описание", newState.details)
+        assertEquals("", newState.title)
     }
 
     @Test
-    fun whenTitleNotEmpty_thenTitleStateIsValid() {
-        // Given - UiState с непустым названием
-        uiState.title.value = "Название события"
+    fun whenCopyWithDate_thenNewStateHasUpdatedDate() {
+        val date = LocalDate.of(2024, 6, 15)
+        val state = CreateEditUiState()
+        val newState = state.copy(selectedDate = date)
 
-        // When - Проверяем валидность (непустое название)
-        val isValid = uiState.title.value.isNotEmpty()
-
-        // Then - Название должно быть валидным
-        assertEquals(true, isValid, "Непустое название должно быть валидным")
+        assertEquals(date, newState.selectedDate)
+        assertNull(state.selectedDate)
     }
 
     @Test
-    fun whenDateNotSelected_thenDateStateIsNotValid() {
-        // Given - UiState с null датой
+    fun whenCopyWithColor_thenNewStateHasUpdatedColor() {
+        val color = Color.Red
+        val state = CreateEditUiState()
+        val newState = state.copy(selectedColor = color)
 
-        // When - Проверяем валидность (null дата)
-        val isValid = uiState.selectedDate.value != null
-
-        // Then - Дата не должна быть валидной
-        assertEquals(false, isValid, "Null дата не должна быть валидной")
+        assertEquals(color, newState.selectedColor)
+        assertNull(state.selectedColor)
     }
 
     @Test
-    fun whenDateSelected_thenDateStateIsValid() {
-        // Given - UiState с выбранной датой
-        uiState.selectedDate.value = LocalDate.now()
+    fun whenCopyWithNullColor_thenColorIsReset() {
+        val state = CreateEditUiState(selectedColor = Color.Red)
+        val newState = state.copy(selectedColor = null)
 
-        // When - Проверяем валидность (выбранная дата)
-        val isValid = uiState.selectedDate.value != null
-
-        // Then - Дата должна быть валидной
-        assertEquals(true, isValid, "Выбранная дата должна быть валидной")
+        assertNull(newState.selectedColor)
     }
 
     @Test
-    fun whenUiStateCreated_thenReminderDefaultsAreApplied() {
-        // Given - UiState создан
+    fun whenCopyWithDisplayOption_thenNewStateHasUpdatedOption() {
+        val state = CreateEditUiState()
+        val newState = state.copy(selectedDisplayOption = DisplayOption.MONTH_DAY)
 
-        // Then
-        assertEquals(false, uiState.reminder.isEnabled.value)
-        assertEquals(ReminderMode.AT_DATE, uiState.reminder.mode.value)
-        assertEquals("", uiState.reminder.intervalValue.value)
-        assertEquals(ReminderIntervalUnit.DAY, uiState.reminder.intervalUnit.value)
+        assertEquals(DisplayOption.MONTH_DAY, newState.selectedDisplayOption)
+        assertEquals(DisplayOption.DAY, state.selectedDisplayOption)
     }
 
     @Test
-    fun whenReminderFieldsChanged_thenReminderStateIsUpdated() {
-        // Given
-        val targetDate = LocalDate.of(2027, 1, 1)
+    fun whenCopyWithAllFields_thenNewStateHasAllUpdated() {
+        val date = LocalDate.of(2024, 6, 15)
+        val color = Color.Blue
+        val state = CreateEditUiState()
+        val newState =
+            state.copy(
+                title = "Тестовое событие",
+                details = "Тестовое описание",
+                selectedDate = date,
+                selectedColor = color,
+                selectedDisplayOption = DisplayOption.YEAR_MONTH_DAY
+            )
 
-        // When
-        uiState.reminder.isEnabled.value = true
-        uiState.reminder.mode.value = ReminderMode.AFTER_INTERVAL
-        uiState.reminder.intervalValue.value = "5"
-        uiState.reminder.intervalUnit.value = ReminderIntervalUnit.WEEK
-        uiState.reminder.selectedDate.value = targetDate
+        assertEquals("Тестовое событие", newState.title)
+        assertEquals("Тестовое описание", newState.details)
+        assertEquals(date, newState.selectedDate)
+        assertEquals(color, newState.selectedColor)
+        assertEquals(DisplayOption.YEAR_MONTH_DAY, newState.selectedDisplayOption)
+    }
 
-        // Then
-        assertEquals(true, uiState.reminder.isEnabled.value)
-        assertEquals(ReminderMode.AFTER_INTERVAL, uiState.reminder.mode.value)
-        assertEquals("5", uiState.reminder.intervalValue.value)
-        assertEquals(ReminderIntervalUnit.WEEK, uiState.reminder.intervalUnit.value)
-        assertEquals(targetDate, uiState.reminder.selectedDate.value)
+    @Test
+    fun whenCopy_thenOriginalIsUnchanged() {
+        val state = CreateEditUiState()
+        state.copy(title = "Новое название")
+
+        assertEquals("", state.title)
+    }
+
+    @Test
+    fun whenCopy_thenReturnsDifferentInstance() {
+        val state = CreateEditUiState()
+        val newState = state.copy(title = "Test")
+
+        assertNotSame(state, newState)
+    }
+
+    @Test
+    fun whenDefaultState_thenReminderHasDefaults() {
+        val state = CreateEditUiState()
+
+        assertEquals(false, state.reminder.isEnabled)
+        assertEquals(ReminderMode.AT_DATE, state.reminder.mode)
+        assertEquals("", state.reminder.intervalValue)
+        assertEquals(ReminderIntervalUnit.DAY, state.reminder.intervalUnit)
+    }
+
+    @Test
+    fun whenCopyWithReminder_thenNewStateHasUpdatedReminder() {
+        val state = CreateEditUiState()
+        val updatedReminder =
+            state.reminder.copy(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "5",
+                intervalUnit = ReminderIntervalUnit.WEEK
+            )
+        val newState = state.copy(reminder = updatedReminder)
+
+        assertEquals(true, newState.reminder.isEnabled)
+        assertEquals(ReminderMode.AFTER_INTERVAL, newState.reminder.mode)
+        assertEquals("5", newState.reminder.intervalValue)
+        assertEquals(ReminderIntervalUnit.WEEK, newState.reminder.intervalUnit)
+    }
+
+    @Test
+    fun whenReminderDefaults_thenSelectedDateIsTomorrow() {
+        val expected = LocalDate.now().plusDays(1)
+        val state = CreateEditUiState()
+
+        assertEquals(expected, state.reminder.selectedDate)
     }
 }

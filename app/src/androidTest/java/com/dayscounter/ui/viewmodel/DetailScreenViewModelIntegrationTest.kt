@@ -348,21 +348,3 @@ class DetailScreenViewModelIntegrationTest {
         }
     }
 }
-
-/**
- * Состояние экрана деталей.
- */
-sealed class DetailScreenState {
-    /** Загрузка данных */
-    data object Loading : DetailScreenState()
-
-    /** Успешная загрузка */
-    data class Success(
-        val item: Item
-    ) : DetailScreenState()
-
-    /** Ошибка загрузки */
-    data class Error(
-        val message: String
-    ) : DetailScreenState()
-}

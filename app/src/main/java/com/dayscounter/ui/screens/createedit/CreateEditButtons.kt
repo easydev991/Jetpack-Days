@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -19,64 +18,73 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import java.time.Instant
-import java.time.ZoneId
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 /**
  * DatePicker Dialog.
+ * Принимает plain-значения и callback'и вместо MutableState.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DatePickerDialogSection(
-    selectedDate: MutableState<java.time.LocalDate?>,
-    showDatePicker: MutableState<Boolean>,
-    onDateSelected: () -> Unit = {}
+    selectedDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
 ) {
-    if (showDatePicker.value) {
-        val datePickerState =
-            rememberDatePickerState(
-                initialSelectedDateMillis =
-                    selectedDate.value
-                        ?.atStartOfDay(ZoneId.systemDefault())
-                        ?.toInstant()
-                        ?.toEpochMilli()
-            )
+    val datePickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis =
+                selectedDate
+                    ?.atStartOfDay(ZoneOffset.UTC)
+                    ?.toInstant()
+                    ?.toEpochMilli()
+        )
 
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker.value = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            selectedDate.value =
-                                Instant
-                                    .ofEpochMilli(millis)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                        }
-                        showDatePicker.value = false
-                        onDateSelected()
-                    }
-                ) {
-                    Text(stringResource(R.string.ok))
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    confirmDatePickerSelection(
+                        selectedDateMillis = datePickerState.selectedDateMillis,
+                        onDateSelected = onDateSelected,
+                        onDismiss = onDismiss
+                    )
                 }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDatePicker.value = false
-                        onDateSelected()
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
+            ) {
+                Text(stringResource(R.string.ok))
             }
-        ) {
-            DatePicker(
-                state = datePickerState,
-                showModeToggle = false
-            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
         }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            showModeToggle = false
+        )
     }
+}
+
+internal fun confirmDatePickerSelection(
+    selectedDateMillis: Long?,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (selectedDateMillis == null) {
+        onDismiss()
+        return
+    }
+
+    onDateSelected(
+        Instant
+            .ofEpochMilli(selectedDateMillis)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+    )
 }
 
 /**

@@ -23,8 +23,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -54,10 +57,14 @@ private const val PREVIEW_MINUTE = 8
 private const val PREVIEW_INTERVAL = "3"
 internal const val REMINDER_TOGGLE_TEST_TAG = "reminder_toggle"
 
+/**
+ * Секция настроек напоминания.
+ * Принимает plain-значения и callback'и вместо MutableState.
+ */
 @Composable
 internal fun ReminderSettingsSection(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit,
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit,
     onReminderToggleRequested: ((Boolean) -> Unit)? = null,
     expandedContentModifier: Modifier = Modifier
 ) {
@@ -68,26 +75,26 @@ internal fun ReminderSettingsSection(
     )
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
     ReminderToggleRow(
-        reminderUiState = reminderUiState,
-        onValueChange = onValueChange,
+        reminder = reminder,
+        onReminderChange = onReminderChange,
         onReminderToggleRequested = onReminderToggleRequested
     )
 
-    if (!reminderUiState.isEnabled.value) {
+    if (!reminder.isEnabled) {
         return
     }
 
     ReminderExpandedContent(
-        reminderUiState = reminderUiState,
-        onValueChange = onValueChange,
+        reminder = reminder,
+        onReminderChange = onReminderChange,
         expandedContentModifier = expandedContentModifier
     )
 }
 
 @Composable
 private fun ReminderToggleRow(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit,
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit,
     onReminderToggleRequested: ((Boolean) -> Unit)?
 ) {
     Row(
@@ -102,11 +109,10 @@ private fun ReminderToggleRow(
         )
         Switch(
             modifier = Modifier.testTag(REMINDER_TOGGLE_TEST_TAG),
-            checked = reminderUiState.isEnabled.value,
+            checked = reminder.isEnabled,
             onCheckedChange = {
                 onReminderToggleRequested?.invoke(it) ?: run {
-                    reminderUiState.isEnabled.value = it
-                    onValueChange()
+                    onReminderChange(reminder.copy(isEnabled = it))
                 }
             }
         )
@@ -115,41 +121,39 @@ private fun ReminderToggleRow(
 
 @Composable
 private fun ReminderExpandedContent(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit,
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit,
     expandedContentModifier: Modifier
 ) {
-    val validationErrorResId = reminderUiState.validationErrorResId(currentDateTime = LocalDateTime.now())
+    val validationErrorResId = reminder.validationErrorResId(currentDateTime = LocalDateTime.now())
 
     Column(modifier = expandedContentModifier) {
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
         DaysRadioButton(
             text = stringResource(R.string.reminder_mode_on_date),
-            selected = reminderUiState.mode.value == ReminderMode.AT_DATE,
+            selected = reminder.mode == ReminderMode.AT_DATE,
             onClick = {
-                reminderUiState.mode.value = ReminderMode.AT_DATE
-                onValueChange()
+                onReminderChange(reminder.copy(mode = ReminderMode.AT_DATE))
             }
         )
         DaysRadioButton(
             text = stringResource(R.string.reminder_mode_after),
-            selected = reminderUiState.mode.value == ReminderMode.AFTER_INTERVAL,
+            selected = reminder.mode == ReminderMode.AFTER_INTERVAL,
             onClick = {
-                reminderUiState.mode.value = ReminderMode.AFTER_INTERVAL
-                onValueChange()
+                onReminderChange(reminder.copy(mode = ReminderMode.AFTER_INTERVAL))
             }
         )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
-        when (reminderUiState.mode.value) {
+        when (reminder.mode) {
             ReminderMode.AT_DATE -> {
-                ReminderDateTimeSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
+                ReminderDateTimeSection(reminder = reminder, onReminderChange = onReminderChange)
             }
 
             ReminderMode.AFTER_INTERVAL -> {
-                ReminderAfterSection(reminderUiState = reminderUiState, onValueChange = onValueChange)
+                ReminderAfterSection(reminder = reminder, onReminderChange = onReminderChange)
             }
         }
 
@@ -166,8 +170,8 @@ private fun ReminderExpandedContent(
 
 @Composable
 private fun ReminderDateTimeSection(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val formatter =
@@ -177,7 +181,7 @@ private fun ReminderDateTimeSection(
 
     OutlinedTextField(
         value =
-            reminderUiState.selectedDate.value
+            reminder.selectedDate
                 ?.format(formatter)
                 .orEmpty(),
         onValueChange = {},
@@ -185,7 +189,7 @@ private fun ReminderDateTimeSection(
         readOnly = true,
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
-            IconButton(onClick = { reminderUiState.showDatePicker.value = true }) {
+            IconButton(onClick = { onReminderChange(reminder.copy(showDatePicker = true)) }) {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
                     contentDescription = stringResource(R.string.select_date)
@@ -195,18 +199,18 @@ private fun ReminderDateTimeSection(
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
-    ReminderTimeField(reminderUiState = reminderUiState, onValueChange = onValueChange)
+    ReminderTimeField(reminder = reminder, onReminderChange = onReminderChange)
 }
 
 @Composable
 private fun ReminderTimeField(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit
 ) {
     val context = LocalContext.current
     val reminderTime =
-        remember(reminderUiState.hour.value, reminderUiState.minute.value) {
-            String.format(Locale.getDefault(), "%02d:%02d", reminderUiState.hour.value, reminderUiState.minute.value)
+        remember(reminder.hour, reminder.minute) {
+            String.format(Locale.getDefault(), "%02d:%02d", reminder.hour, reminder.minute)
         }
 
     OutlinedTextField(
@@ -221,12 +225,10 @@ private fun ReminderTimeField(
                     TimePickerDialog(
                         context,
                         { _, hour, minute ->
-                            reminderUiState.hour.value = hour
-                            reminderUiState.minute.value = minute
-                            onValueChange()
+                            onReminderChange(reminder.copy(hour = hour, minute = minute))
                         },
-                        reminderUiState.hour.value,
-                        reminderUiState.minute.value,
+                        reminder.hour,
+                        reminder.minute,
                         true
                     ).show()
                 }
@@ -242,18 +244,17 @@ private fun ReminderTimeField(
 
 @Composable
 private fun ReminderAfterSection(
-    reminderUiState: ReminderFormUiState,
-    onValueChange: () -> Unit
+    reminder: ReminderFormUiState,
+    onReminderChange: (ReminderFormUiState) -> Unit
 ) {
-    val showUnitsMenu = remember { mutableStateOf(false) }
+    var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
 
     OutlinedTextField(
-        value = reminderUiState.intervalValue.value,
+        value = reminder.intervalValue,
         onValueChange = { newValue ->
-            val onlyDigits = newValue.filter { it.isDigit() }
-            if (onlyDigits != reminderUiState.intervalValue.value) {
-                reminderUiState.intervalValue.value = onlyDigits
-                onValueChange()
+            val sanitized = sanitizeIntervalValue(newValue)
+            if (sanitized != reminder.intervalValue) {
+                onReminderChange(reminder.copy(intervalValue = sanitized))
             }
         },
         label = { Text(stringResource(R.string.remind_after_label)) },
@@ -265,16 +266,16 @@ private fun ReminderAfterSection(
 
     Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = reminderUiState.intervalUnit.value.toDisplayText(),
+            value = reminder.intervalUnit.toDisplayText(),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.reminder_period_unit)) },
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clickable { showUnitsMenu.value = true },
+                    .clickable { showUnitsMenu = true },
             trailingIcon = {
-                IconButton(onClick = { showUnitsMenu.value = true }) {
+                IconButton(onClick = { showUnitsMenu = true }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowDropDown,
                         contentDescription = stringResource(R.string.select_period_unit)
@@ -284,16 +285,15 @@ private fun ReminderAfterSection(
         )
 
         DropdownMenu(
-            expanded = showUnitsMenu.value,
-            onDismissRequest = { showUnitsMenu.value = false }
+            expanded = showUnitsMenu,
+            onDismissRequest = { showUnitsMenu = false }
         ) {
             ReminderIntervalUnit.entries.forEach { unit ->
                 DropdownMenuItem(
                     text = { Text(unit.toDisplayText()) },
                     onClick = {
-                        reminderUiState.intervalUnit.value = unit
-                        showUnitsMenu.value = false
-                        onValueChange()
+                        onReminderChange(reminder.copy(intervalUnit = unit))
+                        showUnitsMenu = false
                     }
                 )
             }
@@ -314,23 +314,23 @@ private fun ReminderIntervalUnit.toDisplayText(): String =
 @Composable
 internal fun ReminderSettingsSectionPreview() {
     JetpackDaysTheme {
+        var reminder by remember {
+            mutableStateOf(
+                ReminderFormUiState(
+                    isEnabled = true,
+                    mode = ReminderMode.AT_DATE,
+                    selectedDate = LocalDate.of(PREVIEW_YEAR, PREVIEW_MONTH, PREVIEW_DAY),
+                    hour = PREVIEW_HOUR,
+                    minute = PREVIEW_MINUTE,
+                    intervalValue = PREVIEW_INTERVAL,
+                    intervalUnit = ReminderIntervalUnit.DAY
+                )
+            )
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             ReminderSettingsSection(
-                reminderUiState =
-                    ReminderFormUiState(
-                        isEnabled = remember { mutableStateOf(true) },
-                        mode = remember { mutableStateOf(ReminderMode.AT_DATE) },
-                        selectedDate =
-                            remember {
-                                mutableStateOf(LocalDate.of(PREVIEW_YEAR, PREVIEW_MONTH, PREVIEW_DAY))
-                            },
-                        showDatePicker = remember { mutableStateOf(false) },
-                        hour = remember { mutableStateOf(PREVIEW_HOUR) },
-                        minute = remember { mutableStateOf(PREVIEW_MINUTE) },
-                        intervalValue = remember { mutableStateOf(PREVIEW_INTERVAL) },
-                        intervalUnit = remember { mutableStateOf(ReminderIntervalUnit.DAY) }
-                    ),
-                onValueChange = {}
+                reminder = reminder,
+                onReminderChange = { reminder = it }
             )
         }
     }
@@ -340,23 +340,23 @@ internal fun ReminderSettingsSectionPreview() {
 @Composable
 internal fun ReminderSettingsSectionDisabledPreview() {
     JetpackDaysTheme {
+        var reminder by remember {
+            mutableStateOf(
+                ReminderFormUiState(
+                    isEnabled = false,
+                    mode = ReminderMode.AT_DATE,
+                    selectedDate = LocalDate.of(PREVIEW_YEAR, PREVIEW_MONTH, PREVIEW_DAY),
+                    hour = PREVIEW_HOUR,
+                    minute = PREVIEW_MINUTE,
+                    intervalValue = PREVIEW_INTERVAL,
+                    intervalUnit = ReminderIntervalUnit.DAY
+                )
+            )
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             ReminderSettingsSection(
-                reminderUiState =
-                    ReminderFormUiState(
-                        isEnabled = remember { mutableStateOf(false) },
-                        mode = remember { mutableStateOf(ReminderMode.AT_DATE) },
-                        selectedDate =
-                            remember {
-                                mutableStateOf(LocalDate.of(PREVIEW_YEAR, PREVIEW_MONTH, PREVIEW_DAY))
-                            },
-                        showDatePicker = remember { mutableStateOf(false) },
-                        hour = remember { mutableStateOf(PREVIEW_HOUR) },
-                        minute = remember { mutableStateOf(PREVIEW_MINUTE) },
-                        intervalValue = remember { mutableStateOf(PREVIEW_INTERVAL) },
-                        intervalUnit = remember { mutableStateOf(ReminderIntervalUnit.DAY) }
-                    ),
-                onValueChange = {}
+                reminder = reminder,
+                onReminderChange = { reminder = it }
             )
         }
     }
