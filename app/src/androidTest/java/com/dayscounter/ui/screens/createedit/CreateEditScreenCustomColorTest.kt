@@ -64,7 +64,6 @@ class CreateEditScreenCustomColorTest {
                         onShowDatePickerChange = {},
                         onTitleChange = { title -> selectedColor = null },
                         onDetailsChange = {},
-                        onDateChange = {},
                         onColorChange = { newColor ->
                             selectedColor = newColor
                             latestSelectedColor = newColor
@@ -122,7 +121,6 @@ class CreateEditScreenCustomColorTest {
                         onShowDatePickerChange = {},
                         onTitleChange = { selectedColor = null },
                         onDetailsChange = {},
-                        onDateChange = {},
                         onColorChange = { newColor -> selectedColor = newColor },
                         onDisplayOptionChange = {},
                         onReminderChange = {},

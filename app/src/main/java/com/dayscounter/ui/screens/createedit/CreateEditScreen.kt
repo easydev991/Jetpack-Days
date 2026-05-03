@@ -129,7 +129,6 @@ private fun CreateEditScreenContent(
                     onShowDatePickerChange = { formState.value = formState.value.copy(showDatePicker = it) },
                     onTitleChange = { title -> formState.value = formState.value.copy(title = title) },
                     onDetailsChange = { details -> formState.value = formState.value.copy(details = details) },
-                    onDateChange = { date -> formState.value = formState.value.copy(selectedDate = date) },
                     onColorChange = { color -> formState.value = formState.value.copy(selectedColor = color) },
                     onDisplayOptionChange = { option ->
                         formState.value = formState.value.copy(selectedDisplayOption = option)

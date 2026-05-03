@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Скрипт для вывода статистики интеграционных (Android) тестов"""
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -10,6 +11,12 @@ import xml.etree.ElementTree as ET
 GREEN = "\033[1;32m"
 RED = "\033[1;31m"
 RESET = "\033[0m"
+
+GRADLE_EXIT_CODE = int(os.environ.get("ANDROID_TEST_GRADLE_EXIT_CODE") or "0")
+
+if GRADLE_EXIT_CODE != 0:
+    print(f"{RED}Gradle connectedDebugAndroidTest завершился с ошибкой: {GRADLE_EXIT_CODE}{RESET}")
+    sys.exit(1)
 
 # ANSI escape коды для очистки из строк при подсчете длины
 ANSI_ESCAPE = re.compile(r"\033\[[0-9;]*m")

@@ -1,7 +1,10 @@
 package com.dayscounter.ui.screens.createedit
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -78,5 +81,25 @@ class DatePickerConversionTest {
             val restored = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
             assertEquals(date, restored, "Roundtrip failed for $date")
         }
+    }
+
+    @Test
+    fun confirmdatepickerselection_when_millis_null_then_dismisses_without_date() {
+        var selectedDate: LocalDate? = null
+        var dateSelected = false
+        var dismissed = false
+
+        confirmDatePickerSelection(
+            selectedDateMillis = null,
+            onDateSelected = {
+                selectedDate = it
+                dateSelected = true
+            },
+            onDismiss = { dismissed = true }
+        )
+
+        assertNull(selectedDate)
+        assertFalse(dateSelected)
+        assertTrue(dismissed)
     }
 }
