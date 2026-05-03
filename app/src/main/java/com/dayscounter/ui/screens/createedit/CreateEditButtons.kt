@@ -46,14 +46,11 @@ internal fun DatePickerDialogSection(
         confirmButton = {
             TextButton(
                 onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        onDateSelected(
-                            Instant
-                                .ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC)
-                                .toLocalDate()
-                        )
-                    }
+                    confirmDatePickerSelection(
+                        selectedDateMillis = datePickerState.selectedDateMillis,
+                        onDateSelected = onDateSelected,
+                        onDismiss = onDismiss
+                    )
                 }
             ) {
                 Text(stringResource(R.string.ok))
@@ -70,6 +67,24 @@ internal fun DatePickerDialogSection(
             showModeToggle = false
         )
     }
+}
+
+internal fun confirmDatePickerSelection(
+    selectedDateMillis: Long?,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (selectedDateMillis == null) {
+        onDismiss()
+        return
+    }
+
+    onDateSelected(
+        Instant
+            .ofEpochMilli(selectedDateMillis)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+    )
 }
 
 /**

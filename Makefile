@@ -42,12 +42,18 @@ test:
 	@if [ -f scripts/test_report.py ]; then chmod +x scripts/test_report.py; fi
 	./gradlew test --console=plain || true
 	@python3 scripts/test_report.py
+	@$(MAKE) scripts-test
+
+## scripts-test: Запуск unit-тестов Python-скриптов
+scripts-test:
+	python3 -m unittest discover -s scripts -p "*_test.py"
 
 ## android-test: Запуск интеграционных тестов на Android устройстве
 android-test:
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
-	./gradlew connectedDebugAndroidTest --console=plain || true
-	@python3 scripts/android_test_report.py
+	./gradlew connectedDebugAndroidTest --console=plain
+	GRADLE_EXIT_CODE=$$?
+	ANDROID_TEST_GRADLE_EXIT_CODE=$$GRADLE_EXIT_CODE python3 scripts/android_test_report.py
 
 ## test-all: Запуск всех тестов (unit + интеграционные)
 test-all:

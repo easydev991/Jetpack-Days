@@ -35,7 +35,6 @@ class CreateEditReminderAutoScrollUiTest {
                         onShowDatePickerChange = {},
                         onTitleChange = { title -> stateHolder.value = stateHolder.value.copy(title = title) },
                         onDetailsChange = { details -> stateHolder.value = stateHolder.value.copy(details = details) },
-                        onDateChange = { date -> stateHolder.value = stateHolder.value.copy(selectedDate = date) },
                         onColorChange = { color -> stateHolder.value = stateHolder.value.copy(selectedColor = color) },
                         onDisplayOptionChange = { option ->
                             stateHolder.value = stateHolder.value.copy(selectedDisplayOption = option)

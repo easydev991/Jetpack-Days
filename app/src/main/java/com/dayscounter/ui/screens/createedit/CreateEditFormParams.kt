@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.graphics.Color
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
-import java.time.LocalDate
 
 /**
  * Параметры для формы создания/редактирования события.
@@ -19,7 +18,6 @@ data class CreateEditFormParams(
     val onShowDatePickerChange: (Boolean) -> Unit,
     val onTitleChange: (String) -> Unit,
     val onDetailsChange: (String) -> Unit,
-    val onDateChange: (LocalDate?) -> Unit,
     val onColorChange: (Color?) -> Unit,
     val onDisplayOptionChange: (DisplayOption) -> Unit,
     val onReminderChange: (ReminderFormUiState) -> Unit,
