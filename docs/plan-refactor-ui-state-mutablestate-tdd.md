@@ -2,7 +2,7 @@
 
 Дата: 2026-04-27  
 Обновлено: 2026-05-03  
-Статус: ✅ Завершён (все unit-тесты + androidTest зелёные, production-код мигрирован, баги исправлены)
+Статус: 🔄 В процессе (production-код мигрирован, баги исправлены, 455 unit + 79 androidTest зелёные; осталась формализация guard от регрессии и финальная приёмка)
 
 ## 1. Цель
 
@@ -44,158 +44,49 @@
 
 ### 5.1 Инкремент A: Инвентаризация ✅ (выполнено)
 
-**Текущее состояние UI-state в проекте:**
+Выявлено 2 data-класса с `MutableState<T>`: `CreateEditUiState` (5 полей) и `ReminderFormUiState` (9 полей). Остальные UI-state иммутабельны (`AppDataUiState`, `ThemeIconUiState`, `RootScreenState`, `DetailScreenState`, `MainScreenState`, `CreateEditScreenState`, `CreateEditChangeInput`).
 
-| State-класс | Статус | MutableState |
-|---|---|---|
-| `AppDataUiState` | ✅ Иммутабельный | нет |
-| `ThemeIconUiState` | ✅ Иммутабельный | нет |
-| `RootScreenState` | ✅ Иммутабельный | нет |
-| `DetailScreenState` (sealed) | ✅ Иммутабельный | нет |
-| `MainScreenState` (sealed) | ✅ Иммутабельный | нет |
-| `CreateEditScreenState` (sealed) | ✅ Иммутабельный | нет |
-| `CreateEditChangeInput` | ✅ Иммутабельный | нет |
-| **`CreateEditUiState`** | ❌ MutableState | 5 полей |
-| **`ReminderFormUiState`** | ❌ MutableState | 9 полей |
+**Тесты для миграции:** `CreateEditUiStateTest.kt` (14 тестов), `CreateEditReminderStateTest.kt` (14 тестов), `CreateEditScreenCustomColorTest.kt` (2 UI-теста).
 
-**Тесты, уже работающие с иммутабельными состояниями:**
-- `DetailScreenStateTest.kt` ✅ — sealed class
-- `RootScreenStateTest.kt` ✅ — plain data class
-- `CreateEditScreenViewModelTest.kt` — использует `CreateEditScreenState` (уже иммутабельный)
-- `CreateEditScreenViewModelReminderTest.kt` — аналогично
-
-**Тесты, завязанные на старый MutableState-паттерн (требуют миграции):**
-
-| Тест | Что делает | Строк |
-|---|---|---|
-| `CreateEditUiStateTest.kt` | Создаёт `CreateEditUiState` с `mutableStateOf()`, пишет/читает `.value` | 284 / 14 тестов |
-| `CreateEditReminderStateTest.kt` | Создаёт `ReminderFormUiState()`, пишет/читает `.value`, тестирует `toReminderRequest`, `isInputValid`, `toChangeFingerprint`, `validationErrorResId`, `isCreateEditFormValid` | 241 / 14 тестов |
-| `CreateEditScreenCustomColorTest.kt` | UI-тест: использует `MutableState<Color?>` в composable контенте, проверяет выбор preset-цвета | 152 / 2 теста |
-
-**Полный список production-файлов, затронутых миграцией:**
-
-| Файл | Что использует MutableState |
-|---|---|
-| `CreateEditUiState.kt` | 5 полей: `title`, `details`, `selectedDate`, `selectedColor`, `selectedDisplayOption` |
-| `CreateEditReminderState.kt` | 9 полей + 5 функций (`toReminderRequest`, `isInputValid`, `validationErrorResId`, `toChangeFingerprint`, `applyReminder`) |
-| `CreateEditFormParams.kt` | `showDatePicker: MutableState<Boolean>` |
-| `CreateEditFormContent.kt` | `TitleSection`, `DetailsSection`, `DateSection`, `MainFormSections`, `ColorAndDisplayOptionSection` принимают MutableState; `rememberReminderToggleHandler` мутирует `.value`; `rememberCreateEditUiStates()` создаёт 14 MutableState; `loadItemData()` пишет/читает `.value`; `previousReminderEnabled` — локальный `MutableState<Boolean>` |
-| `CreateEditSelectors.kt` | `ColorSelector`, `ColorOptionSurface`, `DisplayOptionSelector` принимают MutableState |
-| `CreateEditButtons.kt` | `DatePickerDialogSection` принимает MutableState |
-| `CreateEditScreen.kt` | `CreateEditDatePickerIfNeeded` принимает MutableState; `toItem()`, `rememberCreateEditSaveAction()`, `rememberCreateEditDateSelectedAction()`, `rememberCreateEditScreenActions()` читают `.value` |
-| `CreateEditReminderEffects.kt` | `rememberOnCreateEditValueChange()`, `ObserveReminderStateOnResume()` читают/пишут `.value` |
-| `ReminderSettingsSection.kt` | `ReminderSettingsSection`, `ReminderToggleRow`, `ReminderExpandedContent`, `ReminderDateTimeSection`, `ReminderTimeField`, `ReminderAfterSection` принимают `ReminderFormUiState` и читают/пишут `.value` |
-| `StateSavers.kt` | 4 кастомных Saver: `LocalDateSaver`, `NullableColorSaver`, `DisplayOptionSaver`, `NullableLocalDateSaver` |
+**Production-файлы:** `CreateEditUiState.kt`, `CreateEditReminderState.kt`, `CreateEditFormParams.kt`, `CreateEditFormContent.kt`, `CreateEditSelectors.kt`, `CreateEditButtons.kt`, `CreateEditScreen.kt`, `CreateEditReminderEffects.kt`, `ReminderSettingsSection.kt`, `StateSavers.kt` — используют MutableState через `.value`.
 
 ### 5.2 Инкремент B: Миграция CreateEdit ✅ (выполнено)
 
-**Цель:** Заменить `MutableState<T>` в `CreateEditUiState` (5 полей) и `ReminderFormUiState` (9 полей) на plain-поля. Перенести MutableState единственной точкой в Composable-уровень (`rememberSaveable { mutableStateOf(CreateEditUiState()) }`).
+**Решение:** Единый `MutableState<CreateEditUiState>` на уровне Composable вместо 14 отдельных `MutableState<T>`. Все мутации — через `copy()`.
 
-**Ключевое архитектурное решение:** Вместо 14 отдельных `MutableState<T>` (по одному на каждое поле) используем **один** `MutableState<CreateEditUiState>` на уровне Composable. Все мутации — через `copy()`.
-
-**Фактический результат:** Все пункты выполнены. Production-код мигрирован, unit-тесты переписаны, 446 тестов проходят.
-
-#### B.1 — B.3: Все подзадачи выполнены
-
-- [x] `CreateEditUiState` — 6 plain-полей (включая `showDatePicker`), нет MutableState
-- [x] `ReminderFormUiState` — 9 plain-полей, нет MutableState
+- [x] `CreateEditUiState` — 6 plain-полей (включая `showDatePicker`)
+- [x] `ReminderFormUiState` — 9 plain-полей
 - [x] `CreateEditFormParams` — без MutableState (plain-поля + callback'и)
-- [x] `rememberCreateEditUiState()` — единственный `MutableState<CreateEditUiState>`
+- [x] `rememberCreateEditUiState()` — единственный MutableState на уровне экрана
 - [x] `applyReminder` — чистая функция, возвращает `ReminderFormUiState`
-- [x] Все Composable-функции принимают plain-значения + callback'и
-- [x] Единственный `import MutableState` — в `CreateEditFormContent.kt` для `rememberCreateEditUiState()`
-- [x] `CreateEditUiStateTest.kt` — 14 тестов на plain data class
-- [x] `CreateEditReminderStateTest.kt` — 15 тестов на plain data class
-- [x] `CreateEditScreenCustomColorTest.kt` — 2 UI-теста с `by remember { mutableStateOf() }`
-- [x] `make format` проходит
-- [x] Unit-тесты зелёные
+- [x] Все Composable принимают plain-значения + callback'и
+- [x] Unit-тесты переписаны на plain data class: 14 (`CreateEditUiStateTest`) + 15 (`CreateEditReminderStateTest`)
+- [x] `make format` + unit-тесты зелёные (455)
 
 ### 5.3 Инкремент C: Исправление замечаний после рефакторинга ✅ (выполнено)
 
-**Контекст:** После рефакторинг-миграции (5.2) выявлены 4 предсуществующих замечания. Все они не являются регрессиями, но улучшают архитектурную чистоту.
+4 предсуществующих архитектурных замечания (не регрессии):
 
-#### C.1 Перенос loadItemData в LaunchedEffect (запись во время композиции)
+- [x] **C.1** `loadItemData` — перенесён из тела композиции в `LaunchedEffect(itemId, uiState)`
+- [x] **C.2** `previousReminderEnabled` — `rememberSaveable` → `remember` (корректная инициализация после поворота через Saver)
+- [x] **C.3** `showUnitsMenu` — `remember` → `rememberSaveable` (сохранение при повороте)
+- [x] **C.4** `showDatePicker` — перенесён из отдельного `rememberSaveable` в поле `CreateEditUiState`, единообразно с `ReminderFormUiState.showDatePicker`
+- [x] `make format` + unit-тесты зелёные
 
-**Проблема:** `loadItemData(itemId, uiState, formState)` вызывался прямо в теле `@Composable` функции `CreateEditScreenContent`, что является анти-паттерном Compose — запись в `MutableState` во время композиции может привести к recomposition loops и недетерминированному порядку выполнения.
+### 5.4 Инкремент D: Архитектурная стабилизация (guard от регрессии) 🟡
 
-**Решение:** Обернуть вызов в `LaunchedEffect(itemId, uiState)`:
-
-```kotlin
-// CreateEditScreen.kt
-LaunchedEffect(itemId, uiState) {
-    loadItemData(itemId, uiState, formState)
-}
-```
-
-- [x] `loadItemData` вызывается через `LaunchedEffect`, а не в теле композиции
-- [x] Триггер: изменение `itemId` или `uiState` (переход из Loading в Success)
-- [x] `loadItemData` остаётся регулярной функцией (не меняем сигнатуру)
-
-#### C.2 previousReminderEnabled: rememberSaveable → remember
-
-**Проблема:** `previousReminderEnabled` инициализировался через `rememberSaveable` без ключа. При асинхронной загрузке данных (LaunchedEffect) значение могло быть инициализировано до вызова `loadItemData`, что ломало детектор перехода `isEnabled: false → true` для авто-скролла.
-
-**Решение:** Заменить `rememberSaveable` на `remember`, чтобы значение не переживало поворот экрана (это не требуется — после поворота форма восстанавливается через `CreateEditUiStateSaver`, и детектор перехода корректно инициализируется заново).
-
-```kotlin
-// CreateEditFormContent.kt
-var previousReminderEnabled by remember { mutableStateOf(params.uiStates.reminder.isEnabled) }
-```
-
-- [x] `previousReminderEnabled` использует `remember` вместо `rememberSaveable`
-- [x] При повороте экрана значение корректно переинициализируется из `CreateEditUiStateSaver`
-- [x] Детектор `false → true` срабатывает только на действия пользователя
-
-#### C.3 showUnitsMenu: remember → rememberSaveable
-
-**Проблема:** Выпадающий список единиц измерения (`showUnitsMenu`) использует `remember`, из-за чего при повороте экрана меню схлопывается. Хотя это мелкий UX-недочёт, исправление тривиально.
-
-**Решение:** Заменить `remember` на `rememberSaveable`:
-
-```kotlin
-// ReminderSettingsSection.kt
-var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
-```
-
-- [x] `showUnitsMenu` использует `rememberSaveable`
-- [x] Состояние выпадающего списка сохраняется при повороте экрана
-
-#### C.4 Стандартизация showDatePicker (два подхода к хранению)
-
-**Проблема:** Основной `showDatePicker` (для даты события) хранился как отдельный `rememberSaveable { mutableStateOf(false) }` на уровне `CreateEditScreenContent`, а `showDatePicker` для напоминания — как поле в `ReminderFormUiState`. Разные подходы к хранению однотипного состояния.
-
-**Решение:** Перенести основной `showDatePicker` в `CreateEditUiState` как поле, аналогично `ReminderFormUiState.showDatePicker`:
-
-- [x] `CreateEditUiState.showDatePicker: Boolean = false` — новое поле в data class
-- [x] `CreateEditUiStateSaver` сериализует/десериализует `showDatePicker`
-- [x] `CreateEditFormParams` больше не содержит `showDatePicker` (доступен через `uiStates.showDatePicker`)
-- [x] `onShowDatePickerChange` остаётся в `CreateEditFormParams` как отдельный callback (единообразно с `onTitleChange`, `onDateChange` и т.д.)
-- [x] Удалён отдельный `var showDatePicker by rememberSaveable { mutableStateOf(false) }` из `CreateEditScreenContent`
-- [x] Оба date picker visibility unified: одно как поле `CreateEditUiState`, другое как поле `ReminderFormUiState`
-
-#### Критерий завершения C
-
-- [x] `loadItemData` не вызывается в теле композиции
-- [x] `previousReminderEnabled` использует `remember`
-- [x] `showUnitsMenu` использует `rememberSaveable`
-- [x] `showDatePicker` хранится единообразно (все date picker visibility — поля data-классов)
-- [x] `make format` проходит
-- [x] Все unit-тесты зелёные
-
-### 5.4 Инкремент D: Архитектурная стабилизация (guard от регрессии) ⬜
-
+- [x] Паттерн единообразен: ViewModel → StateFlow, Compose → remember/rememberSaveable, data class'ы без MutableState.
 - [ ] Добавить тест/проверку, что `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
-- [ ] Проверить, что архитектурный паттерн единообразен с остальными экранами.
 - [ ] Обновить документацию по паттерну состояния.
 
 #### Критерий завершения D
 
 - [ ] Новый паттерн формализован и защищён от регрессии.
 
-### 5.5 Инкремент E: Финальная регрессия и приемка ⬜
+### 5.5 Инкремент E: Финальная регрессия и приемка 🟡
 
-- [ ] Прогнать `make format`.
-- [ ] Прогнать полный `make test`.
+- [x] `make format` — без замечаний (проверено многократно).
+- [x] `make test` — 455 unit + 79 androidTest зелёные (проверено многократно).
 - [ ] Прогнать критичные ручные сценарии:
   - создание/редактирование записи;
   - установка/срабатывание напоминаний;
@@ -206,246 +97,33 @@ var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
 
 #### Критерий завершения E
 
-- [ ] Все тесты зелёные, ручная проверка без блокирующих дефектов.
+- [ ] Ручная проверка без блокирующих дефектов.
 
 ### 5.6 Технический долг: Android-тесты ✅ (исправлено)
 
-**Проблема:** Android-тесты (`app/src/androidTest/`) не компилировались из-за трёх типов ошибок.
+3 типа ошибок компиляции androidTest, все исправлены:
 
-#### 5.6.1 `By remember` вне `@Composable` контекста (Kotlin 2.0+) ✅
-
-Исправлено: замена `var x by remember { mutableStateOf(...) }` на уровне класса на `val x = mutableStateOf(...)` вне композиции, чтение через `.value` внутри `setContent`. Изменены файлы:
-- `CreateEditReminderAutoScrollUiTest.kt` — `remember` перенесён внутрь `setContent`
-- `ReminderSettingsSectionUiTest.kt` — `mutableStateOf` вынесен на уровень метода (5 тестов)
-
-#### 5.6.2 `showDatePicker` удалён из `CreateEditFormParams` ✅
-
-После рефакторинга (C.4) `showDatePicker` — поле `CreateEditUiState`, а не параметр `CreateEditFormParams`. Исправлено:
-- `CreateEditReminderAutoScrollUiTest.kt` — удалён `showDatePicker = false`
-- `CreateEditScreenCustomColorTest.kt` — удалён `showDatePicker = false` (2 места), добавлен `onValueChange = {}`
-
-#### 5.6.3 Дублирование `DetailScreenState` в androidTest ✅
-
-`DetailScreenViewModelIntegrationTest.kt` содержал локальное определение `DetailScreenState` (без поля `reminder`), которое shadow-ило production-класс в рантайме, вызывая `NoSuchMethodError`. Исправлено: удалено дублирующее определение sealed class (используется production-версия).
-
-- [x] `CreateEditReminderAutoScrollUiTest.kt` — исправить `@Composable` и `showDatePicker`
-- [x] `ReminderSettingsSectionUiTest.kt` — исправить `@Composable`
-- [x] `CreateEditScreenCustomColorTest.kt` — убрать `showDatePicker`, добавить `onValueChange`
-- [x] `DetailScreenViewModelIntegrationTest.kt` — удалить дублирование `DetailScreenState`
-- [x] Прогнать `./gradlew compileDebugAndroidTestKotlin` — компиляция без ошибок
-- [x] Прогнать `./gradlew connectedDebugAndroidTest` — 79/79 тестов зелёные
+- [x] **5.6.1** `by remember` вне `@Composable` (Kotlin 2.0+): `remember` → `mutableStateOf` на уровне метода в `CreateEditReminderAutoScrollUiTest.kt` и `ReminderSettingsSectionUiTest.kt`
+- [x] **5.6.2** `showDatePicker` удалён из `CreateEditFormParams` после C.4: исправлены `CreateEditReminderAutoScrollUiTest.kt` и `CreateEditScreenCustomColorTest.kt`
+- [x] **5.6.3** Дублирование `DetailScreenState` в `DetailScreenViewModelIntegrationTest.kt` (shadow production-класс) — удалён локальный sealed class
+- [x] `connectedDebugAndroidTest` — 79/79 зелёные
 
 ### 5.7 Устаревший вызов createComposeRule (androidTest, 8 файлов) ✅ (исправлено)
 
-**Проблема:** 8 androidTest-файлов используют устаревший `androidx.compose.ui.test.junit4.createComposeRule`:
-
-```kotlin
-import androidx.compose.ui.test.junit4.createComposeRule  // deprecated
-```
-
-Deprecation: используйте `androidx.compose.ui.test.junit4.v2.createComposeRule`. V2 использует `StandardTestDispatcher` вместо `UnconfinedTestDispatcher`, что требует явной синхронизации для тестов, полагающихся на немедленное выполнение корутин.
-
-**Файлы:**
-- `DaysCountTextTest.kt`
-- `ColorSelectorUiTest.kt`
-- `CreateEditSaveValidationUiTest.kt`
-- `CreateEditScreenCustomColorTest.kt`
-- `ReminderSettingsSectionUiTest.kt`
-- `ColorTagFilterDialogTest.kt`
-- `MoreScreenTest.kt`
-- `ThemeIconScreenTest.kt`
-
-**Решение:** Заменить импорт на `import androidx.compose.ui.test.junit4.v2.createComposeRule` в каждом файле. Для простых тестов (рендер + проверка текста) `StandardTestDispatcher` не меняет поведение.
-
-- [x] `DaysCountTextTest.kt` — замена импорта
-- [x] `ColorSelectorUiTest.kt` — замена импорта
-- [x] `CreateEditSaveValidationUiTest.kt` — замена импорта
-- [x] `CreateEditScreenCustomColorTest.kt` — замена импорта
-- [x] `ReminderSettingsSectionUiTest.kt` — замена импорта
-- [x] `ColorTagFilterDialogTest.kt` — замена импорта
-- [x] `MoreScreenTest.kt` — замена импорта
-- [x] `ThemeIconScreenTest.kt` — замена импорта
+Замена `import androidx.compose.ui.test.junit4.createComposeRule` (deprecated) на `import androidx.compose.ui.test.junit4.v2.createComposeRule` в 8 файлах: `DaysCountTextTest.kt`, `ColorSelectorUiTest.kt`, `CreateEditSaveValidationUiTest.kt`, `CreateEditScreenCustomColorTest.kt`, `ReminderSettingsSectionUiTest.kt`, `ColorTagFilterDialogTest.kt`, `MoreScreenTest.kt`, `ThemeIconScreenTest.kt`.
 
 ### 5.8 Регрессии после рефакторинга: исправление багов ✅ (исправлено)
 
-**Контекст:** После рефакторинг-миграции (5.2) выявлены 2 бага, не покрытых существующими тестами.
+5 багов, исправленных TDD:
 
-#### 5.8.1 Баг #1: Дата напоминания не сохраняется при выборе в DatePickerDialog
+- [x] **Баг #1** — `DatePickerDialogSection`: `onDismiss()` в confirm-кнопке перезаписывал `selectedDate`, т.к. захватывал старый `params` из композиции. Фикс: удалён `onDismiss()` из `onClick` confirm-кнопки. Диалог закрывается через `showDatePicker = false` при рекомпозиции.
+- [x] **Баг #2** — Валидация `AFTER_INTERVAL` всегда возвращала ошибку: `?.let { null }` всегда давал `null`, Elvis выбирал `R.string.error`. Фикс: явная проверка `if (amount != null && amount >= 1) null else ...`.
+- [x] **Баг #3** — После фикса Бага #1 диалог даты события перестал закрываться: `onDateSelected` не устанавливал `showDatePicker = false`. Фикс: добавлен `showDatePicker = false` в `copy()` в `CreateEditScreen.kt:150`.
+- [x] **Баг #4** — Ведущие нули в поле "Напомнить через" не отбрасывались. TDD: `sanitizeIntervalValue` (filter digits + trimStart('0')), применён в `ReminderSettingsSection.kt:onValueChange`. 4 теста.
+- [x] **Баг #5** — DatePicker показывал предыдущий день (timezone mismatch). Material3 DatePicker использует UTC, код передавал millis через `ZoneId.systemDefault()`. Фикс: `ZoneOffset.UTC` в `DatePickerDialogSection`. 4 теста в `DatePickerConversionTest.kt`.
 
-**Причина:** В `CreateEditButtons.kt:49-57` в `onClick` кнопки подтверждения `DatePickerDialogSection` последовательно вызываются `onDateSelected(date)` и `onDismiss()`:
-
-```kotlin
-onClick = {
-    datePickerState.selectedDateMillis?.let { millis ->
-        onDateSelected(...)     // устанавливает selectedDate = date
-    }
-    onDismiss()                 // перезаписывает: читает СТАРЫЙ params.uiStates.reminder
-}
-```
-
-Оба коллбэка захватывают один и тот же `params` из композиции. `onDismiss()` читает `params.uiStates.reminder` (с `selectedDate = tomorrow`) и вызывает `copy(showDatePicker = false)`, перезаписывая корректную дату, установленную `onDateSelected`.
-
-**Исправление:** Удалён вызов `onDismiss()` из `onClick` кнопки подтверждения. Диалог закрывается автоматически, когда `showDatePicker = false` исключает `if`-блок при рекомпозиции.
-
-**Файл:** `CreateEditButtons.kt:49-57`
-
-#### 5.8.2 Баг #2: Валидация `AFTER_INTERVAL` всегда возвращает ошибку
-
-**Причина:** В `CreateEditReminderState.kt:99-103` — цепочка вызовов содержит логическую ошибку:
-
-```kotlin
-ReminderMode.AFTER_INTERVAL ->
-    intervalValue
-        .toIntOrNull()           // "3" → 3 (non-null)
-        ?.takeIf { amount >= 1 } // 3 → 3 (non-null)
-        ?.let { null }           // 3?.let { null } → null (ВСЕГДА!)
-        ?: R.string.error        // null ?: error → error (ВСЕГДА!)
-```
-
-`?.let { null }` **всегда** возвращает `null` (независимо от результата `takeIf`), поэтому Elvis-оператор всегда выбирает ресурс ошибки. Валидация никогда не проходила для `AFTER_INTERVAL`.
-
-**Исправление:** Заменено на явную проверку:
-
-```kotlin
-val amount = intervalValue.toIntOrNull()
-if (amount != null && amount >= 1) null else R.string.reminder_error_invalid_amount
-```
-
-**Файл:** `CreateEditReminderState.kt:99-103`
-
-**Тест:** Добавлен `validationerrorresid_when_interval_valid_then_returns_null()` в `CreateEditReminderStateTest.kt` — изначально упал (Red), после фикса проходит (Green).
-
-- [x] `CreateEditButtons.kt` — удалён `onDismiss()` из confirm-кнопки DatePickerDialog
-- [x] `CreateEditReminderState.kt` — исправлена валидация `AFTER_INTERVAL`
-- [x] `CreateEditReminderStateTest.kt` — добавлен тест на корректное значение
-- [x] `make format` и `make test` проходят
-- [x] `connectedDebugAndroidTest` — 79/79 зелёные
-
-#### 5.8.3 Баг #3: Кнопка "OK" в DatePicker даты события не закрывает диалог ✅ (исправлено)
-
-**Контекст:** После фикса Бага #1 (удаление `onDismiss()` из `DatePickerDialogSection`) перестала работать кнопка "OK" в диалоге выбора основной даты события.
-
-**Причина:** `DatePickerDialogSection` — общий компонент для двух диалогов:
-1. Диалог даты события (в `CreateEditScreenContent`, `CreateEditScreen.kt:146-170`)
-2. Диалог даты напоминания (в `CreateEditFormContent`, `CreateEditFormContent.kt:209-225`)
-
-До фикса Бага #1 confirm-кнопка вызывала `onDateSelected()` **и** `onDismiss()`:
-
-```kotlin
-onClick = {
-    datePickerState.selectedDateMillis?.let { millis ->
-        onDateSelected(...)       // устанавливает дату
-    }
-    onDismiss()                   // закрывает диалог
-}
-```
-
-Для диалога напоминания это ломало дату (Баг #1): `onDismiss()` читал старый `params.uiStates.reminder` и перезаписывал `selectedDate`. **Фикс:** удалён `onDismiss()` из confirm-кнопки.
-
-Но диалог даты события **полагался** на `onDismiss()` для закрытия — его `onDateSelected` callback не устанавливал `showDatePicker = false`:
-
-```kotlin
-onDateSelected = { date ->
-    formState.value = formState.value.copy(selectedDate = date)
-    // showDatePicker остаётся true → диалог не закрывается
-}
-```
-
-**Исправление:** В `CreateEditScreen.kt:150` добавлен `showDatePicker = false` в `copy()`:
-
-```kotlin
-formState.value = formState.value.copy(selectedDate = date, showDatePicker = false)
-```
-
-**Проверка:** Скриншотный тест `ScreenshotsTest.kt` кликает "OK" в DatePicker даты события (строка 156) — до фикса тест зависал, после фикса проходит.
-
-- [x] `CreateEditScreen.kt:150` — добавлен `showDatePicker = false` в `onDateSelected`
-- [x] `make test` — 446 unit-тестов зелёные
-- [x] `connectedDebugAndroidTest` — 79/79 зелёные (включая screenshot test)
-
-#### 5.8.4 Баг #4: Ведущие нули в поле "Напомнить через" не отбрасываются ✅ (исправлено)
-
-**Проблема:** В поле `intervalValue` (`ReminderSettingsSection.kt:252-258`) можно ввести "0", а затем другое число, получив "03" — это значение проходит валидацию (`toIntOrNull()` = 3 ≥ 1) и сохраняется. Ведущий ноль не имеет смысла в числовом поле.
-
-**Решение (TDD):**
-
-1. **Red:** Написаны 4 теста на новую функцию `sanitizeIntervalValue`:
-   - `sanitizeintervalvalue_when_leading_zero_then_strips_it` — "03"→"3", "003"→"3", "010"→"10"
-   - `sanitizeintervalvalue_when_single_zero_then_returns_empty` — "0"→""
-   - `sanitizeintervalvalue_when_empty_then_returns_empty`
-   - `sanitizeintervalvalue_when_letters_then_keeps_only_digits`
-
-   Тесты не компилируются — `sanitizeIntervalValue` не существует.
-
-2. **Green:** Реализована `sanitizeIntervalValue` в `CreateEditReminderState.kt`:
-
-   ```kotlin
-   internal fun sanitizeIntervalValue(raw: String): String =
-       raw.filter { it.isDigit() }.trimStart('0')
-   ```
-
-3. **Применение:** В `ReminderSettingsSection.kt:254-258` заменена фильтрация цифр на `sanitizeIntervalValue`:
-
-   ```kotlin
-   val sanitized = sanitizeIntervalValue(newValue)
-   if (sanitized != reminder.intervalValue) {
-       onReminderChange(reminder.copy(intervalValue = sanitized))
-   }
-   ```
-
-**Поведение после фикса:**
-
-| Ввод | Результат | Валидация |
-|------|-----------|-----------|
-| "0"  | "" (отброшен) | невалидно (пусто) |
-| "03" | "3" | ✅ 3 ≥ 1 |
-| "0" → "3" | "" → "3" | ✅ |
-| "10" | "10" | ✅ 10 ≥ 1 |
-| "abc" | "" | невалидно |
-
-- [x] TDD: Red (compile error) → Green (tests pass) → Apply
-- [x] 4 новых теста в `CreateEditReminderStateTest.kt`
-- [x] `ReminderSettingsSection.kt` — `sanitizeIntervalValue` вместо `filter { isDigit() }`
-- [x] `make format` + `make test` + `connectedDebugAndroidTest` — всё зелёное
-
-#### 5.8.5 Баг #5: DatePicker показывает предыдущий день (timezone mismatch) ✅ (исправлено)
-
-**Проблема:** При повторном открытии DatePicker (для даты события или даты напоминания) календарь показывает предыдущий день относительно выбранной даты. Например, выбрано 29 апреля, а открывается 28 апреля. Если нажать «ОК» без ручного выбора, применяется 28 апреля.
-
-**Root Cause:** Material3 `DatePicker` внутри интерпретирует `selectedDateMillis` как UTC-полночь. Но `DatePickerDialogSection` передаёт millis через `ZoneId.systemDefault()`:
-
-```kotlin
-// MSK (UTC+3): 29 апр 00:00 MSK = 28 апр 21:00 UTC
-selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
-```
-
-DatePicker получает millis = 28 апр 21:00 UTC, думает «это 28 апреля», показывает 28-е. При подтверждении без ручного выбора применяется 28 апреля.
-
-**Фикс (TDD):**
-
-1. **Red:** Написаны 4 теста в `DatePickerConversionTest.kt`, демонстрирующие проблему:
-   - `oldConversion_whenNonUtcOffset_thenDateShiftsWhenReadAsUtc` — с MSK (UTC+3) дата сдвигается на день назад
-   - `fixedConversion_whenUtcOffset_thenPreservesDateThroughUtcLens` — с UTC дата сохраняется
-   - `oldConversion_whenNegativeUtcOffset_thenDatePreservedButMillisNotMidnight` — с UTC-5 millis не соответствует полночи
-   - `roundtrip_with_utc_preserves_any_date` — roundtrip с UTC работает для любых дат
-
-2. **Green:** В `CreateEditButtons.kt:37-41,52-53` заменён `ZoneId.systemDefault()` на `ZoneOffset.UTC`:
-   ```kotlin
-   // Запись в DatePicker:
-   selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
-   
-   // Чтение из DatePicker:
-   Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-   ```
-
-**Поведение после фикса:** DatePicker всегда показывает фактически выбранную дату (или сегодня, если дата не выбрана), независимо от часового пояса устройства.
-
-**Важно:** Конверсия `atStartOfDay(ZoneId.systemDefault())` сохранена в `StateSavers.kt` и `CreateEditScreen.kt:toItem` — там она используется для persistence и timestamp, где timezone-зависимость корректна.
-
-- [x] TDD: Red (bug demo) → Green (UTC-конверсия) → Apply
-- [x] 4 теста в `DatePickerConversionTest.kt`
-- [x] `CreateEditButtons.kt` — `ZoneOffset.UTC` вместо `ZoneId.systemDefault()`
-- [x] `make format` + `make test` (455 unit) + `connectedDebugAndroidTest` (79/79) — всё зелёное
+- [x] Все тесты зелёные: 455 unit + 79 androidTest
+- [x] `make format` без замечаний
 
 ## 6. Риски и меры снижения
 
