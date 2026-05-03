@@ -14,9 +14,10 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
@@ -57,17 +58,17 @@ internal fun rememberPresetColors(): List<Color> = remember { PresetColors.all }
  * Селектор цвета.
  *
  * Поддерживает отображение кастомного цвета (не из preset) в начале списка.
+ * Принимает plain-значение и callback вместо MutableState.
  */
 @Composable
 internal fun ColorSelector(
-    selectedColor: MutableState<Color?>,
-    onValueChange: () -> Unit = {}
+    selectedColor: Color?,
+    onColorSelected: (Color?) -> Unit
 ) {
     val presetColors = rememberPresetColors()
-    val showCustomColor = isCustomColor(selectedColor.value, presetColors)
+    val showCustomColor = isCustomColor(selectedColor, presetColors)
     val colorContentDescription = stringResource(R.string.color)
 
-    // Выносим dimensionResource наружу для корректной работы
     val spacingSmall = dimensionResource(R.dimen.spacing_small)
     val spacingXsmall = dimensionResource(R.dimen.spacing_xsmall)
 
@@ -79,7 +80,6 @@ internal fun ColorSelector(
 
     Spacer(modifier = Modifier.height(spacingXsmall))
 
-    // Используем Row вместо LazyRow для корректного отображения кастомного цвета
     Row(
         modifier =
             Modifier
@@ -87,22 +87,20 @@ internal fun ColorSelector(
                 .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(spacingSmall)
     ) {
-        // Кастомный цвет в начале списка (если есть)
-        if (showCustomColor && selectedColor.value != null) {
+        if (showCustomColor && selectedColor != null) {
             ColorOptionSurface(
-                color = selectedColor.value!!,
+                color = selectedColor,
                 selectedColor = selectedColor,
-                onValueChange = onValueChange,
+                onColorSelected = onColorSelected,
                 contentDescription = colorContentDescription
             )
         }
 
-        // Предустановленные цвета
         presetColors.forEach { color ->
             ColorOptionSurface(
                 color = color,
                 selectedColor = selectedColor,
-                onValueChange = onValueChange,
+                onColorSelected = onColorSelected,
                 contentDescription = colorContentDescription
             )
         }
@@ -113,19 +111,19 @@ internal fun ColorSelector(
  * Поверхность для выбора цвета.
  *
  * @param color Цвет для отображения
- * @param selectedColor Состояние выбранного цвета
- * @param onValueChange Callback при изменении цвета
+ * @param selectedColor Текущий выбранный цвет (plain)
+ * @param onColorSelected Callback при выборе цвета
  * @param contentDescription Описание для accessibility и тестов
  */
 @Composable
 internal fun ColorOptionSurface(
     color: Color,
-    selectedColor: MutableState<Color?>,
-    onValueChange: () -> Unit = {},
+    selectedColor: Color?,
+    onColorSelected: (Color?) -> Unit,
     contentDescription: String = ""
 ) {
     val outerPadding = dimensionResource(R.dimen.spacing_xxsmall)
-    val isSelected = selectedColor.value == color
+    val isSelected = selectedColor == color
 
     SelectableColorTag(
         color = color,
@@ -136,22 +134,22 @@ internal fun ColorOptionSurface(
                 .semantics { this.contentDescription = contentDescription },
         onClick = {
             if (isSelected) {
-                selectedColor.value = null
+                onColorSelected(null)
             } else {
-                selectedColor.value = color
+                onColorSelected(color)
             }
-            onValueChange()
         }
     )
 }
 
 /**
  * Селектор опции отображения.
+ * Принимает plain-значение и callback вместо MutableState.
  */
 @Composable
 internal fun DisplayOptionSelector(
-    selectedDisplayOption: MutableState<DisplayOption>,
-    onValueChange: () -> Unit = {}
+    selectedDisplayOption: DisplayOption,
+    onDisplayOptionSelected: (DisplayOption) -> Unit
 ) {
     Text(
         text = stringResource(R.string.display_format),
@@ -176,10 +174,9 @@ internal fun DisplayOptionSelector(
 
             DaysRadioButton(
                 text = text,
-                selected = selectedDisplayOption.value == option,
+                selected = selectedDisplayOption == option,
                 onClick = {
-                    selectedDisplayOption.value = option
-                    onValueChange()
+                    onDisplayOptionSelected(option)
                 }
             )
         }
@@ -192,7 +189,7 @@ internal fun DisplayOptionSelector(
 @Composable
 fun ColorSelectorRedPreview() {
     JetpackDaysTheme {
-        val selectedColor = remember { mutableStateOf<Color?>(Color.Red) }
+        var selectedColor by remember { mutableStateOf<Color?>(Color.Red) }
 
         Column(
             modifier =
@@ -201,7 +198,10 @@ fun ColorSelectorRedPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            ColorSelector(selectedColor)
+            ColorSelector(
+                selectedColor = selectedColor,
+                onColorSelected = { selectedColor = it }
+            )
         }
     }
 }
@@ -211,8 +211,8 @@ fun ColorSelectorRedPreview() {
 @Composable
 fun ColorSelectorCustomColorPreview() {
     JetpackDaysTheme {
-        val customColor = Color(0xFFFF6600) // Оранжевый — не в preset
-        val selectedColor = remember { mutableStateOf<Color?>(customColor) }
+        val customColor = Color(0xFFFF6600)
+        var selectedColor by remember { mutableStateOf<Color?>(customColor) }
 
         Column(
             modifier =
@@ -221,7 +221,10 @@ fun ColorSelectorCustomColorPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            ColorSelector(selectedColor)
+            ColorSelector(
+                selectedColor = selectedColor,
+                onColorSelected = { selectedColor = it }
+            )
         }
     }
 }
@@ -230,7 +233,7 @@ fun ColorSelectorCustomColorPreview() {
 @Composable
 fun DisplayOptionSelectorPreview() {
     JetpackDaysTheme {
-        val selectedDisplayOption = remember { mutableStateOf(DisplayOption.DAY) }
+        var selectedDisplayOption by remember { mutableStateOf(DisplayOption.DAY) }
 
         Column(
             modifier =
@@ -239,7 +242,10 @@ fun DisplayOptionSelectorPreview() {
                     .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            DisplayOptionSelector(selectedDisplayOption)
+            DisplayOptionSelector(
+                selectedDisplayOption = selectedDisplayOption,
+                onDisplayOptionSelected = { selectedDisplayOption = it }
+            )
         }
     }
 }

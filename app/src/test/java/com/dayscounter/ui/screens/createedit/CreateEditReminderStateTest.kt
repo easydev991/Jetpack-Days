@@ -27,13 +27,12 @@ class CreateEditReminderStateTest {
         val expected = LocalDate.now().plusDays(1)
         val state = ReminderFormUiState()
 
-        assertEquals(expected, state.selectedDate.value)
+        assertEquals(expected, state.selectedDate)
     }
 
     @Test
     fun toreminderrequest_when_disabled_then_returns_null() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = false
+        val state = ReminderFormUiState(isEnabled = false)
 
         val request = state.toReminderRequest(itemId = 42L)
 
@@ -42,12 +41,14 @@ class CreateEditReminderStateTest {
 
     @Test
     fun toreminderrequest_when_at_date_mode_then_builds_request_with_date_and_time() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value = LocalDate.of(2026, 5, 1)
-        state.hour.value = 14
-        state.minute.value = 20
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = LocalDate.of(2026, 5, 1),
+                hour = 14,
+                minute = 20
+            )
 
         val request = state.toReminderRequest(itemId = 11L)
 
@@ -60,11 +61,13 @@ class CreateEditReminderStateTest {
 
     @Test
     fun toreminderrequest_when_interval_mode_then_builds_request_with_amount_and_unit() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AFTER_INTERVAL
-        state.intervalValue.value = "7"
-        state.intervalUnit.value = ReminderIntervalUnit.WEEK
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "7",
+                intervalUnit = ReminderIntervalUnit.WEEK
+            )
 
         val request = state.toReminderRequest(itemId = 99L)
 
@@ -77,12 +80,14 @@ class CreateEditReminderStateTest {
 
     @Test
     fun isinputvalid_when_at_date_in_future_then_true() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value = LocalDate.of(2026, 5, 10)
-        state.hour.value = 10
-        state.minute.value = 30
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = LocalDate.of(2026, 5, 10),
+                hour = 10,
+                minute = 30
+            )
 
         val isValid =
             state.isInputValid(
@@ -94,12 +99,14 @@ class CreateEditReminderStateTest {
 
     @Test
     fun isinputvalid_when_at_date_in_past_then_false() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value = LocalDate.of(2026, 5, 10)
-        state.hour.value = 8
-        state.minute.value = 59
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = LocalDate.of(2026, 5, 10),
+                hour = 8,
+                minute = 59
+            )
 
         val isValid =
             state.isInputValid(
@@ -111,20 +118,24 @@ class CreateEditReminderStateTest {
 
     @Test
     fun isinputvalid_when_interval_is_positive_integer_then_true() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AFTER_INTERVAL
-        state.intervalValue.value = "3"
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "3"
+            )
 
         assertTrue(state.isInputValid(currentDateTime = LocalDateTime.of(2026, 1, 1, 0, 0)))
     }
 
     @Test
     fun isinputvalid_when_interval_contains_letters_then_false() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AFTER_INTERVAL
-        state.intervalValue.value = "5a"
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "5a"
+            )
 
         assertFalse(state.isInputValid(currentDateTime = LocalDateTime.of(2026, 1, 1, 0, 0)))
     }
@@ -144,16 +155,18 @@ class CreateEditReminderStateTest {
                 createdAt = 1_799_999_999_000L,
                 updatedAt = 1_799_999_999_500L
             )
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value =
-            java.time.Instant
-                .ofEpochMilli(selectedDateMillis)
-                .atZone(java.time.ZoneId.systemDefault())
-                .toLocalDate()
-        state.hour.value = 16
-        state.minute.value = 45
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate =
+                    java.time.Instant
+                        .ofEpochMilli(selectedDateMillis)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate(),
+                hour = 16,
+                minute = 45
+            )
 
         val uiFingerprint = state.toChangeFingerprint()
         val domainFingerprint = reminder.toChangeFingerprint()
@@ -163,8 +176,7 @@ class CreateEditReminderStateTest {
 
     @Test
     fun iscreateeditformvalid_when_title_and_date_valid_and_reminder_disabled_then_true() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = false
+        val state = ReminderFormUiState(isEnabled = false)
 
         val isValid =
             isCreateEditFormValid(
@@ -179,10 +191,12 @@ class CreateEditReminderStateTest {
 
     @Test
     fun iscreateeditformvalid_when_reminder_enabled_and_at_date_is_not_configured_then_false() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value = null
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = null
+            )
 
         val isValid =
             isCreateEditFormValid(
@@ -197,10 +211,12 @@ class CreateEditReminderStateTest {
 
     @Test
     fun iscreateeditformvalid_when_reminder_enabled_and_interval_is_empty_then_false() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AFTER_INTERVAL
-        state.intervalValue.value = ""
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = ""
+            )
 
         val isValid =
             isCreateEditFormValid(
@@ -215,10 +231,12 @@ class CreateEditReminderStateTest {
 
     @Test
     fun validationerrorresid_when_interval_invalid_then_returns_amount_error() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AFTER_INTERVAL
-        state.intervalValue.value = ""
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = ""
+            )
 
         val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
 
@@ -227,15 +245,56 @@ class CreateEditReminderStateTest {
 
     @Test
     fun validationerrorresid_when_at_date_valid_then_returns_null() {
-        val state = ReminderFormUiState()
-        state.isEnabled.value = true
-        state.mode.value = ReminderMode.AT_DATE
-        state.selectedDate.value = LocalDate.of(2026, 5, 12)
-        state.hour.value = 10
-        state.minute.value = 0
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AT_DATE,
+                selectedDate = LocalDate.of(2026, 5, 12),
+                hour = 10,
+                minute = 0
+            )
 
         val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
 
         assertNull(errorResId)
+    }
+
+    @Test
+    fun validationerrorresid_when_interval_valid_then_returns_null() {
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "3"
+            )
+
+        val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
+
+        assertNull(errorResId)
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_leading_zero_then_strips_it() {
+        assertEquals("3", sanitizeIntervalValue("03"))
+        assertEquals("3", sanitizeIntervalValue("003"))
+        assertEquals("10", sanitizeIntervalValue("010"))
+        assertEquals("100", sanitizeIntervalValue("100"))
+        assertEquals("5", sanitizeIntervalValue("5"))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_single_zero_then_returns_empty() {
+        assertEquals("", sanitizeIntervalValue("0"))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_empty_then_returns_empty() {
+        assertEquals("", sanitizeIntervalValue(""))
+    }
+
+    @Test
+    fun sanitizeintervalvalue_when_letters_then_keeps_only_digits() {
+        assertEquals("3", sanitizeIntervalValue("a03b"))
+        assertEquals("", sanitizeIntervalValue("abc"))
     }
 }
