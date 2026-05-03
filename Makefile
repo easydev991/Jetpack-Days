@@ -45,12 +45,9 @@ test:
 
 ## android-test: Запуск интеграционных тестов на Android устройстве
 android-test:
-	./gradlew connectedDebugAndroidTest --console=plain
-	@echo ""
-	@echo "Интеграционные тесты выполнены"
-	@if [ -f app/build/reports/androidTests/connected/debug/index.html ]; then \
-		echo "HTML отчет: app/build/reports/androidTests/connected/debug/index.html"; \
-	fi
+	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
+	./gradlew connectedDebugAndroidTest --console=plain || true
+	@python3 scripts/android_test_report.py
 
 ## test-all: Запуск всех тестов (unit + интеграционные)
 test-all:
