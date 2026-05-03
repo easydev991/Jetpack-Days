@@ -305,6 +305,7 @@ ReminderMode.AFTER_INTERVAL ->
 `?.let { null }` **всегда** возвращает `null` (независимо от результата `takeIf`), поэтому Elvis-оператор всегда выбирает ресурс ошибки. Валидация никогда не проходила для `AFTER_INTERVAL`.
 
 **Исправление:** Заменено на явную проверку:
+
 ```kotlin
 val amount = intervalValue.toIntOrNull()
 if (amount != null && amount >= 1) null else R.string.reminder_error_invalid_amount
@@ -319,6 +320,48 @@ if (amount != null && amount >= 1) null else R.string.reminder_error_invalid_amo
 - [x] `CreateEditReminderStateTest.kt` — добавлен тест на корректное значение
 - [x] `make format` и `make test` проходят
 - [x] `connectedDebugAndroidTest` — 79/79 зелёные
+
+#### 5.8.3 Баг #3: Кнопка "OK" в DatePicker даты события не закрывает диалог ✅ (исправлено)
+
+**Контекст:** После фикса Бага #1 (удаление `onDismiss()` из `DatePickerDialogSection`) перестала работать кнопка "OK" в диалоге выбора основной даты события.
+
+**Причина:** `DatePickerDialogSection` — общий компонент для двух диалогов:
+1. Диалог даты события (в `CreateEditScreenContent`, `CreateEditScreen.kt:146-170`)
+2. Диалог даты напоминания (в `CreateEditFormContent`, `CreateEditFormContent.kt:209-225`)
+
+До фикса Бага #1 confirm-кнопка вызывала `onDateSelected()` **и** `onDismiss()`:
+
+```kotlin
+onClick = {
+    datePickerState.selectedDateMillis?.let { millis ->
+        onDateSelected(...)       // устанавливает дату
+    }
+    onDismiss()                   // закрывает диалог
+}
+```
+
+Для диалога напоминания это ломало дату (Баг #1): `onDismiss()` читал старый `params.uiStates.reminder` и перезаписывал `selectedDate`. **Фикс:** удалён `onDismiss()` из confirm-кнопки.
+
+Но диалог даты события **полагался** на `onDismiss()` для закрытия — его `onDateSelected` callback не устанавливал `showDatePicker = false`:
+
+```kotlin
+onDateSelected = { date ->
+    formState.value = formState.value.copy(selectedDate = date)
+    // showDatePicker остаётся true → диалог не закрывается
+}
+```
+
+**Исправление:** В `CreateEditScreen.kt:150` добавлен `showDatePicker = false` в `copy()`:
+
+```kotlin
+formState.value = formState.value.copy(selectedDate = date, showDatePicker = false)
+```
+
+**Проверка:** Скриншотный тест `ScreenshotsTest.kt` кликает "OK" в DatePicker даты события (строка 156) — до фикса тест зависал, после фикса проходит.
+
+- [x] `CreateEditScreen.kt:150` — добавлен `showDatePicker = false` в `onDateSelected`
+- [x] `make test` — 446 unit-тестов зелёные
+- [x] `connectedDebugAndroidTest` — 79/79 зелёные (включая screenshot test)
 
 ## 6. Риски и меры снижения
 

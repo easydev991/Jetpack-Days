@@ -147,7 +147,7 @@ private fun CreateEditScreenContent(
         shouldShowDatePicker = formState.value.showDatePicker,
         selectedDate = formState.value.selectedDate,
         onDateSelected = { date ->
-            formState.value = formState.value.copy(selectedDate = date)
+            formState.value = formState.value.copy(selectedDate = date, showDatePicker = false)
             if (itemId != null) {
                 val s = formState.value
                 viewModel.checkHasChanges(
