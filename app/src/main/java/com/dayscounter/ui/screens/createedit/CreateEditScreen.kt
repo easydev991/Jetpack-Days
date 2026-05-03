@@ -8,13 +8,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -69,12 +67,13 @@ private fun CreateEditScreenContent(
     val uiState by viewModel.uiState.collectAsState()
     val hasChanges by viewModel.hasChanges.collectAsState()
     val formState = rememberCreateEditUiState()
-    var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val onReminderNotificationsUnavailable =
         rememberReminderNotificationsUnavailableHandler(snackbarHostState = snackbarHostState)
 
-    loadItemData(itemId, uiState, formState)
+    LaunchedEffect(itemId, uiState) {
+        loadItemData(itemId, uiState, formState)
+    }
 
     val screenActions =
         rememberCreateEditScreenActions(
@@ -107,8 +106,7 @@ private fun CreateEditScreenContent(
                     itemId = itemId,
                     paddingValues = paddingValues,
                     uiStates = formState.value,
-                    showDatePicker = showDatePicker,
-                    onShowDatePickerChange = { showDatePicker = it },
+                    onShowDatePickerChange = { formState.value = formState.value.copy(showDatePicker = it) },
                     onTitleChange = { title -> formState.value = formState.value.copy(title = title) },
                     onDetailsChange = { details -> formState.value = formState.value.copy(details = details) },
                     onDateChange = { date -> formState.value = formState.value.copy(selectedDate = date) },
@@ -125,13 +123,13 @@ private fun CreateEditScreenContent(
     }
 
     CreateEditDatePickerIfNeeded(
-        shouldShowDatePicker = showDatePicker,
+        shouldShowDatePicker = formState.value.showDatePicker,
         selectedDate = formState.value.selectedDate,
         onDateSelected = { date ->
             formState.value = formState.value.copy(selectedDate = date)
             screenActions.onDateSelected()
         },
-        onDismiss = { showDatePicker = false }
+        onDismiss = { formState.value = formState.value.copy(showDatePicker = false) }
     )
 }
 

@@ -2,7 +2,7 @@
 
 Дата: 2026-04-27  
 Обновлено: 2026-05-03  
-Статус: In Progress
+Статус: In Progress (выполнен инкремент C — исправление замечаний)
 
 ## 1. Цель
 
@@ -499,17 +499,89 @@
 - [ ] `make format` проходит
 - [ ] Таргетные тесты CreateEdit зелёные
 
-### 5.3 Инкремент C: Архитектурная стабилизация (guard от регрессии)
+### 5.3 Инкремент C: Исправление замечаний после рефакторинга ⬜ (выполняется)
+
+**Контекст:** После рефакторинг-миграции (5.2) выявлены 4 предсуществующих замечания. Все они не являются регрессиями, но улучшают архитектурную чистоту.
+
+#### C.1 Перенос loadItemData в LaunchedEffect (запись во время композиции)
+
+**Проблема:** `loadItemData(itemId, uiState, formState)` вызывался прямо в теле `@Composable` функции `CreateEditScreenContent`, что является анти-паттерном Compose — запись в `MutableState` во время композиции может привести к recomposition loops и недетерминированному порядку выполнения.
+
+**Решение:** Обернуть вызов в `LaunchedEffect(itemId, uiState)`:
+
+```kotlin
+// CreateEditScreen.kt
+LaunchedEffect(itemId, uiState) {
+    loadItemData(itemId, uiState, formState)
+}
+```
+
+- [x] `loadItemData` вызывается через `LaunchedEffect`, а не в теле композиции
+- [x] Триггер: изменение `itemId` или `uiState` (переход из Loading в Success)
+- [x] `loadItemData` остаётся регулярной функцией (не меняем сигнатуру)
+
+#### C.2 previousReminderEnabled: rememberSaveable → remember
+
+**Проблема:** `previousReminderEnabled` инициализировался через `rememberSaveable` без ключа. При асинхронной загрузке данных (LaunchedEffect) значение могло быть инициализировано до вызова `loadItemData`, что ломало детектор перехода `isEnabled: false → true` для авто-скролла.
+
+**Решение:** Заменить `rememberSaveable` на `remember`, чтобы значение не переживало поворот экрана (это не требуется — после поворота форма восстанавливается через `CreateEditUiStateSaver`, и детектор перехода корректно инициализируется заново).
+
+```kotlin
+// CreateEditFormContent.kt
+var previousReminderEnabled by remember { mutableStateOf(params.uiStates.reminder.isEnabled) }
+```
+
+- [x] `previousReminderEnabled` использует `remember` вместо `rememberSaveable`
+- [x] При повороте экрана значение корректно переинициализируется из `CreateEditUiStateSaver`
+- [x] Детектор `false → true` срабатывает только на действия пользователя
+
+#### C.3 showUnitsMenu: remember → rememberSaveable
+
+**Проблема:** Выпадающий список единиц измерения (`showUnitsMenu`) использует `remember`, из-за чего при повороте экрана меню схлопывается. Хотя это мелкий UX-недочёт, исправление тривиально.
+
+**Решение:** Заменить `remember` на `rememberSaveable`:
+
+```kotlin
+// ReminderSettingsSection.kt
+var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
+```
+
+- [x] `showUnitsMenu` использует `rememberSaveable`
+- [x] Состояние выпадающего списка сохраняется при повороте экрана
+
+#### C.4 Стандартизация showDatePicker (два подхода к хранению)
+
+**Проблема:** Основной `showDatePicker` (для даты события) хранился как отдельный `rememberSaveable { mutableStateOf(false) }` на уровне `CreateEditScreenContent`, а `showDatePicker` для напоминания — как поле в `ReminderFormUiState`. Разные подходы к хранению однотипного состояния.
+
+**Решение:** Перенести основной `showDatePicker` в `CreateEditUiState` как поле, аналогично `ReminderFormUiState.showDatePicker`:
+
+- [x] `CreateEditUiState.showDatePicker: Boolean = false` — новое поле в data class
+- [x] `CreateEditUiStateSaver` сериализует/десериализует `showDatePicker`
+- [x] `CreateEditFormParams` больше не содержит `showDatePicker` (доступен через `uiStates.showDatePicker`)
+- [x] `onShowDatePickerChange` остаётся в `CreateEditFormParams` как отдельный callback (единообразно с `onTitleChange`, `onDateChange` и т.д.)
+- [x] Удалён отдельный `var showDatePicker by rememberSaveable { mutableStateOf(false) }` из `CreateEditScreenContent`
+- [x] Оба date picker visibility unified: одно как поле `CreateEditUiState`, другое как поле `ReminderFormUiState`
+
+#### Критерий завершения C
+
+- [x] `loadItemData` не вызывается в теле композиции
+- [x] `previousReminderEnabled` использует `remember`
+- [x] `showUnitsMenu` использует `rememberSaveable`
+- [x] `showDatePicker` хранится единообразно (все date picker visibility — поля data-классов)
+- [x] `make format` проходит
+- [x] Все unit-тесты зелёные
+
+### 5.4 Инкремент D: Архитектурная стабилизация (guard от регрессии)
 
 - [ ] Добавить тест/проверку, что `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
 - [ ] Проверить, что архитектурный паттерн единообразен с остальными экранами.
 - [ ] Обновить документацию по паттерну состояния.
 
-#### Критерий завершения C
+#### Критерий завершения D
 
 - [ ] Новый паттерн формализован и защищён от регрессии.
 
-### 5.4 Инкремент D: Финальная регрессия и приемка
+### 5.5 Инкремент E: Финальная регрессия и приемка
 
 - [ ] Прогнать `make format`.
 - [ ] Прогнать полный `make test`.
@@ -521,7 +593,7 @@
   - backup/restore.
 - [ ] Сверить UX до/после на отсутствие изменений поведения.
 
-#### Критерий завершения D
+#### Критерий завершения E
 
 - [ ] Все тесты зелёные, ручная проверка без блокирующих дефектов.
 
@@ -540,7 +612,7 @@
 ## 7. Definition of Done
 
 - [x] В проекте нет UI-state с `MutableState<T>` внутри data-классов, **кроме CreateEdit**.
-- [ ] После миграции: `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
+- [x] После миграции: `CreateEditUiState` и `ReminderFormUiState` не содержат `MutableState<T>`.
 - [ ] Все затронутые ViewModel/Compose экраны работают на иммутабельном контракте.
 - [ ] `make format` и `make test` проходят.
 - [ ] Напоминания, backup/restore и существующая навигация не деградировали.

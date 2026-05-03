@@ -16,5 +16,6 @@ data class CreateEditUiState(
     val selectedDate: LocalDate? = null,
     val selectedColor: Color? = null,
     val selectedDisplayOption: DisplayOption = DisplayOption.DAY,
+    val showDatePicker: Boolean = false,
     val reminder: ReminderFormUiState = ReminderFormUiState()
 )

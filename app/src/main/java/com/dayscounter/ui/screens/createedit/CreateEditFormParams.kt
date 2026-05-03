@@ -16,7 +16,6 @@ data class CreateEditFormParams(
     val itemId: Long?,
     val paddingValues: PaddingValues,
     val uiStates: CreateEditUiState,
-    val showDatePicker: Boolean,
     val onShowDatePickerChange: (Boolean) -> Unit,
     val onTitleChange: (String) -> Unit,
     val onDetailsChange: (String) -> Unit,

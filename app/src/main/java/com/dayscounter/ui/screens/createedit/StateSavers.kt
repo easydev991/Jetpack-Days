@@ -158,6 +158,7 @@ val CreateEditUiStateSaver: Saver<CreateEditUiState, List<Any?>> =
                 },
                 state.selectedColor?.toArgb(),
                 state.selectedDisplayOption.name,
+                state.showDatePicker,
                 with(ReminderFormUiStateSaver) { save(state.reminder) }
             )
         },
@@ -188,7 +189,8 @@ val CreateEditUiStateSaver: Saver<CreateEditUiState, List<Any?>> =
                     } catch (e: IllegalArgumentException) {
                         DisplayOption.DAY
                     },
-                reminder = ReminderFormUiStateSaver.restore(saved[5] as List<Any?>) ?: ReminderFormUiState()
+                showDatePicker = saved[5] as Boolean,
+                reminder = ReminderFormUiStateSaver.restore(saved[6] as List<Any?>) ?: ReminderFormUiState()
             )
         }
     )
