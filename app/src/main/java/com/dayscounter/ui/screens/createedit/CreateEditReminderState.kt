@@ -96,11 +96,10 @@ internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDate
             }
         }
 
-        ReminderMode.AFTER_INTERVAL ->
-            intervalValue
-                .toIntOrNull()
-                ?.takeIf { amount -> amount >= 1 }
-                ?.let { null } ?: R.string.reminder_error_invalid_amount
+        ReminderMode.AFTER_INTERVAL -> {
+            val amount = intervalValue.toIntOrNull()
+            if (amount != null && amount >= 1) null else R.string.reminder_error_invalid_amount
+        }
     }
 }
 

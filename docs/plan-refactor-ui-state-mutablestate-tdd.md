@@ -2,7 +2,7 @@
 
 Дата: 2026-04-27  
 Обновлено: 2026-05-03  
-Статус: ✅ Завершён (все unit-тесты зелёные, production-код мигрирован, androidTest исправлены)
+Статус: ✅ Завершён (все unit-тесты + androidTest зелёные, production-код мигрирован, баги исправлены)
 
 ## 1. Цель
 
@@ -234,6 +234,91 @@ var showUnitsMenu by rememberSaveable { mutableStateOf(false) }
 - [x] `DetailScreenViewModelIntegrationTest.kt` — удалить дублирование `DetailScreenState`
 - [x] Прогнать `./gradlew compileDebugAndroidTestKotlin` — компиляция без ошибок
 - [x] Прогнать `./gradlew connectedDebugAndroidTest` — 79/79 тестов зелёные
+
+### 5.7 Устаревший вызов createComposeRule (androidTest, 8 файлов) ✅ (необходимо исправить)
+
+**Проблема:** 8 androidTest-файлов используют устаревший `androidx.compose.ui.test.junit4.createComposeRule`:
+
+```kotlin
+import androidx.compose.ui.test.junit4.createComposeRule  // deprecated
+```
+
+Deprecation: используйте `androidx.compose.ui.test.junit4.v2.createComposeRule`. V2 использует `StandardTestDispatcher` вместо `UnconfinedTestDispatcher`, что требует явной синхронизации для тестов, полагающихся на немедленное выполнение корутин.
+
+**Файлы:**
+- `DaysCountTextTest.kt`
+- `ColorSelectorUiTest.kt`
+- `CreateEditSaveValidationUiTest.kt`
+- `CreateEditScreenCustomColorTest.kt`
+- `ReminderSettingsSectionUiTest.kt`
+- `ColorTagFilterDialogTest.kt`
+- `MoreScreenTest.kt`
+- `ThemeIconScreenTest.kt`
+
+**Решение:** Заменить импорт на `import androidx.compose.ui.test.junit4.v2.createComposeRule` в каждом файле. Для простых тестов (рендер + проверка текста) `StandardTestDispatcher` не меняет поведение.
+
+- [ ] `DaysCountTextTest.kt` — замена импорта
+- [ ] `ColorSelectorUiTest.kt` — замена импорта
+- [ ] `CreateEditSaveValidationUiTest.kt` — замена импорта
+- [ ] `CreateEditScreenCustomColorTest.kt` — замена импорта
+- [ ] `ReminderSettingsSectionUiTest.kt` — замена импорта
+- [ ] `ColorTagFilterDialogTest.kt` — замена импорта
+- [ ] `MoreScreenTest.kt` — замена импорта
+- [ ] `ThemeIconScreenTest.kt` — замена импорта
+
+### 5.8 Регрессии после рефакторинга: исправление багов ✅ (исправлено)
+
+**Контекст:** После рефакторинг-миграции (5.2) выявлены 2 бага, не покрытых существующими тестами.
+
+#### 5.8.1 Баг #1: Дата напоминания не сохраняется при выборе в DatePickerDialog
+
+**Причина:** В `CreateEditButtons.kt:49-57` в `onClick` кнопки подтверждения `DatePickerDialogSection` последовательно вызываются `onDateSelected(date)` и `onDismiss()`:
+
+```kotlin
+onClick = {
+    datePickerState.selectedDateMillis?.let { millis ->
+        onDateSelected(...)     // устанавливает selectedDate = date
+    }
+    onDismiss()                 // перезаписывает: читает СТАРЫЙ params.uiStates.reminder
+}
+```
+
+Оба коллбэка захватывают один и тот же `params` из композиции. `onDismiss()` читает `params.uiStates.reminder` (с `selectedDate = tomorrow`) и вызывает `copy(showDatePicker = false)`, перезаписывая корректную дату, установленную `onDateSelected`.
+
+**Исправление:** Удалён вызов `onDismiss()` из `onClick` кнопки подтверждения. Диалог закрывается автоматически, когда `showDatePicker = false` исключает `if`-блок при рекомпозиции.
+
+**Файл:** `CreateEditButtons.kt:49-57`
+
+#### 5.8.2 Баг #2: Валидация `AFTER_INTERVAL` всегда возвращает ошибку
+
+**Причина:** В `CreateEditReminderState.kt:99-103` — цепочка вызовов содержит логическую ошибку:
+
+```kotlin
+ReminderMode.AFTER_INTERVAL ->
+    intervalValue
+        .toIntOrNull()           // "3" → 3 (non-null)
+        ?.takeIf { amount >= 1 } // 3 → 3 (non-null)
+        ?.let { null }           // 3?.let { null } → null (ВСЕГДА!)
+        ?: R.string.error        // null ?: error → error (ВСЕГДА!)
+```
+
+`?.let { null }` **всегда** возвращает `null` (независимо от результата `takeIf`), поэтому Elvis-оператор всегда выбирает ресурс ошибки. Валидация никогда не проходила для `AFTER_INTERVAL`.
+
+**Исправление:** Заменено на явную проверку:
+```kotlin
+val amount = intervalValue.toIntOrNull()
+if (amount != null && amount >= 1) null else R.string.reminder_error_invalid_amount
+```
+
+**Файл:** `CreateEditReminderState.kt:99-103`
+
+**Тест:** Добавлен `validationerrorresid_when_interval_valid_then_returns_null()` в `CreateEditReminderStateTest.kt` — изначально упал (Red), после фикса проходит (Green).
+
+- [x] `CreateEditButtons.kt` — удалён `onDismiss()` из confirm-кнопки DatePickerDialog
+- [x] `CreateEditReminderState.kt` — исправлена валидация `AFTER_INTERVAL`
+- [x] `CreateEditReminderStateTest.kt` — добавлен тест на корректное значение
+- [x] `make format` и `make test` проходят
+- [x] `connectedDebugAndroidTest` — 79/79 зелёные
 
 ## 6. Риски и меры снижения
 

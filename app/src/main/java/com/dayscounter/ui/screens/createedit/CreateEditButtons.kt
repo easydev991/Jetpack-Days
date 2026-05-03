@@ -54,7 +54,6 @@ internal fun DatePickerDialogSection(
                                 .toLocalDate()
                         )
                     }
-                    onDismiss()
                 }
             ) {
                 Text(stringResource(R.string.ok))

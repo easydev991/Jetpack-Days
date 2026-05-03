@@ -258,4 +258,18 @@ class CreateEditReminderStateTest {
 
         assertNull(errorResId)
     }
+
+    @Test
+    fun validationerrorresid_when_interval_valid_then_returns_null() {
+        val state =
+            ReminderFormUiState(
+                isEnabled = true,
+                mode = ReminderMode.AFTER_INTERVAL,
+                intervalValue = "3"
+            )
+
+        val errorResId = state.validationErrorResId(currentDateTime = LocalDateTime.of(2026, 5, 10, 9, 0))
+
+        assertNull(errorResId)
+    }
 }
