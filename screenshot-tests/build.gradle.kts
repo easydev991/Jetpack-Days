@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.dayscounter.screenshots"
-    compileSdk = 36
+    compileSdk = 37
 
     targetProjectPath = ":app"
 

@@ -21,7 +21,7 @@ if (secretsPropertiesFile.exists()) {
 
 android {
     namespace = "com.dayscounter"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.dayscounter"
@@ -58,6 +58,7 @@ android {
 
             // Включаем обфускацию для лучшей работы Crashlytics
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
