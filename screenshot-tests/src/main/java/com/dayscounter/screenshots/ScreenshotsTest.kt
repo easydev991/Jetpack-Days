@@ -3,7 +3,7 @@ package com.dayscounter.screenshots
 import android.content.Context
 import android.util.Log
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -224,7 +224,7 @@ class ScreenshotsTest {
             try {
                 saveButton.performScrollTo()
                 Log.d("ScreenshotsTest", "Выполнен скролл к кнопке сохранения")
-            } catch (e: AssertionError) {
+            } catch (_: AssertionError) {
                 // Кнопка не в скроллируемом контейнере - это нормально, продолжаем
                 Log.d(
                     "ScreenshotsTest",
