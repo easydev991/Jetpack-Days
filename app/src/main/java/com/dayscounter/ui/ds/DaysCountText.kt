@@ -50,25 +50,6 @@ private fun getEmphasizedStyle(
 }
 
 /**
- * Вспомогательная функция для получения вторичного стиля.
- */
-@Composable
-private fun getSecondaryStyle(
-    customStyle: TextStyle?,
-    color: Color
-): TextStyle {
-    val secondaryColor =
-        if (color == Color.Unspecified) {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        } else {
-            color
-        }
-
-    return customStyle?.copy(color = secondaryColor)
-        ?: MaterialTheme.typography.bodyMedium.copy(color = secondaryColor)
-}
-
-/**
  * Compose компонент для отображения форматированного количества дней.
  *
  * Поддерживает автоматическое обновление при изменении времени,
@@ -95,7 +76,6 @@ fun DaysCountText(
         when (textStyle) {
             DaysCountTextStyle.NORMAL -> getNormalStyle(customStyle)
             DaysCountTextStyle.EMPHASIZED -> getEmphasizedStyle(customStyle, color)
-            DaysCountTextStyle.SECONDARY -> getSecondaryStyle(customStyle, color)
         }
 
     val contentColor =
@@ -147,18 +127,6 @@ fun DaysCountTextEmphasizedPreview() {
             formattedText = "1 год 2 месяца 5 дней",
             modifier = Modifier.padding(16.dp),
             textStyle = DaysCountTextStyle.EMPHASIZED
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DaysCountTextSecondaryPreview() {
-    JetpackDaysTheme {
-        DaysCountText(
-            formattedText = "2 мес. 5 дн.",
-            modifier = Modifier.padding(16.dp),
-            textStyle = DaysCountTextStyle.SECONDARY
         )
     }
 }

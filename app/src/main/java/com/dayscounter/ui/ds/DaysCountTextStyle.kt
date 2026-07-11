@@ -8,8 +8,5 @@ enum class DaysCountTextStyle {
     NORMAL,
 
     /** Подчеркнутый стиль (для акцента) */
-    EMPHASIZED,
-
-    /** Вторичный стиль (с уменьшенным размером и другим цветом) */
-    SECONDARY
+    EMPHASIZED
 }

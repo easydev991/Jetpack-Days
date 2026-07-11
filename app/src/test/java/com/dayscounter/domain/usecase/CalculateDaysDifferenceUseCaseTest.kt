@@ -237,6 +237,78 @@ class CalculateDaysDifferenceUseCaseTest {
     }
 
     @Test
+    fun calculate_when_end_of_month_to_shorter_month_then_correct_period() {
+        // Given - 31 января → 28 февраля (невисокосный год)
+        val currentDate = LocalDate.of(2023, 2, 28)
+        val eventDate = LocalDate.of(2023, 1, 31)
+        val timestamp = eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        // When
+        val result = useCase(eventTimestamp = timestamp, currentDate = currentDate)
+
+        // Then
+        assertTrue(result is DaysDifference.Calculated, "Результат должен быть Calculated")
+        val calculated = result as DaysDifference.Calculated
+        assertEquals(0, calculated.period.years, "Лет быть не должно")
+        assertEquals(0, calculated.period.months, "Месяцев быть не должно")
+        assertEquals(28, calculated.period.days, "Должно быть 28 дней")
+    }
+
+    @Test
+    fun calculate_when_crossing_year_boundary_then_correct_period() {
+        // Given - 31 декабря → 1 января
+        val currentDate = LocalDate.of(2025, 1, 1)
+        val eventDate = LocalDate.of(2024, 12, 31)
+        val timestamp = eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        // When
+        val result = useCase(eventTimestamp = timestamp, currentDate = currentDate)
+
+        // Then
+        assertTrue(result is DaysDifference.Calculated, "Результат должен быть Calculated")
+        val calculated = result as DaysDifference.Calculated
+        assertEquals(0, calculated.period.years, "Лет быть не должно")
+        assertEquals(0, calculated.period.months, "Месяцев быть не должно")
+        assertEquals(1, calculated.period.days, "Должен быть 1 день")
+    }
+
+    @Test
+    fun calculate_when_leap_year_crossing_then_correct_period() {
+        // Given - 29 февраля 2024 → 1 марта 2025
+        val currentDate = LocalDate.of(2025, 3, 1)
+        val eventDate = LocalDate.of(2024, 2, 29)
+        val timestamp = eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        // When
+        val result = useCase(eventTimestamp = timestamp, currentDate = currentDate)
+
+        // Then
+        assertTrue(result is DaysDifference.Calculated, "Результат должен быть Calculated")
+        val calculated = result as DaysDifference.Calculated
+        assertEquals(1, calculated.period.years, "Должен быть 1 год")
+        assertEquals(0, calculated.period.months, "Месяцев быть не должно")
+        assertEquals(1, calculated.period.days, "Должен быть 1 день")
+    }
+
+    @Test
+    fun calculate_when_end_of_month_crossing_month_boundary_then_correct_period() {
+        // Given - 31 января → 3 марта (невисокосный год)
+        val currentDate = LocalDate.of(2023, 3, 3)
+        val eventDate = LocalDate.of(2023, 1, 31)
+        val timestamp = eventDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        // When
+        val result = useCase(eventTimestamp = timestamp, currentDate = currentDate)
+
+        // Then
+        assertTrue(result is DaysDifference.Calculated, "Результат должен быть Calculated")
+        val calculated = result as DaysDifference.Calculated
+        assertEquals(0, calculated.period.years, "Лет быть не должно")
+        assertEquals(1, calculated.period.months, "Должен быть 1 месяц")
+        assertEquals(3, calculated.period.days, "Должно быть 3 дня")
+    }
+
+    @Test
     fun totaldays_в_calculated_содержит_общее_количество_дней() {
         // Given
         val currentDate = LocalDate.of(2024, 1, 16)

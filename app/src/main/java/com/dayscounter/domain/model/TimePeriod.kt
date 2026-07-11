@@ -11,18 +11,4 @@ data class TimePeriod(
     val years: Int = 0,
     val months: Int = 0,
     val days: Int = 0
-) {
-    /**
-     * Проверяет, является ли период пустым (все значения равны нулю).
-     *
-     * @return true, если годы, месяцы и дни равны 0, иначе false
-     */
-    fun isEmpty(): Boolean = years == 0 && months == 0 && days == 0
-
-    /**
-     * Проверяет, является ли период не пустым (хотя бы одно значение не равно нулю).
-     *
-     * @return true, если хотя бы одно из значений не равно 0, иначе false
-     */
-    fun isNotEmpty(): Boolean = !isEmpty()
-}
+)

@@ -1,90 +1,12 @@
 package com.dayscounter.domain.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
  * Тесты для [TimePeriod].
  */
 class TimePeriodTest {
-    @Test
-    fun isempty_возвращает_true_при_всех_нулях() {
-        // Given
-        val period = TimePeriod(years = 0, months = 0, days = 0)
-
-        // When
-        val result = period.isEmpty()
-
-        // Then
-        assertTrue(result, "Период должен быть пустым при всех нулях")
-    }
-
-    @Test
-    fun isempty_возвращает_false_при_ненулевом_period() {
-        // Given - ненулевые годы
-        val period1 = TimePeriod(years = 1, months = 0, days = 0)
-        val period2 = TimePeriod(years = 0, months = 1, days = 0)
-        val period3 = TimePeriod(years = 0, months = 0, days = 1)
-        val period4 = TimePeriod(years = 1, months = 2, days = 3)
-
-        // When
-        val result1 = period1.isEmpty()
-        val result2 = period2.isEmpty()
-        val result3 = period3.isEmpty()
-        val result4 = period4.isEmpty()
-
-        // Then
-        assertFalse(result1, "Период не должен быть пустым при ненулевых годах")
-        assertFalse(result2, "Период не должен быть пустым при ненулевых месяцах")
-        assertFalse(result3, "Период не должен быть пустым при ненулевых днях")
-        assertFalse(result4, "Период не должен быть пустым при ненулевых значениях")
-    }
-
-    @Test
-    fun isnotempty_возвращает_true_при_ненулевом_period() {
-        // Given
-        val period = TimePeriod(years = 1, months = 0, days = 0)
-
-        // When
-        val result = period.isNotEmpty()
-
-        // Then
-        assertTrue(result, "Период должен быть не пустым при ненулевых годах")
-    }
-
-    @Test
-    fun isnotempty_возвращает_false_при_всех_нулях() {
-        // Given
-        val period = TimePeriod(years = 0, months = 0, days = 0)
-
-        // When
-        val result = period.isNotEmpty()
-
-        // Then
-        assertFalse(result, "Период не должен быть не пустым при всех нулях")
-    }
-
-    @Test
-    fun isnotempty_обратный_метод_для_isempty() {
-        // Given
-        val periodEmpty = TimePeriod(years = 0, months = 0, days = 0)
-        val periodNotEmpty = TimePeriod(years = 1, months = 0, days = 0)
-
-        // When
-        val emptyResult = periodEmpty.isNotEmpty()
-        val notEmptyResult = periodNotEmpty.isNotEmpty()
-
-        // Then
-        assertEquals(periodEmpty.isEmpty(), !emptyResult, "isNotEmpty должен быть обратным isEmpty")
-        assertEquals(
-            periodNotEmpty.isEmpty(),
-            !notEmptyResult,
-            "isNotEmpty должен быть обратным isEmpty"
-        )
-    }
-
     @Test
     fun timeperiod_корректно_хранит_значения() {
         // Given

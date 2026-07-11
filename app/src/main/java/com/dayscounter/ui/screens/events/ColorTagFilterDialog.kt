@@ -122,10 +122,10 @@ private fun ColorTagFilterGrid(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .heightIn(max = ColorTagFilterDialogConstants.GRID_MAX_HEIGHT)
+                .heightIn(max = GRID_MAX_HEIGHT)
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(ColorTagFilterDialogConstants.GRID_MIN_CELL_SIZE),
+            columns = GridCells.Adaptive(GRID_MIN_CELL_SIZE),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small))
         ) {
@@ -171,44 +171,21 @@ private fun ColorTagFilterOption(
     )
 }
 
-private object ColorTagFilterDialogConstants {
-    val GRID_MIN_CELL_SIZE = 56.dp
-    val GRID_MAX_HEIGHT = 260.dp
-    const val HUE_RANGE = 360f
-    const val PREVIEW_SATURATION = 0.75f
-    const val PREVIEW_LIGHTNESS = 0.55f
-    const val PREVIEW_COLORS_1 = 1
-    const val PREVIEW_COLORS_3 = 3
-    const val PREVIEW_COLORS_8 = 8
-    const val PREVIEW_COLORS_30 = 30
-    const val PREVIEW_WIDTH_DP = 360
-    const val PREVIEW_HEIGHT_DP = 640
-    const val PREVIEW_SELECTED_INDEX_3 = 0
-    const val PREVIEW_SELECTED_INDEX_8 = 2
-    const val PREVIEW_SELECTED_INDEX_30 = 10
-}
+private val GRID_MIN_CELL_SIZE = 56.dp
+private val GRID_MAX_HEIGHT = 260.dp
 
+@Suppress("MagicNumber")
 private fun previewColors(count: Int): List<Int> =
     List(count) { index ->
-        val hue = (index * ColorTagFilterDialogConstants.HUE_RANGE) / count.coerceAtLeast(1)
-        Color
-            .hsl(
-                hue = hue,
-                saturation = ColorTagFilterDialogConstants.PREVIEW_SATURATION,
-                lightness = ColorTagFilterDialogConstants.PREVIEW_LIGHTNESS
-            ).toArgb()
+        val hue = (index * 360f) / count.coerceAtLeast(1)
+        Color.hsl(hue = hue, saturation = 0.75f, lightness = 0.55f).toArgb()
     }
 
 @Suppress("UnusedPrivateMember")
-@Preview(
-    name = "ColorFilter 1",
-    showBackground = true,
-    widthDp = ColorTagFilterDialogConstants.PREVIEW_WIDTH_DP,
-    heightDp = ColorTagFilterDialogConstants.PREVIEW_HEIGHT_DP
-)
+@Preview(name = "ColorFilter 1", showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 private fun ColorTagFilterDialogPreviewOneColor() {
-    val colors = previewColors(ColorTagFilterDialogConstants.PREVIEW_COLORS_1)
+    val colors = previewColors(1)
     JetpackDaysTheme {
         ColorTagFilterDialog(
             availableColors = colors,
@@ -219,60 +196,45 @@ private fun ColorTagFilterDialogPreviewOneColor() {
     }
 }
 
-@Suppress("UnusedPrivateMember")
-@Preview(
-    name = "ColorFilter 3",
-    showBackground = true,
-    widthDp = ColorTagFilterDialogConstants.PREVIEW_WIDTH_DP,
-    heightDp = ColorTagFilterDialogConstants.PREVIEW_HEIGHT_DP
-)
+@Suppress("UnusedPrivateMember", "MagicNumber")
+@Preview(name = "ColorFilter 3", showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 private fun ColorTagFilterDialogPreviewThreeColors() {
-    val colors = previewColors(ColorTagFilterDialogConstants.PREVIEW_COLORS_3)
+    val colors = previewColors(3)
     JetpackDaysTheme {
         ColorTagFilterDialog(
             availableColors = colors,
-            currentFilter = colors.getOrNull(ColorTagFilterDialogConstants.PREVIEW_SELECTED_INDEX_3),
+            currentFilter = colors.getOrNull(0),
             onApply = {},
             onDismiss = {}
         )
     }
 }
 
-@Suppress("UnusedPrivateMember")
-@Preview(
-    name = "ColorFilter 8",
-    showBackground = true,
-    widthDp = ColorTagFilterDialogConstants.PREVIEW_WIDTH_DP,
-    heightDp = ColorTagFilterDialogConstants.PREVIEW_HEIGHT_DP
-)
+@Suppress("UnusedPrivateMember", "MagicNumber")
+@Preview(name = "ColorFilter 8", showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 private fun ColorTagFilterDialogPreviewEightColors() {
-    val colors = previewColors(ColorTagFilterDialogConstants.PREVIEW_COLORS_8)
+    val colors = previewColors(8)
     JetpackDaysTheme {
         ColorTagFilterDialog(
             availableColors = colors,
-            currentFilter = colors.getOrNull(ColorTagFilterDialogConstants.PREVIEW_SELECTED_INDEX_8),
+            currentFilter = colors.getOrNull(2),
             onApply = {},
             onDismiss = {}
         )
     }
 }
 
-@Suppress("UnusedPrivateMember")
-@Preview(
-    name = "ColorFilter 30",
-    showBackground = true,
-    widthDp = ColorTagFilterDialogConstants.PREVIEW_WIDTH_DP,
-    heightDp = ColorTagFilterDialogConstants.PREVIEW_HEIGHT_DP
-)
+@Suppress("UnusedPrivateMember", "MagicNumber")
+@Preview(name = "ColorFilter 30", showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 private fun ColorTagFilterDialogPreviewThirtyColors() {
-    val colors = previewColors(ColorTagFilterDialogConstants.PREVIEW_COLORS_30)
+    val colors = previewColors(30)
     JetpackDaysTheme {
         ColorTagFilterDialog(
             availableColors = colors,
-            currentFilter = colors.getOrNull(ColorTagFilterDialogConstants.PREVIEW_SELECTED_INDEX_30),
+            currentFilter = colors.getOrNull(10),
             onApply = {},
             onDismiss = {}
         )

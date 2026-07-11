@@ -88,12 +88,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     implementation(libs.androidx.compose.foundation)
 
     // Material Components (for View-based themes and attributes)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.androidx.appcompat)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -132,11 +130,8 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.robolectric)
     testRuntimeOnly(libs.junit.platform.launcher)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.mockk)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.turbine)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

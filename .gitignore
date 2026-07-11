@@ -162,6 +162,12 @@ proguard/
 vendor/bundle/
 .bundle/
 
+# Python
+scripts/__pycache__/
+*.pyc
+*.pyo
+__pycache__/
+
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html

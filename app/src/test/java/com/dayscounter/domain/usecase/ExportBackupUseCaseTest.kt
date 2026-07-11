@@ -5,7 +5,6 @@ import android.net.Uri
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
-import com.dayscounter.util.Logger
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -27,7 +26,6 @@ import java.io.ByteArrayOutputStream
 class ExportBackupUseCaseTest {
     private val repository: ItemRepository = mockk()
     private val context: Context = mockk()
-    private val logger: Logger = mockk(relaxed = true)
     private val contentResolver: android.content.ContentResolver = mockk()
 
     private lateinit var useCase: ExportBackupUseCase
@@ -40,7 +38,7 @@ class ExportBackupUseCaseTest {
     @BeforeEach
     fun setup() {
         every { context.contentResolver } returns contentResolver
-        useCase = ExportBackupUseCase(repository, context, logger)
+        useCase = ExportBackupUseCase(repository, context)
         outputStream.reset()
     }
 

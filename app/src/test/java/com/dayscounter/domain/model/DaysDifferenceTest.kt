@@ -1,7 +1,6 @@
 package com.dayscounter.domain.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
@@ -70,7 +69,9 @@ class DaysDifferenceTest {
         val difference = DaysDifference.Calculated(period, totalDays, timestamp)
 
         // Then
-        assertTrue(difference.period.isEmpty(), "Период должен быть пустым")
+        assertEquals(0, difference.period.years, "Количество лет должно быть 0")
+        assertEquals(0, difference.period.months, "Количество месяцев должно быть 0")
+        assertEquals(0, difference.period.days, "Количество дней должно быть 0")
         assertEquals(0, difference.totalDays, "Общее количество дней должно быть 0")
     }
 

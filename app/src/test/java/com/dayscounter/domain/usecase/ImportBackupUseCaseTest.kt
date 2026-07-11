@@ -3,7 +3,6 @@ package com.dayscounter.domain.usecase
 import android.content.Context
 import android.net.Uri
 import com.dayscounter.domain.repository.ItemRepository
-import com.dayscounter.util.Logger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,7 +22,6 @@ import java.io.ByteArrayInputStream
 class ImportBackupUseCaseTest {
     private val repository: ItemRepository = mockk()
     private val context: Context = mockk()
-    private val logger: Logger = mockk(relaxed = true)
     private val contentResolver: android.content.ContentResolver = mockk()
 
     private lateinit var useCase: ImportBackupUseCase
@@ -31,7 +29,7 @@ class ImportBackupUseCaseTest {
     @BeforeEach
     fun setup() {
         every { context.contentResolver } returns contentResolver
-        useCase = ImportBackupUseCase(repository, context, logger)
+        useCase = ImportBackupUseCase(repository, context)
     }
 
     // MARK: - Импорт Android-бекапа с полем format: "android"

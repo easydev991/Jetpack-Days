@@ -6,6 +6,7 @@ import com.dayscounter.domain.model.TimePeriod
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
@@ -58,56 +59,15 @@ class CalculateDaysDifferenceUseCase {
         }
     }
 
-    /**
-     * Вычисляет период времени между двумя датами.
-     *
-     * Алгоритм:
-     * 1. Определяем количество полных лет
-     * 2. Определяем количество полных месяцев
-     * 3. Определяем оставшиеся дни
-     *
-     * @param startDate Начальная дата
-     * @param endDate Конечная дата
-     * @return [TimePeriod] с годами, месяцами и днями
-     */
     private fun calculateTimePeriod(
         startDate: LocalDate,
         endDate: LocalDate
     ): TimePeriod {
-        var years = 0
-        var months = 0
-        var days: Int
-
-        // Вычисляем полные годы
-        var tempDate = startDate
-        while (true) {
-            val nextYearDate = tempDate.plusYears(1)
-            if (!nextYearDate.isAfter(endDate)) {
-                tempDate = nextYearDate
-                years++
-            } else {
-                break
-            }
-        }
-
-        // Вычисляем полные месяцы
-        while (true) {
-            val nextMonthDate = tempDate.plusMonths(1)
-            if (!nextMonthDate.isAfter(endDate)) {
-                tempDate = nextMonthDate
-                months++
-            } else {
-                break
-            }
-        }
-
-        // Вычисляем оставшиеся дни
-        days = ChronoUnit.DAYS.between(tempDate, endDate).toInt()
-
+        val period = Period.between(startDate, endDate)
         return TimePeriod(
-            years = years,
-            months = months,
-            days = days
+            years = period.years,
+            months = period.months,
+            days = period.days
         )
     }
 }
