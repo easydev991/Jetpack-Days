@@ -8,6 +8,8 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.test.platform.app.InstrumentationRegistry
+import com.dayscounter.R
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import org.junit.Rule
 import org.junit.Test
@@ -21,6 +23,9 @@ import org.junit.Test
 class ColorSelectorUiTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val colorDescription =
+        InstrumentationRegistry.getInstrumentation().targetContext.getString(R.string.color)
 
     /**
      * Проверяет, что при выборе кастомного цвета появляется дополнительный чип.
@@ -41,7 +46,7 @@ class ColorSelectorUiTest {
         }
 
         composeTestRule
-            .onAllNodesWithContentDescription("Цвет")
+            .onAllNodesWithContentDescription(colorDescription)
             .assertCountEquals(7)
     }
 
@@ -62,7 +67,7 @@ class ColorSelectorUiTest {
         }
 
         composeTestRule
-            .onAllNodesWithContentDescription("Цвет")
+            .onAllNodesWithContentDescription(colorDescription)
             .assertCountEquals(6)
     }
 
@@ -83,7 +88,7 @@ class ColorSelectorUiTest {
         }
 
         composeTestRule
-            .onAllNodesWithContentDescription("Цвет")
+            .onAllNodesWithContentDescription(colorDescription)
             .assertCountEquals(6)
     }
 
@@ -106,7 +111,7 @@ class ColorSelectorUiTest {
         }
 
         composeTestRule
-            .onAllNodesWithContentDescription("Цвет")[0]
+            .onAllNodesWithContentDescription(colorDescription)[0]
             .performClick()
 
         assert(selectedColor == null)
