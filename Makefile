@@ -115,7 +115,7 @@ apk:
 		$(MAKE) _load_secrets; \
 	fi
 	@printf "$(YELLOW)Создаю релизный APK...$(RESET)\n"
-	@./gradlew assembleRelease
+	@./gradlew assembleRelease --console=plain
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	VERSION_NAME=$$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2); \
 	OUTPUT_FILE="dayscounter$$VERSION_CODE.apk"; \
@@ -442,7 +442,7 @@ release:
 	sed -i.tmp "s/^VERSION_CODE=.*/VERSION_CODE=$$NEW_VERSION_CODE/" gradle.properties && rm -f gradle.properties.tmp; \
 	printf "$(GREEN)VERSION_CODE обновлен с $$CURRENT_VERSION_CODE на $$NEW_VERSION_CODE$(RESET)\n"
 	@printf "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)\n"
-	@./gradlew bundleRelease uploadCrashlyticsMappingFileRelease
+	@./gradlew bundleRelease uploadCrashlyticsMappingFileRelease --console=plain
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
 	cp app/build/outputs/bundle/release/app-release.aab "$$OUTPUT_FILE"; \
