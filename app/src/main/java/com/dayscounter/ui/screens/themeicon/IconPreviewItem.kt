@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screens.themeicon
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
@@ -33,7 +34,6 @@ import com.dayscounter.domain.model.AppIcon
  *
  * @param appIcon Иконка приложения для отображения
  * @param isSelected Выбрана ли эта иконка
- * @param isDarkTheme Признак темной темы для выбора правильного ресурса иконки
  * @param onClick Обработчик клика
  * @param modifier Modifier для настройки внешнего вида
  */
@@ -41,18 +41,17 @@ import com.dayscounter.domain.model.AppIcon
 fun IconPreviewItem(
     appIcon: AppIcon,
     isSelected: Boolean,
-    isDarkTheme: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val iconResource = appIcon.iconResource(isDarkTheme)
-    val borderColor =
-        if (isSelected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.outline
-        }
+    val iconResource = appIcon.iconResource()
+    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
     val borderWidth = if (isSelected) 4.dp else 2.dp
+    val bounceSpring: FiniteAnimationSpec<Float> =
+        spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     Box(
         modifier =
             modifier
@@ -83,22 +82,8 @@ fun IconPreviewItem(
         // Галочка на выбранной иконке (аналог iOS .overlay(alignment: .topTrailing))
         AnimatedVisibility(
             visible = isSelected,
-            enter =
-                scaleIn(
-                    animationSpec =
-                        spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                ),
-            exit =
-                scaleOut(
-                    animationSpec =
-                        spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                ),
+            enter = scaleIn(animationSpec = bounceSpring),
+            exit = scaleOut(animationSpec = bounceSpring),
             modifier =
                 Modifier
                     .align(Alignment.TopEnd)
@@ -121,13 +106,13 @@ private fun CheckIcon() {
     )
 }
 
-/** Расширение для получения ресурса иконки по значению AppIcon и теме. */
-private fun AppIcon.iconResource(isDarkTheme: Boolean): Int =
+/** Расширение для получения ресурса иконки по значению AppIcon. */
+private fun AppIcon.iconResource(): Int =
     when (this) {
         AppIcon.DEFAULT -> R.drawable.icon_preview_1
-        AppIcon.ICON_2 -> if (isDarkTheme) R.drawable.icon_preview_2_dark else R.drawable.icon_preview_2
-        AppIcon.ICON_3 -> if (isDarkTheme) R.drawable.icon_preview_3_dark else R.drawable.icon_preview_3
-        AppIcon.ICON_4 -> if (isDarkTheme) R.drawable.icon_preview_4_dark else R.drawable.icon_preview_4
-        AppIcon.ICON_5 -> if (isDarkTheme) R.drawable.icon_preview_5_dark else R.drawable.icon_preview_5
-        AppIcon.ICON_6 -> if (isDarkTheme) R.drawable.icon_preview_6_dark else R.drawable.icon_preview_6
+        AppIcon.ICON_2 -> R.drawable.icon_preview_2
+        AppIcon.ICON_3 -> R.drawable.icon_preview_3
+        AppIcon.ICON_4 -> R.drawable.icon_preview_4
+        AppIcon.ICON_5 -> R.drawable.icon_preview_5
+        AppIcon.ICON_6 -> R.drawable.icon_preview_6
     }

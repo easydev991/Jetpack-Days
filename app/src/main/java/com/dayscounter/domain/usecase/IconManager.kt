@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
-import com.dayscounter.util.ThemeUtils
 
 /**
  * Use Case для управления сменой иконки приложения.
@@ -29,49 +28,27 @@ class IconManager(
     }
 
     /**
-     * Проверяет, включена ли тёмная тема для выбора иконки.
-     *
-     * Для системной темы использует фактические настройки системы.
-     * Для явного выбора темы возвращает соответствующее значение.
-     *
-     * @param theme Выбранная тема приложения
-     * @return true, если для иконки должна использоваться тёмная версия
-     */
-    fun isDarkThemeForIcon(theme: com.dayscounter.domain.model.AppTheme): Boolean =
-        when (theme) {
-            com.dayscounter.domain.model.AppTheme.DARK -> true
-            com.dayscounter.domain.model.AppTheme.LIGHT -> false
-            com.dayscounter.domain.model.AppTheme.SYSTEM -> ThemeUtils.isSystemDarkTheme(context)
-        }
-
-    /**
      * Изменяет иконку приложения.
      *
      * Метод активирует Activity Alias выбранной иконки и деактивирует остальные.
      * Использует PackageManager.setComponentEnabledSetting() для управления видимостью aliases.
-     * Поддерживает светлую и тёмную тему.
      *
      * @param icon Иконка, которую нужно активировать
-     * @param isDarkTheme Признак темной темы
      */
     @Suppress("TooManyFunctions", "ThrowsCount")
-    fun changeIcon(
-        icon: AppIcon,
-        isDarkTheme: Boolean
-    ) {
+    fun changeIcon(icon: AppIcon) {
         val packageName = context.packageName
 
         // Сначала АКТИВИРУЕМ новый Activity Alias
-        val targetComponentName = getIconComponentName(icon, isDarkTheme, packageName)
-        val targetComponentClassName = icon.getComponentName(isDarkTheme)
+        val targetComponentName = getIconComponentName(icon, packageName)
+        val targetComponentClassName = icon.getComponentName()
         try {
             context.packageManager.setComponentEnabledSetting(
                 targetComponentName,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP
             )
-            val themeSuffix = if (isDarkTheme) " (тёмная тема)" else " (светлая тема)"
-            logger.d(TAG, "Иконка $targetComponentClassName АКТИВИРОВАНА$themeSuffix")
+            logger.d(TAG, "Иконка $targetComponentClassName АКТИВИРОВАНА")
         } catch (e: SecurityException) {
             logger.e(TAG, "Ошибка при активации иконки: нет прав", e)
             throw e
@@ -84,24 +61,9 @@ class IconManager(
         }
 
         // Затем деактивируем ВСЕ остальные Activity Aliases
-        val allIcons = AppIcon.entries
-        allIcons.forEach { currentIcon ->
-            // Пропускаем целевую иконку с текущей темой
-            if (currentIcon == icon) {
-                // Для деактивации нужно проверить светлая и тёмная версии
-                val shouldDisableLightTheme = isDarkTheme
-                val shouldDisableDarkTheme = !isDarkTheme
-
-                if (shouldDisableLightTheme) {
-                    disableComponent(getIconComponentName(currentIcon, false, packageName))
-                }
-                if (shouldDisableDarkTheme) {
-                    disableComponent(getIconComponentName(currentIcon, true, packageName))
-                }
-            } else {
-                // Для всех остальных иконок деактивируем ОБЕ версии
-                disableComponent(getIconComponentName(currentIcon, false, packageName))
-                disableComponent(getIconComponentName(currentIcon, true, packageName))
+        AppIcon.entries.forEach { currentIcon ->
+            if (currentIcon != icon) {
+                disableComponent(getIconComponentName(currentIcon, packageName))
             }
         }
     }
@@ -119,13 +81,7 @@ class IconManager(
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP
             )
-            val themeSuffix =
-                if (componentName.className.endsWith("Dark")) {
-                    " (тёмная тема)"
-                } else {
-                    " (светлая тема)"
-                }
-            logger.d(TAG, "Иконка ${componentName.className} ДЕАКТИВИРОВАНА$themeSuffix")
+            logger.d(TAG, "Иконка ${componentName.className} ДЕАКТИВИРОВАНА")
         } catch (e: SecurityException) {
             logger.e(TAG, "Ошибка при деактивации иконки: нет прав", e)
             // Не выбрасываем исключение - продолжаем деактивацию остальных
@@ -149,15 +105,13 @@ class IconManager(
  * Формирует ComponentName для Activity Alias иконки.
  *
  * @param icon Иконка
- * @param isDarkTheme Признак темной темы
  * @param packageName Имя пакета приложения
  * @return ComponentName для Activity Alias иконки
  */
 private fun getIconComponentName(
     icon: AppIcon,
-    isDarkTheme: Boolean,
     packageName: String
 ): android.content.ComponentName {
-    val className = icon.getComponentName(isDarkTheme)
+    val className = icon.getComponentName()
     return android.content.ComponentName(packageName, className)
 }

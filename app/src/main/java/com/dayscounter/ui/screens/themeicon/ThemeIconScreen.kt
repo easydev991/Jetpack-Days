@@ -1,6 +1,5 @@
 package com.dayscounter.ui.screens.themeicon
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,7 +114,6 @@ internal fun ThemeIconScreenContent(
             HorizontalDivider()
 
             IconSection(
-                theme = theme,
                 icon = icon,
                 onIconChange = onIconChange
             )
@@ -212,17 +210,9 @@ private fun DynamicColorsSection(
  */
 @Composable
 private fun IconSection(
-    theme: AppTheme,
     icon: AppIcon,
     onIconChange: (AppIcon) -> Unit
 ) {
-    val isDarkTheme =
-        when (theme) {
-            AppTheme.SYSTEM -> isSystemInDarkTheme()
-            AppTheme.DARK -> true
-            AppTheme.LIGHT -> false
-        }
-
     Text(
         text = stringResource(R.string.app_icon),
         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
@@ -235,7 +225,6 @@ private fun IconSection(
     IconGrid(
         icons = AppIcon.entries,
         selectedIcon = icon,
-        isDarkTheme = isDarkTheme,
         onIconClick = onIconChange
     )
 }
@@ -250,7 +239,6 @@ private fun IconSection(
 private fun IconGrid(
     icons: List<AppIcon>,
     selectedIcon: AppIcon,
-    isDarkTheme: Boolean,
     onIconClick: (AppIcon) -> Unit
 ) {
     FlowRow(
@@ -265,7 +253,6 @@ private fun IconGrid(
                 IconPreviewItem(
                     appIcon = appIcon,
                     isSelected = appIcon == selectedIcon,
-                    isDarkTheme = isDarkTheme,
                     onClick = { onIconClick(appIcon) }
                 )
             }

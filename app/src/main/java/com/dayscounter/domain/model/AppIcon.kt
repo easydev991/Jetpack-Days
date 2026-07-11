@@ -20,21 +20,17 @@ enum class AppIcon {
     ;
 
     /**
-     * Возвращает имя компонента Activity Alias для текущей иконки и темы.
+     * Возвращает имя компонента Activity Alias для текущей иконки.
      *
-     * @param isDarkTheme Признак темной темы
      * @return Имя класса Activity Alias
      */
-    fun getComponentName(isDarkTheme: Boolean): String {
-        val suffix = if (isDarkTheme) "Dark" else ""
-        return when (this) {
-            // DEFAULT иконка учитывает тему (светлая/тёмная версия)
-            DEFAULT -> "com.dayscounter.MainActivityAliasIcon1$suffix"
-            ICON_2 -> "com.dayscounter.MainActivityIcon2$suffix"
-            ICON_3 -> "com.dayscounter.MainActivityIcon3$suffix"
-            ICON_4 -> "com.dayscounter.MainActivityIcon4$suffix"
-            ICON_5 -> "com.dayscounter.MainActivityIcon5$suffix"
-            ICON_6 -> "com.dayscounter.MainActivityIcon6$suffix"
+    fun getComponentName(): String =
+        when (this) {
+            DEFAULT -> "com.dayscounter.MainActivityAliasIcon1"
+            ICON_2 -> "com.dayscounter.MainActivityIcon2"
+            ICON_3 -> "com.dayscounter.MainActivityIcon3"
+            ICON_4 -> "com.dayscounter.MainActivityIcon4"
+            ICON_5 -> "com.dayscounter.MainActivityIcon5"
+            ICON_6 -> "com.dayscounter.MainActivityIcon6"
         }
-    }
 }

@@ -54,20 +54,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity Alias для DEFAULT иконки (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityAliasIcon1Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_1_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_1_dark"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
         <!-- Activity Alias для иконки 2 (светлая тема) -->
         <activity-alias
             android:name=".MainActivityIcon2"
@@ -75,20 +61,6 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_2"
             android:roundIcon="@mipmap/ic_launcher_round_2"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- Activity Alias для иконки 2 (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityIcon2Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_2_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_2_dark"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -109,40 +81,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity Alias для иконки 3 (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityIcon3Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_3_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_3_dark"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
         <activity-alias
             android:name=".MainActivityIcon4"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_4"
             android:roundIcon="@mipmap/ic_launcher_round_4"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- Activity Alias для иконки 4 (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityIcon4Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_4_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_4_dark"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -163,40 +107,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity Alias для иконки 5 (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityIcon5Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_5_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_5_dark"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
         <activity-alias
             android:name=".MainActivityIcon6"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_6"
             android:roundIcon="@mipmap/ic_launcher_round_6"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- Activity Alias для иконки 6 (тёмная тема) -->
-        <activity-alias
-            android:name=".MainActivityIcon6Dark"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_6_dark"
-            android:roundIcon="@mipmap/ic_launcher_round_6_dark"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
