@@ -24,11 +24,14 @@ description: Пиши тесты в андроид-проекте правиль
 ## Инструменты
 
 - JUnit 5 - unit-тесты
+- JUnit 4 - интеграционные и UI тесты (AndroidJUnitRunner)
 - MockK - мокирование
 - Compose Testing - Compose компоненты
 - Room Testing - для интеграционных тестов БД
 - kotlinx-coroutines-test - для тестирования корутин
-- Turbine - для тестирования Flow/StateFlow (app.cash.turbine:turbine:1.1.0)
+- Turbine - для тестирования Flow/StateFlow (app.cash.turbine:turbine)
+
+> Версии зависимостей смотри в `gradle/libs.versions.toml` — навык их не фиксирует.
 
 ## Запуск тестов и отчеты
 
@@ -114,33 +117,22 @@ ItemRepositoryImplTest                            1      15       16
 - Unit-тесты с MockK обеспечивают лучшее покрытие бизнес-логики
 - В JetpackDays часть интеграционных тестов ViewModels была отключена (@Ignore) из-за сложностей с асинхронностью
 
-**Отличия от Jetpack-WorkoutApp:**
-
-В Jetpack-WorkoutApp интеграционные тесты ViewModels возможны (но не рекомендуются), так как там используется сетевой слой с API. В JetpackDays работает полностью офлайн без сетевых запросов, поэтому unit-тесты с моками полностью покрывают бизнес-логику и нет необходимости в сложных интеграционных тестах ViewModels.
-
 ### Рабочий подход к тестированию
 
-См. подробные примеры в [references/EXAMPLES.md](references/EXAMPLES.md).
+Подробные примеры — в [references/EXAMPLES.md](references/EXAMPLES.md). Там лежат:
 
-#### Unit-тесты ViewModels (с MockK)
-
-#### Интеграционные тесты DAO и Repository
-
-#### Интеграционные тесты ViewModels (только для существующих)
-
-#### UI-тесты Compose компонентов
+- Unit-тесты ViewModels с MockK
+- Интеграционные тесты DAO и Repository
+- Интеграционные тесты ViewModels (только для существующих)
+- UI-тесты Compose компонентов
+- Тестирование Flow с исключениями
+- Тестирование Use Cases
+- Параметризированные тесты
+- Тестирование резервного копирования
 
 ### Тестирование Flow с исключениями
 
-**Важно:** Для Flow с исключениями, которые обрабатываются через `catch`, используйте `first()` или `collect()` вместо Turbine.
-
-См. примеры в [references/EXAMPLES.md](references/EXAMPLES.md):
-
-#### Тестирование IOException (обрабатывается в catch)
-
-#### Тестирование других исключений (пробрасываются дальше)
-
-#### Мокирование Android Log
+**Важно:** Для Flow с исключениями, которые обрабатываются через `catch`, используйте `first()` или `collect()` вместо Turbine — см. примеры в [references/EXAMPLES.md](references/EXAMPLES.md).
 
 ### Общие практики
 
@@ -151,5 +143,5 @@ ItemRepositoryImplTest                            1      15       16
 - Интеграционные тесты только для DAO и Repository
 - Unit-тесты для ViewModels с моками
 - UI-тесты для Compose компонентов без бизнес-логики
-- Использовать JUnit 5 аннотации (`@Test`, `@Before`, `@After`)
+- Использовать JUnit 5 аннотации (`@Test`, `@BeforeEach`, `@AfterEach`)
 - Использовать assertions JUnit 5 (`assertEquals`, `assertTrue`, `assertNull`)

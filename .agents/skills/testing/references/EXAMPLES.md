@@ -1,51 +1,74 @@
 # Примеры тестирования
 
+> Версии зависимостей и их актуальные настройки — в `gradle/libs.versions.toml` и `app/build.gradle.kts`. Здесь приведены только паттерны.
+>
+> **Соглашения в проекте:**
+> - Unit-тесты в `app/src/test/` — JUnit 5 (`@BeforeEach`, `@AfterEach`)
+> - Интеграционные и UI тесты в `app/src/androidTest/` — JUnit 4 (`@Before`, `@After`, `@RunWith(AndroidJUnit4::class)`)
+> - DI ручной, без Hilt
+> - Без `!!` — только `?.`, `?:`, `let`, `checkNotNull`
+> - Для ViewModel с `viewModelScope` — `StandardTestDispatcher` + `Dispatchers.setMain` / `resetMain`
+
 ## Unit-тесты ViewModels с MockK
 
-### Базовый пример
+### Базовый пример (JUnit 5, без Turbine)
 
 ```kotlin
+import app.cash.turbine.test
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainScreenViewModelTest {
 
     private lateinit var viewModel: MainScreenViewModel
     private val mockRepository: ItemRepository = mockk()
+    private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setup() {
-        // Настраиваем поведение моков перед каждым тестом
+    @BeforeEach
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
         every { mockRepository.getAllItems() } returns flowOf(listOf(testItem))
         viewModel = MainScreenViewModel(mockRepository)
     }
 
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
-    fun loadItems_whenRepositoryReturnsData_thenSuccessState() {
+    fun loadItems_whenRepositoryReturnsData_thenEmitsSuccessState() = runTest {
         // Given
         val expectedItems = listOf(testItem)
         every { mockRepository.getAllItems() } returns flowOf(expectedItems)
 
         // When
         viewModel.loadItems()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertEquals(MainScreenState.Success(expectedItems), viewModel.uiState.value)
+        val state = viewModel.uiState.value
+        assertEquals(MainScreenState.Success(expectedItems), state)
     }
 
     @Test
-    fun loadItems_whenRepositoryReturnsEmpty_thenEmptyState() {
-        // Given
-        every { mockRepository.getAllItems() } returns flowOf(emptyList())
-
-        // When
-        viewModel.loadItems()
-
-        // Then
-        assertEquals(MainScreenState.Empty, viewModel.uiState.value)
-    }
-
-    @Test
-    fun deleteItem_whenCalled_thenRepositoryDeleteInvoked() {
+    fun deleteItem_whenCalled_thenRepositoryDeleteInvoked() = runTest {
         // When
         viewModel.deleteItem(testItem)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         verify { mockRepository.deleteItem(testItem) }
@@ -57,72 +80,96 @@ class MainScreenViewModelTest {
             title = "Тест",
             details = "Описание",
             timestamp = System.currentTimeMillis(),
-            colorTag = 0xFFFF00.toInt(),
+            colorTag = 0xFFFF00,
             displayOption = DisplayOption.DAY
         )
     }
 }
 ```
 
-### Unit-тест с StateFlow и Turbine
+### Unit-тест с Turbine (для StateFlow с несколькими эмиссиями)
 
 ```kotlin
+import app.cash.turbine.test
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class DetailScreenViewModelTest {
 
     private lateinit var viewModel: DetailScreenViewModel
     private val mockRepository: ItemRepository = mockk()
-    private val mockLogger: Logger = NoOpLogger()
+    private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setup() {
-        viewModel = DetailScreenViewModel(mockRepository, mockLogger, SavedStateHandle())
+    @BeforeEach
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        viewModel = DetailScreenViewModel(
+            repository = mockRepository,
+            logger = NoOpLogger(),
+            savedStateHandle = SavedStateHandle()
+        )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun loadItem_whenItemExists_thenEmitsSuccessState() = runTest {
+    fun loadItem_whenItemExists_thenEmitsLoadingThenSuccess() = runTest {
         // Given
-        val testItem = testItem()
-        coEvery { mockRepository.getItemById(1L) } returns testItem
+        val expected = testItem()
+        coEvery { mockRepository.getItemById(1L) } returns expected
 
         // When
         viewModel.loadItem(1L)
-
-        // Then - используем Turbine для тестирования StateFlow
-        viewModel.uiState.test {
-            val loadingState = awaitItem()
-            assertTrue(loadingState is DetailScreenState.Loading)
-
-            val successState = awaitItem()
-            assertTrue(successState is DetailScreenState.Success)
-            assertEquals(testItem, (successState as DetailScreenState.Success).item)
-        }
-    }
-
-    @Test
-    fun loadItem_whenItemNotFound_thenEmitsErrorState() = runTest {
-        // Given
-        coEvery { mockRepository.getItemById(1L) } returns null
-
-        // When
-        viewModel.loadItem(1L)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         viewModel.uiState.test {
             val loadingState = awaitItem()
             assertTrue(loadingState is DetailScreenState.Loading)
 
-            val errorState = awaitItem()
-            assertTrue(errorState is DetailScreenState.Error)
+            val successState = awaitItem()
+            assertTrue(successState is DetailScreenState.Success)
+            assertEquals(expected, (successState as DetailScreenState.Success).item)
         }
     }
 }
 ```
 
-## Интеграционные тесты DAO и Repository
+## Интеграционные тесты DAO и Repository (JUnit 4, androidTest)
 
 ### Интеграционный тест DAO
 
 ```kotlin
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.dayscounter.data.database.DaysDatabase
+import com.dayscounter.data.database.dao.ItemDao
+import com.dayscounter.data.database.entity.ItemEntity
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+
 @RunWith(AndroidJUnit4::class)
 class ItemDaoTest {
 
@@ -131,11 +178,13 @@ class ItemDaoTest {
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        database = Room.inMemoryDatabaseBuilder(
-            context,
-            DaysDatabase::class.java
-        ).allowMainThreadQueries().build()
+        database = Room
+            .inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                DaysDatabase::class.java
+            )
+            .allowMainThreadQueries()
+            .build()
         dao = database.itemDao()
     }
 
@@ -147,7 +196,7 @@ class ItemDaoTest {
     @Test
     fun insertItem_whenInsert_thenCanRetrieve() = runBlocking {
         // Given
-        val item = testItem()
+        val item = testEntity(id = 1L)
 
         // When
         dao.insert(item)
@@ -155,18 +204,17 @@ class ItemDaoTest {
 
         // Then
         assertNotNull(retrieved)
-        assertEquals(item.title, retrieved!!.title)
+        assertEquals(item.title, retrieved?.title)
     }
 
     @Test
     fun getAllItems_whenMultipleItems_thenReturnsAll() = runBlocking {
         // Given
-        val items = listOf(
-            testItem(id = 1L, title = "Первый"),
-            testItem(id = 2L, title = "Второй"),
-            testItem(id = 3L, title = "Третий")
-        )
-        items.forEach { dao.insert(it) }
+        listOf(
+            testEntity(id = 1L, title = "Первый"),
+            testEntity(id = 2L, title = "Второй"),
+            testEntity(id = 3L, title = "Третий")
+        ).forEach { dao.insert(it) }
 
         // When
         val retrievedItems = dao.getAll()
@@ -179,9 +227,8 @@ class ItemDaoTest {
     @Test
     fun deleteItem_whenDeleted_thenCannotRetrieve() = runBlocking {
         // Given
-        val item = testItem()
+        val item = testEntity(id = 1L)
         dao.insert(item)
-        assertNotNull(dao.getById(item.id))
 
         // When
         dao.delete(item)
@@ -191,7 +238,7 @@ class ItemDaoTest {
         assertNull(retrieved)
     }
 
-    private fun testItem(
+    private fun testEntity(
         id: Long = 1L,
         title: String = "Тест"
     ) = ItemEntity(
@@ -199,7 +246,7 @@ class ItemDaoTest {
         title = title,
         details = "Описание",
         timestamp = System.currentTimeMillis(),
-        colorTag = 0xFFFF00.toInt(),
+        colorTag = 0xFFFF00,
         displayOption = "day"
     )
 }
@@ -211,21 +258,19 @@ class ItemDaoTest {
 @RunWith(AndroidJUnit4::class)
 class ItemRepositoryIntegrationTest {
 
-    private lateinit var repository: ItemRepository
     private lateinit var database: DaysDatabase
+    private lateinit var repository: ItemRepositoryImpl
 
     @Before
-    fun setup() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        database = Room.inMemoryDatabaseBuilder(
-            context,
-            DaysDatabase::class.java
-        ).allowMainThreadQueries().build()
-
-        repository = ItemRepositoryImpl(
-            database.itemDao(),
-            database.itemDao()
-        )
+    fun setUp() {
+        database = Room
+            .inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                DaysDatabase::class.java
+            )
+            .allowMainThreadQueries()
+            .build()
+        repository = ItemRepositoryImpl(database.itemDao())
     }
 
     @After
@@ -234,74 +279,62 @@ class ItemRepositoryIntegrationTest {
     }
 
     @Test
-    fun insertItem_whenInserted_thenCanRetrieve() = runBlocking {
-        // Given
+    fun fullCycle_createReadUpdateDelete_thenWorksCorrectly() = runBlocking {
+        // Given - Create
         val item = Item(
-            id = 1L,
-            title = "Название",
+            title = "Тестовое событие",
             details = "Описание",
-            timestamp = System.currentTimeMillis(),
-            colorTag = 0xFFFF00.toInt(),
-            displayOption = DisplayOption.DAY
+            timestamp = 1234567890000L,
+            colorTag = 0xFFFF0000.toInt(),
+            displayOption = DisplayOption.MONTH_DAY
         )
 
-        // When
+        // When - Insert
         val insertedId = repository.insertItem(item)
+
+        // Then - Read
         val retrieved = repository.getItemById(insertedId)
-
-        // Then
         assertNotNull(retrieved)
-        assertEquals(item.title, retrieved!!.title)
-    }
-
-    @Test
-    fun getAllItems_whenMultipleItems_thenReturnsFlow() = runBlocking {
-        // Given
-        val items = listOf(
-            testItem(id = 1L, title = "Первый"),
-            testItem(id = 2L, title = "Второй")
-        )
-        items.forEach { repository.insertItem(it) }
-
-        // When
-        val result = repository.getAllItems().first()
-
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("Первый", result[0].title)
+        assertEquals("Тестовое событие", retrieved?.title)
     }
 }
 ```
 
 ## Интеграционные тесты ViewModels (только для существующих)
 
-⚠️ **Важно:** Создание новых интеграционных тестов ViewModels запрещено. Этот раздел только для обслуживания существующих тестов.
+⚠️ **Важно:** Создание новых интеграционных тестов ViewModels запрещено. Раздел только для обслуживания уже существующих тестов. В JetpackDays DI ручной — Hilt не используется.
 
 ```kotlin
 @RunWith(AndroidJUnit4::class)
-@HiltAndroidTest
 class DetailScreenViewModelIntegrationTest {
-
-    @get:Rule
-    val hiltRule = HiltAndroidRule(this)
-
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    @Inject
-    lateinit var repository: ItemRepository
-
+    private lateinit var database: DaysDatabase
+    private lateinit var repository: ItemRepository
     private lateinit var viewModel: DetailScreenViewModel
     private lateinit var savedStateHandle: SavedStateHandle
 
     @Before
-    fun setup() {
-        hiltRule.inject()
+    fun setUp() {
+        // Ручное создание зависимостей (без Hilt)
+        database = Room
+            .inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                DaysDatabase::class.java
+            )
+            .allowMainThreadQueries()
+            .build()
+        repository = ItemRepositoryImpl(database.itemDao())
+
         savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
         viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+    }
+
+    @After
+    fun tearDown() {
+        database.close()
     }
 
     @Test
@@ -312,15 +345,15 @@ class DetailScreenViewModelIntegrationTest {
             title = "Тестовый элемент",
             details = "Описание",
             timestamp = System.currentTimeMillis(),
-            colorTag = 0xFFFF00.toInt(),
+            colorTag = 0xFFFF00,
             displayOption = DisplayOption.DAY
         )
         repository.insertItem(testItem)
 
-        // When
+        // When - пересоздаём ViewModel, чтобы он подхватил элемент
         viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
 
-        // Then - тестируем эмиссии StateFlow с помощью Turbine
+        // Then - Turbine для проверки эмиссий StateFlow
         viewModel.uiState.test {
             val loadingState = awaitItem()
             assertTrue(loadingState is DetailScreenState.Loading)
@@ -333,11 +366,20 @@ class DetailScreenViewModelIntegrationTest {
 }
 ```
 
-## UI-тесты Compose компонентов
+## UI-тесты Compose компонентов (androidTest)
 
-### Простой UI-тест
+### Простой UI-тест (без бизнес-логики)
 
 ```kotlin
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
 class DaysCountTextTest {
 
     @get:Rule
@@ -351,7 +393,7 @@ class DaysCountTextTest {
             title = "Тест",
             details = "Описание",
             timestamp = System.currentTimeMillis(),
-            colorTag = 0xFFFF00.toInt(),
+            colorTag = 0xFFFF00,
             displayOption = DisplayOption.DAY
         )
 
@@ -363,34 +405,13 @@ class DaysCountTextTest {
         // Then
         composeTestRule.onNodeWithText("Сегодня").assertIsDisplayed()
     }
-
-    @Test
-    fun daysCountText_whenYesterday_thenShowsYesterday() {
-        // Given
-        val yesterday = System.currentTimeMillis() - 24 * 60 * 60 * 1000
-        val item = Item(
-            id = 1L,
-            title = "Тест",
-            details = "Описание",
-            timestamp = yesterday,
-            colorTag = 0xFFFF00.toInt(),
-            displayOption = DisplayOption.DAY
-        )
-
-        // When
-        composeTestRule.setContent {
-            DaysCountText(item)
-        }
-
-        // Then
-        composeTestRule.onNodeWithText("Вчера").assertIsDisplayed()
-    }
 }
 ```
 
-### UI-тест с взаимодействием
+### UI-тест с взаимодействием и моком навигации
 
 ```kotlin
+@RunWith(AndroidJUnit4::class)
 class MainScreenTest {
 
     @get:Rule
@@ -416,53 +437,32 @@ class MainScreenTest {
         // Then
         verify { mockNavController.navigate("create_edit") }
     }
-
-    @Test
-    fun whenItemClicked_thenNavigatesToDetailScreen() {
-        // Given
-        val testItem = Item(
-            id = 1L,
-            title = "Тестовый элемент",
-            details = "Описание",
-            timestamp = System.currentTimeMillis(),
-            colorTag = 0xFFFF00.toInt(),
-            displayOption = DisplayOption.DAY
-        )
-        val mockNavController = mockk<NavController>(relaxed = true)
-
-        composeTestRule.setContent {
-            MainScreen(
-                navController = mockNavController,
-                viewModel = MainScreenViewModel(mockk(relaxed = true))
-            )
-        }
-
-        // When
-        composeTestRule
-            .onNodeWithText("Тестовый элемент")
-            .performClick()
-
-        // Then
-        verify { mockNavController.navigate("item_detail/1") }
-    }
 }
 ```
 
 ## Тестирование Flow с исключениями
 
+> Turbine нельзя использовать для Flow, ошибки в которых обрабатываются через `catch` — оператор поглотит исключение раньше, чем `awaitItem()` его увидит. В таких случаях применяют `first()` или `collect()`.
+
 ### Тестирование IOException (обрабатывается в catch)
 
 ```kotlin
-class BackupExportUseCaseTest {
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import java.io.IOException
+
+class ExportBackupUseCaseTest {
 
     private val mockRepository: ItemRepository = mockk()
     private val useCase = ExportBackupUseCase(mockRepository)
 
     @Test
-    fun exportBackup_whenRepositoryThrowsIOException_thenReturnsFailure() = runTest {
+    fun invoke_whenRepositoryThrowsIOException_thenReturnsFailure() = runTest {
         // Given
-        val testItem = testItem()
-        every { mockRepository.getAllItems() } returns flowOf(listOf(testItem))
         coEvery { mockRepository.getAllItems() } throws IOException("Нет доступа к базе данных")
 
         // When
@@ -478,13 +478,13 @@ class BackupExportUseCaseTest {
 ### Тестирование других исключений (пробрасываются дальше)
 
 ```kotlin
-class BackupImportUseCaseTest {
+class ImportBackupUseCaseTest {
 
     private val mockRepository: ItemRepository = mockk()
     private val useCase = ImportBackupUseCase(mockRepository)
 
     @Test
-    fun importBackup_whenJsonInvalid_thenThrowsSerializationException() = runTest {
+    fun invoke_whenJsonInvalid_thenThrowsSerializationException() = runTest {
         // Given
         val invalidJson = "{ invalid json }"
         val uri = mockk<Uri>()
@@ -497,29 +497,35 @@ class BackupImportUseCaseTest {
 }
 ```
 
-### Мокирование Android Log
+### Мокирование логгера
 
 ```kotlin
+import io.mockk.coEvery
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Test
+import java.sql.SQLException
+
 class ItemRepositoryTest {
 
     private val mockDao: ItemDao = mockk()
     private val mockLogger: Logger = mockk()
-    private val repository = ItemRepositoryImpl(mockDao, mockDao, mockLogger)
+    private val repository = ItemRepositoryImpl(mockDao, mockLogger)
 
     @Test
     fun insertItem_whenError_thenLogsError() = runTest {
         // Given
-        val item = testItem()
         coEvery { mockDao.insert(any()) } throws SQLException("Ошибка базы данных")
 
         // When
-        repository.insertItem(item)
+        runCatching { repository.insertItem(testItem()) }
 
         // Then
         verify {
             mockLogger.e(
                 "ItemRepository",
-                "Ошибка при вставке элемента: Ошибка базы данных"
+                match { it.contains("Ошибка при вставке элемента") }
             )
         }
     }
@@ -531,6 +537,10 @@ class ItemRepositoryTest {
 ### Простой тест Use Case
 
 ```kotlin
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+
 class CalculateDaysDifferenceUseCaseTest {
 
     private val useCase = CalculateDaysDifferenceUseCase()
@@ -559,25 +569,17 @@ class CalculateDaysDifferenceUseCaseTest {
         // Then
         assertEquals(1L, result.days)
     }
-
-    @Test
-    fun invoke_whenTomorrow_thenReturnsMinusOne() {
-        // Given
-        val today = LocalDate.now()
-        val tomorrow = today.plusDays(1)
-
-        // When
-        val result = useCase(tomorrow, today)
-
-        // Then
-        assertEquals(-1L, result.days)
-    }
 }
 ```
 
 ### Тест форматирования
 
 ```kotlin
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
 class FormatDaysTextUseCaseTest {
 
     private val mockResourceProvider: ResourceProvider = mockk()
@@ -594,19 +596,6 @@ class FormatDaysTextUseCaseTest {
 
         // Then
         assertEquals("Сегодня", result)
-    }
-
-    @Test
-    fun invoke_whenOneDayAgo_thenReturnsYesterday() {
-        // Given
-        val daysDifference = DaysDifference(1L)
-        every { mockResourceProvider.getString(R.string.yesterday) } returns "Вчера"
-
-        // When
-        val result = useCase(daysDifference)
-
-        // Then
-        assertEquals("Вчера", result)
     }
 
     @Test
@@ -628,20 +617,23 @@ class FormatDaysTextUseCaseTest {
 
 ## Параметризированные тесты
 
-### Пример с несколькими вариантами
-
 ```kotlin
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.LocalDate
+
 class DaysDifferenceTest {
 
     @ParameterizedTest
     @CsvSource(
-        "0,0",
-        "1,1",
-        "2,2",
-        "10,10",
-        "365,365"
+        "0, 0",
+        "1, 1",
+        "2, 2",
+        "10, 10",
+        "365, 365"
     )
-    fun calculateDaysDifference_withVariousDates_returnsCorrectDays(
+    fun calculateDaysDifference_withVariousOffsets_returnsCorrectDays(
         daysOffset: Long,
         expectedDays: Long
     ) {
@@ -663,6 +655,14 @@ class DaysDifferenceTest {
 ### Тест экспорта
 
 ```kotlin
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
 class ExportBackupUseCaseTest {
 
     private val mockRepository: ItemRepository = mockk()
@@ -677,20 +677,20 @@ class ExportBackupUseCaseTest {
                 title = "Первый",
                 details = "Описание",
                 timestamp = 1234567890000,
-                colorTag = 0xFFFF00.toInt(),
+                colorTag = 0xFFFF00,
                 displayOption = DisplayOption.DAY
             )
         )
-        every { mockRepository.getAllItems() } returns flowOf(items)
+        coEvery { mockRepository.getAllItems() } returns flowOf(items)
 
         // When
         val result = useCase(Uri.parse("content://test"))
 
         // Then
         assertTrue(result.isSuccess)
-        val jsonString = result.getOrNull() ?: fail("Result should be success")
-        assertTrue(jsonString.contains("Первый"))
-        assertTrue(jsonString.contains("1234567890000"))
+        val jsonString = result.getOrNull()
+        assertTrue(jsonString?.contains("Первый") == true)
+        assertTrue(jsonString?.contains("1234567890000") == true)
     }
 }
 ```
@@ -736,7 +736,7 @@ class ImportBackupUseCaseTest {
             title = "Существующий",
             details = "Описание",
             timestamp = 1234567890000,
-            colorTag = 0xFFFF00.toInt(),
+            colorTag = 0xFFFF00,
             displayOption = DisplayOption.DAY
         )
         val jsonString = """
@@ -752,7 +752,6 @@ class ImportBackupUseCaseTest {
         """.trimIndent()
         val uri = mockk<Uri>()
         coEvery { mockRepository.getAllItems() } returns flowOf(listOf(existingItem))
-        coEvery { mockRepository.insertItem(any()) } returns 2L
 
         // When
         val result = useCase(uri, jsonString)
@@ -772,7 +771,7 @@ class ImportBackupUseCaseTest {
 - [ ] Все тесты проходят
 - [ ] Имена тестов описательные (format: `functionName_whenCondition_thenExpectedResult`)
 - [ ] Использован AAA паттерн (Arrange-Act-Assert или Given-When-Then)
-- [ ] Один тест - одна проверка
+- [ ] Один тест — одна проверка
 - [ ] Тесты независимы друг от друга
 - [ ] Тесты быстрые
 - [ ] Моки настроены корректно
@@ -780,3 +779,6 @@ class ImportBackupUseCaseTest {
 - [ ] Для исключений в Flow используется `first()` или `collect()` вместо Turbine
 - [ ] Новые интеграционные тесты ViewModels не создаются (запрещено)
 - [ ] Существующие интеграционные тесты ViewModels используют `runTest`, `MainDispatcherRule` и `Turbine`
+- [ ] Unit-тесты используют JUnit 5 (`@BeforeEach`, `org.junit.jupiter.api.Assertions`)
+- [ ] Android-тесты используют JUnit 4 (`@Before`, `org.junit.Assert`)
+- [ ] Нет оператора `!!` — только `?.`, `?:`, `let`, `checkNotNull`
