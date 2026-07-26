@@ -11,28 +11,38 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Data Access Object для работы с записями событий в базе данных.
+ *
+ * Все запросы, возвращающие список, сортируют записи по `timestamp` (дата события)
+ * с tie-breaker по `id` — монотонному автоинкременту SQLite. При одинаковой `timestamp`
+ * запись с большим `id` считается созданной позже.
  */
 @Dao
 interface ItemDao {
     /**
      * Получает все записи, отсортированные по дате (от новых к старым).
+     * При одинаковой `timestamp` порядок определяется по `id DESC`.
      *
      * @return Flow со списком всех записей
      */
-    @Query("SELECT * FROM items ORDER BY timestamp DESC")
+    @Query("SELECT * FROM items ORDER BY timestamp DESC, id DESC")
     fun getAllItems(): Flow<List<ItemEntity>>
 
     /**
      * Получает все записи с заданным порядком сортировки.
+     * При одинаковой `timestamp` порядок определяется по `id`.
      *
      * @param ascending true для сортировки по возрастанию (старые первые),
      *                  false для сортировки по убыванию (новые первые)
      * @return Flow со списком всех записей
      */
-    @Query("SELECT * FROM items ORDER BY timestamp ASC")
+    @Query("SELECT * FROM items ORDER BY timestamp ASC, id ASC")
     fun getAllItemsAsc(): Flow<List<ItemEntity>>
 
-    @Query("SELECT * FROM items ORDER BY timestamp DESC")
+    /**
+     * Получает все записи, отсортированные по дате (от новых к старым).
+     * Синоним [getAllItems].
+     */
+    @Query("SELECT * FROM items ORDER BY timestamp DESC, id DESC")
     fun getAllItemsDesc(): Flow<List<ItemEntity>>
 
     /**
@@ -56,12 +66,13 @@ interface ItemDao {
 
     /**
      * Ищет записи по запросу в названии или описании.
+     * Результаты сортируются по `timestamp DESC, id DESC`.
      *
      * @param searchQuery Поисковый запрос
      * @return Flow со списком найденных записей
      */
     @Query(
-        "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%'"
+        "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%' ORDER BY timestamp DESC, id DESC"
     )
     fun searchItems(searchQuery: String): Flow<List<ItemEntity>>
 

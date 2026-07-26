@@ -818,6 +818,54 @@ class MainScreenViewModelTest {
         }
     }
 
+    @Test
+    fun items_when_same_timestamp_use_id_as_tiebreaker() =
+        runTest {
+            // Given — два события на одну дату, с разными id
+            val timestamp = 2000000000000L
+            val oldItem =
+                Item(
+                    id = 1L,
+                    title = "Старое событие",
+                    details = "",
+                    timestamp = timestamp,
+                    displayOption = DisplayOption.DAY
+                )
+            val newItem =
+                Item(
+                    id = 2L,
+                    title = "Новое событие",
+                    details = "",
+                    timestamp = timestamp,
+                    displayOption = DisplayOption.DAY
+                )
+
+            // When — DESC sort order
+            sortOrderFlow.value = SortOrder.DESCENDING
+            repository.setItems(listOf(oldItem, newItem))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — больший id первым: Новое, Старое
+            val descState = viewModel.uiState.value
+            assertTrue(descState is MainScreenState.Success)
+            val descItems = (descState as MainScreenState.Success).items
+            assertEquals(2, descItems.size)
+            assertEquals("Новое событие", descItems[0].title)
+            assertEquals("Старое событие", descItems[1].title)
+
+            // When — ASC sort order
+            sortOrderFlow.value = SortOrder.ASCENDING
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — меньший id первым: Старое, Новое
+            val ascState = viewModel.uiState.value
+            assertTrue(ascState is MainScreenState.Success)
+            val ascItems = (ascState as MainScreenState.Success).items
+            assertEquals(2, ascItems.size)
+            assertEquals("Старое событие", ascItems[0].title)
+            assertEquals("Новое событие", ascItems[1].title)
+        }
+
     /**
      * Fake repository для тестирования.
      */
@@ -834,8 +882,8 @@ class MainScreenViewModelTest {
         override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> =
             _items.map { items ->
                 when (sortOrder) {
-                    SortOrder.ASCENDING -> items.sortedBy { it.timestamp }
-                    SortOrder.DESCENDING -> items.sortedByDescending { it.timestamp }
+                    SortOrder.ASCENDING -> items.sortedWith(compareBy({ it.timestamp }, { it.id }))
+                    SortOrder.DESCENDING -> items.sortedWith(compareByDescending<Item> { it.timestamp }.thenByDescending { it.id })
                 }
             }
 

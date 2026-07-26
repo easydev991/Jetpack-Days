@@ -89,6 +89,85 @@ class ItemDaoTest {
         }
 
     @Test
+    fun getAllItems_whenSameTimestamp_thenSortedByIdDesc() =
+        runBlocking {
+            // Given — items with same timestamp but inserted later = higher id
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItems().first()
+
+            // Then — DESC: larger id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemB.title, allItems[0].title)
+            assertEquals(itemA.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItemsAsc_whenSameTimestamp_thenSortedByIdAsc() =
+        runBlocking {
+            // Given
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItemsAsc().first()
+
+            // Then — ASC: smaller id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemA.title, allItems[0].title)
+            assertEquals(itemB.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItemsDesc_whenSameTimestamp_thenSortedByIdDesc() =
+        runBlocking {
+            // Given
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItemsDesc().first()
+
+            // Then — DESC: larger id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemB.title, allItems[0].title)
+            assertEquals(itemA.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItems_whenDifferentTimestamps_thenTimestampDominates() =
+        runBlocking {
+            // Given — A (same date, older id), B (same date, newer id), C (different date, between them in id)
+            val timestampA = 1000000000000L
+            val timestampB = 3000000000000L
+            val itemOld = ItemEntity(title = "Старое", timestamp = timestampA)
+            val itemNew = ItemEntity(title = "Новое", timestamp = timestampB)
+            val itemSame = ItemEntity(title = "Среднее", timestamp = timestampA)
+            itemDao.insertItem(itemOld)
+            itemDao.insertItem(itemNew)
+            itemDao.insertItem(itemSame)
+
+            // When
+            val allItems = itemDao.getAllItems().first()
+
+            // Then — timestamp dominates, id is only tiebreaker within same timestamp
+            assertEquals("Новое", allItems[0].title) // newest timestamp first
+            assertEquals("Среднее", allItems[1].title) // same timestamp as Old, but inserted later → larger id
+            assertEquals("Старое", allItems[2].title)
+        }
+
+    @Test
     fun getItemById_whenExists_thenReturnsItem() =
         runBlocking {
             // Given
