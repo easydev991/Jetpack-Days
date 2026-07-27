@@ -27,6 +27,7 @@ import com.dayscounter.ui.viewmodel.CreateEditChangeInput
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /**
@@ -82,11 +83,7 @@ private fun CreateEditScreenContent(
                 CreateEditChangeInput(
                     title = s.title,
                     details = s.details,
-                    timestamp =
-                        s.selectedDate
-                            ?.atStartOfDay(ZoneId.systemDefault())
-                            ?.toInstant()
-                            ?.toEpochMilli() ?: 0L,
+                    selectedDate = s.selectedDate,
                     colorTag = s.selectedColor?.toArgb(),
                     displayOption = s.selectedDisplayOption,
                     reminderFingerprint = s.reminder.toChangeFingerprint()
@@ -153,11 +150,7 @@ private fun CreateEditScreenContent(
                     CreateEditChangeInput(
                         title = s.title,
                         details = s.details,
-                        timestamp =
-                            s.selectedDate
-                                ?.atStartOfDay(ZoneId.systemDefault())
-                                ?.toInstant()
-                                ?.toEpochMilli() ?: 0L,
+                        selectedDate = s.selectedDate,
                         colorTag = s.selectedColor?.toArgb(),
                         displayOption = s.selectedDisplayOption,
                         reminderFingerprint = s.reminder.toChangeFingerprint()
@@ -198,7 +191,7 @@ private fun rememberCreateEditSaveAction(params: CreateEditSaveActionParams): ()
     {
         if (params.isValidData) {
             params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.ITEM_SAVED))
-            val item = params.uiStates.toItem(itemId = params.itemId)
+            val item = params.uiStates.toItem(itemId = params.itemId, originalTimeOfDay = params.originalTimeOfDay)
             val reminderRequest = params.uiStates.reminder.toReminderRequest(item.id)
 
             params.viewModel.saveItem(
@@ -209,12 +202,30 @@ private fun rememberCreateEditSaveAction(params: CreateEditSaveActionParams): ()
         }
     }
 
-private fun CreateEditUiState.toItem(itemId: Long?): Item {
+private fun CreateEditUiState.toItem(
+    itemId: Long?,
+    originalTimeOfDay: LocalTime?
+): Item {
+    // selectedDate is guaranteed non-null here: SaveButton is gated on isCreateEditFormValid,
+    // which requires selectedDate != null. If the invariant ever breaks, fail loud.
+    val date =
+        checkNotNull(selectedDate) {
+            "selectedDate must not be null at save time — SaveButton should be disabled"
+        }
     val timestamp =
-        selectedDate
-            ?.atStartOfDay(ZoneId.systemDefault())
-            ?.toInstant()
-            ?.toEpochMilli() ?: System.currentTimeMillis()
+        if (originalTimeOfDay != null) {
+            date
+                .atTime(originalTimeOfDay)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        } else {
+            date
+                .atTime(LocalTime.now())
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        }
 
     return Item(
         id = itemId ?: 0L,
@@ -248,7 +259,8 @@ private data class CreateEditSaveActionParams(
     val uiStates: CreateEditUiState,
     val viewModel: CreateEditScreenViewModel,
     val analyticsService: AnalyticsService,
-    val onBackClick: () -> Unit
+    val onBackClick: () -> Unit,
+    val originalTimeOfDay: LocalTime?
 )
 
 @Composable
@@ -269,7 +281,8 @@ private fun rememberCreateEditScreenActions(params: CreateEditScreenActionsParam
                     uiStates = params.uiStates,
                     viewModel = params.viewModel,
                     analyticsService = params.analyticsService,
-                    onBackClick = params.onBackClick
+                    onBackClick = params.onBackClick,
+                    originalTimeOfDay = params.viewModel.originalTimeOfDay
                 )
         )
     return CreateEditScreenActions(

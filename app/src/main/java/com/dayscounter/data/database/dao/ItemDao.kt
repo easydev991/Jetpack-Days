@@ -12,15 +12,20 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Data Access Object для работы с записями событий в базе данных.
  *
- * Все запросы, возвращающие список, сортируют записи по `timestamp` (дата события)
- * с tie-breaker по `id` — монотонному автоинкременту SQLite. При одинаковой `timestamp`
- * запись с большим `id` считается созданной позже.
+ * Семантика хранения и сортировки:
+ * - `timestamp` хранится с millisecond precision (полный `LocalDateTime` → epoch millis,
+ *   включая time-of-day). Это единственный осмысленный критерий порядка для same-date событий.
+ * - `id` (rowid SQLite) — defensive tie-breaker, не отражает «новизну» события.
+ *   Используется только для стабильности при коллизиях миллисекунд и для legacy-данных
+ *   (созданных до миграции на millisecond precision), у которых `timestamp` приведён к началу дня.
+ * - Все запросы с `ORDER BY` сортируют по `timestamp` первично и по `id` вторично.
  */
 @Dao
 interface ItemDao {
     /**
      * Получает все записи, отсортированные по дате (от новых к старым).
-     * При одинаковой `timestamp` порядок определяется по `id DESC`.
+     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
+     * порядок определяется по `id DESC` (defensive tie-breaker, не «новизна» события).
      *
      * @return Flow со списком всех записей
      */
@@ -29,7 +34,8 @@ interface ItemDao {
 
     /**
      * Получает все записи с заданным порядком сортировки.
-     * При одинаковой `timestamp` порядок определяется по `id`.
+     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
+     * порядок определяется по `id ASC` (defensive tie-breaker).
      *
      * @param ascending true для сортировки по возрастанию (старые первые),
      *                  false для сортировки по убыванию (новые первые)
@@ -40,6 +46,8 @@ interface ItemDao {
 
     /**
      * Получает все записи, отсортированные по дате (от новых к старым).
+     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
+     * порядок определяется по `id DESC` (defensive tie-breaker).
      * Синоним [getAllItems].
      */
     @Query("SELECT * FROM items ORDER BY timestamp DESC, id DESC")
@@ -66,7 +74,8 @@ interface ItemDao {
 
     /**
      * Ищет записи по запросу в названии или описании.
-     * Результаты сортируются по `timestamp DESC, id DESC`.
+     * Результаты сортируются по `timestamp DESC` (millisecond precision) с `id DESC`
+     * как defensive tie-breaker.
      *
      * @param searchQuery Поисковый запрос
      * @return Flow со списком найденных записей

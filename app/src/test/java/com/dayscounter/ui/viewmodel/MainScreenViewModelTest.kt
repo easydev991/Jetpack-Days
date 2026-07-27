@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Unit-тесты для MainScreenViewModel.
@@ -819,9 +821,11 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun items_when_same_timestamp_use_id_as_tiebreaker() =
+    fun items_when_same_timestamp_id_breaks_tie() =
         runTest {
-            // Given — два события на одну дату, с разными id
+            // Given — два события с ОДИНАКОВЫМ timestamp (legacy-данные с atStartOfDay
+            // или редкая коллизия миллисекунд). Это не обычный случай, а defensive-поведение
+            // tie-breaker'а по `id`.
             val timestamp = 2000000000000L
             val oldItem =
                 Item(
@@ -864,6 +868,66 @@ class MainScreenViewModelTest {
             assertEquals(2, ascItems.size)
             assertEquals("Старое событие", ascItems[0].title)
             assertEquals("Новое событие", ascItems[1].title)
+        }
+
+    @Test
+    fun items_when_same_date_different_time_of_day_sorts_by_timestamp() =
+        runTest {
+            // Given — два события на ОДНУ дату, но с РАЗНЫМ time-of-day (нормальный путь:
+            // timestamp различается на миллисекунды, сортировка идёт по реальному времени).
+            val morningTimestamp =
+                LocalDateTime
+                    .of(2026, 1, 15, 9, 0, 0)
+                    .atZone(ZoneId.of("UTC"))
+                    .toInstant()
+                    .toEpochMilli()
+            val eveningTimestamp =
+                LocalDateTime
+                    .of(2026, 1, 15, 18, 0, 0)
+                    .atZone(ZoneId.of("UTC"))
+                    .toInstant()
+                    .toEpochMilli()
+            val morning =
+                Item(
+                    id = 1L,
+                    title = "Утро",
+                    details = "",
+                    timestamp = morningTimestamp,
+                    displayOption = DisplayOption.DAY
+                )
+            val evening =
+                Item(
+                    id = 2L,
+                    title = "Вечер",
+                    details = "",
+                    timestamp = eveningTimestamp,
+                    displayOption = DisplayOption.DAY
+                )
+
+            // When — DESC sort order
+            sortOrderFlow.value = SortOrder.DESCENDING
+            repository.setItems(listOf(morning, evening))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — "Вечер" первым (18:00 позже 09:00)
+            val descState = viewModel.uiState.value
+            assertTrue(descState is MainScreenState.Success)
+            val descItems = (descState as MainScreenState.Success).items
+            assertEquals(2, descItems.size)
+            assertEquals("Вечер", descItems[0].title)
+            assertEquals("Утро", descItems[1].title)
+
+            // When — ASC sort order
+            sortOrderFlow.value = SortOrder.ASCENDING
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — "Утро" первым (09:00 раньше 18:00)
+            val ascState = viewModel.uiState.value
+            assertTrue(ascState is MainScreenState.Success)
+            val ascItems = (ascState as MainScreenState.Success).items
+            assertEquals(2, ascItems.size)
+            assertEquals("Утро", ascItems[0].title)
+            assertEquals("Вечер", ascItems[1].title)
         }
 
     /**

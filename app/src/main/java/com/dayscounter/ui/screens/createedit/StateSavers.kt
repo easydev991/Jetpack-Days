@@ -8,16 +8,24 @@ import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /**
  * Saver для LocalDate (non-null).
+ *
+ * Намеренная асимметрия save/restore: save кодирует дату как epoch millis с time-of-day = `now()`,
+ * restore извлекает только `LocalDate` (time-of-day отбрасывается). Это безопасно, потому что
+ * `LocalDate` сам по себе не имеет значимой time-of-day компоненты — мы просто используем
+ * `Long` как контейнер для совместимости с [androidx.compose.runtime.saveable.Saver] (Bundle-saveable).
+ * Реальный источник истины — `Item.timestamp` в БД, загружаемый через `loadItemData` после restore.
  */
 val LocalDateSaver: Saver<LocalDate, Long> =
     Saver(
         save = { localDate ->
             localDate
-                .atStartOfDay(ZoneId.systemDefault())
+                .atTime(LocalTime.now())
+                .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli()
         },
@@ -64,13 +72,18 @@ val DisplayOptionSaver: Saver<DisplayOption, String> =
 /**
  * Saver для LocalDate? (nullable).
  * Использует -1L как sentinel значение для null.
+ *
+ * Асимметрия save/restore та же, что и в [LocalDateSaver]: save сохраняет millis (с time-of-day = now()),
+ * restore восстанавливает только `LocalDate`. Time-of-day не имеет смысла для `LocalDate`-UI,
+ * а `Long` используется как контейнер для совместимости с `Saver<*, Long>`.
  */
 val NullableLocalDateSaver: Saver<LocalDate?, Long> =
     Saver(
         save = { localDate ->
             localDate?.let {
                 it
-                    .atStartOfDay(ZoneId.systemDefault())
+                    .atTime(LocalTime.now())
+                    .atZone(ZoneId.systemDefault())
                     .toInstant()
                     .toEpochMilli()
             } ?: -1L
@@ -99,7 +112,11 @@ val ReminderFormUiStateSaver: Saver<ReminderFormUiState, List<Any?>> =
                 state.isEnabled,
                 state.mode.name,
                 state.selectedDate?.let { date ->
-                    date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    date
+                        .atTime(LocalTime.now())
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
                 },
                 state.showDatePicker,
                 state.hour,
@@ -154,7 +171,11 @@ val CreateEditUiStateSaver: Saver<CreateEditUiState, List<Any?>> =
                 state.title,
                 state.details,
                 state.selectedDate?.let { date ->
-                    date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    date
+                        .atTime(LocalTime.now())
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
                 },
                 state.selectedColor?.toArgb(),
                 state.selectedDisplayOption.name,
