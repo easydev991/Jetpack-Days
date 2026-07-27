@@ -9,47 +9,18 @@ import androidx.room.Update
 import com.dayscounter.data.database.entity.ItemEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Data Access Object для работы с записями событий в базе данных.
- *
- * Семантика хранения и сортировки:
- * - `timestamp` хранится с millisecond precision (полный `LocalDateTime` → epoch millis,
- *   включая time-of-day). Это единственный осмысленный критерий порядка для same-date событий.
- * - `id` (rowid SQLite) — defensive tie-breaker, не отражает «новизну» события.
- *   Используется только для стабильности при коллизиях миллисекунд и для legacy-данных
- *   (созданных до миграции на millisecond precision), у которых `timestamp` приведён к началу дня.
- * - Все запросы с `ORDER BY` сортируют по `timestamp` первично и по `id` вторично.
- */
+// Data Access Object для записей событий. timestamp первичен, id — defensive tie-breaker.
 @Dao
 interface ItemDao {
-    /**
-     * Получает все записи, отсортированные по дате (от новых к старым).
-     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
-     * порядок определяется по `id DESC` (defensive tie-breaker, не «новизна» события).
-     *
-     * @return Flow со списком всех записей
-     */
+    /** Получает все записи от новых к старым. См. KDoc интерфейса. */
     @Query("SELECT * FROM items ORDER BY timestamp DESC, id DESC")
     fun getAllItems(): Flow<List<ItemEntity>>
 
-    /**
-     * Получает все записи с заданным порядком сортировки.
-     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
-     * порядок определяется по `id ASC` (defensive tie-breaker).
-     *
-     * @param ascending true для сортировки по возрастанию (старые первые),
-     *                  false для сортировки по убыванию (новые первые)
-     * @return Flow со списком всех записей
-     */
+    /** Получает все записи по возрастанию (старые первые). См. KDoc интерфейса. */
     @Query("SELECT * FROM items ORDER BY timestamp ASC, id ASC")
     fun getAllItemsAsc(): Flow<List<ItemEntity>>
 
-    /**
-     * Получает все записи, отсортированные по дате (от новых к старым).
-     * Первичный критерий — `timestamp` (millisecond precision); при равном `timestamp`
-     * порядок определяется по `id DESC` (defensive tie-breaker).
-     * Синоним [getAllItems].
-     */
+    /** Синоним [getAllItems]. */
     @Query("SELECT * FROM items ORDER BY timestamp DESC, id DESC")
     fun getAllItemsDesc(): Flow<List<ItemEntity>>
 
@@ -72,14 +43,7 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE id = :id")
     fun getItemByIdFlow(id: Long): Flow<ItemEntity?>
 
-    /**
-     * Ищет записи по запросу в названии или описании.
-     * Результаты сортируются по `timestamp DESC` (millisecond precision) с `id DESC`
-     * как defensive tie-breaker.
-     *
-     * @param searchQuery Поисковый запрос
-     * @return Flow со списком найденных записей
-     */
+    /** Ищет записи в title/details. См. KDoc интерфейса. */
     @Query(
         "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%' ORDER BY timestamp DESC, id DESC"
     )

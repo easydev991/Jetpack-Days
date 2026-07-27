@@ -20,6 +20,13 @@ import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 class ItemDaoTest {
+    private fun timestamp(hour: Int): Long =
+        LocalDateTime
+            .of(2026, 1, 15, hour, 0, 0)
+            .atZone(ZoneId.of("UTC"))
+            .toInstant()
+            .toEpochMilli()
+
     private lateinit var database: DaysDatabase
     private lateinit var itemDao: ItemDao
 
@@ -331,18 +338,8 @@ class ItemDaoTest {
     fun getAllItems_getAllItemsDesc_getAllItemsAsc_whenSameDateDifferentTimeOfDay() =
         runBlocking {
             // Given — same day, different time-of-day
-            val timestampA =
-                LocalDateTime
-                    .of(2026, 1, 15, 9, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
-            val timestampB =
-                LocalDateTime
-                    .of(2026, 1, 15, 18, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
+            val timestampA = timestamp(9)
+            val timestampB = timestamp(18)
             val itemA = ItemEntity(title = "A (09:00)", timestamp = timestampA)
             val itemB = ItemEntity(title = "B (18:00)", timestamp = timestampB)
 
@@ -373,18 +370,8 @@ class ItemDaoTest {
     fun searchItems_whenSameDateDifferentTimeOfDay_returnsByTimeOfDay() =
         runBlocking {
             // Given — same day, different time-of-day, both titles contain "Событие"
-            val timestampMorning =
-                LocalDateTime
-                    .of(2026, 1, 15, 9, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
-            val timestampEvening =
-                LocalDateTime
-                    .of(2026, 1, 15, 18, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
+            val timestampMorning = timestamp(9)
+            val timestampEvening = timestamp(18)
             val itemMorning = ItemEntity(title = "Событие утро", timestamp = timestampMorning)
             val itemEvening = ItemEntity(title = "Событие вечер", timestamp = timestampEvening)
 
@@ -404,18 +391,8 @@ class ItemDaoTest {
     fun deleteAllItems_then_reinsert_preservesTimestampOrder() =
         runBlocking {
             // Given — same day, different time-of-day
-            val timestampA =
-                LocalDateTime
-                    .of(2026, 1, 15, 9, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
-            val timestampB =
-                LocalDateTime
-                    .of(2026, 1, 15, 18, 0, 0)
-                    .atZone(ZoneId.of("UTC"))
-                    .toInstant()
-                    .toEpochMilli()
+            val timestampA = timestamp(9)
+            val timestampB = timestamp(18)
 
             // Insert both and capture original order
             itemDao.insertItem(ItemEntity(title = "A (09:00)", timestamp = timestampA))

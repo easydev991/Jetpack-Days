@@ -45,6 +45,12 @@ import java.time.ZoneId
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class CreateEditScreenViewModelTest {
+    private fun Long.toTestLocalDate(): LocalDate =
+        Instant
+            .ofEpochMilli(this)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
     private lateinit var repository: FakeItemRepositoryWithLoggingDisabled
     private lateinit var resourceProvider: FakeResourceProvider
     private lateinit var viewModel: CreateEditScreenViewModel
@@ -472,7 +478,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = "Измененное название",
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -505,7 +511,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = "Измененное описание",
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -538,7 +544,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp + 86400000L).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = (testItem.timestamp + 86400000L).toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -571,7 +577,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = 0xFFFF0000.toInt(),
                     displayOption = testItem.displayOption
                 )
@@ -604,7 +610,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = DisplayOption.YEAR_MONTH_DAY
                 )
@@ -637,7 +643,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -673,7 +679,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = itemWithFixedTimestamp.title,
                     details = itemWithFixedTimestamp.details,
-                    selectedDate = Instant.ofEpochMilli(fixedTimestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = fixedTimestamp.toTestLocalDate(),
                     colorTag = itemWithFixedTimestamp.colorTag,
                     displayOption = itemWithFixedTimestamp.displayOption
                 )
@@ -714,7 +720,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = itemWithFixedTimestamp.title,
                     details = itemWithFixedTimestamp.details,
-                    selectedDate = Instant.ofEpochMilli(nextDayTimestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = nextDayTimestamp.toTestLocalDate(),
                     colorTag = itemWithFixedTimestamp.colorTag,
                     displayOption = itemWithFixedTimestamp.displayOption
                 )
@@ -794,7 +800,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = "Измененное название",
                     details = testItem.details,
-                    selectedDate = Instant.ofEpochMilli(testItem.timestamp).atZone(ZoneId.systemDefault()).toLocalDate(),
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )

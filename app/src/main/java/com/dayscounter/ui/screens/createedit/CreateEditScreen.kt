@@ -212,20 +212,13 @@ private fun CreateEditUiState.toItem(
         checkNotNull(selectedDate) {
             "selectedDate must not be null at save time — SaveButton should be disabled"
         }
+    val time = originalTimeOfDay ?: LocalTime.now()
     val timestamp =
-        if (originalTimeOfDay != null) {
-            date
-                .atTime(originalTimeOfDay)
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-        } else {
-            date
-                .atTime(LocalTime.now())
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-        }
+        date
+            .atTime(time)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
 
     return Item(
         id = itemId ?: 0L,
