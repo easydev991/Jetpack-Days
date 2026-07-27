@@ -33,6 +33,6 @@
 
 - [x] 5.1 Создать `demo old` и `demo new` с одинаковой датой 26 июля; переключить «старые→новые» — порядок `demo old`, `demo new`; переключить «новые→старые» — порядок `demo new`, `demo old`.
 - [x] 5.2 Отредактировать `demo old` — убедиться, что оно не стало новым.
-- [ ] 5.3 **Заблокировано.** Backup → factory reset → restore выявил два pre-existing бага (НЕ от этого change):
-  1. **Файл-коррупция** (`/sdcard/Download/Days backup.json`, 429 байт, последние 21 — мусор `"\n        }\n    ]\n}`). BackupWrapper-decode падает, парсер ошибочно валится в fallback `List<BackupItem>`, ошибка "Expected array, got object" вводит в заблуждение. Требует отдельного расследования `ExportBackupUseCase` (truncate mode? гонка write? ручная правка?).
-  2. **Порядок после restore переворачивается**: id как tiebreaker + autoincrement-reset после factory reset = для одинаковой даты события видим `[old, new]` вместо исходного `[new, old]`. Корректное решение — добавить `createdAt` в `BackupItem`, что выходит за scope этого change. До фикса в `BackupItem` это ограничение задокументировано.
+- [x] 5.3 **Протестировано без краша.** Backup → factory reset → restore — успешно. Выявлено:
+  1. Оставшийся pre-existing баг: **порядок после restore переворачивается** — id как tiebreaker + autoincrement-reset после factory reset = для одинаковой даты события видим `[old, new]` вместо исходного `[new, old]`. Корректное решение — см. change `timestamp-sort-priority-over-id`.
+  2. Файл-коррупция: будет оформлена отдельной задачей.
