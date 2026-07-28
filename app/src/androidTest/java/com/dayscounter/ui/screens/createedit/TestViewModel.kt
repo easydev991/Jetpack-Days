@@ -53,7 +53,7 @@ private fun createTestItemRepository(): ItemRepository =
 /**
  * Создаёт тестовый провайдер ресурсов с пустой реализацией.
  */
-private fun createTestResourceProvider(): ResourceProvider =
+internal fun createTestResourceProvider(): ResourceProvider =
     object : ResourceProvider {
         override fun getString(
             resId: Int,
