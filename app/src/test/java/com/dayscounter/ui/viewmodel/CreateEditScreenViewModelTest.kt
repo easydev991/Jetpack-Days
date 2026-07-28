@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /**
@@ -779,6 +780,24 @@ class CreateEditScreenViewModelTest {
     }
 
     @Test
+    fun originalTimeOfDay_whenItemHasAfternoonTimestamp_returnsCorrectTime() {
+        runTest {
+            val vm = createViewModelWithTimestamp(14, 30)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(LocalTime.of(14, 30), vm.originalTimeOfDay)
+        }
+    }
+
+    @Test
+    fun originalTimeOfDay_whenItemHasMidnightTimestamp_returnsMidnight() {
+        runTest {
+            val vm = createViewModelWithTimestamp(0, 0)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(LocalTime.of(0, 0), vm.originalTimeOfDay)
+        }
+    }
+
+    @Test
     fun whenResetHasChanges_thenHasChangesIsFalse() {
         runTest {
             // Given - ViewModel с загруженным элементом и обнаруженными изменениями
@@ -897,6 +916,31 @@ class CreateEditScreenViewModelTest {
                 "Прошедшее напоминание не должно пробрасываться в edit-форму"
             )
         }
+    }
+
+    /**
+     * Создаёт ViewModel с загруженным Item, timestamp которого соответствует
+     * заданному часу/минуте на 2026-01-15.
+     */
+    private fun createViewModelWithTimestamp(
+        hour: Int,
+        minute: Int
+    ): CreateEditScreenViewModel {
+        val timestamp =
+            LocalDate
+                .of(2026, 1, 15)
+                .atTime(hour, minute)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        repository.setItemForGetById(testItem.copy(timestamp = timestamp))
+        return CreateEditScreenViewModel(
+            repository,
+            resourceProvider,
+            NoOpLogger(),
+            SavedStateHandle(mapOf("itemId" to 1L)),
+            noOpAnalyticsService
+        )
     }
 
     /**
