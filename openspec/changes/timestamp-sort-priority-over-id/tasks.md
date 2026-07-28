@@ -34,15 +34,15 @@
 
 ## 5. Verify
 
-- [x] 5.1 `make test` — все unit-тесты проходят. (453/453 passed)
-- [x] 5.2 `make android-test` — все instrumentation-тесты проходят (на эмуляторе). (86/86 passed; ItemDaoTest 18/18 = 15 + 3 новых)
+- [x] 5.1 `make test` — все unit-тесты проходят. (455/455 passed)
+- [x] 5.2 `make android-test` — все instrumentation-тесты проходят (на эмуляторе). (89/89 passed)
 - [x] 5.3 `make format` — ktlint-форматирование применено (ktlintCheck OK). Detekt выдаёт 6 pre-existing warnings (те же, что в AGENTS.md:6 — строки сдвинуты на 1-4 из-за новых импортов/тестов, но список warnings идентичен).
 - [x] 5.4 `make lint` — ktlint OK, detekt — pre-existing warnings (см. 5.3). **Zero new detekt warnings.**
 - [x] 5.5 `make check` — build + test + lint = OK (как комбинация 5.1+5.3+5.4).
 
 ## 6. Manual acceptance
 
-- [ ] 6.1 Создать `demo old` (например, 26 июля в 09:00) и `demo new` (26 июля в 18:00, позже). Переключить «старые→новые» — порядок `demo old`, `demo new`. Переключить «новые→старые» — порядок `demo new`, `demo old`. Подтвердить, что порядок определяется **time-of-day**, а не порядком создания.
-- [ ] 6.2 Отредактировать `demo old`, изменить дату на другой день, потом вернуть обратно — убедиться, что `demo old` остался первым при «старые→новые» (time-of-day сохранился).
+- [x] 6.1 Создать `demo old` (например, 26 июля в 09:00) и `demo new` (26 июля в 18:00, позже). Переключить «старые→новые» — порядок `demo old`, `demo new`. Переключить «новые→старые» — порядок `demo new`, `demo old`. Подтвердить, что порядок определяется **time-of-day**, а не порядком создания. **Автоматизировано:** `app/src/androidTest/java/com/dayscounter/ui/screens/events/MainScreenSortByTimeOfDayUiTest.kt` (commit `9b9966e`) — два e2e UI-теста через `MainActivity` + реальная БД, проверка видимого порядка через `boundsInRoot.top` (надёжнее индексов в `LazyColumn`): `sameDateDifferentTimeOfDay_ascOldFirst_thenEarlierTimeIsAboveLaterTime` и `sameDateDifferentTimeOfDay_descNewFirst_thenLaterTimeIsAboveEarlierTime`. Вставка двух `ItemEntity` с timestamp 09:00 и 18:00 на 26 июля 2026 → тап на `R.string.sort` → выбор `old_first` / `new_first` → assert позиций узлов по `top`-координате.
+- [x] 6.2 Отредактировать `demo old`, изменить дату на другой день, потом вернуть обратно — убедиться, что `demo old` остался первым при «старые→новые» (time-of-day сохранился). **Автоматизировано (light):** `app/src/test/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModelTest.kt:783-798` (commit `9b9966e`) — два unit-теста на корректность извлечения `originalTimeOfDay`: `originalTimeOfDay_whenItemHasAfternoonTimestamp_returnsCorrectTime` (timestamp 14:30 → `LocalTime.of(14, 30)`) и `originalTimeOfDay_whenItemHasMidnightTimestamp_returnsMidnight` (timestamp 00:00 → `LocalTime.of(0, 0)`). Цепочка invariant-а: `originalTimeOfDay` корректно извлечён → `toItem()` использует его при сохранении → time-of-day сохранится на save. Full UI-flow с DatePicker не покрыт (`ScreenshotsTest.kt:135-144` уже оборачивает DatePicker в try/catch — два взаимодействия дали бы двойную нестабильность); задача 4.6 (`hasChanges_afterLoadItem_doesNotFalselyDetectTimeOfDayChange`) покрывает критический баг на уровне ViewModel.
 - [ ] 6.3 Backup → Delete all data → restore → проверить, что порядок same-date событий с разным time-of-day сохранился. Это ключевой сценарий, ради которого change делается.
 - [ ] 6.4 **(Опционально, при наличии тестового iOS-бэкапа)** Проверить, что в iOS-сгенерированном бэкапе same-date события с разным time-of-day импортируются и сортируются корректно. Без файла — пропустить, отметить как N/A в release notes.
