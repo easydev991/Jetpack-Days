@@ -427,6 +427,15 @@ class DetailScreenViewModelTest {
     private class FakeItemRepository : ItemRepository {
         private val items = MutableStateFlow<List<Item>>(emptyList())
 
+        private fun List<Item>.sortedByOrder(sortOrder: com.dayscounter.domain.model.SortOrder): List<Item> =
+            when (sortOrder) {
+                com.dayscounter.domain.model.SortOrder.ASCENDING -> sortedWith(compareBy({ it.timestamp }, { it.id }))
+                com.dayscounter.domain.model.SortOrder.DESCENDING ->
+                    sortedWith(
+                        compareByDescending<Item> { it.timestamp }.thenByDescending { it.id }
+                    )
+            }
+
         fun setItem(item: Item) {
             items.value = listOf(item)
         }
@@ -435,7 +444,8 @@ class DetailScreenViewModelTest {
 
         override fun getAllItems(): Flow<List<Item>> = items
 
-        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> = items
+        override fun getAllItems(sortOrder: com.dayscounter.domain.model.SortOrder): Flow<List<Item>> =
+            items.map { it.sortedByOrder(sortOrder) }
 
         override suspend fun getItemById(id: Long): Item? {
             // Без задержки для тестов - getItemFlow используется для загрузки в ViewModel

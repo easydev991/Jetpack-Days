@@ -26,6 +26,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 /**
  * ViewModel для управления состоянием экрана создания/редактирования события.
@@ -75,6 +79,12 @@ class CreateEditScreenViewModel(
     private val _hasChanges = MutableStateFlow(false)
     val hasChanges: StateFlow<Boolean> = _hasChanges.asStateFlow()
 
+    val originalTimeOfDay: LocalTime?
+        get() =
+            _originalItem.value?.let { item ->
+                Instant.ofEpochMilli(item.timestamp).atZone(ZoneId.systemDefault()).toLocalTime()
+            }
+
     init {
         if (itemId != null) {
             loadItem()
@@ -97,10 +107,13 @@ class CreateEditScreenViewModel(
 
     fun checkHasChanges(changeInput: CreateEditChangeInput) {
         val original = _originalItem.value ?: return
+        val originalLocalDate =
+            Instant.ofEpochMilli(original.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
+        val dateChanged = changeInput.selectedDate != originalLocalDate
         val hasChanges =
             changeInput.title != original.title ||
                 changeInput.details != original.details ||
-                changeInput.timestamp != original.timestamp ||
+                dateChanged ||
                 changeInput.colorTag != original.colorTag ||
                 changeInput.displayOption != original.displayOption ||
                 changeInput.reminderFingerprint != originalReminderFingerprint.value
@@ -244,7 +257,7 @@ class CreateEditScreenViewModel(
 data class CreateEditChangeInput(
     val title: String,
     val details: String,
-    val timestamp: Long,
+    val selectedDate: LocalDate?,
     val colorTag: Int?,
     val displayOption: com.dayscounter.domain.model.DisplayOption,
     val reminderFingerprint: String? = null

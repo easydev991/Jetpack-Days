@@ -15,9 +15,18 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 class ItemDaoTest {
+    private fun timestamp(hour: Int): Long =
+        LocalDateTime
+            .of(2026, 1, 15, hour, 0, 0)
+            .atZone(ZoneId.of("UTC"))
+            .toInstant()
+            .toEpochMilli()
+
     private lateinit var database: DaysDatabase
     private lateinit var itemDao: ItemDao
 
@@ -86,6 +95,85 @@ class ItemDaoTest {
             assertEquals("Событие 3", allItems[0].title)
             assertEquals("Событие 2", allItems[1].title)
             assertEquals("Событие 1", allItems[2].title)
+        }
+
+    @Test
+    fun getAllItems_whenSameTimestamp_thenSortedByIdDesc() =
+        runBlocking {
+            // Given — items with same timestamp but inserted later = higher id
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItems().first()
+
+            // Then — DESC: larger id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemB.title, allItems[0].title)
+            assertEquals(itemA.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItemsAsc_whenSameTimestamp_thenSortedByIdAsc() =
+        runBlocking {
+            // Given
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItemsAsc().first()
+
+            // Then — ASC: smaller id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemA.title, allItems[0].title)
+            assertEquals(itemB.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItemsDesc_whenSameTimestamp_thenSortedByIdDesc() =
+        runBlocking {
+            // Given
+            val timestamp = 2000000000000L
+            val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
+            val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
+            val idA = itemDao.insertItem(itemA)
+            val idB = itemDao.insertItem(itemB)
+
+            // When
+            val allItems = itemDao.getAllItemsDesc().first()
+
+            // Then — DESC: larger id first
+            assertEquals(2, allItems.size)
+            assertEquals(itemB.title, allItems[0].title)
+            assertEquals(itemA.title, allItems[1].title)
+        }
+
+    @Test
+    fun getAllItems_whenDifferentTimestamps_thenTimestampDominates() =
+        runBlocking {
+            // Given — A (same date, older id), B (same date, newer id), C (different date, between them in id)
+            val timestampA = 1000000000000L
+            val timestampB = 3000000000000L
+            val itemOld = ItemEntity(title = "Старое", timestamp = timestampA)
+            val itemNew = ItemEntity(title = "Новое", timestamp = timestampB)
+            val itemSame = ItemEntity(title = "Среднее", timestamp = timestampA)
+            itemDao.insertItem(itemOld)
+            itemDao.insertItem(itemNew)
+            itemDao.insertItem(itemSame)
+
+            // When
+            val allItems = itemDao.getAllItems().first()
+
+            // Then — timestamp dominates, id is only tiebreaker within same timestamp
+            assertEquals("Новое", allItems[0].title) // newest timestamp first
+            assertEquals("Среднее", allItems[1].title) // same timestamp as Old, but inserted later → larger id
+            assertEquals("Старое", allItems[2].title)
         }
 
     @Test
@@ -244,5 +332,86 @@ class ItemDaoTest {
 
             // Then
             assertEquals(0, count)
+        }
+
+    @Test
+    fun getAllItems_getAllItemsDesc_getAllItemsAsc_whenSameDateDifferentTimeOfDay() =
+        runBlocking {
+            // Given — same day, different time-of-day
+            val timestampA = timestamp(9)
+            val timestampB = timestamp(18)
+            val itemA = ItemEntity(title = "A (09:00)", timestamp = timestampA)
+            val itemB = ItemEntity(title = "B (18:00)", timestamp = timestampB)
+
+            itemDao.insertItem(itemA)
+            itemDao.insertItem(itemB)
+
+            // When
+            val allDesc = itemDao.getAllItems().first()
+            val allDescExplicit = itemDao.getAllItemsDesc().first()
+            val allAsc = itemDao.getAllItemsAsc().first()
+
+            // Then — DESC: larger timestamp (B) first
+            assertEquals(2, allDesc.size)
+            assertEquals(itemB.title, allDesc[0].title)
+            assertEquals(itemA.title, allDesc[1].title)
+
+            assertEquals(2, allDescExplicit.size)
+            assertEquals(itemB.title, allDescExplicit[0].title)
+            assertEquals(itemA.title, allDescExplicit[1].title)
+
+            // Then — ASC: smaller timestamp (A) first
+            assertEquals(2, allAsc.size)
+            assertEquals(itemA.title, allAsc[0].title)
+            assertEquals(itemB.title, allAsc[1].title)
+        }
+
+    @Test
+    fun searchItems_whenSameDateDifferentTimeOfDay_returnsByTimeOfDay() =
+        runBlocking {
+            // Given — same day, different time-of-day, both titles contain "Событие"
+            val timestampMorning = timestamp(9)
+            val timestampEvening = timestamp(18)
+            val itemMorning = ItemEntity(title = "Событие утро", timestamp = timestampMorning)
+            val itemEvening = ItemEntity(title = "Событие вечер", timestamp = timestampEvening)
+
+            itemDao.insertItem(itemMorning)
+            itemDao.insertItem(itemEvening)
+
+            // When
+            val results = itemDao.searchItems("Событие").first()
+
+            // Then — DESC: вечер (larger timestamp) first, then утро
+            assertEquals(2, results.size)
+            assertEquals(itemEvening.title, results[0].title)
+            assertEquals(itemMorning.title, results[1].title)
+        }
+
+    @Test
+    fun deleteAllItems_then_reinsert_preservesTimestampOrder() =
+        runBlocking {
+            // Given — same day, different time-of-day
+            val timestampA = timestamp(9)
+            val timestampB = timestamp(18)
+
+            // Insert both and capture original order
+            itemDao.insertItem(ItemEntity(title = "A (09:00)", timestamp = timestampA))
+            itemDao.insertItem(ItemEntity(title = "B (18:00)", timestamp = timestampB))
+
+            val beforeDelete = itemDao.getAllItems().first()
+            val expectedOrder = beforeDelete.map { it.title }
+
+            // When — delete all, then re-insert with same timestamps (new instances, different ids)
+            itemDao.deleteAllItems()
+
+            itemDao.insertItem(ItemEntity(title = "A (09:00)", timestamp = timestampA))
+            itemDao.insertItem(ItemEntity(title = "B (18:00)", timestamp = timestampB))
+
+            val afterReinsert = itemDao.getAllItems().first()
+
+            // Then — same relative order as before (B before A in DESC)
+            assertEquals(2, afterReinsert.size)
+            assertEquals(expectedOrder[0], afterReinsert[0].title)
+            assertEquals(expectedOrder[1], afterReinsert[1].title)
         }
 }

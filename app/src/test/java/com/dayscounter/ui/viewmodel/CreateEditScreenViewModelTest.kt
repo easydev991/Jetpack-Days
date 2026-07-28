@@ -36,12 +36,22 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 /**
  * Unit-тесты для CreateEditScreenViewModel.
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class CreateEditScreenViewModelTest {
+    private fun Long.toTestLocalDate(): LocalDate =
+        Instant
+            .ofEpochMilli(this)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
     private lateinit var repository: FakeItemRepositoryWithLoggingDisabled
     private lateinit var resourceProvider: FakeResourceProvider
     private lateinit var viewModel: CreateEditScreenViewModel
@@ -469,7 +479,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = "Измененное название",
                     details = testItem.details,
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -502,7 +512,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = "Измененное описание",
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -535,7 +545,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    timestamp = testItem.timestamp + 86400000L,
+                    selectedDate = (testItem.timestamp + 86400000L).toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -568,7 +578,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = 0xFFFF0000.toInt(),
                     displayOption = testItem.displayOption
                 )
@@ -601,7 +611,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = DisplayOption.YEAR_MONTH_DAY
                 )
@@ -634,7 +644,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = testItem.title,
                     details = testItem.details,
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -670,7 +680,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = itemWithFixedTimestamp.title,
                     details = itemWithFixedTimestamp.details,
-                    timestamp = fixedTimestamp, // Тот же самый timestamp
+                    selectedDate = fixedTimestamp.toTestLocalDate(),
                     colorTag = itemWithFixedTimestamp.colorTag,
                     displayOption = itemWithFixedTimestamp.displayOption
                 )
@@ -711,7 +721,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = itemWithFixedTimestamp.title,
                     details = itemWithFixedTimestamp.details,
-                    timestamp = nextDayTimestamp, // На 1 день позже
+                    selectedDate = nextDayTimestamp.toTestLocalDate(),
                     colorTag = itemWithFixedTimestamp.colorTag,
                     displayOption = itemWithFixedTimestamp.displayOption
                 )
@@ -722,6 +732,68 @@ class CreateEditScreenViewModelTest {
                 newViewModel.hasChanges.value,
                 "При изменении timestamp на 1 день изменения должны быть обнаружены"
             )
+        }
+    }
+
+    @Test
+    fun checkHasChanges_afterLoadItem_doesNotFalselyDetectTimeOfDayChange() {
+        runTest {
+            // Given - ViewModel с загруженным элементом с time-of-day в timestamp
+            val fixedTimestamp =
+                LocalDate
+                    .of(2026, 1, 15)
+                    .atTime(14, 30)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+            val itemWithTimeOfDay = testItem.copy(timestamp = fixedTimestamp)
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L))
+            repository.setItemForGetById(itemWithTimeOfDay)
+
+            // When - Создаем ViewModel и проверяем изменения без касания формы
+            val newViewModel =
+                CreateEditScreenViewModel(
+                    repository,
+                    resourceProvider,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    noOpAnalyticsService
+                )
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            newViewModel.checkHasChanges(
+                CreateEditChangeInput(
+                    title = itemWithTimeOfDay.title,
+                    details = itemWithTimeOfDay.details,
+                    selectedDate = LocalDate.of(2026, 1, 15),
+                    colorTag = itemWithTimeOfDay.colorTag,
+                    displayOption = itemWithTimeOfDay.displayOption
+                )
+            )
+
+            // Then - Изменений не должно быть (time-of-day не влияет на hasChanges)
+            assertFalse(
+                newViewModel.hasChanges.value,
+                "Time-of-day не должен влиять на определение изменений"
+            )
+        }
+    }
+
+    @Test
+    fun originalTimeOfDay_whenItemHasAfternoonTimestamp_returnsCorrectTime() {
+        runTest {
+            val vm = createViewModelWithTimestamp(14, 30)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(LocalTime.of(14, 30), vm.originalTimeOfDay)
+        }
+    }
+
+    @Test
+    fun originalTimeOfDay_whenItemHasMidnightTimestamp_returnsMidnight() {
+        runTest {
+            val vm = createViewModelWithTimestamp(0, 0)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(LocalTime.of(0, 0), vm.originalTimeOfDay)
         }
     }
 
@@ -747,7 +819,7 @@ class CreateEditScreenViewModelTest {
                 CreateEditChangeInput(
                     title = "Измененное название",
                     details = testItem.details,
-                    timestamp = testItem.timestamp,
+                    selectedDate = testItem.timestamp.toTestLocalDate(),
                     colorTag = testItem.colorTag,
                     displayOption = testItem.displayOption
                 )
@@ -844,6 +916,31 @@ class CreateEditScreenViewModelTest {
                 "Прошедшее напоминание не должно пробрасываться в edit-форму"
             )
         }
+    }
+
+    /**
+     * Создаёт ViewModel с загруженным Item, timestamp которого соответствует
+     * заданному часу/минуте на 2026-01-15.
+     */
+    private fun createViewModelWithTimestamp(
+        hour: Int,
+        minute: Int
+    ): CreateEditScreenViewModel {
+        val timestamp =
+            LocalDate
+                .of(2026, 1, 15)
+                .atTime(hour, minute)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        repository.setItemForGetById(testItem.copy(timestamp = timestamp))
+        return CreateEditScreenViewModel(
+            repository,
+            resourceProvider,
+            NoOpLogger(),
+            SavedStateHandle(mapOf("itemId" to 1L)),
+            noOpAnalyticsService
+        )
     }
 
     /**

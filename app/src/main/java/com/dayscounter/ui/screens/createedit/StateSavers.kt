@@ -8,84 +8,18 @@ import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
-/**
- * Saver для LocalDate (non-null).
- */
-val LocalDateSaver: Saver<LocalDate, Long> =
-    Saver(
-        save = { localDate ->
-            localDate
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-        },
-        restore = { epochMilli ->
-            Instant
-                .ofEpochMilli(epochMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
-        }
-    )
-
-/**
- * Saver для Color (nullable).
- * Использует -1 как sentinel значение для null.
- */
-val NullableColorSaver: Saver<Color?, Int> =
-    Saver(
-        save = { color -> color?.toArgb() ?: -1 },
-        restore = { argb ->
-            if (argb == -1) {
-                null
-            } else {
-                Color(argb)
-            }
-        }
-    )
-
-/**
- * Saver для DisplayOption (non-null).
- */
-@Suppress("SwallowedException")
-val DisplayOptionSaver: Saver<DisplayOption, String> =
-    Saver(
-        save = { option -> option.name },
-        restore = { name ->
-            try {
-                DisplayOption.valueOf(name)
-            } catch (e: IllegalArgumentException) {
-                DisplayOption.DAY
-            }
-        }
-    )
-
-/**
- * Saver для LocalDate? (nullable).
- * Использует -1L как sentinel значение для null.
- */
-val NullableLocalDateSaver: Saver<LocalDate?, Long> =
-    Saver(
-        save = { localDate ->
-            localDate?.let {
-                it
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-            } ?: -1L
-        },
-        restore = { epochMilli ->
-            if (epochMilli == -1L) {
-                null
-            } else {
-                Instant
-                    .ofEpochMilli(epochMilli)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-            }
-        }
-    )
+// ponytail: 4× дублирование atTime→atZone→toInstant→toEpochMilli вынесено в extension.
+// time-of-day = now() — допустимо, т.к. LocalDate не несёт значимого времени;
+// реальный источник истины — Item.timestamp в БД, загружаемый через loadItemData после restore.
+private fun LocalDate.toBundleMillis(): Long =
+    this
+        .atTime(LocalTime.now())
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
 
 /**
  * Saver для ReminderFormUiState.
@@ -98,9 +32,7 @@ val ReminderFormUiStateSaver: Saver<ReminderFormUiState, List<Any?>> =
             listOf(
                 state.isEnabled,
                 state.mode.name,
-                state.selectedDate?.let { date ->
-                    date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                },
+                state.selectedDate?.toBundleMillis(),
                 state.showDatePicker,
                 state.hour,
                 state.minute,
@@ -153,9 +85,7 @@ val CreateEditUiStateSaver: Saver<CreateEditUiState, List<Any?>> =
             listOf(
                 state.title,
                 state.details,
-                state.selectedDate?.let { date ->
-                    date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                },
+                state.selectedDate?.toBundleMillis(),
                 state.selectedColor?.toArgb(),
                 state.selectedDisplayOption.name,
                 state.showDatePicker,
