@@ -1,5 +1,11 @@
 package com.dayscounter.ui.screens.events
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -147,6 +154,9 @@ private fun ScreenHeader(state: MainScreenTopBarState) {
 
 /**
  * Тело экрана со списком и полем поиска.
+ *
+ * Верхний паддинг TopAppBar вынесен на сам [Column], чтобы высота поля поиска
+ * изменялась плавно внутри [AnimatedVisibility] без перерасчёта паддингов у списка.
  */
 @Composable
 private fun ScreenBody(
@@ -156,32 +166,39 @@ private fun ScreenBody(
     state: MainScreenContentState,
     onSearchQueryChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                    bottom = 0.dp
+                )
+    ) {
         val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
-        if (showSearchField) {
+        AnimatedVisibility(
+            visible = showSearchField,
+            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(200))
+        ) {
             SearchField(
                 searchQuery = searchQuery,
                 onSearchQueryChange = onSearchQueryChange,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(
-                            PaddingValues(
-                                top = paddingValues.calculateTopPadding(),
-                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                                bottom = 0.dp
-                            )
-                        ).padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = dimensionResource(R.dimen.spacing_regular))
             )
         }
         MainScreenContentByState(
             state = state,
             paddingValues =
                 PaddingValues(
-                    top = if (showSearchField) 0.dp else paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                    top = 0.dp,
+                    start = 0.dp,
+                    end = 0.dp,
                     bottom = paddingValues.calculateBottomPadding()
                 )
         )
