@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import com.dayscounter.R
 import com.dayscounter.domain.model.SortOrder
@@ -208,6 +211,13 @@ internal fun ErrorContent(
 
 /**
  * Поле поиска для фильтрации списка записей.
+ *
+ * Использует не-deprecated сигнатуру `SearchBar(inputField, expanded, onExpandedChange)`
+ * из material3 1.4.0 (`SearchBar.kt:534`). Режим разворота (`expanded = true`) намеренно не
+ * используется: показ/скрытие поля управляется отдельным `AnimatedVisibility` в [ScreenBody].
+ * `trailingIcon` (крестик очистки) отрисовывается через слот `SearchBarDefaults.InputField.trailingIcon`
+ * — Material3 сам позиционирует его внутри Surface inputField (`SearchBar.kt:1711-1714`), отдельная
+ * overlay-обёртка не требуется.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -216,29 +226,39 @@ internal fun SearchField(
     onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
-        value = searchQuery,
-        onValueChange = onSearchQueryChange,
-        placeholder = {
-            Text(stringResource(R.string.search))
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(R.string.search)
+    SearchBar(
+        inputField = {
+            SearchBarDefaults.InputField(
+                query = searchQuery,
+                onQueryChange = onSearchQueryChange,
+                onSearch = { },
+                expanded = false,
+                onExpandedChange = { },
+                placeholder = { Text(stringResource(R.string.search)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.search)
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.close)
+                            )
+                        }
+                    }
+                }
             )
         },
-        trailingIcon = {
-            if (searchQuery.isNotEmpty()) {
-                IconButton(onClick = { onSearchQueryChange("") }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close)
-                    )
-                }
-            }
-        },
-        singleLine = true,
-        modifier = modifier
-    )
+        expanded = false,
+        onExpandedChange = { },
+        modifier = modifier,
+        windowInsets = WindowInsets(0, 0, 0, 0)
+    ) {
+        // пустой content: suggestions/историю не показываем,
+        // in-memory фильтрация уже применена через ViewModel
+    }
 }

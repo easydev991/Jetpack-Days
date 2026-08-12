@@ -24,7 +24,7 @@ Main Screen является основным экраном приложени�
 
 ✅ **Все тесты проходят успешно**:
 
-- Unit-тесты для ViewModel: 10 тестов
+- Unit-тесты для ViewModel: 23 теста
 - Интеграционные тесты: DAO, Database, Repository
 - Компонентные тесты UI: DaysCountText — 7 тестов
 - ✅ ktlintCheck пройден успешно, сборка успешна
@@ -55,14 +55,14 @@ Main Screen является основным экраном приложени�
 - [x] Диалог подтверждения удаления записи
 - [x] Выделение выбранного элемента списка
 - [x] Проверка линтеров (ktlint) — ✅ пройдено
-- [ ] UI-тесты для MainScreen (опционально)
+- [x] UI-тесты для MainScreen (`MainScreenSearchVisibilityUiTest` — 5 тестов, анимация Show/Hide SearchBar)
 - [ ] Проверка detekt (статический анализ) — опционально
 
 ### UI требования
 
 - [x] Список записей в LazyColumn
 - [x] Карточка записи с количеством дней и цветовой меткой
-- [x] SearchField (OutlinedTextField) для поиска записей — отображается при наличии 5+ записей или при активном поиске
+- [x] SearchField (SearchBar из material3) для поиска записей — отображается при 5+ записях или активном поиске с анимацией expandVertically/shrinkVertically + fadeIn/fadeOut (tween 200ms)
 - [x] Кнопка сортировки (возрастание/убывание) — отображается при наличии 2+ записей
 - [x] Кнопка добавления новой записи (+)
 - [x] Контекстное меню при длинном нажатии (Просмотр/Редактирование/Удаление)
@@ -124,7 +124,7 @@ Main Screen является основным экраном приложени�
 - **4.1** ListItemView — карточка записи, 7 preview-вариантов
 - **4.2** EmptyState — 4 варианта (empty, search, loading, error)
 - **4.3** Toolbar — сортировка (возрастание/убывание), заголовок "События"
-- **4.4** MainScreen — `ui/screens/events/MainScreen.kt` — LazyColumn, SearchField (OutlinedTextField), SwipeToDismissBox, состояния
+- **4.4** MainScreen — `ui/screens/events/MainScreen.kt` — LazyColumn, SearchField (SearchBar), SwipeToDismissBox, состояния
 - **4.5** Context Menu — Просмотр/Редактирование/Удаление, длинное нажатие, выделение
 - **4.6** Delete Dialog — AlertDialog с подтверждением
 - **4.7** RootScreen Integration — `EventsScreenContent()` в `ui/screens/common/RootScreenComponents.kt`, NavHost
@@ -150,7 +150,7 @@ Main Screen является основным экраном приложени�
 ✅ **ВЫПОЛНЕНО**
 
 - Entity, Domain model, DAO (in-memory), Repository — протестированы
-- ViewModel — `ui/viewmodel/MainScreenViewModelTest.kt` (10 тестов с MockK): загрузка, поиск (название/детали, регистронезависимый), сортировка, удаление, пустое состояние
+- ViewModel — `ui/viewmodel/MainScreenViewModelTest.kt` (23 теста с MockK): загрузка, поиск (название/детали, регистронезависимый), сортировка, удаление, пустое состояние
 
 ### Компонентные тесты (Compose Testing)
 
@@ -188,7 +188,7 @@ Main Screen является основным экраном приложени�
 
 - Совместимость с iOS, производительность (LazyColumn), реактивность (Flow), тестирование компонентов
 - ✅ Зависимости: Этап 7 (Модель данных), Этап 6 (Форматирование)
-- ✅ Поиск: SearchField (OutlinedTextField), отображается при 5+ записях или активном поиске
+- ✅ Поиск: SearchField (SearchBar), отображается при 5+ записях с анимацией или активном поиске
 - ✅ Сортировка: SortOrder enum, сохраняется в DataStore
 - ✅ Свайп-действия: SwipeToDismissBox
 - ✅ Factory методы: companion object в CreateEditScreenViewModel и DetailScreenViewModel
@@ -206,7 +206,8 @@ Main Screen является основным экраном приложени�
 ✅ **Исправлено:**
 
 - Краш при открытии экранов CreateEdit и Detail — добавлены factory методы
-- Переделка компонента поиска — SearchField (OutlinedTextField), устранен deprecated API
+- Переделка компонента поиска — ~~SearchField (OutlinedTextField)~~ → SearchBar (material3), устранен deprecated API (V1, устарело)
+- 2026-08-12: V2 — SearchBar (material3) вместо OutlinedTextField, анимация expandVertically/shrinkVertically + fadeIn/fadeOut (tween 200ms), коммиты c8f15f1 → b2297f2
 - Контекстное меню для записей — Просмотр/Редактирование/Удаление, диалог подтверждения, выделение элемента
 - Качество кода — ktlintCheck пройден, все тесты и сборка успешны
 
@@ -233,7 +234,7 @@ Main Screen является основным экраном приложени�
 
 ✅ **Приоритет 2: Реализация функциональности поиска**
 
-- Реализован `SearchBar` → позже заменен на `SearchField` (OutlinedTextField)
+- Реализован `SearchBar` → позже заменен на `SearchField` (SearchBar)
 - Фильтрация по названию и деталям (нечувствительно к регистру) через Combine Flow
 
 ✅ **Приоритет 3: Полная интеграция навигации**
@@ -284,7 +285,8 @@ Main Screen является основным экраном приложени�
 - 2025-01-01: Первоначальный план создания Main Screen
 - 2025-01-02: Исправление краша (factory методы), обновление навигации, актуализация документации (97%)
 - 2026-01-01: Обновление документации — экран полностью реализован
-- 2026-01-02: Переделка поиска (SearchField на OutlinedTextField, условное отображение), контекстное меню, диалог удаления, компонентные тесты (7), проверка качества (ktlint), завершение (100%)
+- 2026-01-02: Переделка поиска (~~SearchField на OutlinedTextField~~ → SearchField (SearchBar), условное отображение), контекстное меню, диалог удаления, компонентные тесты (7), проверка качества (ktlint), завершение (100%)
 - 2026-01-11: Актуализация — весь функционал реализован (100%)
 - 2026-01-15: Реализовано сохранение порядка сортировки в DataStore (ASCENDING/DESCENDING)
 - 2026-01-15: Сжатие описания выполненных пунктов (удаление дублирования)
+- 2026-08-12: UI-тесты видимости SearchBar — `MainScreenSearchVisibilityUiTest` (5 тестов: Show/Hide при 4-5 элементах, анимация, удержание при активном вводе)
