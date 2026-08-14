@@ -30,9 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
@@ -190,6 +193,9 @@ fun ReadSectionView(
 ) {
     val onCopyCallback = onCopy
     var menuVisible by remember { mutableStateOf(false) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var textHeightPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
@@ -201,8 +207,15 @@ fun ReadSectionView(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth()
         )
-        // ponytail: pointerInput + DropdownMenu вешаются только при ненулевом onCopy.
-        Box(modifier = Modifier.fillMaxWidth()) {
+        // ponytail: Material3 1.4 DropdownMenu по умолчанию topToAnchorBottom —
+        // menu.top = anchor.bottom + offset.y. Чтобы top-left меню попал в точку жеста,
+        // вычитаем высоту Text из offset.y: menu.top = Box.top + touchOffset.y = touch.Y.
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .onSizeChanged { textHeightPx = it.height }
+        ) {
             Text(
                 text = bodyText,
                 style = MaterialTheme.typography.bodyLarge,
@@ -213,7 +226,18 @@ fun ReadSectionView(
                         .let { base ->
                             if (onCopyCallback != null) {
                                 base.pointerInput(Unit) {
-                                    detectTapGestures(onLongPress = { menuVisible = true })
+                                    detectTapGestures(
+                                        onLongPress = { touchOffset ->
+                                            menuOffset =
+                                                with(density) {
+                                                    DpOffset(
+                                                        x = touchOffset.x.toDp(),
+                                                        y = (touchOffset.y - textHeightPx).toDp()
+                                                    )
+                                                }
+                                            menuVisible = true
+                                        }
+                                    )
                                 }
                             } else {
                                 base
@@ -223,6 +247,7 @@ fun ReadSectionView(
             if (onCopyCallback != null) {
                 DropdownMenu(
                     expanded = menuVisible,
+                    offset = menuOffset,
                     onDismissRequest = { menuVisible = false }
                 ) {
                     DropdownMenuItem(
