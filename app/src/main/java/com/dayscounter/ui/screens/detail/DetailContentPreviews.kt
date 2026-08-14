@@ -301,6 +301,8 @@ fun DetailContentInnerPreview() {
             )
         DetailContentInner(
             item = item,
+            onCopyTitle = {},
+            onCopyDetails = {},
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
     }
@@ -348,6 +350,8 @@ fun DetailContentInnerSimplePreview() {
             )
         DetailContentInner(
             item = item,
+            onCopyTitle = {},
+            onCopyDetails = {},
             getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
         )
     }

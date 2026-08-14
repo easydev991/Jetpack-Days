@@ -38,12 +38,16 @@ import java.util.Locale
  * Контент по состоянию.
  *
  * @param uiState Состояние экрана
+ * @param onCopyTitle Колбэк копирования title (передаётся в `DetailContentInner` → `ReadSectionView` для title)
+ * @param onCopyDetails Колбэк копирования details (передаётся в `DetailContentInner` → `ReadSectionView` для details)
  * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
  * @param modifier Modifier для компонента
  */
 @Composable
 fun DetailContentByState(
     uiState: DetailScreenState,
+    onCopyTitle: () -> Unit,
+    onCopyDetails: () -> Unit,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier
 ) {
@@ -56,6 +60,8 @@ fun DetailContentByState(
             DetailContentInner(
                 item = uiState.item,
                 reminder = uiState.reminder,
+                onCopyTitle = onCopyTitle,
+                onCopyDetails = onCopyDetails,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
                 modifier = modifier
             )
@@ -75,13 +81,18 @@ fun DetailContentByState(
  * Структура аналогична iOS (VStack с выравниванием по левому краю).
  *
  * @param item Элемент для отображения
+ * @param onCopyTitle Колбэк копирования title (передаётся в `ReadSectionView` для title)
+ * @param onCopyDetails Колбэк копирования details (передаётся в `ReadSectionView` для details)
  * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
  * @param modifier Modifier для компонента
  */
+@Suppress("LongParameterList")
 @Composable
 internal fun DetailContentInner(
     item: Item,
     reminder: Reminder? = null,
+    onCopyTitle: () -> Unit,
+    onCopyDetails: () -> Unit,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier
 ) {
@@ -95,12 +106,14 @@ internal fun DetailContentInner(
     ) {
         ReadSectionView(
             headerText = stringResource(R.string.title),
-            bodyText = item.title
+            bodyText = item.title,
+            onCopy = onCopyTitle
         )
         if (item.details.isNotEmpty()) {
             ReadSectionView(
                 headerText = stringResource(R.string.details),
-                bodyText = item.details
+                bodyText = item.details,
+                onCopy = onCopyDetails
             )
         }
         if (item.colorTag != null) {
@@ -149,12 +162,17 @@ fun ColorTagSection(colorTag: Int) {
  *
  * @param headerText Заголовок секции
  * @param bodyText Текст секции
+ * @param onCopy Колбэк «скопировать и показать снекбар» для body-текста.
+ *               Если `null` (по умолчанию) — секция не реагирует на жесты и не
+ *               отображает контекстное меню. Длинное нажатие и `DropdownMenu`
+ *               навешиваются только при ненулевом `onCopy` (см. stage 4).
  * @param modifier Modifier для компонента
  */
 @Composable
 fun ReadSectionView(
     headerText: String,
     bodyText: String,
+    onCopy: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(

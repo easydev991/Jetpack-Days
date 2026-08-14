@@ -14,12 +14,12 @@
 
 ## 3. Хендлер и снекбар в DetailScreen
 
-- [ ] 3.1 В `DetailScreen.kt` добавить `snackbarHostState = remember { SnackbarHostState() }` и `coroutineScope = rememberCoroutineScope()`; добавить `SnackbarHost(hostState = snackbarHostState)` в `Scaffold`
-- [ ] 3.2 Создать `internal @Composable fun rememberCopyToClipboardHandler(...)` по паттерну `CreateEditScreen.kt:166-187 rememberReminderNotificationsUnavailableHandler` (принимает `ClipboardHelper` интерфейс, возвращает `(label, messageResId, text) -> Unit` lambda)
-- [ ] 3.3 Вызвать `rememberCopyToClipboardHandler` в `DetailScreen`, пробросить в `DetailScreenParams` как `onCopyTitle` / `onCopyDetails`
-- [ ] 3.4 В `DetailScreen` для `Loading`/`Error` веток использовать `onCopyTitle = {}` / `onCopyDetails = {}` (no-op); для `Success` — реальные колбэки с `R.string.title_copied` / `R.string.details_copied`
-- [ ] 3.5 Провинуть `onCopyTitle` / `onCopyDetails` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`
-- [ ] 3.6 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/CopyToClipboardHandlerUiTest.kt` с локальным `FakeClipboardHelper` (метод `copy` управляется из теста через `var nextResult: Result<Unit>`) и тремя случаями: `remembercopytoclipboardhandler_when_invoked_with_title_label_then_shows_title_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_invoked_with_details_label_then_shows_details_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_clipboard_returns_failure_then_no_snackbar_shown` (`nextResult = failure`, проверка отсутствия снекбара через `onNodeWithText(R.string.title_copied).assertDoesNotExist()`)
+- [x] 3.1 В `DetailScreen.kt` добавить `snackbarHostState = remember { SnackbarHostState() }` и `coroutineScope = rememberCoroutineScope()`; добавить `SnackbarHost(hostState = snackbarHostState)` в `Scaffold`
+- [x] 3.2 Создать `internal @Composable fun rememberCopyToClipboardHandler(...)` по паттерну `CreateEditScreen.kt:166-187 rememberReminderNotificationsUnavailableHandler` (принимает `ClipboardHelper` интерфейс, возвращает `(label, messageResId, text) -> Unit` lambda)
+- [x] 3.3 Вызвать `rememberCopyToClipboardHandler` в `DetailScreen`, пробросить в `DetailScreenParams` как `onCopyTitle` / `onCopyDetails`
+- [x] 3.4 В `DetailScreen` для `Loading`/`Error` веток использовать `onCopyTitle = {}` / `onCopyDetails = {}` (no-op); для `Success` — реальные колбэки с `R.string.title_copied` / `R.string.details_copied`
+- [x] 3.5 Провинуть `onCopyTitle` / `onCopyDetails` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`
+- [x] 3.6 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/CopyToClipboardHandlerUiTest.kt` с локальным `FakeClipboardHelper` (метод `copy` управляется из теста через `var nextResult: Result<Unit>`) и тремя случаями: `remembercopytoclipboardhandler_when_invoked_with_title_label_then_shows_title_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_invoked_with_details_label_then_shows_details_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_clipboard_returns_failure_then_no_snackbar_shown` (`nextResult = failure`, проверка отсутствия снекбара через `onNodeWithText(R.string.title_copied).assertDoesNotExist()`)
 
 ## 4. Контекстное меню в ReadSectionView
 

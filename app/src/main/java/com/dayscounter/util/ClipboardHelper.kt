@@ -36,8 +36,9 @@ class SystemClipboardHelper : ClipboardHelper {
         text: String
     ): Result<Unit> =
         runCatching {
-            val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                ?: error("ClipboardManager недоступен")
+            val manager =
+                context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                    ?: error("ClipboardManager недоступен")
             manager.setPrimaryClip(ClipData.newPlainText(label, text))
         }
 }
