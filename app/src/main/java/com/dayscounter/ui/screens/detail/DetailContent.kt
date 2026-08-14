@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
@@ -191,11 +192,6 @@ fun ReadSectionView(
     onCopy: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val onCopyCallback = onCopy
-    var menuVisible by remember { mutableStateOf(false) }
-    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
-    var textHeightPx by remember { mutableStateOf(0) }
-    val density = LocalDensity.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
@@ -210,64 +206,111 @@ fun ReadSectionView(
         // ponytail: Material3 1.4 DropdownMenu по умолчанию topToAnchorBottom —
         // menu.top = anchor.bottom + offset.y. Чтобы top-left меню попал в точку жеста,
         // вычитаем высоту Text из offset.y: menu.top = Box.top + touchOffset.y = touch.Y.
-        Box(
+        ReadSectionBody(bodyText = bodyText, onCopy = onCopy)
+    }
+}
+
+/**
+ * Тело [ReadSectionView]: [Box] с body-текстом и опциональным
+ * контекстным меню копирования. Вынесено из публичной
+ * [ReadSectionView], чтобы родитель оставался в пределах
+ * `LongMethod`-threshold detekt (=60).
+ *
+ * @param bodyText Текст секции
+ * @param onCopy Колбэк копирования; `null` отключает жест и меню
+ * @param modifier Modifier для компонента
+ */
+@Composable
+private fun ReadSectionBody(
+    bodyText: String,
+    onCopy: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    var menuVisible by remember { mutableStateOf(false) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var textHeightPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSizeChanged { textHeightPx = it.height }
+    ) {
+        Text(
+            text = bodyText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .onSizeChanged { textHeightPx = it.height }
-        ) {
-            Text(
-                text = bodyText,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .let { base ->
-                            if (onCopyCallback != null) {
-                                base.pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onLongPress = { touchOffset ->
-                                            menuOffset =
-                                                with(density) {
-                                                    DpOffset(
-                                                        x = touchOffset.x.toDp(),
-                                                        y = (touchOffset.y - textHeightPx).toDp()
-                                                    )
-                                                }
-                                            menuVisible = true
-                                        }
-                                    )
+                    .let { base ->
+                        onCopy?.let {
+                            base.copyOnLongPress(
+                                density = density,
+                                textHeightPx = { textHeightPx },
+                                showMenu = {
+                                    menuOffset = it
+                                    menuVisible = true
                                 }
-                            } else {
-                                base
-                            }
-                        }
-            )
-            if (onCopyCallback != null) {
-                DropdownMenu(
-                    expanded = menuVisible,
-                    offset = menuOffset,
-                    onDismissRequest = { menuVisible = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.context_menu_copy)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.ContentCopy,
-                                contentDescription = null
                             )
-                        },
-                        onClick = {
-                            menuVisible = false
-                            onCopyCallback()
-                        }
-                    )
-                }
+                        } ?: base
+                    }
+        )
+        if (onCopy != null) {
+            DropdownMenu(
+                expanded = menuVisible,
+                offset = menuOffset,
+                onDismissRequest = { menuVisible = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.context_menu_copy)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.ContentCopy,
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        menuVisible = false
+                        onCopy()
+                    }
+                )
             }
         }
     }
 }
+
+/**
+ * Навешивает `pointerInput` с `detectTapGestures(onLongPress)` и компенсирует
+ * `topToAnchorBottom` Material3 1.4: при жесте вызывает [showMenu] с [DpOffset],
+ * который ставит top-left [DropdownMenu] в точку касания — `menu.top =
+ * anchor.top + touchOffset.y`. Из [touchOffset]`.y` вычитается [textHeightPx]
+ * (замеренная высота Text через `Modifier.onSizeChanged`).
+ *
+ * @param density [Density] для px → Dp
+ * @param textHeightPx Геттер текущей высоты Text (px) внутри родительского [Box]
+ * @param showMenu Колбэк показа меню со скорректированным [DpOffset]
+ * @return модификатор с навешенным жестом длинного нажатия
+ */
+private fun Modifier.copyOnLongPress(
+    density: Density,
+    textHeightPx: () -> Int,
+    showMenu: (DpOffset) -> Unit
+): Modifier =
+    pointerInput(Unit) {
+        detectTapGestures(
+            onLongPress = { touchOffset ->
+                showMenu(
+                    with(density) {
+                        DpOffset(
+                            x = touchOffset.x.toDp(),
+                            y = (touchOffset.y - textHeightPx()).toDp()
+                        )
+                    }
+                )
+            }
+        )
+    }
 
 /**
  * Компонент DetailDatePicker - аналог iOS ItemDatePicker.
