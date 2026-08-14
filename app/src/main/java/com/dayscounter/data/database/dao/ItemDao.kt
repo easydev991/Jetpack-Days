@@ -45,7 +45,9 @@ interface ItemDao {
 
     /** Ищет записи в title/details. См. KDoc интерфейса. */
     @Query(
-        "SELECT * FROM items WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%' ORDER BY timestamp DESC, id DESC"
+        "SELECT * FROM items " +
+            "WHERE title LIKE '%' || :searchQuery || '%' OR details LIKE '%' || :searchQuery || '%' " +
+            "ORDER BY timestamp DESC, id DESC"
     )
     fun searchItems(searchQuery: String): Flow<List<ItemEntity>>
 

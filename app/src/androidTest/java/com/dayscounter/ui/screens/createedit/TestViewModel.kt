@@ -18,10 +18,13 @@ import kotlinx.coroutines.flow.flowOf
  */
 fun createTestViewModel(): CreateEditScreenViewModel =
     CreateEditScreenViewModel(
-        repository = createTestItemRepository(),
-        resourceProvider = createTestResourceProvider(),
-        savedStateHandle = SavedStateHandle(),
-        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+        deps =
+            CreateEditScreenViewModel.Deps(
+                repository = createTestItemRepository(),
+                resourceProvider = createTestResourceProvider(),
+                analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+            ),
+        savedStateHandle = SavedStateHandle()
     )
 
 /**

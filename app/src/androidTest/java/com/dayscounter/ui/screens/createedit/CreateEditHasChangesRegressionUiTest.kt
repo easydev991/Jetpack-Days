@@ -17,7 +17,6 @@ import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.ui.theme.JetpackDaysTheme
 import com.dayscounter.ui.viewmodel.CreateEditScreenViewModel
-import com.dayscounter.util.NoOpLogger
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -89,11 +88,13 @@ class CreateEditHasChangesRegressionUiTest {
 
         val viewModel =
             CreateEditScreenViewModel(
-                repository = repository,
-                resourceProvider = createTestResourceProvider(),
-                logger = NoOpLogger(),
-                savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId)),
-                analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+                deps =
+                    CreateEditScreenViewModel.Deps(
+                        repository = repository,
+                        resourceProvider = createTestResourceProvider(),
+                        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+                    ),
+                savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
             )
 
         // When: открываем экран редактирования без изменения данных

@@ -129,11 +129,11 @@ complexity:
     threshold: 600
   LongMethod:
     active: true
-    threshold: 90
+    threshold: 60
   LongParameterList:
     active: true
-    functionThreshold: 8
-    constructorThreshold: 8
+    functionThreshold: 6
+    constructorThreshold: 7
     ignoreDefaultParameters: false
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
@@ -617,7 +617,6 @@ style:
       - '0'
       - '1'
       - '2'
-      - '200'
     ignoreHashCodeFunction: true
     ignorePropertyDeclaration: false
     ignoreLocalVariableDeclaration: false
@@ -634,12 +633,6 @@ style:
     active: false
     maxChainedCalls: 5
   # MaxLineLength отключен - дублирует функционал ktlint
-  MaxLineLength:
-    active: false
-    maxLineLength: 120
-    excludePackageStatements: true
-    excludeImportStatements: true
-    excludeCommentStatements: false
   MayBeConst:
     active: true
   ModifierOrder:
@@ -678,7 +671,7 @@ style:
     active: false
   ReturnCount:
     active: true
-    max: 5
+    max: 2
     excludedFunctions:
       - 'equals'
     excludeLabeled: false

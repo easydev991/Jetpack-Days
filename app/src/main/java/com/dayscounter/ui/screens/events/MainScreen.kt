@@ -10,20 +10,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
@@ -34,11 +29,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -80,6 +73,9 @@ import com.dayscounter.ui.viewmodel.MainScreenViewModel
 
 // Минимальное количество записей для отображения поля поиска
 private const val MIN_ITEMS_FOR_SEARCH = 5
+
+// Длительность анимации появления/скрытия поля поиска
+private const val SEARCH_FIELD_ANIMATION_DURATION_MS = 200
 
 /**
  * Главный экран со списком событий.
@@ -148,7 +144,7 @@ fun MainScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(state: MainScreenTopBarState) {
+internal fun ScreenHeader(state: MainScreenTopBarState) {
     MainScreenTopBar(state = state)
 }
 
@@ -159,7 +155,7 @@ private fun ScreenHeader(state: MainScreenTopBarState) {
  * изменялась плавно внутри [AnimatedVisibility] без перерасчёта паддингов у списка.
  */
 @Composable
-private fun ScreenBody(
+internal fun ScreenBody(
     searchQuery: String,
     itemsCount: Int,
     paddingValues: PaddingValues,
@@ -180,8 +176,8 @@ private fun ScreenBody(
         val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
         AnimatedVisibility(
             visible = showSearchField,
-            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
-            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(200))
+            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(SEARCH_FIELD_ANIMATION_DURATION_MS)),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(SEARCH_FIELD_ANIMATION_DURATION_MS))
         ) {
             SearchField(
                 searchQuery = searchQuery,
@@ -209,7 +205,7 @@ private fun ScreenBody(
  * Диалог подтверждения удаления.
  */
 @Composable
-private fun DeleteDialog(
+internal fun DeleteDialog(
     item: com.dayscounter.domain.model.Item,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
@@ -259,84 +255,40 @@ private fun MainScreenContent(
     val availableColorTags by params.viewModel.availableColorTags.collectAsState()
     val selectedColorTag by params.viewModel.selectedColorTag.collectAsState()
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        contentWindowInsets =
-            WindowInsets
-                .safeDrawing
-                .only(WindowInsetsSides.Horizontal),
-        topBar = {
-            ScreenHeader(
-                state =
-                    MainScreenTopBarState(
-                        itemsCount = itemsCount,
-                        sortOrder = sortOrder,
-                        onSortClick = {
-                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
-                        },
-                        onSortOrderChange = { newSortOrder ->
-                            params.viewModel.updateSortOrder(newSortOrder)
-                        },
-                        availableColorTags = availableColorTags,
-                        selectedColorTag = selectedColorTag,
-                        onFilterClick = {
-                            params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.OPEN_FILTER))
-                            params.viewModel.toggleFilterDialog()
-                        }
-                    )
+    MainScreenScaffold(
+        state =
+            MainScreenScaffoldState(
+                uiState = uiState,
+                searchQuery = searchQuery,
+                sortOrder = sortOrder,
+                itemsCount = itemsCount,
+                listState = listState,
+                availableColorTags = availableColorTags,
+                selectedColorTag = selectedColorTag
+            ),
+        params = params,
+        modifier = modifier
+    )
+
+    MainScreenDialogs(
+        state =
+            MainScreenDialogsState(
+                showDeleteDialog = showDeleteDialog,
+                showFilterDialog = showFilterDialog,
+                availableColorTags = availableColorTags,
+                selectedColorTag = selectedColorTag,
+                onDeleteConfirm = {
+                    params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.DELETE))
+                    params.viewModel.confirmDelete()
+                },
+                onDeleteCancel = { params.viewModel.cancelDelete() },
+                onFilterApply = { colorTag ->
+                    params.viewModel.updateSelectedColorTag(colorTag)
+                    params.viewModel.toggleFilterDialog()
+                },
+                onFilterDismiss = { params.viewModel.toggleFilterDialog() }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = params.onCreateClick
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_item)
-                )
-            }
-        }
-    ) { paddingValues ->
-        ScreenBody(
-            searchQuery = searchQuery,
-            itemsCount = itemsCount,
-            paddingValues = paddingValues,
-            state =
-                MainScreenContentState(
-                    uiState = uiState,
-                    searchQuery = searchQuery,
-                    listState = listState,
-                    getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
-                    onItemClick = params.onItemClick,
-                    onEditClick = params.onEditClick,
-                    viewModel = params.viewModel
-                ),
-            onSearchQueryChange = { params.viewModel.updateSearchQuery(it) }
-        )
-    }
-
-    showDeleteDialog?.let { item ->
-        DeleteDialog(
-            item = item,
-            onConfirm = {
-                params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.DELETE))
-                params.viewModel.confirmDelete()
-            },
-            onCancel = { params.viewModel.cancelDelete() }
-        )
-    }
-
-    if (showFilterDialog) {
-        ColorTagFilterDialog(
-            availableColors = availableColorTags,
-            currentFilter = selectedColorTag,
-            onApply = { colorTag ->
-                params.viewModel.updateSelectedColorTag(colorTag)
-                params.viewModel.toggleFilterDialog()
-            },
-            onDismiss = { params.viewModel.toggleFilterDialog() }
-        )
-    }
+    )
 }
 
 /**
@@ -481,7 +433,7 @@ private fun ItemsListContent(params: ItemsListParams) {
 /**
  * Data class for parameters of main screen top bar.
  */
-private data class MainScreenTopBarState(
+internal data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
     val onSortClick: () -> Unit,
@@ -539,7 +491,7 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
 /**
  * Data class for parameters of main screen content by state.
  */
-private data class MainScreenContentState(
+internal data class MainScreenContentState(
     val uiState: MainScreenState,
     val searchQuery: String,
     val listState: androidx.compose.foundation.lazy.LazyListState,

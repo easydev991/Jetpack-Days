@@ -45,16 +45,28 @@ class CreateEditScreenViewModelReminderTest {
         repository = FakeItemRepository()
         reminderManager = FakeReminderManager()
 
-        viewModel =
-            CreateEditScreenViewModel(
-                repository = repository,
-                resourceProvider = FakeResourceProvider(),
-                logger = NoOpLogger(),
-                savedStateHandle = SavedStateHandle(),
-                analyticsService = analyticsService,
-                reminderManager = reminderManager
-            )
+        viewModel = createTestViewModel(SavedStateHandle())
     }
+
+    /**
+     * Создаёт [CreateEditScreenViewModel] с тестовыми зависимостями.
+     */
+    private fun createTestViewModel(
+        savedStateHandle: SavedStateHandle,
+        reminderManager: ReminderManager = this.reminderManager,
+        analyticsService: AnalyticsService = this.analyticsService
+    ): CreateEditScreenViewModel =
+        CreateEditScreenViewModel(
+            deps =
+                CreateEditScreenViewModel.Deps(
+                    repository = repository,
+                    resourceProvider = FakeResourceProvider(),
+                    analyticsService = analyticsService,
+                    reminderManager = reminderManager,
+                    logger = NoOpLogger()
+                ),
+            savedStateHandle = savedStateHandle
+        )
 
     @AfterEach
     fun tearDown() {
@@ -110,14 +122,7 @@ class CreateEditScreenViewModelReminderTest {
             repository.seed(existingItem)
 
             val editViewModel =
-                CreateEditScreenViewModel(
-                    repository = repository,
-                    resourceProvider = FakeResourceProvider(),
-                    logger = NoOpLogger(),
-                    savedStateHandle = SavedStateHandle(mapOf("itemId" to 5L)),
-                    analyticsService = analyticsService,
-                    reminderManager = reminderManager
-                )
+                createTestViewModel(SavedStateHandle(mapOf("itemId" to 5L)))
             dispatcher.scheduler.advanceUntilIdle()
 
             // When
