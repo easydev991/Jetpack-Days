@@ -2,15 +2,15 @@
 
 ## 1. Локализация
 
-- [ ] 1.1 Добавить `context_menu_copy` ("Copy"), `title_copied` ("Title copied"), `details_copied` ("Details copied") в `app/src/main/res/values/strings.xml`
-- [ ] 1.2 Добавить параллельные строки `context_menu_copy` ("Скопировать"), `title_copied` ("Название скопировано"), `details_copied` ("Описание скопировано") в `app/src/main/res/values-ru/strings.xml`
-- [ ] 1.3 Запустить `make format` — ktlint + detekt проходят без ошибок
+- [x] 1.1 Добавить `context_menu_copy` ("Copy"), `title_copied` ("Title copied"), `details_copied` ("Details copied") в `app/src/main/res/values/strings.xml`
+- [x] 1.2 Добавить параллельные строки `context_menu_copy` ("Скопировать"), `title_copied` ("Название скопировано"), `details_copied` ("Описание скопировано") в `app/src/main/res/values-ru/strings.xml`
+- [x] 1.3 Запустить `make format` — ktlint + detekt проходят без ошибок
 
 ## 2. Утилита копирования
 
-- [ ] 2.1 Создать `app/src/main/java/com/dayscounter/util/ClipboardHelper.kt` с `interface ClipboardHelper { fun copy(context: Context, label: String, text: String): Result<Unit> }` и `class SystemClipboardHelper : ClipboardHelper` (без `!!`, safe unwrapping, Result-returning). Добавить KDoc на оба публичных типа согласно AGENTS.md «KDoc for public APIs».
-- [ ] 2.2 Создать `app/src/test/java/com/dayscounter/util/ClipboardHelperTest.kt` с тремя случаями: `copy_when_service_is_null_then_returns_failure`, `copy_when_setPrimaryClip_succeeds_then_returns_success`, `copy_when_setPrimaryClip_throws_then_returns_failure` (MockK)
-- [ ] 2.3 Запустить `make test` — все 3 кейса ClipboardHelperTest зелёные
+- [x] 2.1 Создать `app/src/main/java/com/dayscounter/util/ClipboardHelper.kt` с `interface ClipboardHelper { fun copy(context: Context, label: String, text: String): Result<Unit> }` и `class SystemClipboardHelper : ClipboardHelper` (без `!!`, safe unwrapping, Result-returning). Добавить KDoc на оба публичных типа согласно AGENTS.md «KDoc for public APIs».
+- [x] 2.2 Создать `app/src/test/java/com/dayscounter/util/ClipboardHelperTest.kt` с тремя случаями: `copy_when_service_is_null_then_returns_failure`, `copy_when_setPrimaryClip_succeeds_then_returns_success`, `copy_when_setPrimaryClip_throws_then_returns_failure` (MockK)
+- [x] 2.3 Запустить `make test` — все 3 кейса ClipboardHelperTest зелёные
 
 ## 3. Хендлер и снекбар в DetailScreen
 
