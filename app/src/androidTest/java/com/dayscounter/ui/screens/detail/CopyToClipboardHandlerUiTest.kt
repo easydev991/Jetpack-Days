@@ -3,6 +3,8 @@ package com.dayscounter.ui.screens.detail
 import android.content.Context
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.dayscounter.R
 import com.dayscounter.util.ClipboardHelper
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -25,25 +27,33 @@ import org.junit.runner.RunWith
  *
  * Использует локальный [FakeClipboardHelper] с управляемым `nextResult` и
  * `lastInvocation`, чтобы изолировать тест от системного `ClipboardManager`.
+ *
+ * Строки Toast'а резолвятся в test setUp из instrumentation target context —
+ * production-код делает то же самое в composable-скоупе через [stringResource],
+ * чтобы Toast был конфигурационно-чувствительным (см. lint
+ * `ConfigurationLocale`).
  */
 @RunWith(AndroidJUnit4::class)
 class CopyToClipboardHandlerUiTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private val titleCopiedMessage = context.getString(R.string.title_copied)
+    private val detailsCopiedMessage = context.getString(R.string.details_copied)
     private val fakeClipboardHelper = FakeClipboardHelper()
 
     @Test
     fun remembercopytoclipboardhandler_when_invoked_with_title_label_then_calls_clipboard_helper_with_label_and_text() {
         // Given
-        var handler: ((String, Int, String) -> Unit)? = null
+        var handler: ((String, String, String) -> Unit)? = null
         composeTestRule.setContent {
             handler = rememberCopyToClipboardHandler(clipboardHelper = fakeClipboardHelper)
         }
         fakeClipboardHelper.nextResult = Result.success(Unit)
 
         // When
-        handler?.invoke("Title", com.dayscounter.R.string.title_copied, "Какой-то title")
+        handler?.invoke("Title", titleCopiedMessage, "Какой-то title")
 
         // Then
         assertNotNull("handler должен вызвать clipboardHelper.copy", fakeClipboardHelper.lastInvocation)
@@ -54,7 +64,7 @@ class CopyToClipboardHandlerUiTest {
     @Test
     fun remembercopytoclipboardhandler_when_clipboard_returns_failure_then_no_exception() {
         // Given
-        var handler: ((String, Int, String) -> Unit)? = null
+        var handler: ((String, String, String) -> Unit)? = null
         composeTestRule.setContent {
             handler = rememberCopyToClipboardHandler(clipboardHelper = fakeClipboardHelper)
         }
@@ -62,11 +72,14 @@ class CopyToClipboardHandlerUiTest {
 
         // When / Then: handler не должен пробрасывать исключение
         try {
-            handler?.invoke("Title", com.dayscounter.R.string.title_copied, "Какой-то title")
+            handler?.invoke("Title", titleCopiedMessage, "Какой-то title")
         } catch (e: RuntimeException) {
             throw AssertionError("handler пробросил исключение при Result.failure: ${e.message}", e)
         }
-        assertNotNull("handler должен вызвать clipboardHelper.copy даже при Result.failure", fakeClipboardHelper.lastInvocation)
+        assertNotNull(
+            "handler должен вызвать clipboardHelper.copy даже при Result.failure",
+            fakeClipboardHelper.lastInvocation
+        )
     }
 }
 

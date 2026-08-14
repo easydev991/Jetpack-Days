@@ -78,6 +78,11 @@ fun DetailScreen(
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
     RefreshReminderOnResume(viewModel = viewModel)
 
+    // Строки резолвятся в composable-скоупе через stringResource,
+    // чтобы Toast на API <33 показывал актуальный перевод при смене локали.
+    val titleCopiedMessage = stringResource(R.string.title_copied)
+    val detailsCopiedMessage = stringResource(R.string.details_copied)
+
     val copyToClipboard =
         rememberCopyToClipboardHandler(clipboardHelper = SystemClipboardHelper())
 
@@ -87,10 +92,10 @@ fun DetailScreen(
     when (currentState) {
         is DetailScreenState.Success -> {
             onCopyTitle = {
-                copyToClipboard("Title", R.string.title_copied, currentState.item.title)
+                copyToClipboard("Title", titleCopiedMessage, currentState.item.title)
             }
             onCopyDetails = {
-                copyToClipboard("Details", R.string.details_copied, currentState.item.details)
+                copyToClipboard("Details", detailsCopiedMessage, currentState.item.details)
             }
         }
         else -> {

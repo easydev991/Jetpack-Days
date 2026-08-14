@@ -73,6 +73,8 @@
 
 **Решение:** колбэк, который получает `ReadSectionView`, — это «скопировать текст в системный буфер обмена» и при `Result.success` И на устройстве с API <33 — показать системный `Toast` (`Toast.makeText(context, message, Toast.LENGTH_SHORT).show()`). На API ≥33 системный `Toast` НЕ показывается: ОС сама показывает системный overlay после копирования, и дублирование перекрывает его визуально. Используем именно системный `Toast`, а не Compose `Snackbar`: визуально системный Toast лучше (тот же стиль, что и в `AppDataScreen`), плюс Compose `Snackbar` внутри `Scaffold` всё равно перекрывался бы системным overlay на API ≥33. `ReadSectionView` не знает ни о clipboard, ни о Toast'е.
 
+**Сигнатура handler'а:** `(label: String, message: String, text: String) -> Unit` — `message` уже готовый `String`, резолвленный вызывающим в composable-скоупе через `stringResource(R.string.title_copied)`. Резолвить строку в composable-скоупе обязательно: иначе `context.getString()` внутри callback возвращает stale-значение при смене локали/dark-mode (Android Studio lint `ConfigurationLocale`/`ResourceValuesConfigurationAware`). Handler остаётся свободным от конфигурационных зависимостей.
+
 **Альтернативы:**
 - Передавать `onCopy: (text: String) -> Unit` в `ReadSectionView`, чтобы он сам передавал текст.
 - Compose `Snackbar` через `SnackbarHostState` + `Scaffold(snackbarHost = ...)` — отказ. На API ≥33 системный overlay перекрывает наш снекбар (визуальный конфликт); на API <33 системный Toast выглядит лучше Compose-снекбара.

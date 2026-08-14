@@ -11,12 +11,13 @@ import com.dayscounter.util.SystemClipboardHelper
  * Фабрика Compose-обработчика копирования текста в системный буфер обмена
  * с системным `Toast` подтверждения.
  *
- * Возвращает лямбду `(label, messageResId, text) -> Unit`, которую можно передать
+ * Возвращает лямбду `(label, message, text) -> Unit`, которую можно передать
  * в `ReadSectionView.onCopy` или вызвать напрямую из UI:
  *
  * - `label` — метка для системного буфера обмена ("Title"/"Details"),
- * - `messageResId` — ресурс сообщения Toast'а ([com.dayscounter.R.string.title_copied]
- *   или [com.dayscounter.R.string.details_copied]),
+ * - `message` — текст Toast'а (например `"Название скопировано"`); строки
+ *   резолвятся вызывающим в composable-скоупе через [stringResource], поэтому
+ *   handler остаётся свободным от конфигурационных зависимостей,
  * - `text` — копируемый текст.
  *
  * Контракт (см. `specs/detail-screen-text-copy/spec.md`, requirement «Клик по
@@ -37,19 +38,19 @@ import com.dayscounter.util.SystemClipboardHelper
  * для подмены в androidTest на [com.dayscounter.util.ClipboardHelper] fake.
  *
  * @param clipboardHelper Реализация интерфейса доступа к буферу обмена
- * @return Лямбда `(label, messageResId, text) -> Unit` для вызова из UI
+ * @return Лямбда `(label, message, text) -> Unit` для вызова из UI
  */
 @Composable
 internal fun rememberCopyToClipboardHandler(
     clipboardHelper: ClipboardHelper = SystemClipboardHelper()
-): (label: String, messageResId: Int, text: String) -> Unit {
+): (label: String, message: String, text: String) -> Unit {
     val context = LocalContext.current
-    return { label, messageResId, text ->
+    return { label, message, text ->
         val result = clipboardHelper.copy(context, label, text)
         if (result.isSuccess && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             // ponytail: Toast на API >=33 не показывается — ОС сама рисует системный overlay.
             Toast
-                .makeText(context, context.getString(messageResId), Toast.LENGTH_SHORT)
+                .makeText(context, message, Toast.LENGTH_SHORT)
                 .show()
         }
         // Failure: намеренно игнорируется — копирование молча.
