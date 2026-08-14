@@ -23,10 +23,10 @@
 
 ## 4. Контекстное меню в ReadSectionView
 
-- [ ] 4.1 В `DetailContentByState` добавить параметры `onCopyTitle: () -> Unit`, `onCopyDetails: () -> Unit` и передать в `DetailContentInner` (только для `Success`)
-- [ ] 4.2 В `DetailContentInner` передать `onCopy = onCopyTitle` в первый `ReadSectionView` (title), `onCopy = onCopyDetails` во второй (details, только при `item.details.isNotEmpty()`), ничего не передавать для Reminder
-- [ ] 4.3 Модифицировать `ReadSectionView`: добавить `onCopy: (() -> Unit)? = null`, обернуть `Text` в `Box`, навесить `Modifier.pointerInput` с `detectTapGestures(onLongPress = { menuVisible = true })` только при `onCopy != null`, рендерить `DropdownMenu` с одним `DropdownMenuItem` ("Скопировать" + ContentCopy иконка). Добавить KDoc на новые публичные параметры `ReadSectionView` и `DetailContentByState` согласно AGENTS.md «KDoc for public APIs».
-- [ ] 4.4 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/ReadSectionViewCopyContextMenuUiTest.kt` с двумя случаями: `on_copy_when_menu_item_clicked_then_count_is_one` (long-press → wait → click menu item → `invocationCount == 1`), `long_press_ignored_when_on_copy_is_null_then_no_menu_shown`
+- [x] 4.1 В `DetailContentByState` добавить параметры `onCopyTitle: () -> Unit`, `onCopyDetails: () -> Unit` и передать в `DetailContentInner` (только для `Success`)
+- [x] 4.2 В `DetailContentInner` передать `onCopy = onCopyTitle` в первый `ReadSectionView` (title), `onCopy = onCopyDetails` во второй (details, только при `item.details.isNotEmpty()`), ничего не передавать для Reminder
+- [x] 4.3 Модифицировать `ReadSectionView`: добавить `onCopy: (() -> Unit)? = null`, обернуть `Text` в `Box`, навесить `Modifier.pointerInput` с `detectTapGestures(onLongPress = { menuVisible = true })` только при `onCopy != null`, рендерить `DropdownMenu` с одним `DropdownMenuItem` ("Скопировать" + ContentCopy иконка). Добавить KDoc на новые публичные параметры `ReadSectionView` и `DetailContentByState` согласно AGENTS.md «KDoc for public APIs».
+- [x] 4.4 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/ReadSectionViewCopyContextMenuUiTest.kt` с двумя случаями: `on_copy_when_menu_item_clicked_then_count_is_one` (long-press → wait → click menu item → `invocationCount == 1`), `long_press_ignored_when_on_copy_is_null_then_no_menu_shown`
 
 ## 5. Преview-ы и проверка
 

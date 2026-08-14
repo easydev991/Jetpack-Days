@@ -1,6 +1,8 @@
 package com.dayscounter.ui.screens.detail
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +13,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -160,12 +171,14 @@ fun ColorTagSection(colorTag: Int) {
  * Компонент ReadSectionView - аналог iOS ReadSectionView.
  * Отображает заголовок и текст секции с выравниванием по левому краю.
  *
+ * При ненулевом `onCopy` тело секции реагирует на длинное нажатие и показывает
+ * контекстное меню с пунктом «Скопировать» (см. [R.string.context_menu_copy]).
+ * При `onCopy == null` секция не реагирует на жесты и меню не отображается.
+ *
  * @param headerText Заголовок секции
  * @param bodyText Текст секции
  * @param onCopy Колбэк «скопировать и показать снекбар» для body-текста.
- *               Если `null` (по умолчанию) — секция не реагирует на жесты и не
- *               отображает контекстное меню. Длинное нажатие и `DropdownMenu`
- *               навешиваются только при ненулевом `onCopy` (см. stage 4).
+ *               Если `null` (по умолчанию) — секция не реагирует на жесты.
  * @param modifier Modifier для компонента
  */
 @Composable
@@ -186,12 +199,61 @@ fun ReadSectionView(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth()
         )
+        if (onCopy != null) {
+            CopyableBodyText(
+                bodyText = bodyText,
+                onCopy = onCopy
+            )
+        } else {
+            Text(
+                text = bodyText,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+/**
+ * Текст секции с поддержкой длинного нажатия и контекстного меню «Скопировать».
+ */
+@Composable
+private fun CopyableBodyText(
+    bodyText: String,
+    onCopy: () -> Unit
+) {
+    var menuVisible by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = bodyText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onLongPress = { menuVisible = true })
+                    }
         )
+        DropdownMenu(
+            expanded = menuVisible,
+            onDismissRequest = { menuVisible = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.context_menu_copy)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.ContentCopy,
+                        contentDescription = null
+                    )
+                },
+                onClick = {
+                    menuVisible = false
+                    onCopy()
+                }
+            )
+        }
     }
 }
 
