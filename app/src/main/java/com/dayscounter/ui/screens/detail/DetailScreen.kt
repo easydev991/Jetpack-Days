@@ -1,5 +1,7 @@
 package com.dayscounter.ui.screens.detail
 
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,6 +28,7 @@ import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.ui.viewmodel.DetailScreenState
 import com.dayscounter.ui.viewmodel.DetailScreenViewModel
+import com.dayscounter.util.SystemClipboardHelper
 
 /**
  * Экран деталей события.
@@ -38,6 +42,7 @@ import com.dayscounter.ui.viewmodel.DetailScreenViewModel
  * @param onBackClick Обработчик клика "Назад"
  * @param onEditClick Обработчик клика "Редактировать"
  */
+@Suppress("LongMethod") // use-case wiring (~28 строк) выводит функцию за порог 60
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -76,6 +81,31 @@ fun DetailScreen(
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
     RefreshReminderOnResume(viewModel = viewModel)
 
+    // Строки резолвятся в composable-скоупе через stringResource,
+    // чтобы Toast на API <33 показывал актуальный перевод при смене локали.
+    val titleCopiedMessage = stringResource(R.string.title_copied)
+    val detailsCopiedMessage = stringResource(R.string.details_copied)
+
+    val clipboardHelper = remember { SystemClipboardHelper() }
+    val item = (uiState as? DetailScreenState.Success)?.item
+    val onCopyTitle: () -> Unit = {
+        item?.let {
+            clipboardHelper.copy(context, "Title", it.title)
+            // ponytail: Toast на API >=33 не показывается — ОС сама рисует системный overlay.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Toast.makeText(context, titleCopiedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    val onCopyDetails: () -> Unit = {
+        item?.let {
+            clipboardHelper.copy(context, "Details", it.details)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Toast.makeText(context, detailsCopiedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     DetailScreenContent(
         params =
             DetailScreenParams(
@@ -93,6 +123,8 @@ fun DetailScreen(
                 onCancelDelete = {
                     viewModel.cancelDelete()
                 },
+                onCopyTitle = onCopyTitle,
+                onCopyDetails = onCopyDetails,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             ),
         modifier = modifier,
@@ -143,6 +175,8 @@ private fun DetailScreenContent(
     ) { paddingValues ->
         DetailContentByState(
             uiState = uiState,
+            onCopyTitle = params.onCopyTitle,
+            onCopyDetails = params.onCopyDetails,
             getDaysAnalysisTextUseCase = params.getDaysAnalysisTextUseCase,
             modifier = Modifier.padding(paddingValues)
         )

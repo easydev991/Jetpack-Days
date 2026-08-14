@@ -39,13 +39,16 @@ class ThemeIconScreenTest {
         composeTestRule.setContent {
             JetpackDaysTheme {
                 ThemeIconScreenContent(
-                    theme = theme,
-                    useDynamicColors = useDynamicColors,
-                    icon = icon,
-                    onThemeChange = onThemeChange,
-                    onDynamicColorsChange = onDynamicColorsChange,
-                    onIconChange = onIconChange,
-                    onBackClick = onBackClick
+                    state =
+                        ThemeIconScreenState(
+                            theme = theme,
+                            useDynamicColors = useDynamicColors,
+                            icon = icon,
+                            onThemeChange = onThemeChange,
+                            onDynamicColorsChange = onDynamicColorsChange,
+                            onIconChange = onIconChange,
+                            onBackClick = onBackClick
+                        )
                 )
             }
         }

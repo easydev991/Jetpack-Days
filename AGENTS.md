@@ -139,46 +139,21 @@ sealed class Screen(val route: String, val icon: ImageVector? = null, val titleR
 
 ## Testing
 
-### Test Naming
+**Unit-тесты** — следуй навыку `kotlin-testing`
+(`.opencode/skills/kotlin-testing/SKILL.md`): загрузи его перед написанием
+тестов. Именование, Given/When/Then, MockK/Fake, диспетчеры и команды
+запуска описаны там.
 
-```kotlin
-@Test
-fun function_name_when_condition_then_expected_result() {
-    // Given
-    // When
-    // Then
-}
-```
+**UI- и интеграционные тесты** (`androidTest/`) — следуй навыку
+`kotlin-ui-testing` (`.opencode/skills/kotlin-ui-testing/SKILL.md`):
+загрузи его перед написанием тестов. Compose Testing (v2 API),
+Room in-memory, Turbine, AlarmManager и запуск через `make android-test`
+описаны там.
 
-- Используй `snake_case` для имен тестовых методов
-- Обратные кавычки в именах тестовых методов не использовать
-
-### Test Example
-
-```kotlin
-@Test
-fun calculate_when_same_day_then_returns_today() {
-    // Given
-    val today = LocalDate.now()
-    val timestamp = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-    // When
-    val result = useCase(eventTimestamp = timestamp)
-
-    // Then
-    assertTrue(result is DaysDifference.Today, "Result should be Today")
-}
-```
-
-### Test Pyramid
-
-- Unit tests: 70%
-- Integration tests: 20%
-- UI tests: 10%
-
-### TDD Order
-
-**1.** Tests → **2.** Logic → **3.** UI
+- Test Pyramid: Unit 70% / Integration 20% / UI 10%
+- TDD Order: **1.** Tests → **2.** Logic → **3.** UI
+- Integration/UI тесты (`androidTest/`): JUnit 4, Compose Testing (v2 API),
+  Room in-memory — без Espresso
 
 ---
 
@@ -235,7 +210,7 @@ Tests: `test/` (unit), `androidTest/` (integration/UI) - structure mirrors sourc
 | Preferences | DataStore |
 | Async | Coroutines |
 | Serialization | kotlinx-serialization |
-| Tests | JUnit 5, MockK, Espresso |
+| Tests | JUnit 5 (unit), Compose Testing (androidTest), MockK |
 | Crash Reporting | Firebase Crashlytics (release only) |
 
 ### Versions

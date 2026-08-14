@@ -97,19 +97,13 @@ class ImportBackupUseCase(
         val jsonString = inputStream.bufferedReader().use { it.readText() }
 
         val wrapperResult = runCatching { json.decodeFromString<BackupWrapper>(jsonString) }
-
-        if (wrapperResult.isSuccess) {
-            val wrapper = wrapperResult.getOrThrow()
-            return wrapper.items
-        }
-
         val iosWrapperResult = runCatching { json.decodeFromString<IosBackupWrapper>(jsonString) }
 
-        if (iosWrapperResult.isSuccess) {
-            val iosWrapper = iosWrapperResult.getOrThrow()
-            return iosWrapper.items.mapNotNull { iosItem -> iosItem.toBackupItem() }
+        return when {
+            wrapperResult.isSuccess -> wrapperResult.getOrThrow().items
+            iosWrapperResult.isSuccess ->
+                iosWrapperResult.getOrThrow().items.mapNotNull { it.toBackupItem() }
+            else -> json.decodeFromString<List<BackupItem>>(jsonString)
         }
-
-        return json.decodeFromString<List<BackupItem>>(jsonString)
     }
 }

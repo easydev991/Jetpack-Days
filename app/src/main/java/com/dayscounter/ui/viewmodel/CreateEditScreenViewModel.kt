@@ -35,14 +35,28 @@ import java.time.ZoneId
  * ViewModel для управления состоянием экрана создания/редактирования события.
  */
 class CreateEditScreenViewModel(
-    private val repository: ItemRepository,
-    private val resourceProvider: ResourceProvider,
-    private val logger: Logger = AndroidLogger(),
-    savedStateHandle: SavedStateHandle,
-    private val analyticsService: AnalyticsService,
-    private val reminderManager: ReminderManager = NoOpReminderManager,
-    private val currentTimeMillisProvider: () -> Long = System::currentTimeMillis
+    deps: Deps,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val repository = deps.repository
+    private val resourceProvider = deps.resourceProvider
+    private val logger = deps.logger
+    private val analyticsService = deps.analyticsService
+    private val reminderManager = deps.reminderManager
+    private val currentTimeMillisProvider = deps.currentTimeMillisProvider
+
+    /**
+     * Зависимости [CreateEditScreenViewModel], сгруппированные для конструктора.
+     */
+    data class Deps(
+        val repository: ItemRepository,
+        val resourceProvider: ResourceProvider,
+        val analyticsService: AnalyticsService,
+        val reminderManager: ReminderManager = NoOpReminderManager,
+        val logger: Logger = AndroidLogger(),
+        val currentTimeMillisProvider: () -> Long = System::currentTimeMillis
+    )
+
     companion object {
         fun factory(
             repository: ItemRepository,
@@ -53,14 +67,17 @@ class CreateEditScreenViewModel(
             viewModelFactory {
                 initializer {
                     CreateEditScreenViewModel(
-                        repository = repository,
-                        resourceProvider = resourceProvider,
+                        deps =
+                            Deps(
+                                repository = repository,
+                                resourceProvider = resourceProvider,
+                                analyticsService = analyticsService,
+                                reminderManager = reminderManager
+                            ),
                         savedStateHandle =
                             checkNotNull(createSavedStateHandle()) {
                                 "SavedStateHandle is required"
-                            },
-                        analyticsService = analyticsService,
-                        reminderManager = reminderManager
+                            }
                     )
                 }
             }

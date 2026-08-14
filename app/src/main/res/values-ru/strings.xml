@@ -32,6 +32,7 @@
     <string name="context_menu_view">Просмотр</string>
     <string name="context_menu_edit">Изменить</string>
     <string name="context_menu_delete">Удалить</string>
+    <string name="context_menu_copy">Скопировать</string>
 
     <!-- Screen titles -->
     <string name="new_item">Новая запись</string>
@@ -65,6 +66,8 @@
     <string name="color">Цвет</string>
     <string name="display_format">Формат отображения</string>
     <string name="today">Сегодня</string>
+    <string name="title_copied">Название скопировано</string>
+    <string name="details_copied">Описание скопировано</string>
 
     <!-- Create/Edit Item Screen -->
     <string name="title_for_the_item">Название для записи</string>

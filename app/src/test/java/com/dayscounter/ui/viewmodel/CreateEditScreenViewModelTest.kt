@@ -15,6 +15,7 @@ import com.dayscounter.domain.model.ReminderMode
 import com.dayscounter.domain.model.ReminderStatus
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ReminderRequest
+import com.dayscounter.reminder.NoOpReminderManager
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.NoOpLogger
 import io.mockk.mockk
@@ -58,6 +59,28 @@ class CreateEditScreenViewModelTest {
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var noOpAnalyticsService: AnalyticsService
 
+    /**
+     * Создаёт [CreateEditScreenViewModel] с тестовыми зависимостями по умолчанию.
+     */
+    private fun createViewModel(
+        repository: ItemRepository,
+        resourceProvider: ResourceProvider,
+        savedStateHandle: SavedStateHandle,
+        analyticsService: AnalyticsService = noOpAnalyticsService,
+        reminderManager: ReminderManager = NoOpReminderManager
+    ): CreateEditScreenViewModel =
+        CreateEditScreenViewModel(
+            deps =
+                CreateEditScreenViewModel.Deps(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    analyticsService = analyticsService,
+                    reminderManager = reminderManager,
+                    logger = NoOpLogger()
+                ),
+            savedStateHandle = savedStateHandle
+        )
+
     private val testItem =
         Item(
             id = 1L,
@@ -79,10 +102,9 @@ class CreateEditScreenViewModelTest {
 
         // Создаем ViewModel без itemId (для создания)
         viewModel =
-            CreateEditScreenViewModel(
-                repository,
-                resourceProvider,
-                NoOpLogger(),
+            createViewModel(
+                repository = repository,
+                resourceProvider = resourceProvider,
                 savedStateHandle = SavedStateHandle(),
                 analyticsService = noOpAnalyticsService
             )
@@ -101,12 +123,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel для нового элемента
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             // Then - Состояние должно быть Success с пустым Item
@@ -134,12 +155,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel для редактирования
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             // Then - Элемент должен быть загружен
@@ -166,12 +186,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             // Then - Должно быть состояние Error
@@ -204,12 +223,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем элемент
             val createViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -249,12 +267,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Пытаем создать элемент
             val createViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             createViewModel.saveItem(item = errorItem, reminderRequest = null)
@@ -288,10 +305,9 @@ class CreateEditScreenViewModelTest {
                 )
 
             val createViewModel =
-                CreateEditScreenViewModel(
+                createViewModel(
                     repository = repository,
                     resourceProvider = resourceProvider,
-                    logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     analyticsService = analyticsService
                 )
@@ -327,12 +343,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Обновляем элемент
             val updateViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -373,12 +388,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Пытаем обновить элемент
             val updateViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             updateViewModel.saveItem(item = updatedItem, reminderRequest = null)
@@ -405,10 +419,9 @@ class CreateEditScreenViewModelTest {
             val updatedItem = testItem.copy(title = "Ошибка обновления")
 
             val updateViewModel =
-                CreateEditScreenViewModel(
+                createViewModel(
                     repository = repository,
                     resourceProvider = resourceProvider,
-                    logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     analyticsService = analyticsService
                 )
@@ -436,12 +449,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -466,12 +478,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -499,12 +510,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -532,12 +542,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -565,12 +574,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -598,12 +606,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -631,12 +638,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -667,12 +673,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel и проверяем тот же timestamp
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -706,12 +711,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel и проверяем timestamp на 1 день позже
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -752,12 +756,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel и проверяем изменения без касания формы
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -806,12 +809,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -844,12 +846,11 @@ class CreateEditScreenViewModelTest {
 
             // When - Создаем ViewModel
             val newViewModel =
-                CreateEditScreenViewModel(
-                    repository,
-                    resourceProvider,
-                    NoOpLogger(),
-                    savedStateHandle,
-                    noOpAnalyticsService
+                createViewModel(
+                    repository = repository,
+                    resourceProvider = resourceProvider,
+                    savedStateHandle = savedStateHandle,
+                    analyticsService = noOpAnalyticsService
                 )
 
             // Then - Сначала должно быть состояние Loading
@@ -897,13 +898,16 @@ class CreateEditScreenViewModelTest {
 
             val newViewModel =
                 CreateEditScreenViewModel(
-                    repository = repository,
-                    resourceProvider = resourceProvider,
-                    logger = NoOpLogger(),
-                    savedStateHandle = savedStateHandle,
-                    analyticsService = noOpAnalyticsService,
-                    reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    deps =
+                        CreateEditScreenViewModel.Deps(
+                            repository = repository,
+                            resourceProvider = resourceProvider,
+                            analyticsService = noOpAnalyticsService,
+                            reminderManager = reminderManager,
+                            logger = NoOpLogger(),
+                            currentTimeMillisProvider = { nowMillis }
+                        ),
+                    savedStateHandle = savedStateHandle
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -934,12 +938,11 @@ class CreateEditScreenViewModelTest {
                 .toInstant()
                 .toEpochMilli()
         repository.setItemForGetById(testItem.copy(timestamp = timestamp))
-        return CreateEditScreenViewModel(
-            repository,
-            resourceProvider,
-            NoOpLogger(),
-            SavedStateHandle(mapOf("itemId" to 1L)),
-            noOpAnalyticsService
+        return createViewModel(
+            repository = repository,
+            resourceProvider = resourceProvider,
+            savedStateHandle = SavedStateHandle(mapOf("itemId" to 1L)),
+            analyticsService = noOpAnalyticsService
         )
     }
 

@@ -947,7 +947,10 @@ class MainScreenViewModelTest {
             _items.map { items ->
                 when (sortOrder) {
                     SortOrder.ASCENDING -> items.sortedWith(compareBy({ it.timestamp }, { it.id }))
-                    SortOrder.DESCENDING -> items.sortedWith(compareByDescending<Item> { it.timestamp }.thenByDescending { it.id })
+                    SortOrder.DESCENDING ->
+                        items.sortedWith(
+                            compareByDescending<Item> { it.timestamp }.thenByDescending { it.id }
+                        )
                 }
             }
 

@@ -48,15 +48,31 @@ fun ThemeIconScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     ThemeIconScreenContent(
-        theme = uiState.theme,
-        useDynamicColors = uiState.useDynamicColors,
-        icon = uiState.icon,
-        onThemeChange = { viewModel.updateTheme(it) },
-        onDynamicColorsChange = { viewModel.updateDynamicColors(it) },
-        onIconChange = { viewModel.updateIcon(it) },
-        onBackClick = onBackClick
+        state =
+            ThemeIconScreenState(
+                theme = uiState.theme,
+                useDynamicColors = uiState.useDynamicColors,
+                icon = uiState.icon,
+                onThemeChange = { viewModel.updateTheme(it) },
+                onDynamicColorsChange = { viewModel.updateDynamicColors(it) },
+                onIconChange = { viewModel.updateIcon(it) },
+                onBackClick = onBackClick
+            )
     )
 }
+
+/**
+ * Состояние экрана выбора темы и иконки для UI-тестов.
+ */
+internal data class ThemeIconScreenState(
+    val theme: AppTheme = AppTheme.SYSTEM,
+    val useDynamicColors: Boolean = true,
+    val icon: AppIcon = AppIcon.DEFAULT,
+    val onThemeChange: (AppTheme) -> Unit = {},
+    val onDynamicColorsChange: (Boolean) -> Unit = {},
+    val onIconChange: (AppIcon) -> Unit = {},
+    val onBackClick: () -> Unit = {}
+)
 
 /**
  * Контент экрана для выбора темы и иконки приложения.
@@ -65,21 +81,13 @@ fun ThemeIconScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ThemeIconScreenContent(
-    theme: AppTheme = AppTheme.SYSTEM,
-    useDynamicColors: Boolean = true,
-    icon: AppIcon = AppIcon.DEFAULT,
-    onThemeChange: (AppTheme) -> Unit = {},
-    onDynamicColorsChange: (Boolean) -> Unit = {},
-    onIconChange: (AppIcon) -> Unit = {},
-    onBackClick: () -> Unit = {}
-) {
+internal fun ThemeIconScreenContent(state: ThemeIconScreenState = ThemeIconScreenState()) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_theme_and_icon)) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = state.onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -100,22 +108,22 @@ internal fun ThemeIconScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ThemeSection(
-                theme = theme,
-                onThemeChange = onThemeChange
+                theme = state.theme,
+                onThemeChange = state.onThemeChange
             )
 
             HorizontalDivider()
 
             DynamicColorsSection(
-                useDynamicColors = useDynamicColors,
-                onDynamicColorsChange = onDynamicColorsChange
+                useDynamicColors = state.useDynamicColors,
+                onDynamicColorsChange = state.onDynamicColorsChange
             )
 
             HorizontalDivider()
 
             IconSection(
-                icon = icon,
-                onIconChange = onIconChange
+                icon = state.icon,
+                onIconChange = state.onIconChange
             )
         }
     }

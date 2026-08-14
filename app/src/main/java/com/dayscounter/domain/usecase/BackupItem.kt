@@ -81,20 +81,13 @@ fun String.fromHexColor(): Int? =
  */
 fun String?.parseColorTag(): Int? {
     if (this.isNullOrBlank()) return null
-
-    // Проверяем формат hex (начинается с #)
-    if (startsWith("#")) {
-        return fromHexColor()
+    return when {
+        startsWith("#") -> fromHexColor()
+        // Формат iOS NSKeyedArchiver (Base64 bplist00)
+        NsKeyedArchiverParser.isNsKeyedArchiver(this) ->
+            NsKeyedArchiverParser.parseHexColor(this)?.fromHexColor()
+        else -> null
     }
-
-    // Проверяем формат iOS NSKeyedArchiver (Base64 bplist00)
-    if (NsKeyedArchiverParser.isNsKeyedArchiver(this)) {
-        val hexColor = NsKeyedArchiverParser.parseHexColor(this) ?: return null
-        return hexColor.fromHexColor()
-    }
-
-    // Неизвестный формат
-    return null
 }
 
 /**

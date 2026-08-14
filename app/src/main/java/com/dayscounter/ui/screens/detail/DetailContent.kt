@@ -1,6 +1,8 @@
 package com.dayscounter.ui.screens.detail
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,17 +13,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpOffset
 import com.dayscounter.R
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
@@ -38,12 +53,16 @@ import java.util.Locale
  * Контент по состоянию.
  *
  * @param uiState Состояние экрана
+ * @param onCopyTitle Колбэк копирования title (передаётся в `DetailContentInner` → `ReadSectionView` для title)
+ * @param onCopyDetails Колбэк копирования details (передаётся в `DetailContentInner` → `ReadSectionView` для details)
  * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
  * @param modifier Modifier для компонента
  */
 @Composable
 fun DetailContentByState(
     uiState: DetailScreenState,
+    onCopyTitle: () -> Unit,
+    onCopyDetails: () -> Unit,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier
 ) {
@@ -56,6 +75,8 @@ fun DetailContentByState(
             DetailContentInner(
                 item = uiState.item,
                 reminder = uiState.reminder,
+                onCopyTitle = onCopyTitle,
+                onCopyDetails = onCopyDetails,
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase,
                 modifier = modifier
             )
@@ -75,13 +96,18 @@ fun DetailContentByState(
  * Структура аналогична iOS (VStack с выравниванием по левому краю).
  *
  * @param item Элемент для отображения
+ * @param onCopyTitle Колбэк копирования title (передаётся в `ReadSectionView` для title)
+ * @param onCopyDetails Колбэк копирования details (передаётся в `ReadSectionView` для details)
  * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
  * @param modifier Modifier для компонента
  */
+@Suppress("LongParameterList")
 @Composable
 internal fun DetailContentInner(
     item: Item,
     reminder: Reminder? = null,
+    onCopyTitle: () -> Unit,
+    onCopyDetails: () -> Unit,
     getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
     modifier: Modifier = Modifier
 ) {
@@ -95,12 +121,14 @@ internal fun DetailContentInner(
     ) {
         ReadSectionView(
             headerText = stringResource(R.string.title),
-            bodyText = item.title
+            bodyText = item.title,
+            onCopy = onCopyTitle
         )
         if (item.details.isNotEmpty()) {
             ReadSectionView(
                 headerText = stringResource(R.string.details),
-                bodyText = item.details
+                bodyText = item.details,
+                onCopy = onCopyDetails
             )
         }
         if (item.colorTag != null) {
@@ -147,14 +175,21 @@ fun ColorTagSection(colorTag: Int) {
  * Компонент ReadSectionView - аналог iOS ReadSectionView.
  * Отображает заголовок и текст секции с выравниванием по левому краю.
  *
+ * При ненулевом `onCopy` тело секции реагирует на длинное нажатие и показывает
+ * контекстное меню с пунктом «Скопировать» (см. [R.string.context_menu_copy]).
+ * При `onCopy == null` секция не реагирует на жесты и меню не отображается.
+ *
  * @param headerText Заголовок секции
  * @param bodyText Текст секции
+ * @param onCopy Колбэк «скопировать и показать снекбар» для body-текста.
+ *               Если `null` (по умолчанию) — секция не реагирует на жесты.
  * @param modifier Modifier для компонента
  */
 @Composable
 fun ReadSectionView(
     headerText: String,
     bodyText: String,
+    onCopy: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -168,14 +203,114 @@ fun ReadSectionView(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth()
         )
+        // ponytail: Material3 1.4 DropdownMenu по умолчанию topToAnchorBottom —
+        // menu.top = anchor.bottom + offset.y. Чтобы top-left меню попал в точку жеста,
+        // вычитаем высоту Text из offset.y: menu.top = Box.top + touchOffset.y = touch.Y.
+        ReadSectionBody(bodyText = bodyText, onCopy = onCopy)
+    }
+}
+
+/**
+ * Тело [ReadSectionView]: [Box] с body-текстом и опциональным
+ * контекстным меню копирования. Вынесено из публичной
+ * [ReadSectionView], чтобы родитель оставался в пределах
+ * `LongMethod`-threshold detekt (=60).
+ *
+ * @param bodyText Текст секции
+ * @param onCopy Колбэк копирования; `null` отключает жест и меню
+ * @param modifier Modifier для компонента
+ */
+@Composable
+private fun ReadSectionBody(
+    bodyText: String,
+    onCopy: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    var menuVisible by remember { mutableStateOf(false) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var textHeightPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSizeChanged { textHeightPx = it.height }
+    ) {
         Text(
             text = bodyText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .let { base ->
+                        onCopy?.let {
+                            base.copyOnLongPress(
+                                density = density,
+                                textHeightPx = { textHeightPx },
+                                showMenu = {
+                                    menuOffset = it
+                                    menuVisible = true
+                                }
+                            )
+                        } ?: base
+                    }
         )
+        if (onCopy != null) {
+            DropdownMenu(
+                expanded = menuVisible,
+                offset = menuOffset,
+                onDismissRequest = { menuVisible = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.context_menu_copy)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.ContentCopy,
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        menuVisible = false
+                        onCopy()
+                    }
+                )
+            }
+        }
     }
 }
+
+/**
+ * Навешивает `pointerInput` с `detectTapGestures(onLongPress)` и компенсирует
+ * `topToAnchorBottom` Material3 1.4: при жесте вызывает [showMenu] с [DpOffset],
+ * который ставит top-left [DropdownMenu] в точку касания — `menu.top =
+ * anchor.top + touchOffset.y`. Из [touchOffset]`.y` вычитается [textHeightPx]
+ * (замеренная высота Text через `Modifier.onSizeChanged`).
+ *
+ * @param density [Density] для px → Dp
+ * @param textHeightPx Геттер текущей высоты Text (px) внутри родительского [Box]
+ * @param showMenu Колбэк показа меню со скорректированным [DpOffset]
+ * @return модификатор с навешенным жестом длинного нажатия
+ */
+private fun Modifier.copyOnLongPress(
+    density: Density,
+    textHeightPx: () -> Int,
+    showMenu: (DpOffset) -> Unit
+): Modifier =
+    pointerInput(Unit) {
+        detectTapGestures(
+            onLongPress = { touchOffset ->
+                showMenu(
+                    with(density) {
+                        DpOffset(
+                            x = touchOffset.x.toDp(),
+                            y = (touchOffset.y - textHeightPx()).toDp()
+                        )
+                    }
+                )
+            }
+        )
+    }
 
 /**
  * Компонент DetailDatePicker - аналог iOS ItemDatePicker.
