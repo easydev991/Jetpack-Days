@@ -1,14 +1,15 @@
 ## Context
 
-Экран `DetailScreen` (`app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreen.kt`) и его контент (`DetailContent.kt`) уже используют общий композабл `ReadSectionView` для трёх секций: `Title`, `Details` (если не пусто) и `Reminder`. Снекбар уже интегрирован в `CreateEditScreen.kt` через `SnackbarHostState` + `Scaffold(snackbarHost = ...)`. Контекстное меню реализовано в `MainScreen.kt` через `DropdownMenu` + `DropdownMenuItem` с `text`/`leadingIcon`/`onClick`. Долгое нажатие — через `Modifier.pointerInput { detectTapGestures(onLongPress = ...) }` (см. `ListItemView.kt`). Буфер обмена ранее в проекте не использовался — это первая точка интеграции.
+Экран `DetailScreen` (`app/src/main/java/com/dayscounter/ui/screens/detail/DetailScreen.kt`) и его контент (`DetailContent.kt`) уже используют общий композабл `ReadSectionView` для трёх секций: `Title`, `Details` (если не пусто) и `Reminder`. Подтверждение пользовательских действий через системный `Toast` уже используется в `AppDataScreen.kt` (`Toast.makeText(context, message, Toast.LENGTH_SHORT).show()` внутри `LaunchedEffect`). Контекстное меню реализовано в `MainScreen.kt` через `DropdownMenu` + `DropdownMenuItem` с `text`/`leadingIcon`/`onClick`. Долгое нажатие — через `Modifier.pointerInput { detectTapGestures(onLongPress = ...) }` (см. `ListItemView.kt`). Буфер обмена ранее в проекте не использовался — это первая точка интеграции.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Долгое нажатие на текст в `ReadSectionView` (когда передан `onCopy`) открывает `DropdownMenu` с пунктом «Скопировать»; клик копирует текст и показывает снекбар.
+- Долгое нажатие на текст в `ReadSectionView` (когда передан `onCopy`) открывает `DropdownMenu` с пунктом «Скопировать»; клик копирует текст в системный буфер обмена и на устройствах с API <33 показывает системный `Toast` с подтверждением.
+- На устройствах с API ≥33 системный Toast НЕ показывается — ОС сама показывает системный overlay после копирования, и дублирование перекрывает его визуально.
 - `ReadSectionView` остаётся обратно совместимым (Reminder и любые будущие вызовы без `onCopy` работают как раньше).
 - `ClipboardHelper` — интерфейс с дефолтной реализацией `SystemClipboardHelper`; handler в Compose получает `ClipboardHelper` через параметр `internal`-функции `rememberCopyToClipboardHandler` (для подмены в androidTest).
-- Локализация (en/ru) для пункта меню и сообщений снекбара.
+- Локализация (en/ru) для пункта меню и сообщений Toast.
 
 **Non-Goals:**
 - Расширять контекстное меню (share, edit, etc.) — задача только про копирование.
@@ -16,6 +17,7 @@
 - Копирование для Reminder/Color/Date и других read-only секций — задача только про title и details.
 - Поднимать общий state меню на уровень `DetailScreenContent` — двух секций недостаточно, чтобы оправдать lift-state.
 - Заменять системный буфер обмена на что-либо ещё.
+- Использовать Compose `Snackbar`/`SnackbarHost` для подтверждения — системный `Toast` визуально лучше (тот же стиль, что и в `AppDataScreen`); Compose Snackbar внутри `Scaffold` перекрывался бы системным overlay на API ≥33.
 
 ## Decisions
 
@@ -67,19 +69,21 @@
 
 **Обоснование:** для одной секции внутри `Column` ручное позиционирование — избыточно. `Box` даёт достаточно контекста, чтобы `DropdownMenu` Material3 корректно встал под текстом.
 
-### 6. Колбэк `onCopy` уже содержит и копирование, и снекбар
+### 6. Колбэк `onCopy` содержит копирование и условный системный Toast
 
-**Решение:** колбэк, который получает `ReadSectionView`, — это «скопировать и показать снекбар» как единое действие. `ReadSectionView` не знает ни о clipboard, ни о снекбаре.
+**Решение:** колбэк, который получает `ReadSectionView`, — это «скопировать текст в системный буфер обмена» и при `Result.success` И на устройстве с API <33 — показать системный `Toast` (`Toast.makeText(context, message, Toast.LENGTH_SHORT).show()`). На API ≥33 системный `Toast` НЕ показывается: ОС сама показывает системный overlay после копирования, и дублирование перекрывает его визуально. Используем именно системный `Toast`, а не Compose `Snackbar`: визуально системный Toast лучше (тот же стиль, что и в `AppDataScreen`), плюс Compose `Snackbar` внутри `Scaffold` всё равно перекрывался бы системным overlay на API ≥33. `ReadSectionView` не знает ни о clipboard, ни о Toast'е.
 
 **Альтернативы:**
 - Передавать `onCopy: (text: String) -> Unit` в `ReadSectionView`, чтобы он сам передавал текст.
+- Compose `Snackbar` через `SnackbarHostState` + `Scaffold(snackbarHost = ...)` — отказ. На API ≥33 системный overlay перекрывает наш снекбар (визуальный конфликт); на API <33 системный Toast выглядит лучше Compose-снекбара.
 
-**Обоснование:** `ReadSectionView` уже знает `bodyText` (значение `Text`), но не должен владеть метой «это title-секция vs details-секция» (для разных снекбаров). Поэтому логика выбора label + messageResId живёт в caller'е (`DetailScreen`), а в `ReadSectionView` приходит готовый `() -> Unit` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`.
+**Обоснование:** `ReadSectionView` уже знает `bodyText` (значение `Text`), но не должен владеть метой «это title-секция vs details-секция» (для разных `label` и `messageResId`). Поэтому логика выбора label + messageResId живёт в caller'е (`DetailScreen`), а в `ReadSectionView` приходит готовый `() -> Unit` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`.
 
 ## Risks / Trade-offs
 
 - **[Reminder может случайно получить контекстное меню при рефакторинге]** → Митигация: `onCopy = null` по умолчанию + существующий caller на Reminder ничего не передаёт; Compose UI-тест `long_press_ignored_when_on_copy_is_null_then_no_menu_shown` фиксирует контракт.
 - **[Handler-тест зависит от системного clipboard]** → Митигация: `ClipboardHelper` интерфейс + `FakeClipboardHelper` в androidTest-файле. Юнит-тест `SystemClipboardHelper` тестирует реальный сервис через MockK.
 - **[Имя теста `copy_*` конфликтует с `ClipboardHelperTest`]** → Митигация: handler-тесты используют префикс `remembercopytoclipboardhandler_*` (lowercase SUT-имя).
-- **[Снекбар не показывается на экранах Loading/Error]** → Митигация: для этих веток `uiState` передаются no-op `onCopyTitle = {}` / `onCopyDetails = {}`. Меню всё равно не показывается в этих стейтах (нет `ReadSectionView` с контентом).
+- **[Toast не показывается на экранах Loading/Error]** → Допустимо: меню копирования недоступно в этих стейтах (нет `ReadSectionView` с контентом), соответственно handler не вызывается. Для `Loading`/`Error` передаются no-op `onCopyTitle = {}` / `onCopyDetails = {}` для стабильной сигнатуры `DetailScreenParams`.
 - **[Race condition: пользователь успевает нажать на пункт меню после `onDismissRequest`]** → Стандартное поведение `DropdownMenuItem.onClick` корректно обрабатывает это: при клике `menuVisible = false` + `onCopy?.invoke()` синхронно; порядок важен — закрытие первым, чтобы пользователь не видел «застрявшее» меню.
+- **[Toast — системный, не Compose, поэтому его сложно тестировать в androidTest]** → Митигация: handler-тесты в androidTest проверяют, что `clipboardHelper.copy` вызван с правильными `label`/`text` (через `FakeClipboardHelper.copyInvocations`); условный показ Toast'а — `if (result.isSuccess && SDK_INT < TIRAMISU)` — это одна строка без рантайм-эффектов для теста; сама системная Toast-обвязка доверена Android и проверяется вручную на эмуляторе (этап 5.6).

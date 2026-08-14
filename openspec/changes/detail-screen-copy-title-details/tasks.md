@@ -12,14 +12,14 @@
 - [x] 2.2 Создать `app/src/test/java/com/dayscounter/util/ClipboardHelperTest.kt` с тремя случаями: `copy_when_service_is_null_then_returns_failure`, `copy_when_setPrimaryClip_succeeds_then_returns_success`, `copy_when_setPrimaryClip_throws_then_returns_failure` (MockK)
 - [x] 2.3 Запустить `make test` — все 3 кейса ClipboardHelperTest зелёные
 
-## 3. Хендлер и снекбар в DetailScreen
+## 3. Хендлер и Toast подтверждения в DetailScreen
 
-- [x] 3.1 В `DetailScreen.kt` добавить `snackbarHostState = remember { SnackbarHostState() }` и `coroutineScope = rememberCoroutineScope()`; добавить `SnackbarHost(hostState = snackbarHostState)` в `Scaffold`
-- [x] 3.2 Создать `internal @Composable fun rememberCopyToClipboardHandler(...)` по паттерну `CreateEditScreen.kt:166-187 rememberReminderNotificationsUnavailableHandler` (принимает `ClipboardHelper` интерфейс, возвращает `(label, messageResId, text) -> Unit` lambda)
-- [x] 3.3 Вызвать `rememberCopyToClipboardHandler` в `DetailScreen`, пробросить в `DetailScreenParams` как `onCopyTitle` / `onCopyDetails`
-- [x] 3.4 В `DetailScreen` для `Loading`/`Error` веток использовать `onCopyTitle = {}` / `onCopyDetails = {}` (no-op); для `Success` — реальные колбэки с `R.string.title_copied` / `R.string.details_copied`
-- [x] 3.5 Провинуть `onCopyTitle` / `onCopyDetails` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`
-- [x] 3.6 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/CopyToClipboardHandlerUiTest.kt` с локальным `FakeClipboardHelper` (метод `copy` управляется из теста через `var nextResult: Result<Unit>`) и тремя случаями: `remembercopytoclipboardhandler_when_invoked_with_title_label_then_shows_title_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_invoked_with_details_label_then_shows_details_copied_snackbar` (`nextResult = success`), `remembercopytoclipboardhandler_when_clipboard_returns_failure_then_no_snackbar_shown` (`nextResult = failure`, проверка отсутствия снекбара через `onNodeWithText(R.string.title_copied).assertDoesNotExist()`)
+- [ ] 3.1 В `DetailScreen.kt` НЕ добавлять `SnackbarHostState`/`SnackbarHost`/`rememberCoroutineScope` (Compose Snackbar не используется — системный Toast показывается прямо из handler'а, см. `AppDataScreen.kt:107-109`).
+- [ ] 3.2 Создать `internal @Composable fun rememberCopyToClipboardHandler(clipboardHelper: ClipboardHelper = SystemClipboardHelper()): (label: String, messageResId: Int, text: String) -> Unit`. Внутри lambda: `clipboardHelper.copy(context, label, text)`; при `Result.success(Unit)` И `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` — `Toast.makeText(context, context.getString(messageResId), Toast.LENGTH_SHORT).show()`. На API ≥33 (Android 13+) системный Toast НЕ показывается — ОС сама показывает системный overlay. Без `coroutineScope` (handler синхронный, см. `AppDataScreen.kt:109`).
+- [ ] 3.3 Вызвать `rememberCopyToClipboardHandler` в `DetailScreen`, пробросить в `DetailScreenParams` как `onCopyTitle` / `onCopyDetails`.
+- [ ] 3.4 В `DetailScreen` для `Loading`/`Error` веток использовать `onCopyTitle = {}` / `onCopyDetails = {}` (no-op); для `Success` — реальные колбэки с `R.string.title_copied` / `R.string.details_copied`.
+- [ ] 3.5 Провинуть `onCopyTitle` / `onCopyDetails` через `DetailScreenParams` → `DetailScreenContent` → `DetailContentByState` → `DetailContentInner`.
+- [ ] 3.6 Создать `app/src/androidTest/java/com/dayscounter/ui/screens/detail/CopyToClipboardHandlerUiTest.kt` с локальным `FakeClipboardHelper` (метод `copy` записывает вызов в `var lastInvocation: CopyInvocation?` где `CopyInvocation(label, text)`, и возвращает `nextResult: Result<Unit>`) и двумя случаями: `remembercopytoclipboardhandler_when_invoked_with_title_label_then_calls_clipboard_helper_with_label_and_text` (проверка `lastInvocation == CopyInvocation("Title", "Какой-то title")`), `remembercopytoclipboardhandler_when_clipboard_returns_failure_then_no_exception` (`nextResult = failure`, handler не падает). Проверка появления системного Toast'а НЕ включается — Toast живёт в WindowManager, не в Compose-дереве; его рендеринг доверен Android и проверяется вручную на этапе 5.6.
 
 ## 4. Контекстное меню в ReadSectionView
 
@@ -35,4 +35,4 @@
 - [ ] 5.3 Запустить `make test` — все unit-тесты проходят
 - [ ] 5.4 Запустить `./gradlew assembleDebug` — APK собирается успешно
 - [ ] 5.5 (Опционально) Запустить `make android-test`
-- [ ] 5.6 Ручная проверка: long-press title → меню "Скопировать" → клик → снекбар "Название скопировано" → вставить совпадает с `item.title`; аналогично для details; tap вне меню закрывает; Reminder не реагирует на long-press
+- [ ] 5.6 Ручная проверка на эмуляторе: long-press title → меню "Скопировать" → клик → вставить совпадает с `item.title`; аналогично для details; на устройстве API <33 дополнительно проверить, что появляется системный Toast "Название скопировано" / "Описание скопировано"; на устройстве API ≥33 проверить, что наш Toast НЕ появляется (есть только системный overlay); tap вне меню закрывает; Reminder не реагирует на long-press

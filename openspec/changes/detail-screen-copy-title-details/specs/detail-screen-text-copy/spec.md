@@ -34,29 +34,39 @@
 
 ---
 
-### Requirement: Клик по пункту меню копирует текст в буфер обмена и показывает снекбар
+### Requirement: Клик по пункту меню копирует текст в буфер обмена и показывает системный Toast (только на API <33)
 
-При клике пользователем по пункту "Скопировать" в контекстном меню секции Title система MUST вызвать `clipboardHelper.copy(context, "Title", item.title)`. При возврате `Result.success(Unit)` система MUST отобразить снекбар с текстом `R.string.title_copied` ("Название скопировано") длительностью `SnackbarDuration.Short`. При возврате `Result.failure` система MUST NOT отображать снекбар (копирование молча игнорируется). Для секции Details MUST вызываться `clipboardHelper.copy(context, "Details", item.details)` с тем же контрактом: success → снекбар `R.string.details_copied`, failure → без снекбара.
+При клике пользователем по пункту "Скопировать" в контекстном меню секции Title система MUST вызвать `clipboardHelper.copy(context, "Title", item.title)`. При возврате `Result.success(Unit)` И на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` (API <33, Android 12 и старше) система MUST отобразить системный `Toast` через `Toast.makeText(context, message, Toast.LENGTH_SHORT).show()` с текстом `R.string.title_copied` ("Название скопировано"). На устройствах с API ≥33 (Android 13+) системный Toast НЕ показывается: ОС сама показывает системный overlay после копирования, дублирование перекрывает его визуально. При возврате `Result.failure` система MUST NOT отображать Toast (копирование молча игнорируется) на любой версии API. Для секции Details MUST вызываться `clipboardHelper.copy(context, "Details", item.details)` с тем же контрактом: success → Toast `R.string.details_copied` (только API <33), failure → без Toast'а.
 
-#### Scenario: Клик по пункту меню Title копирует item.title в буфер обмена и показывает снекбар "Название скопировано"
+#### Scenario: Клик по пункту меню Title копирует item.title в буфер обмена и показывает Toast "Название скопировано" на API <33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title
-- **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)`; при возврате `Result.success(Unit)` показывается снекбар с текстом `R.string.title_copied` ("Название скопировано") длительностью `SnackbarDuration.Short`
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)` И показывается системный `Toast.makeText(context, context.getString(R.string.title_copied), Toast.LENGTH_SHORT).show()`
 
-#### Scenario: Клик по пункту меню Details копирует item.details в буфер обмена и показывает снекбар "Описание скопировано"
+#### Scenario: Клик по пункту меню Title копирует item.title в буфер обмена БЕЗ Toast на API >=33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details
-- **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)`; при возврате `Result.success(Unit)` показывается снекбар с текстом `R.string.details_copied` ("Описание скопировано") длительностью `SnackbarDuration.Short`
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)`; системный Toast НЕ показывается — ОС сама показывает системный overlay
 
-#### Scenario: Клик по пункту меню Title при ошибке копирования не показывает снекбар
+#### Scenario: Клик по пункту меню Details копирует item.details в буфер обмена и показывает Toast "Описание скопировано" на API <33
+
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)` И показывается системный `Toast.makeText(context, context.getString(R.string.details_copied), Toast.LENGTH_SHORT).show()`
+
+#### Scenario: Клик по пункту меню Details копирует item.details в буфер обмена БЕЗ Toast на API >=33
+
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)`; системный Toast НЕ показывается
+
+#### Scenario: Клик по пункту меню Title при ошибке копирования не показывает Toast
 
 - **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title и `clipboardHelper.copy(...)` возвращает `Result.failure`
-- **THEN** снекбар с текстом `R.string.title_copied` НЕ отображается
+- **THEN** системный Toast с текстом `R.string.title_copied` НЕ отображается ни на какой версии API
 
-#### Scenario: Клик по пункту меню Details при ошибке копирования не показывает снекбар
+#### Scenario: Клик по пункту меню Details при ошибке копирования не показывает Toast
 
 - **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details и `clipboardHelper.copy(...)` возвращает `Result.failure`
-- **THEN** снекбар с текстом `R.string.details_copied` НЕ отображается
+- **THEN** системный Toast с текстом `R.string.details_copied` НЕ отображается ни на какой версии API
 
 #### Scenario: Меню закрывается сразу после клика по пункту не дожидаясь копирования
 
