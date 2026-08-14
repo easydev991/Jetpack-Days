@@ -9,15 +9,16 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
  * Unit-тесты для SystemClipboardHelper.
  *
- * Проверяет Result-контракт: success при корректной работе сервиса,
- * failure при отсутствии сервиса или исключении из setPrimaryClip.
+ * Проверяет, что `copy` делегирует системному `ClipboardManager` с правильными
+ * параметрами и бросает `IllegalStateException` при недоступном сервисе.
  *
  * Статический [ClipData.newPlainText] замокирован, потому что
  * на JVM без Robolectric реальная реализация бросает RuntimeException.
@@ -42,37 +43,25 @@ class ClipboardHelperTest {
     }
 
     @Test
-    fun copy_when_set_primary_clip_succeeds_then_returns_success() {
+    fun copy_when_set_primary_clip_succeeds_then_delegates_to_manager() {
         // When
-        val result = helper.copy(context, "Title", "some text")
+        helper.copy(context, "Title", "some text")
 
         // Then
-        assertTrue(result.isSuccess, "Ожидался Result.success при корректной работе сервиса")
         verify(exactly = 1) { ClipData.newPlainText("Title", "some text") }
         verify(exactly = 1) { clipboardManager.setPrimaryClip(clipData) }
     }
 
     @Test
-    fun copy_when_service_is_null_then_returns_failure() {
+    fun copy_when_service_is_null_then_throws() {
         // Given
         every { context.getSystemService(Context.CLIPBOARD_SERVICE) } returns null
 
-        // When
-        val result = helper.copy(context, "Title", "some text")
-
-        // Then
-        assertTrue(result.isFailure, "Ожидался Result.failure при недоступном ClipboardManager")
-    }
-
-    @Test
-    fun copy_when_set_primary_clip_throws_then_returns_failure() {
-        // Given
-        every { clipboardManager.setPrimaryClip(any()) } throws RuntimeException("boom")
-
-        // When
-        val result = helper.copy(context, "Title", "some text")
-
-        // Then
-        assertTrue(result.isFailure, "Ожидался Result.failure при исключении из setPrimaryClip")
+        // When / Then
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                helper.copy(context, "Title", "some text")
+            }
+        assertEquals("ClipboardManager недоступен", exception.message)
     }
 }

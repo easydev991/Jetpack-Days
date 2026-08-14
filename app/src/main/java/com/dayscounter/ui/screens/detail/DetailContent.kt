@@ -188,6 +188,8 @@ fun ReadSectionView(
     onCopy: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val onCopyCallback = onCopy
+    var menuVisible by remember { mutableStateOf(false) }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_xsmall))
@@ -199,60 +201,45 @@ fun ReadSectionView(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth()
         )
-        if (onCopy != null) {
-            CopyableBodyText(
-                bodyText = bodyText,
-                onCopy = onCopy
-            )
-        } else {
+        // ponytail: pointerInput + DropdownMenu вешаются только при ненулевом onCopy.
+        Box(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = bodyText,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth()
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .let { base ->
+                            if (onCopyCallback != null) {
+                                base.pointerInput(Unit) {
+                                    detectTapGestures(onLongPress = { menuVisible = true })
+                                }
+                            } else {
+                                base
+                            }
+                        }
             )
-        }
-    }
-}
-
-/**
- * Текст секции с поддержкой длинного нажатия и контекстного меню «Скопировать».
- */
-@Composable
-private fun CopyableBodyText(
-    bodyText: String,
-    onCopy: () -> Unit
-) {
-    var menuVisible by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = bodyText,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .pointerInput(Unit) {
-                        detectTapGestures(onLongPress = { menuVisible = true })
-                    }
-        )
-        DropdownMenu(
-            expanded = menuVisible,
-            onDismissRequest = { menuVisible = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.context_menu_copy)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.ContentCopy,
-                        contentDescription = null
+            if (onCopyCallback != null) {
+                DropdownMenu(
+                    expanded = menuVisible,
+                    onDismissRequest = { menuVisible = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.context_menu_copy)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.ContentCopy,
+                                contentDescription = null
+                            )
+                        },
+                        onClick = {
+                            menuVisible = false
+                            onCopyCallback()
+                        }
                     )
-                },
-                onClick = {
-                    menuVisible = false
-                    onCopy()
                 }
-            )
+            }
         }
     }
 }

@@ -14,31 +14,28 @@ interface ClipboardHelper {
     /**
      * Помещает [text] в системный буфер обмена под [label].
      *
-     * @return [Result.success] при успешной записи;
-     *   [Result.failure] если [ClipboardManager] недоступен или бросил исключение.
+     * Бросает [IllegalStateException] если [ClipboardManager] недоступен
+     * (не должен случаться в production — это programming error).
      */
     fun copy(
         context: Context,
         label: String,
         text: String
-    ): Result<Unit>
+    )
 }
 
 /**
  * Реализация [ClipboardHelper] поверх системного [ClipboardManager].
- *
- * Не бросает исключения наружу: любые ошибки оборачиваются в [Result.failure].
  */
 class SystemClipboardHelper : ClipboardHelper {
     override fun copy(
         context: Context,
         label: String,
         text: String
-    ): Result<Unit> =
-        runCatching {
-            val manager =
-                context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                    ?: error("ClipboardManager недоступен")
-            manager.setPrimaryClip(ClipData.newPlainText(label, text))
-        }
+    ) {
+        val manager =
+            context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                ?: error("ClipboardManager недоступен")
+        manager.setPrimaryClip(ClipData.newPlainText(label, text))
+    }
 }

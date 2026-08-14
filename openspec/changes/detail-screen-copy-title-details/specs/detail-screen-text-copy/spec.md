@@ -36,37 +36,27 @@
 
 ### Requirement: Клик по пункту меню копирует текст в буфер обмена и показывает системный Toast (только на API <33)
 
-При клике пользователем по пункту "Скопировать" в контекстном меню секции Title система MUST вызвать `clipboardHelper.copy(context, "Title", item.title)`. При возврате `Result.success(Unit)` И на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` (API <33, Android 12 и старше) система MUST отобразить системный `Toast` через `Toast.makeText(context, message, Toast.LENGTH_SHORT).show()` с текстом `R.string.title_copied` ("Название скопировано"). Текст Toast'а резолвится вызывающим в composable-скоупе через `stringResource(R.string.title_copied)` и передаётся в handler как уже готовый `String`, чтобы Toast оставался конфигурационно-чувствительным (lint `ConfigurationLocale`). На устройствах с API ≥33 (Android 13+) системный Toast НЕ показывается: ОС сама показывает системный overlay после копирования, дублирование перекрывает его визуально. При возврате `Result.failure` система MUST NOT отображать Toast (копирование молча игнорируется) на любой версии API. Для секции Details MUST вызываться `clipboardHelper.copy(context, "Details", item.details)` с тем же контрактом: success → Toast `R.string.details_copied` (только API <33), failure → без Toast'а.
+При клике пользователем по пункту "Скопировать" в контекстном меню секции Title система MUST вызвать `clipboardHelper.copy(context, "Title", item.title)`. Если копирование завершилось без исключения И устройство работает на `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` (API <33, Android 12 и старше) — система MUST отобразить системный `Toast` через `Toast.makeText(context, titleCopiedMessage, Toast.LENGTH_SHORT).show()` с текстом `titleCopiedMessage = stringResource(R.string.title_copied)`. Текст Toast'а резолвится в composable-скоупе через `stringResource(R.string.title_copied)` и передаётся в lambda как уже готовый `String`, чтобы Toast оставался конфигурационно-чувствительным (lint `ConfigurationLocale`). На устройствах с API ≥33 (Android 13+) системный Toast НЕ показывается: ОС сама показывает системный overlay после копирования, дублирование перекрывает его визуально. Если `clipboardHelper.copy` бросил исключение (например, при недоступном системном `ClipboardManager` — programming error), система MUST NOT отображать Toast, исключение пробрасывается наверх для диагностики (это не нормальный runtime-fail). Для секции Details MUST вызываться `clipboardHelper.copy(context, "Details", item.details)` с тем же контрактом: success → Toast `R.string.details_copied` (только API <33), исключение → без Toast'а. Лямбды `onCopyTitle`/`onCopyDetails` объявляются инлайн в `DetailScreen.kt` рядом с местом их использования (не выносятся в отдельную фабрику): оба вызова передают константные `label` и строки, специализация уже произошла на месте.
 
 #### Scenario: Клик по пункту меню Title копирует item.title в буфер обмена и показывает Toast "Название скопировано" на API <33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
-- **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)` И показывается системный `Toast.makeText(context, titleCopiedMessage, Toast.LENGTH_SHORT).show()` где `titleCopiedMessage` — это `stringResource(R.string.title_copied)`, полученный вызывающим в composable-скоупе
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` выполняется без исключения
+- **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)` И показывается системный `Toast.makeText(context, titleCopiedMessage, Toast.LENGTH_SHORT).show()` где `titleCopiedMessage` — это `stringResource(R.string.title_copied)`, полученный в composable-скоупе
 
 #### Scenario: Клик по пункту меню Title копирует item.title в буфер обмена БЕЗ Toast на API >=33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` выполняется без исключения
 - **THEN** вызывается `clipboardHelper.copy(context, "Title", item.title)`; системный Toast НЕ показывается — ОС сама показывает системный overlay
 
 #### Scenario: Клик по пункту меню Details копирует item.details в буфер обмена и показывает Toast "Описание скопировано" на API <33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
-- **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)` И показывается системный `Toast.makeText(context, detailsCopiedMessage, Toast.LENGTH_SHORT).show()` где `detailsCopiedMessage` — это `stringResource(R.string.details_copied)`, полученный вызывающим в composable-скоупе
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` выполняется без исключения
+- **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)` И показывается системный `Toast.makeText(context, detailsCopiedMessage, Toast.LENGTH_SHORT).show()` где `detailsCopiedMessage` — это `stringResource(R.string.details_copied)`, полученный в composable-скоупе
 
 #### Scenario: Клик по пункту меню Details копирует item.details в буфер обмена БЕЗ Toast на API >=33
 
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` возвращает `Result.success(Unit)`
+- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details на устройстве с `Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU` и `clipboardHelper.copy(...)` выполняется без исключения
 - **THEN** вызывается `clipboardHelper.copy(context, "Details", item.details)`; системный Toast НЕ показывается
-
-#### Scenario: Клик по пункту меню Title при ошибке копирования не показывает Toast
-
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Title и `clipboardHelper.copy(...)` возвращает `Result.failure`
-- **THEN** системный Toast НЕ отображается ни на какой версии API
-
-#### Scenario: Клик по пункту меню Details при ошибке копирования не показывает Toast
-
-- **WHEN** пользователь нажимает пункт "Скопировать" в меню секции Details и `clipboardHelper.copy(...)` возвращает `Result.failure`
-- **THEN** системный Toast НЕ отображается ни на какой версии API
 
 #### Scenario: Меню закрывается сразу после клика по пункту не дожидаясь копирования
 
@@ -109,27 +99,17 @@
 
 ### Requirement: ClipboardHelper абстрагирует доступ к системному буферу обмена
 
-Система MUST осуществлять доступ к системному буферу обмена через интерфейс `ClipboardHelper`, имеющий метод `fun copy(context: Context, label: String, text: String): Result<Unit>`. Реализация `SystemClipboardHelper` MUST использовать `ClipboardManager`, MUST возвращать `Result.success(Unit)` при успехе и MUST возвращать `Result.failure` при любых ошибках (null `ClipboardManager`, исключения из `setPrimaryClip`). Compose-обработчик `rememberCopyToClipboardHandler` MUST принимать `ClipboardHelper` параметром с дефолтом `SystemClipboardHelper()` для возможности подмены в тестах.
+Система MUST осуществлять доступ к системному буферу обмена через интерфейс `ClipboardHelper`, имеющий метод `fun copy(context: Context, label: String, text: String)`. Реализация `SystemClipboardHelper` MUST использовать `ClipboardManager` и MUST делегировать вызов `setPrimaryClip(ClipData.newPlainText(label, text))`. Метод бросает `IllegalStateException` если `context.getSystemService(Context.CLIPBOARD_SERVICE)` возвращает null — это programming error (системный сервис всегда доступен на поддерживаемых платформах), не runtime-fail. `DetailScreen` использует `SystemClipboardHelper` напрямую (через `remember { SystemClipboardHelper() }`); интерфейс `ClipboardHelper` сохранён для unit-тестирования `SystemClipboardHelper` через MockK.
 
-#### Scenario: ClipboardHelper.copy возвращает Result.success когда ClipboardManager доступен и setPrimaryClip succeeds
+#### Scenario: ClipboardHelper.copy делегирует в ClipboardManager.setPrimaryClip с правильными параметрами
 
-- **WHEN** `SystemClipboardHelper.copy(context, "Title", "some text")` вызывается когда ClipboardManager доступен
-- **THEN** возвращается `Result.success(Unit)`; текст помещается в системный буфер обмена
+- **WHEN** `SystemClipboardHelper.copy(context, "Title", "some text")` вызывается когда `context.getSystemService(Context.CLIPBOARD_SERVICE)` возвращает `ClipboardManager`
+- **THEN** вызывается `ClipData.newPlainText("Title", "some text")` и `clipboardManager.setPrimaryClip(...)` с этим `ClipData`; метод возвращает `Unit`
 
-#### Scenario: ClipboardHelper.copy возвращает Result.failure когда ClipboardManager равен null
+#### Scenario: ClipboardHelper.copy бросает IllegalStateException когда ClipboardManager равен null
 
 - **WHEN** `SystemClipboardHelper.copy(context, "Title", "some text")` вызывается когда `context.getSystemService(Context.CLIPBOARD_SERVICE)` возвращает null
-- **THEN** возвращается `Result.failure`; никакое исключение не пробрасывается наверх
-
-#### Scenario: ClipboardHelper.copy возвращает Result.failure когда setPrimaryClip бросает исключение
-
-- **WHEN** `SystemClipboardHelper.copy(context, "Title", "some text")` вызывается и `clipboardManager.setPrimaryClip(...)` бросает `RuntimeException`
-- **THEN** возвращается `Result.failure`; исключение перехватывается и не пробрасывается наверх
-
-#### Scenario: Compose-обработчик принимает ClipboardHelper через параметр для подмены в тестах
-
-- **WHEN** `rememberCopyToClipboardHandler` вызывается с кастомным `ClipboardHelper` (например `FakeClipboardHelper`)
-- **THEN** используется переданная реализация, а не `SystemClipboardHelper`; это позволяет тестировать handler без зависимости от системного clipboard
+- **THEN** метод бросает `IllegalStateException("ClipboardManager недоступен")`; исключение пробрасывается наверх
 
 ---
 

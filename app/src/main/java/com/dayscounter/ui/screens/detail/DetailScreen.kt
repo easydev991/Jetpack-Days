@@ -1,5 +1,7 @@
 package com.dayscounter.ui.screens.detail
 
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,7 +42,7 @@ import com.dayscounter.util.SystemClipboardHelper
  * @param onBackClick Обработчик клика "Назад"
  * @param onEditClick Обработчик клика "Редактировать"
  */
-@Suppress("LongMethod") // use-case wiring + copy callback setup
+@Suppress("LongMethod") // use-case wiring (~28 строк) выводит функцию за порог 60
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -83,26 +86,23 @@ fun DetailScreen(
     val titleCopiedMessage = stringResource(R.string.title_copied)
     val detailsCopiedMessage = stringResource(R.string.details_copied)
 
-    val copyToClipboard =
-        rememberCopyToClipboardHandler(clipboardHelper = SystemClipboardHelper())
-
-    val currentState = uiState
-    val onCopyTitle: () -> Unit
-    val onCopyDetails: () -> Unit
-    when (currentState) {
-        is DetailScreenState.Success -> {
-            onCopyTitle = {
-                copyToClipboard("Title", titleCopiedMessage, currentState.item.title)
-            }
-            onCopyDetails = {
-                copyToClipboard("Details", detailsCopiedMessage, currentState.item.details)
+    val clipboardHelper = remember { SystemClipboardHelper() }
+    val item = (uiState as? DetailScreenState.Success)?.item
+    val onCopyTitle: () -> Unit = {
+        item?.let {
+            clipboardHelper.copy(context, "Title", it.title)
+            // ponytail: Toast на API >=33 не показывается — ОС сама рисует системный overlay.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Toast.makeText(context, titleCopiedMessage, Toast.LENGTH_SHORT).show()
             }
         }
-        else -> {
-            // Loading/Error: no-op (ReadSectionView для title/details не рендерится,
-            // но параметр всё равно нужен для стабильной сигнатуры DetailScreenParams).
-            onCopyTitle = {}
-            onCopyDetails = {}
+    }
+    val onCopyDetails: () -> Unit = {
+        item?.let {
+            clipboardHelper.copy(context, "Details", it.details)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Toast.makeText(context, detailsCopiedMessage, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
