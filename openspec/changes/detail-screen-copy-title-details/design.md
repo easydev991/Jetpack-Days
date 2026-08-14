@@ -13,7 +13,7 @@
 
 **Non-Goals:**
 - Расширять контекстное меню (share, edit, etc.) — задача только про копирование.
-- Тактильная обратная связь (`hapticFeedback`), `onGloballyPositioned` + ручное смещение меню — стандартного позиционирования `DropdownMenu` внутри `Box` достаточно.
+- Тактильная обратная связь (`hapticFeedback`) — не входит в задачу.
 - Копирование для Reminder/Color/Date и других read-only секций — задача только про title и details.
 - Поднимать общий state меню на уровень `DetailScreenContent` — двух секций недостаточно, чтобы оправдать lift-state.
 - Заменять системный буфер обмена на что-либо ещё.
@@ -63,14 +63,25 @@
 
 **Обоснование:** `DetailScreen` уже владеет `LocalContext` и `stringResource(...)` — инфраструктура для копирования и Toast'а живёт там же. Лямбды короткие (6–8 строк каждая), специализированы для конкретных `label` + `message`, и читаются на месте использования. Отдельная фабрика с 3-арг параметрами — лишний слой абстракции без будущей переиспользуемости.
 
-### 5. Стандартное позиционирование `DropdownMenu` в `Box`
+### 5. Компенсация `topToAnchorBottom` Material3 1.4 для попадания в точку касания
 
-**Решение:** оборачиваем `Text` в `Box`, рядом кладём `DropdownMenu` (только при `onCopy != null`). Меню появляется под текстом автоматически.
+**Решение:** Material3 1.4 `DropdownMenu` по умолчанию использует кандидат `topToAnchorBottom` в `DropdownMenuPositionProvider.calculatePosition()`: `menu.top = anchor.bottom + contentOffset.y`. То есть `DropdownMenu.offset.y` прибавляется к **нижнему** краю родителя (`Box`), а не к точке касания. Чтобы top-left меню попал в точку long-press, измеряем высоту Text через `Modifier.onSizeChanged` на `Box` (`textHeightPx`) и вычитаем её из `touchOffset.y` при формировании `DpOffset`:
+
+```kotlin
+menuOffset = DpOffset(
+    x = touchOffset.x.toDp(),
+    y = (touchOffset.y - textHeightPx).toDp()
+)
+```
+
+Тогда `menu.top = Box.bottom + (touchOffset.y - Box.height) = Box.top + touchOffset.y = touch.Y`.
 
 **Альтернативы:**
-- `onGloballyPositioned` + `DpOffset` (как в `MainScreen`).
+- Стандартное позиционирование без коррекции: `menu.top` оказывается на `Box.height` ниже точки касания (для однострочного `bodyLarge` ≈ 28-32dp). Для меню с одним пунктом высотой ~48dp это ≈ 60% высоты меню ниже пальца — не соответствует ожиданиям пользователя.
+- `SubcomposeLayout` для замера высоты меню и центрирования по точке касания: сложнее, не добавляет ценности — top-left меню в точке касания совпадает с поведением стандартных Android-popup и `MainScreen`.
+- Использовать `MainScreen`-паттерн (`positionInRoot + touchOffset`): некорректен для нашего случая, потому что в `MainScreen` anchor-родитель `DropdownMenu` — full-screen контейнер, где `anchor.topLeft ≈ (0, 0)`, поэтому `anchor + offset = offset` оказывается близко к точке касания; в нашем случае anchor — `Box` (компактный), и та же формула даёт смещение на высоту `Box`.
 
-**Обоснование:** для одной секции внутри `Column` ручное позиционирование — избыточно. `Box` даёт достаточно контекста, чтобы `DropdownMenu` Material3 корректно встал под текстом.
+**Обоснование:** минимальное изменение (одна строка арифметики + `onSizeChanged` для замера), не зависит от длины текста и количества переносов. `Box` остаётся родителем для корректной работы anchor-логики Material3. `onSizeChanged` срабатывает после первого layout — пользовательский long-press всегда происходит после первого layout, поэтому `textHeightPx` уже известен к моменту жеста.
 
 ### 6. Условный системный Toast по версии API
 

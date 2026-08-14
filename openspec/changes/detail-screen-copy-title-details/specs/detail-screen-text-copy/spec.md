@@ -11,10 +11,10 @@
 - **WHEN** пользователь выполняет долгое нажатие (long-press) на body-текст секции Title
 - **THEN** отображается `DropdownMenu` с одним `DropdownMenuItem`, содержащим текст `R.string.context_menu_copy` и иконку `Icons.Filled.ContentCopy`
 
-#### Scenario: Меню появляется непосредственно под текстом Title в пределах Box-контейнера
+#### Scenario: Top-left меню появляется в точке касания
 
-- **WHEN** пользователь выполняет долгое нажатие на body-текст секции Title
-- **THEN** `DropdownMenu` позиционируется внутри `Box`, оборачивающего `Text`, стандартным для Material3 способом — под текстом
+- **WHEN** пользователь выполняет долгое нажатие на body-текст секции Title в координатах `(touchX, touchY)` относительно `Box`
+- **THEN** `DropdownMenu` позиционируется так, что его top-left совпадает с точкой касания: `menu.top = Box.top + touchY`, `menu.left = Box.left + touchX`. Material3 1.4 `DropdownMenu` использует кандидат `topToAnchorBottom` (`menu.top = anchor.bottom + offset.y`); при формировании `DropdownMenu.offset = DpOffset(touchX.toDp(), (touchY - textHeightPx).toDp())` из `touchOffset.y` вычитается высота Text (замеренная через `Modifier.onSizeChanged` на `Box`), что компенсирует `topToAnchorBottom` и даёт совпадение top-left меню с точкой касания
 
 ---
 
