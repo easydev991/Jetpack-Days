@@ -81,6 +81,26 @@ fun ReadSectionViewDetailsPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "ReadSectionView - Title с копированием")
+@Composable
+fun ReadSectionViewTitleWithCopyPreview() {
+    JetpackDaysTheme {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(R.dimen.spacing_regular)),
+            verticalArrangement = Arrangement.Center
+        ) {
+            ReadSectionView(
+                headerText = "Title",
+                bodyText = "День рождения",
+                onCopy = {}
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, name = "DetailDatePicker - прошлое (DAY)")
 @Composable
 fun DetailDatePickerPastDayPreview() {

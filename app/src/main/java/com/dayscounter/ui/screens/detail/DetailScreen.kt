@@ -7,16 +7,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,7 +39,7 @@ import com.dayscounter.util.SystemClipboardHelper
  * @param onBackClick Обработчик клика "Назад"
  * @param onEditClick Обработчик клика "Редактировать"
  */
-@Suppress("LongMethod") // use-case wiring + snackbar/copy callback setup
+@Suppress("LongMethod") // use-case wiring + copy callback setup
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -82,14 +78,8 @@ fun DetailScreen(
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()
     RefreshReminderOnResume(viewModel = viewModel)
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
     val copyToClipboard =
-        rememberCopyToClipboardHandler(
-            clipboardHelper = SystemClipboardHelper(),
-            snackbarHostState = snackbarHostState,
-            coroutineScope = coroutineScope
-        )
+        rememberCopyToClipboardHandler(clipboardHelper = SystemClipboardHelper())
 
     val currentState = uiState
     val onCopyTitle: () -> Unit
@@ -133,8 +123,7 @@ fun DetailScreen(
                 getDaysAnalysisTextUseCase = getDaysAnalysisTextUseCase
             ),
         modifier = modifier,
-        uiState = uiState,
-        snackbarHostState = snackbarHostState
+        uiState = uiState
     )
 }
 
@@ -163,16 +152,12 @@ private fun RefreshReminderOnResume(viewModel: DetailScreenViewModel) {
 private fun DetailScreenContent(
     params: DetailScreenParams,
     modifier: Modifier = Modifier,
-    uiState: DetailScreenState,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    uiState: DetailScreenState
 ) {
     val currentItem = (uiState as? DetailScreenState.Success)?.item
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
         topBar = {
             DetailTopAppBar(
                 uiState = uiState,
