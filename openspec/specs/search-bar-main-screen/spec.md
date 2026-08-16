@@ -1,8 +1,11 @@
 # search-bar-main-screen Specification
 
 ## Purpose
+
 TBD - created by archiving change redesign-search-bar. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Search Field Visibility
 
 Поле поиска `SearchField` на главном экране `MainScreen` **MUST** отображаться тогда и только тогда, когда в отфильтрованном списке есть ≥5 элементов (`itemsCount >= MIN_ITEMS_FOR_SEARCH`) или пользователь уже начал вводить поисковый запрос (`searchQuery.isNotEmpty()`).
@@ -116,4 +119,3 @@ TBD - created by archiving change redesign-search-bar. Update Purpose after arch
 - **WHEN** `SearchField` компонуется в `MainScreen`
 - **THEN** `Modifier.fillMaxWidth().padding(horizontal = dimensionResource(R.dimen.spacing_regular))` применяется
 - **AND** вертикальный padding отсутствует (top inset контролируется через `windowInsets`)
-

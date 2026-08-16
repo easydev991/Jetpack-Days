@@ -1,12 +1,17 @@
 package com.dayscounter.ui.screens.events
 
 import android.content.pm.ActivityInfo
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.MainActivity
@@ -18,6 +23,7 @@ import com.dayscounter.domain.model.DisplayOption
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -193,6 +199,128 @@ class MainScreenSearchVisibilityUiTest {
             .performClick()
 
         activity.requestedOrientation = originalOrientation
+    }
+
+    @Test
+    fun when_scroll_up_in_long_list_then_search_field_collapses() {
+        runBlocking { insertItems(30) }
+        composeTestRule.waitForIdle()
+
+        val expandedHeight = collapsibleSearchFieldHeight()
+        swipeVertically(upward = true)
+        composeTestRule.waitForIdle()
+
+        val collapsedHeight = collapsibleSearchFieldHeight()
+        assertTrue(
+            "CollapsibleSearchField should collapse on scroll up. Expanded: $expandedHeight, collapsed: $collapsedHeight",
+            collapsedHeight < expandedHeight
+        )
+    }
+
+    @Test
+    fun when_scroll_down_after_collapse_then_search_field_expands() {
+        runBlocking { insertItems(30) }
+        composeTestRule.waitForIdle()
+
+        swipeVertically(upward = true)
+        composeTestRule.waitForIdle()
+        val collapsedHeight = collapsibleSearchFieldHeight()
+
+        swipeVertically(upward = false)
+        composeTestRule.waitForIdle()
+        val reExpandedHeight = collapsibleSearchFieldHeight()
+
+        assertTrue(
+            "CollapsibleSearchField should re-expand on scroll down. Collapsed: $collapsedHeight, re-expanded: $reExpandedHeight",
+            reExpandedHeight > collapsedHeight
+        )
+    }
+
+    @Test
+    fun when_short_scroll_up_then_search_field_partially_collapsed() {
+        runBlocking { insertItems(30) }
+        composeTestRule.waitForIdle()
+
+        val expandedHeight = collapsibleSearchFieldHeight()
+        // Короткий swipe вверх: SearchField сворачивается частично (no-snap первой итерации).
+        swipeVertically(upward = true, fraction = 0.2f)
+        composeTestRule.waitForIdle()
+
+        val afterSwipeHeight = collapsibleSearchFieldHeight()
+        assertTrue(
+            "CollapsibleSearchField should partially collapse. Expanded: $expandedHeight, after: $afterSwipeHeight",
+            afterSwipeHeight in 0f..expandedHeight && afterSwipeHeight < expandedHeight
+        )
+    }
+
+    @Test
+    fun when_search_query_active_then_scroll_does_not_collapse_search_field() {
+        runBlocking { insertItems(30) }
+        composeTestRule.waitForIdle()
+
+        val expandedHeight = collapsibleSearchFieldHeight()
+
+        composeTestRule
+            .onNodeWithContentDescription(searchDescription)
+            .performTextInput("Item")
+        composeTestRule.waitForIdle()
+
+        swipeVertically(upward = true)
+        composeTestRule.waitForIdle()
+
+        val afterScrollHeight = collapsibleSearchFieldHeight()
+        assertTrue(
+            "CollapsibleSearchField should stay visible when search query is active. Initial: $expandedHeight, after: $afterScrollHeight",
+            afterScrollHeight >= expandedHeight * 0.9f
+        )
+    }
+
+    @Test
+    fun when_items_below_threshold_then_scroll_does_not_affect_search_field() {
+        runBlocking { insertItems(4) }
+        composeTestRule.waitForIdle()
+
+        // SearchField скрыт по порогу — leading-icon отсутствует.
+        composeTestRule
+            .onNodeWithContentDescription(searchDescription)
+            .assertDoesNotExist()
+
+        // Скролл не должен приводить к NPE / падению теста.
+        swipeVertically(upward = true)
+        composeTestRule.waitForIdle()
+
+        composeTestRule
+            .onNodeWithContentDescription(searchDescription)
+            .assertDoesNotExist()
+    }
+
+    private fun collapsibleSearchFieldHeight(): Float =
+        composeTestRule
+            .onNodeWithTag("collapsibleSearchField")
+            .fetchSemanticsNode()
+            .boundsInRoot.height
+
+    private fun swipeVertically(
+        upward: Boolean,
+        fraction: Float = 0.5f
+    ) {
+        val root = composeTestRule.onRoot().fetchSemanticsNode().boundsInRoot
+        val centerX = (root.left + root.right) / 2
+        val height = root.bottom - root.top
+        val midY = (root.top + root.bottom) / 2
+        val swipeDistance = height * fraction
+        val startY: Float
+        val endY: Float
+        if (upward) {
+            startY = midY + swipeDistance / 2
+            endY = midY - swipeDistance / 2
+        } else {
+            startY = midY - swipeDistance / 2
+            endY = midY + swipeDistance / 2
+        }
+        composeTestRule.onRoot().performTouchInput {
+            swipe(Offset(centerX, startY), Offset(centerX, endY))
+        }
     }
 
     private suspend fun insertItems(count: Int) {
