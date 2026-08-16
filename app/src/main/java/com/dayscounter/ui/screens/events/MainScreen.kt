@@ -41,15 +41,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
@@ -70,6 +76,7 @@ import com.dayscounter.ui.ds.ListItemParams
 import com.dayscounter.ui.ds.ListItemView
 import com.dayscounter.ui.viewmodel.MainScreenState
 import com.dayscounter.ui.viewmodel.MainScreenViewModel
+import kotlin.math.roundToInt
 
 // Минимальное количество записей для отображения поля поиска
 private const val MIN_ITEMS_FOR_SEARCH = 5
@@ -142,26 +149,30 @@ fun MainScreen(
 /**
  * Заголовок экрана (TopBar).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ScreenHeader(state: MainScreenTopBarState) {
     MainScreenTopBar(state = state)
 }
 
 /**
- * Тело экрана со списком и полем поиска.
+ * Тело экрана со списком событий.
  *
- * Верхний паддинг TopAppBar вынесен на сам [Column], чтобы высота поля поиска
- * изменялась плавно внутри [AnimatedVisibility] без перерасчёта паддингов у списка.
+ * SearchField сворачивается при скролле вверх через [CollapsibleSearchField].
+ * [NestedScrollConnection] живёт в `MainScreenScaffold` на самом `Scaffold` —
+ * это родитель `LazyColumn` через `content`-слот, pre-scroll от списка доходит до колбэка.
+ * Scaffold уже резервирует место под topbar через [paddingValues].
  */
 @Composable
 internal fun ScreenBody(
-    searchQuery: String,
-    itemsCount: Int,
     paddingValues: PaddingValues,
-    state: MainScreenContentState,
-    onSearchQueryChange: (String) -> Unit
+    state: MainScreenContentState
 ) {
+    val showSearchField =
+        state.searchQuery.isNotEmpty() ||
+            state.itemsCount >= MIN_ITEMS_FOR_SEARCH
+    // Верхний паддинг TopAppBar вынесен на сам Column, чтобы поле поиска жило НИЖЕ topbar
+    // (иначе рендерится за ним — семантика есть, пиксели перекрыты), а высота поля менялась
+    // внутри AnimatedVisibility без пересчёта contentPadding у списка.
     Column(
         modifier =
             Modifier
@@ -173,19 +184,16 @@ internal fun ScreenBody(
                     bottom = 0.dp
                 )
     ) {
-        val showSearchField = searchQuery.isNotEmpty() || itemsCount >= MIN_ITEMS_FOR_SEARCH
         AnimatedVisibility(
             visible = showSearchField,
             enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(SEARCH_FIELD_ANIMATION_DURATION_MS)),
             exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(SEARCH_FIELD_ANIMATION_DURATION_MS))
         ) {
-            SearchField(
-                searchQuery = searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = dimensionResource(R.dimen.spacing_regular))
+            CollapsibleSearchField(
+                searchQuery = state.searchQuery,
+                onSearchQueryChange = state.onSearchQueryChange,
+                onSearchFieldHeightPxChange = state.onSearchFieldHeightPxChange,
+                searchBarCollapsePx = state.searchBarCollapsePx
             )
         }
         MainScreenContentByState(
@@ -436,6 +444,8 @@ private fun ItemsListContent(params: ItemsListParams) {
 internal data class MainScreenTopBarState(
     val itemsCount: Int,
     val sortOrder: SortOrder,
+    val searchQuery: String,
+    val onSearchQueryChange: (String) -> Unit,
     val onSortClick: () -> Unit,
     val onSortOrderChange: (SortOrder) -> Unit,
     val availableColorTags: List<Int>,
@@ -461,8 +471,6 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
             }
         },
         actions = {
-            // Кнопка фильтра отображается только если есть достаточное количество записей и доступные цвета.
-            // При активном фильтре оставляем кнопку видимой, чтобы пользователь мог сбросить фильтр.
             if (
                 (state.itemsCount >= 2 || state.selectedColorTag != null) &&
                 state.availableColorTags.isNotEmpty()
@@ -489,11 +497,76 @@ private fun MainScreenTopBar(state: MainScreenTopBarState) {
 }
 
 /**
+ * SearchField, сворачивающийся при скролле вверх через [NestedScrollConnection] + [Modifier.layout].
+ *
+ * Поведение:
+ * - При скролле вверх — `onPreScroll` (в родительском [Column]) увеличивает `searchBarCollapsePx` →
+ *   `Box` физически сжимается, освобождая место для [LazyColumn].
+ * - При скролле вниз — обратный процесс, поле возвращается.
+ * - При активном [searchQuery] — `onPreScroll` возвращает [Offset.Zero] (поле не уезжает при наборе).
+ * - Состояние `searchBarCollapsePx` сохраняется через [rememberSaveable] для переживания rotation.
+ *
+ * Реализует UX-критерий «SearchField сворачивается при скролле вверх» без перевода экрана на
+ * [androidx.compose.material3.MediumTopAppBar] (который ломает «title всегда в одной строке с
+ * SortMenu и PaletteFilter» в [TopAppBar]).
+ *
+ * Механика: `clipToBounds()` стоит ВНЕ `Modifier.layout` — клип по свернувшейся высоте,
+ * которую репортит layout. Контент размещается `placeRelative(0, -collapsePx)` — поле
+ * физически уезжает вверх и срезается клипом, `graphicsLayer` не нужен.
+ * Constraints передаются как есть (без `Constraints.Infinity`): внутри material3 `SearchBar` —
+ * кастомный `Layout` (`SearchBarLayout`, `SearchBar.kt:2206`), который выводит фиксированную
+ * высоту inputField через `constrainHeight(minIntrinsicHeight(...))` — с бесконечным
+ * `maxHeight` клампа нет и измерение раздувается, поле перестаёт отрисовываться.
+ * Высота репортится через [onSizeChanged] на дочернем [SearchField] — запись state внутри
+ * measure-блока `layout` запрещена (сайд-эффект в фазе layout ломает exit-анимацию
+ * [AnimatedVisibility]).
+ *
+ * @param onSearchFieldHeightPxChange колбэк реальной высоты поля в px (из [onSizeChanged]).
+ *   Нужен в родительском [Column] для клампа `searchBarCollapsePx` в [NestedScrollConnection].
+ * @param searchBarCollapsePx px свёрнутой части (0 = expanded, searchFieldHeightPx = collapsed).
+ */
+@Composable
+private fun CollapsibleSearchField(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchFieldHeightPxChange: (Int) -> Unit,
+    searchBarCollapsePx: Float
+) {
+    Box(
+        Modifier
+            .testTag("collapsibleSearchField")
+            .clipToBounds()
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                val collapsePx = searchBarCollapsePx.coerceIn(0f, placeable.height.toFloat())
+                val visibleHeight = placeable.height - collapsePx.roundToInt()
+                layout(placeable.width, visibleHeight) {
+                    placeable.placeRelative(0, -collapsePx.roundToInt())
+                }
+            }
+    ) {
+        SearchField(
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(R.dimen.spacing_regular))
+                    .onSizeChanged { onSearchFieldHeightPxChange(it.height) }
+        )
+    }
+}
+
+/**
  * Data class for parameters of main screen content by state.
  */
 internal data class MainScreenContentState(
     val uiState: MainScreenState,
     val searchQuery: String,
+    val itemsCount: Int,
+    val onSearchQueryChange: (String) -> Unit,
+    val onSearchFieldHeightPxChange: (Int) -> Unit,
+    val searchBarCollapsePx: Float,
     val listState: androidx.compose.foundation.lazy.LazyListState,
     val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
     val onItemClick: (Long) -> Unit,

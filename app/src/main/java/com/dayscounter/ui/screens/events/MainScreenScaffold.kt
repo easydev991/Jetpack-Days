@@ -13,7 +13,17 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
 import com.dayscounter.analytics.AnalyticsEvent
@@ -45,8 +55,28 @@ internal fun MainScreenScaffold(
     params: MainScreenParams,
     modifier: Modifier
 ) {
+    var searchFieldHeightPx by remember { mutableIntStateOf(0) }
+    var searchBarCollapsePx by rememberSaveable { mutableFloatStateOf(0f) }
+    val nestedScrollConnection =
+        remember(searchFieldHeightPx, state.searchQuery) {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    if (state.searchQuery.isNotEmpty()) return Offset.Zero
+                    // swipe up → available.y<0; вычитаем, чтобы растить collapse.
+                    val newOffset =
+                        (searchBarCollapsePx - available.y)
+                            .coerceIn(0f, searchFieldHeightPx.toFloat())
+                    val consumedY = newOffset - searchBarCollapsePx
+                    searchBarCollapsePx = newOffset
+                    return Offset(0f, consumedY)
+                }
+            }
+        }
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().nestedScroll(nestedScrollConnection),
         contentWindowInsets =
             WindowInsets
                 .safeDrawing
@@ -57,6 +87,8 @@ internal fun MainScreenScaffold(
                     MainScreenTopBarState(
                         itemsCount = state.itemsCount,
                         sortOrder = state.sortOrder,
+                        searchQuery = state.searchQuery,
+                        onSearchQueryChange = { params.viewModel.updateSearchQuery(it) },
                         onSortClick = {
                             params.analyticsService.log(AnalyticsEvent.UserAction(UserActionType.SORT))
                         },
@@ -84,20 +116,21 @@ internal fun MainScreenScaffold(
         }
     ) { paddingValues ->
         ScreenBody(
-            searchQuery = state.searchQuery,
-            itemsCount = state.itemsCount,
             paddingValues = paddingValues,
             state =
                 MainScreenContentState(
                     uiState = state.uiState,
                     searchQuery = state.searchQuery,
+                    itemsCount = state.itemsCount,
+                    onSearchQueryChange = { params.viewModel.updateSearchQuery(it) },
+                    onSearchFieldHeightPxChange = { searchFieldHeightPx = it },
+                    searchBarCollapsePx = searchBarCollapsePx,
                     listState = state.listState,
                     getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
                     onItemClick = params.onItemClick,
                     onEditClick = params.onEditClick,
                     viewModel = params.viewModel
-                ),
-            onSearchQueryChange = { params.viewModel.updateSearchQuery(it) }
+                )
         )
     }
 }

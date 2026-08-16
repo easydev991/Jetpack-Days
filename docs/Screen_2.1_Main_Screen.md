@@ -55,14 +55,14 @@ Main Screen является основным экраном приложени�
 - [x] Диалог подтверждения удаления записи
 - [x] Выделение выбранного элемента списка
 - [x] Проверка линтеров (ktlint) — ✅ пройдено
-- [x] UI-тесты для MainScreen (`MainScreenSearchVisibilityUiTest` — 5 тестов, анимация Show/Hide SearchBar)
+- [x] UI-тесты для MainScreen (`MainScreenSearchVisibilityUiTest` — 12 тестов: 7 visibility Show/Hide SearchBar + 5 collapse через NestedScrollConnection)
 - [ ] Проверка detekt (статический анализ) — опционально
 
 ### UI требования
 
 - [x] Список записей в LazyColumn
 - [x] Карточка записи с количеством дней и цветовой меткой
-- [x] SearchField (SearchBar из material3) для поиска записей — отображается при 5+ записях или активном поиске с анимацией expandVertically/shrinkVertically + fadeIn/fadeOut (tween 200ms)
+- [x] SearchField (SearchBar из material3) для поиска записей — отображается при 5+ записях или активном поиске с анимацией expandVertically/shrinkVertically + fadeIn/fadeOut (tween 200ms). Живёт в `ScreenBody` как `CollapsibleSearchField` через `NestedScrollConnection` + `Modifier.layout`, **не в topbar**; сворачивается по высоте при скролле вверх (от `expandedHeight` до `0dp`), разворачивается при скролле вниз
 - [x] Кнопка сортировки (возрастание/убывание) — отображается при наличии 2+ записей
 - [x] Кнопка добавления новой записи (+)
 - [x] Контекстное меню при длинном нажатии (Просмотр/Редактирование/Удаление)
@@ -290,3 +290,4 @@ Main Screen является основным экраном приложени�
 - 2026-01-15: Реализовано сохранение порядка сортировки в DataStore (ASCENDING/DESCENDING)
 - 2026-01-15: Сжатие описания выполненных пунктов (удаление дублирования)
 - 2026-08-12: UI-тесты видимости SearchBar — `MainScreenSearchVisibilityUiTest` (5 тестов: Show/Hide при 4-5 элементах, анимация, удержание при активном вводе)
+- 2026-08-16: Возврат с MediumTopAppBar на TopAppBar (small) + CollapsibleSearchField в ScreenBody через NestedScrollConnection + Modifier.layout. 5 новых UI-тестов (12/12 зелёных). Заголовок Events теперь всегда в одной строке с SortMenu и PaletteFilter
