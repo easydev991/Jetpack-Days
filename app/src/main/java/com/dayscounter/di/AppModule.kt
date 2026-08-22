@@ -3,6 +3,7 @@
 package com.dayscounter.di
 
 import android.content.Context
+import androidx.lifecycle.ViewModelProvider
 import com.dayscounter.BuildConfig
 import com.dayscounter.DaysCounterApplication
 import com.dayscounter.analytics.AnalyticsService
@@ -16,8 +17,11 @@ import com.dayscounter.data.repository.ReminderRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.repository.ReminderRepository
 import com.dayscounter.reminder.AlarmReminderScheduler
+import com.dayscounter.reminder.AndroidExactAlarmPermissionHelper
 import com.dayscounter.reminder.DefaultReminderManager
+import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.ui.viewmodel.ExactAlarmPermissionViewModel
 
 /**
  * Модуль внедрения зависимостей для приложения.
@@ -65,4 +69,12 @@ object AppModule {
         )
 
     fun createAppSettingsDataStore(context: Context): AppSettingsDataStore = AppSettingsDataStore(context)
+
+    fun createExactAlarmPermissionHelper(context: Context): ExactAlarmPermissionHelper =
+        AndroidExactAlarmPermissionHelper(context.applicationContext)
+
+    fun createExactAlarmPermissionViewModelFactory(context: Context): ViewModelProvider.Factory =
+        ExactAlarmPermissionViewModel.factory(
+            helper = createExactAlarmPermissionHelper(context)
+        )
 }

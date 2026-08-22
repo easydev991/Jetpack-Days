@@ -92,6 +92,12 @@
     <string name="reminder_notification_title">Reminder</string>
     <string name="reminder_notification_title_with_item">Reminder: %1$s</string>
     <string name="reminder_notification_text">Tap to open event details</string>
+
+    <!-- Exact alarm permission banner (API 31+ SCHEDULE_EXACT_ALARM) -->
+    <string name="exact_alarm_request_title">Exact reminders are off</string>
+    <string name="exact_alarm_request_text">Without this permission, notifications may arrive late</string>
+    <string name="exact_alarm_request_button">Enable</string>
+    <string name="exact_alarm_unavailable_text">Exact reminders are not available on this device</string>
     <string name="reminder_error_invalid_amount">Enter number greater than 0</string>
     <string name="reminder_error_past_datetime">Choose a future date and time</string>
     <string name="reminder_notifications_disabled_message">Notifications are disabled for the app. Enable them in system settings.</string>

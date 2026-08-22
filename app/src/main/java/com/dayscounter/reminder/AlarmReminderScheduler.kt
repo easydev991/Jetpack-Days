@@ -5,12 +5,15 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.dayscounter.domain.model.Reminder
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.Logger
 
 /**
  * Реализация [ReminderScheduler] через AlarmManager.
  */
 class AlarmReminderScheduler(
-    private val context: Context
+    private val context: Context,
+    private val logger: Logger = AndroidLogger()
 ) : ReminderScheduler {
     private val alarmManager: AlarmManager? =
         context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
@@ -34,8 +37,16 @@ class AlarmReminderScheduler(
                 reminder.targetEpochMillis,
                 pendingIntent
             )
-        } catch (_: SecurityException) {
+        } catch (securityException: SecurityException) {
             // Fallback на случай отсутствия права exact alarm.
+            // Не глотаем молча: разработчик и Crashlytics увидят причину
+            // задержки уведомлений в минуты/часы (Doze) при отключённом permission.
+            logger.w(
+                TAG,
+                "Нет permission SCHEDULE_EXACT_ALARM — fallback на setAndAllowWhileIdle. " +
+                    "Уведомления могут приходить с задержкой.",
+                securityException
+            )
             alarm.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 reminder.targetEpochMillis,
@@ -76,5 +87,9 @@ class AlarmReminderScheduler(
             intent,
             flags
         )
+    }
+
+    private companion object {
+        const val TAG = "AlarmReminderScheduler"
     }
 }

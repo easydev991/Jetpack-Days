@@ -74,6 +74,15 @@ android {
         buildConfig = true
         compose = true
     }
+    testOptions {
+        unitTests {
+            // Разрешает вызывать Android-методы (Intent.setAction, PendingIntent.getBroadcast и т.п.)
+            // в JVM unit-тестах без Robolectric — возвращают дефолтные значения (null/0/Unit)
+            // вместо RuntimeException("Method ... not mocked").
+            // Используется в AlarmReminderSchedulerTest, чтобы не тянуть Robolectric.
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {

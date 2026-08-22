@@ -48,11 +48,15 @@ test:
 scripts-test:
 	python3 -m unittest discover -s scripts -p "*_test.py"
 
-## android-test: Запуск интеграционных тестов на Android устройстве
+## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации.
 android-test:
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
-	./gradlew connectedDebugAndroidTest --console=plain
+	./gradlew connectedDebugAndroidTest --console=plain $(ANDROID_TEST_FILTER_FLAGS)
 	ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py
+
+# ponytail: ANDROID_TEST_FILTER пробрасывается в gradle как -Pandroid.testInstrumentationRunnerArguments.class=...
+# Пустое значение не передаётся, чтобы не ломать прогон без фильтра.
+ANDROID_TEST_FILTER_FLAGS = $(if $(ANDROID_TEST_FILTER),-Pandroid.testInstrumentationRunnerArguments.class=$(ANDROID_TEST_FILTER),)
 
 ## test-all: Запуск всех тестов (unit + интеграционные)
 test-all:

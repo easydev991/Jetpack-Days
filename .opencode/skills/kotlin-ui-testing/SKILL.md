@@ -30,6 +30,13 @@ description: >
   (полный стек с реальной Activity), либо без Activity: Room DAO /
   репозиторий / ViewModel / Alarm (см. `references/activity-integration.md`,
   `references/room-repository.md`, `references/viewmodel-integration.md`).
+  Если Activity должна стартовать с кастомным `Intent` (push, deep link) —
+  `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), ...)`
+  в том же `references/activity-integration.md` (раздел «Кастомный launch Intent»).
+  **Для тестируемой Activity-логики предпочитайте pure-JVM gate через
+  `companion object` + `@VisibleForTesting`** (см. тот же reference,
+  раздел «Pure-JVM gate для Activity-логики») — никакого Compose, никакого
+  эмулятора.
 
 > Unit-тесты — это `app/src/test/` (JUnit 5, MockK). Их правила описаны
 > в навыке `kotlin-testing`. Этот skill про `app/src/androidTest/`.
@@ -48,6 +55,16 @@ description: >
    Компонентный тест — `createComposeRule()`; тест с реальной
    MainActivity — `createAndroidComposeRule<MainActivity>()`. Правило
    объявляется как `@get:Rule val composeTestRule = ...`.
+   Для старта Activity с кастомным `Intent` (push, deep link) — **нет**
+   overload `createAndroidComposeRule(intent)` в v2 (см. `AndroidComposeTestRule.android.kt`):
+   собираем правило через `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)`.
+   `androidx.test.core.app.ActivityScenario` — `AutoCloseable`, не `TestRule`,
+   поэтому **не** передаётся напрямую — нужен `androidx.test.ext.junit.rules.ActivityScenarioRule`
+   (`extends ExternalResource`, `TestRule`). Внутренний `getActivityFromTestRule(rule)`
+   помечен `internal` и недоступен из androidTest module — нужен свой helper
+   через `lateinit var`. См. `references/activity-integration.md`.
+   Если логика выносима в pure-функцию — используйте **pure-JVM gate**
+   (companion-объект + `@VisibleForTesting`), см. тот же reference.
 3. **snake_case для имён тестов, без обратных кавычек.** Форматы:
    `subject_whenCondition_thenResult` (`dialog_whenSameColorClicked_thenDeselects`),
    `when_condition_then_result` (`when_items_count_4_then_search_field_not_displayed`),
@@ -153,14 +170,16 @@ description: >
 | `assertTrue(x is Y)` без проверки sealed перед `as Y` | Сначала `assertTrue(state is DetailScreenState.Success)`, потом `as` — иначе ClassCastException |
 | Alarm-тест не видит PendingIntent | Ищи через `PendingIntent.getBroadcast(...)` с `FLAG_NO_CREATE or FLAG_IMMUTABLE` (см. `references/alarm-reminder.md`) |
 | Тест уведомлений падает на API 33+ | Оберни в `runWithNotificationPermission { ... }` — `adoptShellPermissionIdentity(POST_NOTIFICATIONS)` (см. `references/alarm-reminder.md`) |
-| Ротация не работает в тесте | `composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` + `waitForIdle()` (см. `references/activity-integration.md`) |
+| Ротация не работает в тесте | `composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` + `waitForIdle()` (см. `references/activity-integration.md`). **Caveat:** `setRequestedOrientation` + `Activity.setIntent(intent)` ломают `ActivityScenario.close()` в `@After` (таймаут 45-90 сек в `Activity never becomes DESTROYED`). Для логики recreation — предпочитайте pure-JVM gate или `scenario.recreate()` без `setIntent`. |
+| Нужно передать кастомный Intent на старте (push, deep link) | В v2 нет `createAndroidComposeRule(intent)`; используй `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)` (см. `references/activity-integration.md`). **`ActivityScenario.launch(intent)` не компилируется** (`ActivityScenario` не `TestRule`). **`scenario.getActivity()` не существует** — используй свой `activityFromRule` через `lateinit var`. |
 
 ## Verification checklist
 
 - [ ] Тест на JUnit 4: импорты из `org.junit.*`, класс аннотирован
       `@RunWith(AndroidJUnit4::class)`
 - [ ] `@get:Rule val composeTestRule` — `createComposeRule()` (компонент)
-      или `createAndroidComposeRule<MainActivity>()` (экран)
+      или `createAndroidComposeRule<MainActivity>()` (экран); для кастомного
+      launch-intent — `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)`
 - [ ] Имя метода в `snake_case` без обратных кавычек
 - [ ] Комментарии `// Given`, `// When`, `// Then` в каждом тесте
 - [ ] Нет `!!` — `?.`, `?:`, `let`, `checkNotNull`, `assertNotNull`
