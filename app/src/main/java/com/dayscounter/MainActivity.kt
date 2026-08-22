@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +38,12 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val pendingOpenDetailItemId = mutableStateOf<Long?>(null)
 
+    // ponytail: state-based проверка фикса `if (savedInstanceState == null)` в onCreate —
+    // без фикса recreate Activity повторно устанавливает значение из сохранённого push-интента,
+    // и мы проверяем через getter, что после recreate остаётся null.
+    @get:VisibleForTesting
+    internal val openDetailItemId: Long? get() = pendingOpenDetailItemId.value
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,7 +54,15 @@ class MainActivity : ComponentActivity() {
         val database = DaysDatabase.getDatabase(applicationContext)
         val reminderManager = AppModule.createReminderManager(applicationContext, database)
 
-        handleReminderIntent(intent, reminderManager)
+        // ponytail: handleReminderIntent должен вызываться ровно один раз на доставку пуша —
+        // иначе при rotation / recreation Activity Android подсовывает сохранённый intent
+        // с EXTRA_ITEM_ID, и обработчик повторно пушит ItemDetail поверх текущего стека,
+        // а также повторно дёргает side-effects (consumeReminder + NotificationManagerCompat.cancel).
+        // shouldHandleReminderIntent(null) == true покрывает cold-start и process-restart;
+        // onNewIntent (без изменений ниже) покрывает пуш при уже запущенном приложении.
+        if (shouldHandleReminderIntent(savedInstanceState)) {
+            handleReminderIntent(intent, reminderManager)
+        }
 
         setContent {
             val viewModel: MainActivityViewModel =
@@ -113,6 +128,25 @@ class MainActivity : ComponentActivity() {
                 .from(this@MainActivity)
                 .cancel(ReminderIntentContract.notificationIdForItem(itemId))
         }
+    }
+
+    companion object {
+        /**
+         * Гейт обработки пуш-интента в [onCreate].
+         *
+         * Возвращает `true`, если нужно обработать reminder-intent при создании Activity:
+         * - `savedInstanceState == null` — cold-start (новый процесс) или
+         *   process-restart (Android убил процесс, пользователь вернулся по savedInstance).
+         *
+         * Возвращает `false`, если Activity пересоздана системой при rotation / theme change /
+         * возврате из фона после смерти процесса — Android восстанавливает прежний intent из
+         * ActivityRecord, но обрабатывать его повторно нельзя: иначе `pendingOpenDetailItemId`
+         * перезаписывается и `LaunchedEffect` пушит ещё одну копию `ItemDetail` поверх стека.
+         *
+         * @see onCreate
+         */
+        @VisibleForTesting
+        internal fun shouldHandleReminderIntent(savedInstanceState: Bundle?): Boolean = savedInstanceState == null
     }
 }
 
