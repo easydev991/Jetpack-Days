@@ -188,6 +188,11 @@ internal fun CreateEditFormContent(params: CreateEditFormParams) {
                 ),
             expandedContentModifier = Modifier.bringIntoViewRequester(reminderSettingsBringIntoViewRequester)
         )
+        if (params.uiStates.reminder.isEnabled) {
+            androidx.compose.foundation.layout
+                .Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_regular)))
+            ExactAlarmPermissionInlineSection()
+        }
     }
 
     val isReminderEnabled = params.uiStates.reminder.isEnabled

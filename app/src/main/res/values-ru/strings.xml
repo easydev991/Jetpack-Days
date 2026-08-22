@@ -92,6 +92,12 @@
     <string name="reminder_notification_title">Напоминание</string>
     <string name="reminder_notification_title_with_item">Напоминание: %1$s</string>
     <string name="reminder_notification_text">Нажмите, чтобы открыть запись</string>
+
+    <!-- Exact alarm permission banner (API 31+ SCHEDULE_EXACT_ALARM) -->
+    <string name="exact_alarm_request_title">Точные напоминания отключены</string>
+    <string name="exact_alarm_request_text">Без разрешения уведомления могут приходить с задержкой</string>
+    <string name="exact_alarm_request_button">Включить</string>
+    <string name="exact_alarm_unavailable_text">Точные напоминания недоступны на этом устройстве</string>
     <string name="reminder_error_invalid_amount">Введите число больше 0</string>
     <string name="reminder_error_past_datetime">Выберите будущие дату и время</string>
     <string name="reminder_notifications_disabled_message">Уведомления для приложения отключены. Включите их в системных настройках.</string>
