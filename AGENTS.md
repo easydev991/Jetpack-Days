@@ -2,241 +2,171 @@
 
 ## Project Overview
 
-"Days Counter" - Android app for tracking days since events. Fully offline. Kotlin + Jetpack Compose.
+"Days Counter" — Android app (Kotlin + Jetpack Compose) for tracking days
+since events. Fully offline; backup format is shared with the iOS
+counterpart.
 
-**Key Constraints:**
-- Offline mode: no network features
-- Backup model compatible with iOS app
-- Logs in Russian by default
-- Safety: never use `!!`, safely unwrap optionals
+**Hard constraints (do not violate):**
+- Offline only: no Retrofit / OkHttp / Ktor — see `.agents/rules/tech-stack.mdc`
+- Backup format must stay compatible with the iOS app (iOS uses
+  `NSKeyedArchiver`; importer lives in `domain/usecase/ImportBackupUseCase.kt`)
+- Logs and user-facing comments are Russian by default
+- **Never use `!!`** — use `?`, `?:`, `let`, `checkNotNull`
 
----
-
-## Build/Lint/Test Commands
-
-### Build
-
-```bash
-./gradlew assembleDebug          # Debug APK
-./gradlew assembleRelease        # Release APK (requires secrets)
-make build                       # Same as assembleDebug
-```
-
-### Lint & Format
-
-```bash
-make format                      # Run ktlint + detekt with auto-fix (REQUIRED after code changes)
-make lint                        # Check ktlint + detekt (no auto-fix)
-./gradlew ktlintCheck            # ktlint only
-./gradlew ktlintFormat           # ktlint auto-fix only
-./gradlew app:detekt             # detekt only
-```
-
-### Test
-
-```bash
-make test                        # All unit tests with report
-./gradlew test                   # Unit tests only
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"  # Single test class
-./gradlew test --tests "*DaysDifferenceTest"  # Pattern matching
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate_when_same_day_then_returns_today"  # Single test method
-make android-test                # Instrumentation tests (requires device)
-```
-
-### Full Check
-
-```bash
-make check                       # Build + test + lint
-```
+Per-area rules (auto-loaded by OpenCode) live in `.agents/rules/*.mdc`:
+`overview`, `architecture`, `code-style`, `code-quality`, `tech-stack`,
+`project-structure`, `performance-security`, `tdd`. Load them when in
+doubt — do not duplicate their content here.
 
 ---
 
-## Code Style
+## Where to find things
 
-### Kotlin
+| Concern | Source of truth |
+| --- | --- |
+| Library / plugin versions | `gradle/libs.versions.toml` |
+| `compileSdk` / `minSdk` / `targetSdk` | `app/build.gradle.kts` |
+| App version (`VERSION_NAME`, `VERSION_CODE`) | `gradle.properties` |
+| Version badges rendered in README | `<!-- BEGIN_VERSIONS -->` block in `README.md` (kept current by `make update_readme_versions`) |
+| Release / signing flow | `docs/deployment.md` + `Makefile` |
+| Detekt config | `config/detekt/detekt.yml` |
+| ktlint / detekt plugins | `app/build.gradle.kts` |
 
-- Data classes for models
-- Sealed classes for states/results
-- Extension functions for readability
-- **NEVER use `!!`** - use `?`, `?:`, `let`, `checkNotNull`
+Do not pin versions in this file — they change often, and stale values
+have caused wrong answers before. Read the files above.
 
-### Safe Unwrapping (MANDATORY)
+---
 
-```kotlin
-// WRONG: val itemId = savedStateHandle["itemId"]!!
+## Build / Lint / Test
 
-// CORRECT: checkNotNull with message
-private val itemId: Long = checkNotNull(savedStateHandle["itemId"]) {
-    "ItemId parameter is required"
-}
+All user-facing commands live in the `Makefile`; run `Makefile` (`make help` lists the full set — no need to duplicate here). Direct gradle entrypoints for finer control:
 
-// CORRECT: let for null-safe call
-repository.getItemById(itemId)?.let { item -> ... }
-
-// CORRECT: Elvis operator
-val icon = screen.icon ?: defaultIcon
+```bash
+./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"      # single class
+./gradlew test --tests "*DaysDifferenceTest"                                                   # pattern
+./gradlew test --tests "…UseCaseTest.calculate_when_same_day_then_returns_today"               # single method
+./gradlew ktlintCheck && ./gradlew app:detekt                                                 # lint only
+./gradlew :app:assembleDebug :screenshot-tests:assembleDebug --quiet                           # used by screenshots target
 ```
 
-### Error Handling
+**Gotcha:** `make test` runs `./gradlew test || true` — the exit code is
+**not** a failure signal. Read `scripts/test_report.py` output (it
+parses `app/build/test-results/`) and treat any failing/non-passing test
+as a failure, even if `make` exits 0.
 
-**In Use Cases** - use standard `Result<T>`:
-
-```kotlin
-suspend operator fun invoke(uri: Uri): Result<Int> =
-    try {
-        Result.success(items.size)
-    } catch (e: IOException) {
-        Result.failure(BackupException("Failed: ${e.message}", e))
-    }
-```
-
-**For UI States** - use sealed classes:
-
-```kotlin
-sealed class DetailScreenState {
-    data object Loading : DetailScreenState()
-    data class Success(val item: Item) : DetailScreenState()
-    data class Error(val message: String) : DetailScreenState()
-}
-```
-
-### Compose
-
-- `State`/`MutableState` for UI state
-- Unidirectional data flow (state flows down, events flow up)
-- `ViewModel` for UI state management
-- `CompositionLocal` only for theme/global config
-
-```kotlin
-@Preview
-@Composable
-fun ComponentPreview() {
-    JetpackDaysTheme {
-        Component()
-    }
-}
-```
-
-### Naming Conventions
-
-- Classes: `PascalCase`
-- Functions/variables: `camelCase`
-- Constants: `UPPER_SNAKE_CASE`
-- Packages: `lowercase.with.dots`
-
-### Navigation
-
-```kotlin
-sealed class Screen(val route: String, val icon: ImageVector? = null, val titleResId: Int? = null) {
-    object Events : Screen(route = "events", icon = Icons.AutoMirrored.Filled.List, titleResId = R.string.events)
-    object ItemDetail : Screen(route = "item_detail/{itemId}") {
-        fun createRoute(itemId: Long) = "item_detail/$itemId"
-    }
-}
-```
+`make lint` skips `markdownlint` with a yellow warning when the CLI is
+missing — install it (`npm i -g markdownlint-cli`) or run `make setup`
+to get the full check.
 
 ---
 
 ## Testing
 
-**Unit-тесты** — следуй навыку `kotlin-testing`
-(`.opencode/skills/kotlin-testing/SKILL.md`): загрузи его перед написанием
-тестов. Именование, Given/When/Then, MockK/Fake, диспетчеры и команды
-запуска описаны там.
+Before writing tests, load the matching skill:
 
-**UI- и интеграционные тесты** (`androidTest/`) — следуй навыку
-`kotlin-ui-testing` (`.opencode/skills/kotlin-ui-testing/SKILL.md`):
-загрузи его перед написанием тестов. Compose Testing (v2 API),
-Room in-memory, Turbine, AlarmManager и запуск через `make android-test`
-описаны там.
+- `kotlin-testing` (`.opencode/skills/kotlin-testing/SKILL.md`) — for
+  `app/src/test/` (unit). JUnit 5, MockK, kotlinx-coroutines-test,
+  Turbine, Fake repos on `MutableStateFlow`, AAA structure with
+  `// Given / // When / // Then` markers, snake_case test names without
+  backticks. ViewModel integration tests are **forbidden** here.
+- `kotlin-ui-testing` (`.opencode/skills/kotlin-ui-testing/SKILL.md`) —
+  for `app/src/androidTest/`. JUnit 4, Compose Testing v2, Room
+  in-memory, Turbine, real `AlarmManager`. No Espresso.
 
-- Test Pyramid: Unit 70% / Integration 20% / UI 10%
-- TDD Order: **1.** Tests → **2.** Logic → **3.** UI
-- Integration/UI тесты (`androidTest/`): JUnit 4, Compose Testing (v2 API),
-  Room in-memory — без Espresso
+TDD order (tests → logic → UI) and the 70/20/10 pyramid are defined in
+`.agents/rules/tdd.mdc` — read it before starting a new feature.
 
 ---
 
 ## Project Structure
 
+Full tree and placement rules live in `.agents/rules/project-structure.mdc`.
+Compact view of `app/src/main/java/com/dayscounter/`:
+
 ```
-app/src/main/java/com/dayscounter/
-├── data/
-│   ├── database/         # Room entities, DAO, DB, converters, mappers
-│   ├── provider/         # DaysFormatter, ResourceProvider
-│   ├── preferences/      # AppSettingsDataStore
-│   └── repository/       # ItemRepositoryImpl
-├── domain/
-│   ├── exception/        # ItemException
-│   ├── model/            # Domain entities (Item, DaysDifference, TimePeriod, etc.)
-│   ├── repository/       # ItemRepository interface
-│   └── usecase/          # Use cases, IconManager, BackupException
-├── ui/
-│   ├── ds/               # Design System components (reusable)
-│   ├── screens/          # Compose screens (events/, detail/, createedit/, more/, etc.)
-│   ├── state/            # UI state classes
-│   ├── theme/            # App theme
-│   └── viewmodel/        # ViewModels
-├── navigation/           # Navigation routes
-├── analytics/            # FirebaseAnalyticsHelper
-├── crash/                # CrashlyticsHelper
-├── di/                   # AppModule, FormatterModule (manual DI, no Hilt)
-├── util/                 # AndroidLogger, AppConstants, Logger
-├── DaysCounterApplication.kt
-└── MainActivity.kt
+data/        # Room (database/, mappers), provider/, preferences/, repository/
+domain/      # model/, repository/ (interface), usecase/, exception/
+ui/          # ds/ (reusable), screens/<feature>/, state/, theme/, viewmodel/
+reminder/    # AlarmReminderScheduler, ReminderBootReceiver, ReminderAlarmReceiver
+navigation/  # Screen.kt (sealed class with createRoute helpers)
+analytics/   # FirebaseAnalyticsHelper (release-only)
+crash/       # CrashlyticsHelper (release-only)
+di/          # AppModule, FormatterModule — manual factory DI, no Hilt
+util/        # AndroidLogger, NoOpLogger, ClipboardHelper, ThemeUtils, AppConstants
 ```
 
-Tests: `test/` (unit), `androidTest/` (integration/UI) - structure mirrors source
+DI rationale + module breakdown: `.agents/rules/architecture.mdc`.
 
 ---
 
-## Architecture
+## Release / Signing
 
-- **MVVM**: Model (Room, repositories) → ViewModel → View (Compose)
-- **Clean Architecture**: Presentation → Domain → Data
-- **Manual DI**: Factory methods in `FormatterModule`, `AppModule` (no Hilt)
-- **Offline-only**: No Retrofit, OkHttp, Ktor
+- Signing secrets live in a private repo (`easydev991/android-secrets`),
+  fetched over SSH by `make release` / `make apk` into a temp `.secrets/`
+  dir. Configure SSH access with `make setup_ssh` first.
+- `make release` increments `VERSION_CODE`, builds a signed AAB, and
+  uploads Crashlytics mapping files. Use `make apk` when you want a
+  signed APK without bumping the build number.
+- Fastlane uses the Ruby version pinned in `.ruby-version` (rbenv);
+  `make setup` installs the full toolchain. Screenshots live in
+  `fastlane/metadata/android/<locale>/images/phoneScreenshots/`.
 
 ---
 
-## Tech Stack
+## Code Style (summary)
 
-| Component | Technology |
-|-----------|------------|
-| UI | Jetpack Compose |
-| Navigation | Navigation Compose |
-| State | ViewModel |
-| Database | Room |
-| Preferences | DataStore |
-| Async | Coroutines |
-| Serialization | kotlinx-serialization |
-| Tests | JUnit 5 (unit), Compose Testing (androidTest), MockK |
-| Crash Reporting | Firebase Crashlytics (release only) |
+Full rules: `.agents/rules/code-style.mdc`. Top reminders worth keeping
+in mind while editing:
 
-### Versions
+- Data classes for models; sealed classes for UI states / `Result<T>`
+- Use Cases return `Result<T>`, mapping exceptions to domain failures
+  (`BackupException`, `ItemException`)
+- Navigation routes live in `navigation/Screen.kt` (sealed class with
+  `createRoute(...)` helpers); screen entries take an optional `icon`
+  and `titleResId`
+- KDoc for public APIs; comment *why*, not *what*
+- Logs in Russian, error messages user-facing only when localized via
+  `ResourceProvider`
 
-- AGP: 9.0.0
-- Kotlin: 2.3.0
-- Compile SDK: 36
-- Target SDK: 35
-- Min SDK: 26
+Safe-unwrapping patterns (mandatory):
+
+```kotlin
+// ❌ val itemId = savedStateHandle["itemId"]!!
+
+// ✅ checkNotNull with informative message
+private val itemId: Long = checkNotNull(savedStateHandle["itemId"]) {
+    "ItemId parameter is required"
+}
+
+// ✅ let for null-safe call
+repository.getItemById(itemId)?.let { item -> /* ... */ }
+
+// ✅ Elvis for default
+val icon = screen.icon ?: defaultIcon
+```
 
 ---
 
 ## Performance
 
-- `viewModelScope.launch` for coroutines with auto-cancellation
+Full notes in `.agents/rules/performance-security.mdc`. Defaults used
+across the codebase:
+
+- `viewModelScope.launch` for coroutines (auto-cancellation)
 - `StateFlow` with `SharingStarted.WhileSubscribed(5000)`
-- `rememberSaveable` for state across configuration changes
-- `LazyColumn` with `key = { it.id }` for stable item identification
-- Room DAO with Flow for reactive queries
+- `rememberSaveable` for state across config changes
+- `LazyColumn` with `key = { it.id }`; `rememberLazyListState()` for
+  scroll position
+- Room DAO via `Flow` for reactive queries
+- Crashlytics + Analytics enabled only in `release` build type
+  (`manifestPlaceholders["crashlyticsCollectionEnabled"]`)
 
 ---
 
 ## Checklist Before Commit
 
-1. `make format` - fix all lint issues
-2. `make test` - all tests pass
+1. `make format` — fixes ktlint + detekt + markdown issues
+2. `make test` — read the report; do not trust exit code alone
 3. No `!!` operators
-4. KDoc for public APIs
-5. No deprecated APIs
+4. KDoc on public APIs
+5. No deprecated APIs (`./gradlew lint` flags them)
