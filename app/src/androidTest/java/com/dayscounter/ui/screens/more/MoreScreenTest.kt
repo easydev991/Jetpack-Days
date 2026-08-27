@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.BuildConfig
 import com.dayscounter.R
 import com.dayscounter.ui.theme.JetpackDaysTheme
+import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,7 +30,7 @@ class MoreScreenTest {
      * Проверяет, что кнопка "Тема и иконка" отображается на экране.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsThemeAndIconButton() {
+    fun more_screen_when_displayed_then_shows_theme_and_icon_button() {
         // When
         composeTestRule.setContent {
             JetpackDaysTheme {
@@ -47,7 +48,7 @@ class MoreScreenTest {
      * Проверяет, что кнопка "Данные приложения" отображается на экране.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsAppDataButton() {
+    fun more_screen_when_displayed_then_shows_app_data_button() {
         // When
         composeTestRule.setContent {
             JetpackDaysTheme {
@@ -65,7 +66,7 @@ class MoreScreenTest {
      * Проверяет, что кнопка "Отправить отзыв" отображается на экране.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsSendFeedbackButton() {
+    fun more_screen_when_displayed_then_shows_send_feedback_button() {
         // When
         composeTestRule.setContent {
             JetpackDaysTheme {
@@ -80,46 +81,54 @@ class MoreScreenTest {
     }
 
     /**
-     * Проверяет, что кнопка "Оценить приложение" отображается на экране.
+     * Проверяет, что кнопки "Оценить приложение" и "Поделиться приложением"
+     * отображаются на экране при `BuildConfig.RUSTORE_FEATURES = true` (flavor rustore).
+     * На flavor github тест пропускается через Assume.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsRateAppButton() {
-        // When
-        composeTestRule.setContent {
-            JetpackDaysTheme {
-                MoreScreen()
-            }
-        }
+    fun moreScreen_when_rustore_features_true_then_shows_rate_and_share_buttons() {
+        // SKIPPED на flavor github
+        Assume.assumeTrue(BuildConfig.RUSTORE_FEATURES)
 
-        // Then
+        // Given: экран MoreScreen отрендерен при BuildConfig.RUSTORE_FEATURES=true (flavor rustore)
+        composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+
+        // Then: rate и share кнопки видны
         composeTestRule
             .onNodeWithText(context.getString(R.string.rate_the_app))
             .assertIsDisplayed()
-    }
-
-    /**
-     * Проверяет, что кнопка "Поделиться приложением" отображается на экране.
-     */
-    @Test
-    fun moreScreen_whenDisplayed_thenShowsShareAppButton() {
-        // When
-        composeTestRule.setContent {
-            JetpackDaysTheme {
-                MoreScreen()
-            }
-        }
-
-        // Then
         composeTestRule
             .onNodeWithText(context.getString(R.string.share_the_app))
             .assertIsDisplayed()
     }
 
     /**
+     * Проверяет, что кнопки "Оценить приложение" и "Поделиться приложением"
+     * скрыты на экране при `BuildConfig.RUSTORE_FEATURES = false` (flavor github).
+     * На flavor rustore тест пропускается через Assume.
+     */
+    @Test
+    fun moreScreen_when_rustore_features_false_then_hides_rate_and_share_buttons() {
+        // SKIPPED на flavor rustore
+        Assume.assumeFalse(BuildConfig.RUSTORE_FEATURES)
+
+        // Given: экран MoreScreen отрендерен при BuildConfig.RUSTORE_FEATURES=false (flavor github)
+        composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+
+        // Then: rate и share кнопки скрыты
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.rate_the_app))
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.share_the_app))
+            .assertDoesNotExist()
+    }
+
+    /**
      * Проверяет, что кнопка "Страница на GitHub" отображается на экране.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsGitHubPageButton() {
+    fun more_screen_when_displayed_then_shows_github_page_button() {
         // When
         composeTestRule.setContent {
             JetpackDaysTheme {
@@ -137,7 +146,7 @@ class MoreScreenTest {
      * Проверяет, что версия приложения отображается внизу экрана.
      */
     @Test
-    fun moreScreen_whenDisplayed_thenShowsAppVersion() {
+    fun more_screen_when_displayed_then_shows_app_version() {
         // When
         composeTestRule.setContent {
             JetpackDaysTheme {

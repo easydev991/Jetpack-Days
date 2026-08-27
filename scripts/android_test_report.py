@@ -15,10 +15,12 @@ RESET = "\033[0m"
 GRADLE_EXIT_CODE = int(os.environ.get("ANDROID_TEST_GRADLE_EXIT_CODE") or "0")
 
 if GRADLE_EXIT_CODE != 0:
-    print(f"{RED}Gradle connectedDebugAndroidTest завершился с ошибкой: {GRADLE_EXIT_CODE}{RESET}")
+    print(
+        f"{RED}Gradle connectedVariantAndroidTest завершился с ошибкой: {GRADLE_EXIT_CODE}{RESET}"
+    )
     sys.exit(1)
 
-# ANSI escape коды для очистки из строк при подсчете длины
+# ANSI escape коды для очистки при подсчете длины
 ANSI_ESCAPE = re.compile(r"\033\[[0-9;]*m")
 
 
@@ -27,12 +29,29 @@ def strip_ansi(text: str) -> str:
     return ANSI_ESCAPE.sub("", text)
 
 
-# Каталог с результатами тестов - несколько возможных путей
+# Вариант сборки: <flavor><BuildType> в lowercase (например, rustoreDebug, githubDebug).
+# Передаётся из Makefile (android-test: $(FLAVOR_LOWER)Debug) или аргументом CLI.
+# Default — rustoreDebug (обратная совместимость со старыми ручными вызовами скрипта).
+variant = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else os.environ.get("ANDROID_TEST_VARIANT", "rustoreDebug")
+)
+if variant not in ("rustoreDebug", "githubDebug"):
+    print(
+        f"{RED}Неизвестный variant={variant}. Ожидается: rustoreDebug, githubDebug{RESET}"
+    )
+    sys.exit(1)
+
+# Каталог с результатами тестов - несколько возможных путей для выбранного variant.
+# Имя gradle-таски — connected<FlavorTitle><BuildType>AndroidTest: из `rustoreDebug` собираем `RustoreDebug`.
 POSSIBLE_DIRS = [
-    Path("app/build/outputs/androidTest-results/connected/debug"),
-    Path("app/build/reports/androidTests/connected/debug/results"),
-    Path("app/build/reports/androidTests/connectedTest-results/debug"),
-    Path("app/build/test-results/connectedDebugAndroidTest"),
+    Path(f"app/build/outputs/androidTest-results/connected/{variant}"),
+    Path(f"app/build/reports/androidTests/connected/{variant}/results"),
+    Path(f"app/build/reports/androidTests/connectedTest-results/{variant}"),
+    Path(
+        f"app/build/test-results/connected{variant[0].upper() + variant[1:]}AndroidTest"
+    ),
 ]
 
 # Поиск первой существующей директории

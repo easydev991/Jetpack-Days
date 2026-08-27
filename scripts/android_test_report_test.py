@@ -16,7 +16,9 @@ class AndroidTestReportTest(unittest.TestCase):
     def test_script_when_gradle_exit_code_empty_then_prints_existing_report(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
-            results_dir = root / "app/build/outputs/androidTest-results/connected/debug"
+            results_dir = (
+                root / "app/build/outputs/androidTest-results/connected/rustoreDebug"
+            )
             results_dir.mkdir(parents=True)
             (results_dir / "TEST-success.xml").write_text(
                 """<?xml version="1.0" encoding="UTF-8"?>
@@ -45,7 +47,9 @@ class AndroidTestReportTest(unittest.TestCase):
     def test_script_when_gradle_failed_then_fails_without_reading_stale_results(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
-            results_dir = root / "app/build/outputs/androidTest-results/connected/debug"
+            results_dir = (
+                root / "app/build/outputs/androidTest-results/connected/rustoreDebug"
+            )
             results_dir.mkdir(parents=True)
             (results_dir / "TEST-stale.xml").write_text(
                 """<?xml version="1.0" encoding="UTF-8"?>
@@ -70,6 +74,53 @@ class AndroidTestReportTest(unittest.TestCase):
 
         self.assertEqual(1, result.returncode)
         self.assertIn("Gradle", result.stdout)
+
+    def test_script_when_variant_arg_supplied_then_reads_matching_dir(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            results_dir = (
+                root / "app/build/outputs/androidTest-results/connected/githubDebug"
+            )
+            results_dir.mkdir(parents=True)
+            (results_dir / "TEST-success.xml").write_text(
+                """<?xml version="1.0" encoding="UTF-8"?>
+                <testsuite name="success" tests="2" failures="0" errors="0">
+                    <testcase classname="GithubTest" name="a"/>
+                    <testcase classname="GithubTest" name="b"/>
+                </testsuite>
+                """,
+                encoding="utf-8",
+            )
+
+            env = os.environ.copy()
+            env["ANDROID_TEST_GRADLE_EXIT_CODE"] = ""
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT_PATH), "githubDebug"],
+                cwd=root,
+                env=env,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(0, result.returncode)
+        self.assertIn("Всего тестов: 2", result.stdout)
+
+    def test_script_when_variant_arg_unknown_then_fails(self):
+        env = os.environ.copy()
+        env["ANDROID_TEST_GRADLE_EXIT_CODE"] = ""
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT_PATH), "playstore"],
+            env=env,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("Неизвестный variant", result.stdout)
 
 
 if __name__ == "__main__":

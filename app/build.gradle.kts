@@ -33,6 +33,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("rustore") {
+            buildConfigField("Boolean", "RUSTORE_FEATURES", "true")
+        }
+        create("github") {
+            buildConfigField("Boolean", "RUSTORE_FEATURES", "false")
+        }
+    }
+
     signingConfigs {
         create("release") {
             val keystoreFile = secretsProperties["KEYSTORE_FILE"] as? String ?: ".secrets/keystore/dayscounter-release.keystore"
