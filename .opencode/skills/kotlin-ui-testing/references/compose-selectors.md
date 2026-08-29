@@ -54,6 +54,20 @@ composeTestRule.onAllNodesWithText(text)                      // все ноды
 .assertTextEquals(text)        // текст ноды = text
 ```
 
+**Импорт assertions.** В `androidx.compose.ui:ui-test:1.10+`
+`assertDoesNotExist` НЕ импортируется явно — он доступен без
+отдельного импорта, когда из пакета `androidx.compose.ui.test`
+уже импортирован любой другой assert (`assertIsDisplayed` и т.п.).
+Паттерн — в `MainScreenSearchVisibilityUiTest.kt:5` (там только
+`import androidx.compose.ui.test.assertIsDisplayed`, но
+`assertDoesNotExist()` тоже вызывается) и в
+`ReadSectionViewCopyContextMenuUiTest.kt`. Явный
+`import androidx.compose.ui.test.assertDoesNotExist` в этом проекте
+приводит к `Unresolved reference`. Импортируйте `assertIsDisplayed`
+(и другие нужные); `assertDoesNotExist` подтянется сам. Если
+Compose UI обновится до версии, где поведение изменится — обновите
+эту заметку.
+
 ## Ожидание idle-состояния
 
 ```kotlin
