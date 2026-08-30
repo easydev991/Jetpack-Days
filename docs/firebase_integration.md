@@ -54,19 +54,20 @@ buildTypes {
 | Firebase BOM | (через libs.versions.toml) |
 | Firebase Crashlytics | (через libs.versions.toml) |
 | Firebase Analytics | (через libs.versions.toml) |
-| Google Services plugin | 4.4.4 |
-| Crashlytics Gradle plugin | 3.0.7 |
+| Google Services plugin | 4.5.0 |
+| Crashlytics Gradle plugin | 3.0.8 |
 
 ---
 
 ## google-services.json
 
-- Файл `app/google-services.json` присутствует в проекте
-- Добавлен в `.gitignore` — не хранится в репозитории
+- Файл `app/google-services.json` создаётся автоматически в `app/` перед каждой gradle-сборкой из `_load_secrets` (`Makefile`)
+- Один файл используется обоими `productFlavors` (`rustore` и `github` — оба работают с одним Firebase-проектом)
+- Добавлен в `.gitignore` — исходник хранится в приватном репозитории `easydev991/android-secrets` (каталог `jetpackdays/google-services.json`)
 - Проект Firebase: `days-counter-5ee1f`
 - Android App: `com.dayscounter`
 
-Для локальной разработки достаточно поместить `google-services.json` в `app/`. Для CI/CD — передавать через защищённое хранилище.
+Исходник `google-services.json` живёт в `easydev991/android-secrets` — на каждом запуске gradle-цели `Makefile` клонирует репо по SSH и копирует файл в `app/` (см. «Секреты для подписи» в `docs/deployment.md`). На fresh checkout без SSH-доступа `make build` / `make apk` упадут с понятным сообщением об ошибке от `_load_secrets`.
 
 ---
 

@@ -15,6 +15,10 @@ android {
         targetSdk = 36
 
         testInstrumentationRunner = "com.dayscounter.screenshots.ScreenshotTestRunner"
+
+        // Пиннит потребляемый variant :app как rustore (без явного flavor
+        // :screenshot-tests собрал бы 4 test-APK вместо 2).
+        missingDimensionStrategy("distribution", "rustore")
     }
 
     compileOptions {

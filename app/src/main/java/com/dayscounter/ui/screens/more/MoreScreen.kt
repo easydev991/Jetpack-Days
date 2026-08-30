@@ -125,21 +125,24 @@ private fun ActionButtons(context: Context) {
 
     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
-    // Кнопка "Оценить приложение"
-    MoreButton(
-        text = stringResource(R.string.rate_the_app),
-        onClick = { rateApp(context) }
-    )
+    // Кнопки "Оценить приложение" и "Поделиться приложением" — только на RuStore-сборке
+    if (BuildConfig.RUSTORE_FEATURES) {
+        // Кнопка "Оценить приложение"
+        MoreButton(
+            text = stringResource(R.string.rate_the_app),
+            onClick = { rateApp(context) }
+        )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
-    // Кнопка "Поделиться приложением"
-    MoreButton(
-        text = stringResource(R.string.share_the_app),
-        onClick = { shareApp(context) }
-    )
+        // Кнопка "Поделиться приложением"
+        MoreButton(
+            text = stringResource(R.string.share_the_app),
+            onClick = { shareApp(context) }
+        )
 
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
+    }
 
     // Кнопка "Страница на GitHub"
     MoreButton(

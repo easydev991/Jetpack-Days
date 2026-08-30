@@ -42,4 +42,6 @@ make help
 
 ### Релизный процесс
 
+Проект собирается в двух `productFlavors` — `rustore` (RuStore, основной канал) и `github` (GitHub Release, альтернативный). Команды `make rustore` (RuStore — все 4 шага одной командой) или `make rustore-draft` → `make rustore-commit VID=<vid>` (черновик + ручная отправка на модерацию); `make apk FLAVOR=github` для APK.
+
 Инструкция по созданию сборки и управлению версиями: [deployment.md](docs/deployment.md)

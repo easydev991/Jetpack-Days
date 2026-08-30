@@ -59,6 +59,9 @@ local.properties
 # Firebase configuration
 app/google-services.json
 
+# Serena memories (локальные заметки агента; могут содержать sensitive info — пути к репо, ID, токены)
+.serena/memories/
+
 # Release builds (AAB files)
 *.aab
 

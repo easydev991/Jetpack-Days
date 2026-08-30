@@ -131,6 +131,55 @@ composeTestRule.onNodeWithText(context.getString(R.string.save)).assertIsNotEnab
   `DetailScreenViewModelIntegrationTest`,
   `AlarmReminderSchedulerInstrumentedTest`).
 
+## Условный пропуск теста (Assume)
+
+JUnit 4 `org.junit.Assume` — пропуск теста (SKIPPED, не FAILED)
+по условию: `Assume.assumeTrue(...)` / `Assume.assumeFalse(...)`
+бросают `TestSkippedException`, тест помечается как `ignored` в
+отчёте. Используется для per-flavor/per-config пропуска — когда
+один и тот же тест-класс должен проверять разное поведение на
+разных вариантах сборки (rustore/github debug/release), без
+flavor-специфичных source sets:
+
+```kotlin
+import org.junit.Assume
+
+@Test
+fun moreScreen_when_rustore_features_true_then_shows_rate_and_share_buttons() {
+    // SKIPPED на flavor github — тест выполняется только на rustore
+    Assume.assumeTrue(BuildConfig.RUSTORE_FEATURES)
+
+    composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+    composeTestRule
+        .onNodeWithText(context.getString(R.string.rate_the_app))
+        .assertIsDisplayed()
+}
+
+@Test
+fun moreScreen_when_rustore_features_false_then_hides_rate_and_share_buttons() {
+    // SKIPPED на flavor rustore — тест выполняется только на github
+    Assume.assumeFalse(BuildConfig.RUSTORE_FEATURES)
+
+    composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+    composeTestRule
+        .onNodeWithText(context.getString(R.string.rate_the_app))
+        .assertDoesNotExist()
+}
+```
+
+Пара симметричных тестов: один проверяет «свой» сценарий,
+другой — «чужой», каждый скипается на «чужих» flavor'ах. Это
+предпочтительнее, чем отдельные source sets (`src/androidTestGithub/`) —
+`BuildConfig.*` генерируется per-variant в
+`app/build/generated/source/buildConfig/<flavor>/<buildType>/`
+и принимает нужное значение в каждом запуске.
+
+Запуск: `make android-test` или напрямую
+`./gradlew :app:connectedRustoreDebugAndroidTest` /
+`:app:connectedGithubDebugAndroidTest`. В отчёте
+`app/build/reports/androidTests/connected/debug/flavors/<flavor>/<class>.html`
+skipped-тесты помечены как `class="skipped"`, passed — `class="success"`.
+
 ## Два типа тестов — когда что использовать
 
 | Ситуация | Тип теста | Правило |

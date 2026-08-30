@@ -28,6 +28,7 @@ doubt — do not duplicate their content here.
 | `compileSdk` / `minSdk` / `targetSdk` | `app/build.gradle.kts` |
 | App version (`VERSION_NAME`, `VERSION_CODE`) | `gradle.properties` |
 | Version badges rendered in README | `<!-- BEGIN_VERSIONS -->` block in `README.md` (kept current by `make update_readme_versions`) |
+| Build flavors | `app/build.gradle.kts` (`productFlavors`) — каналы дистрибуции в [docs/deployment.md → Каналы дистрибуции](docs/deployment.md#каналы-дистрибуции) |
 | Release / signing flow | `docs/deployment.md` + `Makefile` |
 | Detekt config | `config/detekt/detekt.yml` |
 | ktlint / detekt plugins | `app/build.gradle.kts` |
@@ -46,8 +47,10 @@ All user-facing commands live in the `Makefile`; run `Makefile` (`make help` lis
 ./gradlew test --tests "*DaysDifferenceTest"                                                   # pattern
 ./gradlew test --tests "…UseCaseTest.calculate_when_same_day_then_returns_today"               # single method
 ./gradlew ktlintCheck && ./gradlew app:detekt                                                 # lint only
-./gradlew :app:assembleDebug :screenshot-tests:assembleDebug --quiet                           # used by screenshots target
+./gradlew :app:assembleRustoreDebug :screenshot-tests:assembleDebug --quiet                    # used by screenshots target
 ```
+
+**Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют `_GRADLE_PREREQS := _ensure_secrets`. На чистом чекауте без `.secrets/keystore` и `app/google-services.json` они упадут с «google-services.json not found» без пояснения. Для локальной разработки предпочтительны цели `make build` / `make test` / `make install` / `make android-test` — они подтягивают секреты через SSH автоматически.
 
 **Gotcha:** `make test` runs `./gradlew test || true` — the exit code is
 **not** a failure signal. Read `scripts/test_report.py` output (it
@@ -102,11 +105,16 @@ DI rationale + module breakdown: `.agents/rules/architecture.mdc`.
 ## Release / Signing
 
 - Signing secrets live in a private repo (`easydev991/android-secrets`),
-  fetched over SSH by `make release` / `make apk` into a temp `.secrets/`
+  fetched over SSH by `make rustore` / `make apk` into a temp `.secrets/`
   dir. Configure SSH access with `make setup_ssh` first.
-- `make release` increments `VERSION_CODE`, builds a signed AAB, and
-  uploads Crashlytics mapping files. Use `make apk` when you want a
-  signed APK without bumping the build number.
+- `make rustore` increments `VERSION_CODE`, builds a signed AAB
+  (`rustore` flavor → `dayscounter{N}.aab`), and uploads Crashlytics
+  mapping files. For a two-step workflow (draft + manual moderation),
+  use `make rustore-draft` then `make rustore-commit VID=<vid>`
+  after checking release notes in the RuStore Console.
+  Use `make apk FLAVOR=github` when you want a signed APK
+  (`github` flavor → `dayscounter{N}.apk`) without bumping the build
+  number.
 - Fastlane uses the Ruby version pinned in `.ruby-version` (rbenv);
   `make setup` installs the full toolchain. Screenshots live in
   `fastlane/metadata/android/<locale>/images/phoneScreenshots/`.
