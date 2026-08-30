@@ -1,7 +1,3 @@
----
-alwaysApply: true
----
-
 # Стиль кода
 
 ## Kotlin
