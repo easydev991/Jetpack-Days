@@ -25,10 +25,22 @@ FAKE_CURL_BODY = """\
 #!/usr/bin/env python3
 import json, os, sys
 url = next(a for a in sys.argv[1:] if a.startswith("http"))
+# curl с -G + --data-urlencode не включает query в URL — собираем полный URL
+# для лога, чтобы тесты могли проверить page=/size=.
+log_url = url
+query_parts = [
+    sys.argv[i + 1] for i, a in enumerate(sys.argv)
+    if a == "--data-urlencode" and i + 1 < len(sys.argv)
+]
+if query_parts:
+    log_url = url + "?" + "&".join(query_parts)
 with open(os.environ["FAKE_CURL_LOG"], "a") as f:
-    f.write(url + "\\n")
+    f.write(log_url + "\\n")
 if url.endswith("/public/auth/"):
     print(json.dumps({"body": {"jwe": "fake.jwe.token"}}))
+elif "page=" in " ".join(sys.argv):
+    max_code = int(os.environ.get("FAKE_MAX_CODE", "20"))
+    print(json.dumps({"body": {"content": [{"versionId": 1, "versionCode": max_code}]}}))
 elif "/aab" in url:
     pass
 elif "/commit" in url:
@@ -51,7 +63,9 @@ class RustorePublishHappyPathTest(unittest.TestCase):
 
         # Whats-new файл — скрипт требует его наличие (line 54-58).
         version_name = "9.9.9-smoke"
-        (self.cwd / "gradle.properties").write_text(f"VERSION_NAME={version_name}\n")
+        (self.cwd / "gradle.properties").write_text(
+            f"VERSION_NAME={version_name}\nVERSION_CODE=99\n"
+        )
         whats_new_dir = (
             self.cwd / "fastlane" / "metadata" / "android" / "ru-RU" / "whats_new"
         )
@@ -119,11 +133,12 @@ class RustorePublishHappyPathTest(unittest.TestCase):
         )
 
         urls = self.log.read_text().splitlines()
-        self.assertEqual(len(urls), 4, f"expected 4 curl calls, got {urls}")
+        self.assertEqual(len(urls), 5, f"expected 5 curl calls, got {urls}")
         self.assertTrue(urls[0].endswith("/public/auth/"), urls[0])
-        self.assertIn("/version", urls[1])
-        self.assertIn("/aab", urls[2])
-        self.assertIn("/commit", urls[3])
+        self.assertIn("page=", urls[1])
+        self.assertIn("/version", urls[2])
+        self.assertIn("/aab", urls[3])
+        self.assertIn("/commit", urls[4])
 
 
 class RustorePublishReleaseNotesMissingTest(unittest.TestCase):
@@ -139,7 +154,7 @@ class RustorePublishReleaseNotesMissingTest(unittest.TestCase):
         self.cwd.mkdir()
         self.version_name = "9.9.9-smoke"
         (self.cwd / "gradle.properties").write_text(
-            f"VERSION_NAME={self.version_name}\n"
+            f"VERSION_NAME={self.version_name}\nVERSION_CODE=99\n"
         )
         self.creds = self.cwd / "creds.json"
         self.creds.write_text(json.dumps({"key_id": "k", "client_secret": "c"}))
@@ -186,7 +201,9 @@ class _ModeTestBase(unittest.TestCase):
         self.cwd.mkdir()
         self.log = self.tmp / "curl.log"
         version_name = "9.9.9-smoke"
-        (self.cwd / "gradle.properties").write_text(f"VERSION_NAME={version_name}\n")
+        (self.cwd / "gradle.properties").write_text(
+            f"VERSION_NAME={version_name}\nVERSION_CODE=99\n"
+        )
         whats_new_dir = (
             self.cwd / "fastlane" / "metadata" / "android" / "ru-RU" / "whats_new"
         )
@@ -255,10 +272,11 @@ class RustorePublishUploadModeTest(_ModeTestBase):
             f"stdout={result.stdout!r}\nstderr={result.stderr!r}",
         )
         urls = self.log.read_text().splitlines()
-        self.assertEqual(len(urls), 3, f"expected 3 curl calls, got {urls}")
+        self.assertEqual(len(urls), 4, f"expected 4 curl calls, got {urls}")
         self.assertTrue(urls[0].endswith("/public/auth/"), urls[0])
-        self.assertIn("/version", urls[1])
-        self.assertIn("/aab", urls[2])
+        self.assertIn("page=", urls[1])
+        self.assertIn("/version", urls[2])
+        self.assertIn("/aab", urls[3])
         self.assertFalse(
             any("/commit" in u for u in urls),
             f"upload mode не должен вызывать /commit, got {urls}",
@@ -288,6 +306,53 @@ class RustorePublishUploadModeTest(_ModeTestBase):
             vid_file.read_text(),
             "12345",
             f"VID-файл должен содержать VID из create-draft ответа",
+        )
+
+
+class RustorePublishVersionCodeCheckTest(_ModeTestBase):
+    """VERSION_CODE в gradle.properties должен быть строго выше max из RuStore.
+
+    Защита от регрессии: без проверки скрипт принимает create-draft (HTTP 200),
+    но upload AAB падает с HTTP 400 — в Console остаётся пустой черновик без файла.
+    Скрипт должен упасть ДО create-draft с понятным сообщением.
+    """
+
+    def test_low_version_code_fails_before_create_draft(self):
+        # В gradle.properties — 21, в RuStore fake — 22 (MODERATION).
+        (self.cwd / "gradle.properties").write_text(
+            "VERSION_NAME=9.9.9-smoke\nVERSION_CODE=21\n"
+        )
+        result = self._run({"RUSTORE_MODE": "upload", "FAKE_MAX_CODE": "22"})
+
+        self.assertNotEqual(
+            result.returncode,
+            0,
+            f"exit должен быть != 0 при VERSION_CODE ниже max, got {result.returncode}",
+        )
+        self.assertIn(
+            "VERSION_CODE=21",
+            result.stderr,
+            f"stderr должен содержать локальный VERSION_CODE, got {result.stderr!r}",
+        )
+        self.assertIn(
+            "max=22",
+            result.stderr,
+            f"stderr должен содержать max из RuStore, got {result.stderr!r}",
+        )
+        # create-draft и upload AAB НЕ должны быть вызваны.
+        urls = self.log.read_text().splitlines()
+        self.assertEqual(
+            len(urls),
+            2,
+            f"после auth+GET /version скрипт должен упасть, "
+            f"ожидалось 2 вызова, got {urls}",
+        )
+        self.assertTrue(urls[0].endswith("/public/auth/"), urls[0])
+        self.assertIn("page=", urls[1])
+        self.assertNotIn(
+            any("/aab" in u for u in urls),
+            urls,
+            "create-draft/upload НЕ должны вызываться при низком VERSION_CODE",
         )
 
 

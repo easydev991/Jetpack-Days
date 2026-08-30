@@ -107,6 +107,30 @@ JWE=$(curl -fsS -X POST "$BASE/public/auth/" \
 	exit 1
 }
 
+# ---- Проверка VERSION_CODE vs существующих версий (all/upload) ----
+# Без этой проверки RuStore принимает create-draft, но upload AAB падает с HTTP 400
+# если versionCode не выше уже существующего (на модерации/опубликованного). Черновик
+# остаётся в Console без файла — выглядит как «AAB загружен», но фактически нет.
+if [[ "$RUSTORE_MODE" != "commit" ]]; then
+	VERSION_CODE=$(grep '^VERSION_CODE=' gradle.properties | cut -d= -f2)
+	[[ -n "$VERSION_CODE" ]] || {
+		echo "VERSION_CODE не найден в gradle.properties" >&2
+		exit 1
+	}
+
+	LIST_RESP=$(curl -fsS -G "$BASE/public/v1/application/$APP_ID/version" \
+		-H "Public-Token: $JWE" \
+		--data-urlencode "page=0" --data-urlencode "size=100")
+	MAX_CODE=$(echo "$LIST_RESP" | jq -r '[.body.content[]?.versionCode] | max // 0')
+
+	if [[ "$VERSION_CODE" -le "$MAX_CODE" ]]; then
+		echo "VERSION_CODE=$VERSION_CODE не выше максимального в RuStore (max=$MAX_CODE)." >&2
+		echo "Поднимите VERSION_CODE в gradle.properties минимум до $((MAX_CODE + 1))," >&2
+		echo "иначе RuStore примет create-draft, но отклонит upload AAB с HTTP 400." >&2
+		exit 1
+	fi
+fi
+
 # ---- Шаги 2-3: Создание черновика + загрузка AAB (только all/upload) ----
 if [[ "$RUSTORE_MODE" != "commit" ]]; then
 	WHAT_NEW=$(jq -Rs . <"$WHATS_NEW_FILE")
