@@ -78,7 +78,7 @@ gh auth login
 Предлагаемая логика цели:
 
 1. Проверить `gh` и `gh auth status`.
-2. Вызвать prerequisite `apk FLAVOR=github` через `_GRADLE_PREREQS := _ensure_secrets` — секреты нужны для подписи APK.
+2. Вызвать prerequisite `apk FLAVOR=github` с инлайненным `_ensure_secrets` — секреты нужны для подписи APK.
 3. Использовать `dayscounter{VERSION_CODE}.apk` из корня проекта (результат `make apk FLAVOR=github`).
 4. Проверить существование тега `v{VERSION_NAME}`:
    - если тег и релиз уже есть — обновить релиз и перезалить APK (`--clobber`);

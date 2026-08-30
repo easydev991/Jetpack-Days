@@ -50,8 +50,13 @@ else:
 """
 
 
-class RustorePublishHappyPathTest(unittest.TestCase):
-    """Скрипт отрабатывает все 4 шага и завершается с exit 0."""
+class _ModeTestBase(unittest.TestCase):
+    """Общий setup для smoke/mode тестов rustore_publish.sh.
+
+    Создаёт временный проект с gradle.properties, fake-AAB, RSA-ключом,
+    fake-curl через PATH. _run() запускает SCRIPT с extra_env и возвращает
+    CompletedProcess. Используется всеми тестами ниже.
+    """
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -60,8 +65,6 @@ class RustorePublishHappyPathTest(unittest.TestCase):
         self.cwd = self.tmp / "project"
         self.cwd.mkdir()
         self.log = self.tmp / "curl.log"
-
-        # Whats-new файл — скрипт требует его наличие (line 54-58).
         version_name = "9.9.9-smoke"
         (self.cwd / "gradle.properties").write_text(
             f"VERSION_NAME={version_name}\nVERSION_CODE=99\n"
@@ -71,14 +74,9 @@ class RustorePublishHappyPathTest(unittest.TestCase):
         )
         whats_new_dir.mkdir(parents=True)
         (whats_new_dir / f"{version_name}.txt").write_text("Тестовый релиз\n")
-
-        # Fake AAB (скрипт только проверяет существование).
-        self.aab = self.cwd / "app.aab"
-        self.aab.write_bytes(b"fake-aab-content")
-
-        # Реальный RSA private key (PKCS8, base64) — openssl его примет
-        # при подписи. openssl отклоняет слишком короткие ключи, поэтому
-        # генерируем 2048-bit в setUp. Это занимает ~0.5с.
+        # Реальный RSA private key (PKCS8, base64) — иначе openssl в шаге 1
+        # auth падает с "Could not find private key". Генерируем 2048-bit в
+        # setUp (~0.5с).
         genpkey = subprocess.run(
             [
                 "openssl",
@@ -103,8 +101,8 @@ class RustorePublishHappyPathTest(unittest.TestCase):
         }
         self.creds = self.cwd / "creds.json"
         self.creds.write_text(json.dumps(creds))
-
-        # Fake curl через PATH — логирует URL и отвечает заготовленным JSON.
+        self.aab = self.cwd / "app.aab"
+        self.aab.write_bytes(b"fake-aab")
         curl = self.fake_bin / "curl"
         curl.write_text(FAKE_CURL_BODY)
         curl.chmod(0o755)
@@ -112,18 +110,26 @@ class RustorePublishHappyPathTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_happy_path(self):
+    def _run(self, extra_env):
         env = os.environ.copy()
         env["PATH"] = f"{self.fake_bin}{os.pathsep}{env['PATH']}"
         env["FAKE_CURL_LOG"] = str(self.log)
-
-        result = subprocess.run(
+        env.update(extra_env)
+        return subprocess.run(
             [str(SCRIPT), str(self.creds), str(self.aab), "0"],
             cwd=self.cwd,
             env=env,
             capture_output=True,
             text=True,
         )
+
+
+class RustorePublishHappyPathTest(_ModeTestBase):
+    """Скрипт отрабатывает все 4 шага и завершается с exit 0."""
+
+    def test_happy_path(self):
+        # RUSTORE_MODE не задан → defaults to "all" в rustore_publish.sh:31.
+        result = self._run({})
 
         self.assertEqual(
             result.returncode,
@@ -187,75 +193,6 @@ class RustorePublishReleaseNotesMissingTest(unittest.TestCase):
             self.version_name,
             result.stderr,
             f"stderr должен содержать VERSION_NAME, got {result.stderr!r}",
-        )
-
-
-class _ModeTestBase(unittest.TestCase):
-    """Общий setup для upload/commit mode тестов."""
-
-    def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        self.fake_bin = self.tmp / "bin"
-        self.fake_bin.mkdir()
-        self.cwd = self.tmp / "project"
-        self.cwd.mkdir()
-        self.log = self.tmp / "curl.log"
-        version_name = "9.9.9-smoke"
-        (self.cwd / "gradle.properties").write_text(
-            f"VERSION_NAME={version_name}\nVERSION_CODE=99\n"
-        )
-        whats_new_dir = (
-            self.cwd / "fastlane" / "metadata" / "android" / "ru-RU" / "whats_new"
-        )
-        whats_new_dir.mkdir(parents=True)
-        (whats_new_dir / f"{version_name}.txt").write_text("Тестовый релиз\n")
-        # Реальный RSA private key (PKCS8, base64) — иначе openssl в шаге 1
-        # auth падает с "Could not find private key". Генерируем 2048-bit в
-        # setUp (~0.5с). Тот же подход что и в happy_path тесте.
-        genpkey = subprocess.run(
-            [
-                "openssl",
-                "genpkey",
-                "-algorithm",
-                "RSA",
-                "-pkeyopt",
-                "rsa_keygen_bits:2048",
-            ],
-            capture_output=True,
-            check=True,
-        )
-        pkcs8 = subprocess.run(
-            ["openssl", "pkcs8", "-topk8", "-nocrypt"],
-            input=genpkey.stdout,
-            capture_output=True,
-            check=True,
-        )
-        creds = {
-            "key_id": "test-key-id",
-            "client_secret": base64.b64encode(pkcs8.stdout).decode(),
-        }
-        self.creds = self.cwd / "creds.json"
-        self.creds.write_text(json.dumps(creds))
-        self.aab = self.cwd / "app.aab"
-        self.aab.write_bytes(b"fake-aab")
-        curl = self.fake_bin / "curl"
-        curl.write_text(FAKE_CURL_BODY)
-        curl.chmod(0o755)
-
-    def tearDown(self):
-        shutil.rmtree(self.tmp, ignore_errors=True)
-
-    def _run(self, extra_env):
-        env = os.environ.copy()
-        env["PATH"] = f"{self.fake_bin}{os.pathsep}{env['PATH']}"
-        env["FAKE_CURL_LOG"] = str(self.log)
-        env.update(extra_env)
-        return subprocess.run(
-            [str(SCRIPT), str(self.creds), str(self.aab), "0"],
-            cwd=self.cwd,
-            env=env,
-            capture_output=True,
-            text=True,
         )
 
 
@@ -392,17 +329,8 @@ class RustorePublishCommitModeTest(_ModeTestBase):
         self.assertTrue(urls[0].endswith("/public/auth/"), urls[0])
         self.assertIn("/commit", urls[1])
         self.assertIn("12345", urls[1], "VID должен попасть в URL commit")
-        # create-draft (POST /version без /aab) НЕ должен вызываться
-        create_draft_calls = [
-            u
-            for u in urls[1:]
-            if "/version" in u and "/aab" not in u and "/commit" not in u
-        ]
-        self.assertEqual(
-            create_draft_calls,
-            [],
-            f"commit mode не должен слать create-draft, got {create_draft_calls}",
-        )
+        # create-draft (POST /version без /aab) НЕ должен вызываться —
+        # уже доказано: len==2 и urls[1] содержит /commit (других URL нет).
 
 
 if __name__ == "__main__":

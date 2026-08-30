@@ -36,30 +36,33 @@ exit 0
 """
 
 
-class MakefileRustoreTargetTest(unittest.TestCase):
-    """make rustore: путь к AAB передаётся в rustore_publish.sh без пустых."""
+class _MakefileTestBase(unittest.TestCase):
+    """Общая изоляция: копия Makefile + fake rustore_publish.sh + gradlew + secrets.
+
+    setUp заполняет self.tmp (изолированная FS), self.publish_log (для лога
+    publish-скрипта). Подклассы могут дополнительно инициализировать git и т.п.
+    """
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
-        # Изолированная копия Makefile и scripts/ с fake-скриптами.
+        # Изолированная копия Makefile + scripts/ + gradlew fakes.
         shutil.copy(REPO_ROOT / "Makefile", self.tmp / "Makefile")
         scripts = self.tmp / "scripts"
         scripts.mkdir()
         publish = scripts / "rustore_publish.sh"
         publish.write_text(FAKE_PUBLISH_BODY)
         publish.chmod(0o755)
-        # _generate_whats_new.sh нужен для `whats-new` prerequisite в `rustore`.
+        # _generate_whats_new.sh нужен для prerequisite `whats-new` в rustore/rustore-draft.
+        # Файл добавлен в коммите 61a44374 вместе с этим тестом — guard не нужен.
         helper_src = REPO_ROOT / "scripts" / "_generate_whats_new.sh"
-        if helper_src.exists():
-            helper = scripts / "_generate_whats_new.sh"
-            helper.write_text(helper_src.read_text())
-            helper.chmod(0o755)
+        helper = scripts / "_generate_whats_new.sh"
+        helper.write_text(helper_src.read_text())
+        helper.chmod(0o755)
         gradlew = self.tmp / "gradlew"
         gradlew.write_text(FAKE_GRADLEW_BODY)
         gradlew.chmod(0o755)
-        # Свой gradle.properties с известным VERSION_CODE (для предсказуемого имени).
         (self.tmp / "gradle.properties").write_text(
-            "VERSION_NAME=9.9.9-test\nVERSION_CODE=20\n"
+            f"VERSION_NAME={self.version_name}\nVERSION_CODE=20\n"
         )
         # _ensure_secrets проверяет .secrets/ и app/google-services.json.
         secrets = self.tmp / ".secrets"
@@ -72,6 +75,12 @@ class MakefileRustoreTargetTest(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
+
+
+class MakefileRustoreTargetTest(_MakefileTestBase):
+    """make rustore: путь к AAB передаётся в rustore_publish.sh без пустых."""
+
+    version_name = "9.9.9-test"
 
     def _run_make_rustore(self, env_overrides):
         env = os.environ.copy()
@@ -123,11 +132,13 @@ class MakefileRustoreTargetTest(unittest.TestCase):
         )
 
 
-class MakefileWhatsNewAndDraftTest(unittest.TestCase):
+class MakefileWhatsNewAndDraftTest(_MakefileTestBase):
     """make whats-new / rustore-draft / rustore-commit: helper + targets."""
 
+    version_name = "1.1.0"
+
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
+        super().setUp()
         # Git репозиторий с тегом — _generate_whats_new.sh берёт его.
         env = {
             **os.environ,
@@ -160,35 +171,6 @@ class MakefileWhatsNewAndDraftTest(unittest.TestCase):
             check=True,
             capture_output=True,
         )
-        # Изолированная копия Makefile + scripts/ + gradlew fakes.
-        shutil.copy(REPO_ROOT / "Makefile", self.tmp / "Makefile")
-        scripts = self.tmp / "scripts"
-        scripts.mkdir()
-        publish = scripts / "rustore_publish.sh"
-        publish.write_text(FAKE_PUBLISH_BODY)
-        publish.chmod(0o755)
-        # _generate_whats_new.sh копируется из реального (когда появится).
-        helper_src = REPO_ROOT / "scripts" / "_generate_whats_new.sh"
-        if helper_src.exists():
-            helper = scripts / "_generate_whats_new.sh"
-            helper.write_text(helper_src.read_text())
-            helper.chmod(0o755)
-        gradlew = self.tmp / "gradlew"
-        gradlew.write_text(FAKE_GRADLEW_BODY)
-        gradlew.chmod(0o755)
-        (self.tmp / "gradle.properties").write_text(
-            "VERSION_NAME=1.1.0\nVERSION_CODE=20\n"
-        )
-        secrets = self.tmp / ".secrets"
-        secrets.mkdir()
-        (secrets / "rustore-credentials.json").write_text("{}")
-        app = self.tmp / "app"
-        app.mkdir()
-        (app / "google-services.json").write_text("{}")
-        self.publish_log = self.tmp / "publish_args.log"
-
-    def tearDown(self):
-        shutil.rmtree(self.tmp, ignore_errors=True)
 
     def _run(self, target, env_overrides=None):
         env = os.environ.copy()

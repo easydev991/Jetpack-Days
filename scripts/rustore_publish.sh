@@ -154,10 +154,12 @@ if [[ "$RUSTORE_MODE" != "commit" ]]; then
 	# Upload AAB: тело ответа печатается для диагностики (раньше `> /dev/null`
 	# гасил всё — если Console не показывал файл, понять причину было нельзя).
 	# --max-time 600 — защита от зависания на больших AAB.
+	# -# — прогресс-бар в stderr вместо ранее существовавшего polling-цикла в Makefile
+	# (видно, что загрузка идёт; сам curl молчит на stdout, поэтому не мешает парсеру $AAB_RESP).
 	# type=application/octet-stream — без явного Content-Type RuStore интерпретирует
 	# файл как APK (загружает в «главный APK» слот, commit падает с
 	# «There can be only one main APK file», в Console не виден как AAB).
-	AAB_RESP=$(curl -fsS --max-time 600 -X POST "$BASE/public/v1/application/$APP_ID/version/$VID/aab" \
+	AAB_RESP=$(curl -f#S --max-time 600 -X POST "$BASE/public/v1/application/$APP_ID/version/$VID/aab" \
 		-H "Public-Token: $JWE" -F "file=@$AAB_FILE;type=application/octet-stream")
 	echo "AAB загружен: $AAB_FILE (ответ: $AAB_RESP)"
 fi

@@ -13,7 +13,6 @@ RUBY_VERSION=3.2.2
 # Канал дистрибуции: rustore (по умолчанию) или github
 FLAVOR ?= github
 FLAVOR_TITLE := $(if $(filter rustore,$(FLAVOR)),Rustore,Github)
-FLAVOR_LOWER := $(shell echo $(FLAVOR_TITLE) | tr A-Z a-z)
 ifeq ($(filter rustore github,$(FLAVOR)),)
     $(error Unknown FLAVOR=$(FLAVOR). Expected: rustore, github)
 endif
@@ -28,9 +27,7 @@ SHELL := /bin/bash
 BUNDLE_EXEC := RBENV_VERSION=$(RUBY_VERSION) bundle exec
 
 # Prerequisite для gradle-целей: гарантирует .secrets/keystore и app/google-services.json
-# Определяется через обёртку _ensure_secrets (рядом с _load_secrets ниже), чтобы не
-# триггерить лишний git clone на каждой dev-итерации.
-_GRADLE_PREREQS := _ensure_secrets
+# (см. _ensure_secrets ниже). Не триггерит лишний git clone на каждой dev-итерации.
 
 ## help: Показать это справочное сообщение
 help:
@@ -42,7 +39,7 @@ help:
 
 # Сборка проекта
 ## build: Собрать debug APK. Использование: make build FLAVOR=rustore (по умолчанию FLAVOR=github).
-build: $(_GRADLE_PREREQS)
+build: _ensure_secrets
 	./gradlew assemble$(FLAVOR_TITLE)Debug
 
 ## clean: Очистка кеша проекта
@@ -51,7 +48,7 @@ clean:
 
 # Тестирование
 ## test: Запуск unit-тестов (JVM, без устройства). Использование: make test FLAVOR=github.
-test: $(_GRADLE_PREREQS)
+test: _ensure_secrets
 	@if [ -f scripts/test_report.py ]; then chmod +x scripts/test_report.py; fi
 	./gradlew test$(FLAVOR_TITLE)DebugUnitTest --console=plain || true
 	@python3 scripts/test_report.py
@@ -62,21 +59,21 @@ scripts-test:
 	python3 -m unittest discover -s scripts -p "*_test.py"
 
 ## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации. Использование: make android-test FLAVOR=github.
-android-test: $(_GRADLE_PREREQS)
+android-test: _ensure_secrets
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
 	./gradlew connected$(FLAVOR_TITLE)DebugAndroidTest --console=plain $(ANDROID_TEST_FILTER_FLAGS)
-	ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVOR_LOWER)Debug
+	ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVOR)Debug
 
 # ponytail: ANDROID_TEST_FILTER пробрасывается в gradle как -Pandroid.testInstrumentationRunnerArguments.class=...
 # Пустое значение не передаётся, чтобы не ломать прогон без фильтра.
 ANDROID_TEST_FILTER_FLAGS = $(if $(ANDROID_TEST_FILTER),-Pandroid.testInstrumentationRunnerArguments.class=$(ANDROID_TEST_FILTER),)
 
 ## test-all: Запуск всех тестов (unit + интеграционные)
-test-all: $(_GRADLE_PREREQS)
+test-all: _ensure_secrets
 	@echo ""
 	@echo "Все тесты выполнены"
 	@echo "Unit: app/build/test-results/"
-	@echo "Интеграционные: app/build/reports/androidTests/connected/$(FLAVOR_LOWER)Debug/index.html"
+	@echo "Интеграционные: app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html"
 
 # Анализ кода
 ## lint: Запуск ktlint, detekt и markdownlint (проверка)
@@ -106,7 +103,7 @@ check: build test
 
 # Установка приложения
 ## install: Установить debug APK на подключённое устройство. Использование: make install FLAVOR=rustore (по умолчанию FLAVOR=github).
-install: $(_GRADLE_PREREQS)
+install: _ensure_secrets
 	./gradlew install$(FLAVOR_TITLE)Debug
 
 ## _load_secrets: Загрузить секреты из SSH-репозитория во временную директорию
@@ -131,13 +128,13 @@ _ensure_secrets:
 	@if [ ! -d .secrets ] || [ ! -f app/google-services.json ]; then $(MAKE) _load_secrets; fi
 
 ## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Использование: make apk FLAVOR=rustore (по умолчанию FLAVOR=github). Файл: dayscounter{VERSION_CODE}.apk
-apk: $(_GRADLE_PREREQS)
+apk: _ensure_secrets
 	@printf "$(YELLOW)Создаю релизный APK ($(FLAVOR))...$(RESET)\n"
 	@./gradlew assemble$(FLAVOR_TITLE)Release --console=plain
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	VERSION_NAME=$$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2); \
 	OUTPUT_FILE="dayscounter$$VERSION_CODE.apk"; \
-	cp app/build/outputs/apk/$(FLAVOR_LOWER)/release/app-$(FLAVOR_LOWER)-release.apk "$$OUTPUT_FILE"; \
+	cp app/build/outputs/apk/$(FLAVOR)/release/app-$(FLAVOR)-release.apk "$$OUTPUT_FILE"; \
 	printf "$(GREEN)APK создан: $$OUTPUT_FILE$(RESET)\n"; \
 	printf "$(YELLOW)Версия: $$VERSION_NAME (build $$VERSION_CODE)$(RESET)\n"
 
@@ -372,7 +369,7 @@ fastlane:
 
 # Дополнительно
 ## screenshots: Генерировать скриншоты для всех локалей через fastlane
-screenshots: $(_GRADLE_PREREQS)
+screenshots: _ensure_secrets
 	@$(MAKE) _build_screenshots_apk
 	@printf "$(YELLOW)Генерирую скриншоты через fastlane...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
@@ -381,7 +378,7 @@ screenshots: $(_GRADLE_PREREQS)
 	@$(MAKE) update_readme
 
 ## screenshots-ru: Генерировать скриншоты только на русском
-screenshots-ru: $(_GRADLE_PREREQS)
+screenshots-ru: _ensure_secrets
 	@$(MAKE) _build_screenshots_apk
 	@printf "$(YELLOW)Генерирую скриншоты (русский)...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
@@ -389,7 +386,7 @@ screenshots-ru: $(_GRADLE_PREREQS)
 	@$(MAKE) _cleanup_screenshots_apk
 
 ## screenshots-en: Генерировать скриншоты только на английском
-screenshots-en: $(_GRADLE_PREREQS)
+screenshots-en: _ensure_secrets
 	@$(MAKE) _build_screenshots_apk
 	@printf "$(YELLOW)Генерирую скриншоты (английский)...$(RESET)\n"
 	@$(MAKE) _ensure_fastlane
@@ -415,7 +412,7 @@ update_readme_versions:
 	@printf "$(GREEN)Версии обновлены успешно$(RESET)\n"
 
 ## _build_screenshots_apk: Подготовить APK для скриншотов (удаление старых и сборка новых)
-_build_screenshots_apk: $(_GRADLE_PREREQS)
+_build_screenshots_apk: _ensure_secrets
 	@printf "$(YELLOW)Удаляю старые APK артефакты...$(RESET)\n"
 	@rm -rf app/build/outputs/apk
 	@rm -rf screenshot-tests/build/outputs/apk
@@ -441,8 +438,8 @@ _ensure_fastlane:
 
 ## android-test-report: Открыть HTML отчет интеграционных тестов в браузере
 android-test-report:
-	@if [ -f app/build/reports/androidTests/connected/$(FLAVOR_LOWER)Debug/index.html ]; then \
-		open app/build/reports/androidTests/connected/$(FLAVOR_LOWER)Debug/index.html; \
+	@if [ -f app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html ]; then \
+		open app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html; \
 	else \
 		printf "Отчет не найден. Сначала запустите: make android-test FLAVOR=$(FLAVOR)\n"; \
 	fi
@@ -455,7 +452,7 @@ _WHATS_NEW_FILE := fastlane/metadata/android/ru-RU/whats_new/$(VERSION_NAME).txt
 
 # Общий prerequisite для rustore и rustore-draft: инкремент VERSION_CODE,
 # build AAB, upload Crashlytics mapping, копирование в корень.
-_rustore_build_aab: $(_GRADLE_PREREQS)
+_rustore_build_aab: _ensure_secrets
 	@printf "$(YELLOW)Увеличиваю VERSION_CODE...$(RESET)\n"
 	@CURRENT_VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	NEW_VERSION_CODE=$$((CURRENT_VERSION_CODE + 1)); \
@@ -478,14 +475,12 @@ whats-new:
 ## rustore: Собрать AAB и опубликовать в RuStore (все 4 шага: auth → draft → upload → commit). Файл: dayscounter{VERSION_CODE}.aab
 ##   SKIP_PUBLISH=1 — собрать AAB без загрузки в RuStore (escape hatch для локальной отладки)
 rustore: _rustore_build_aab whats-new
-	@if [ -z "$(SKIP_PUBLISH)" ]; then \
-		VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
-		OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
+	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	if [ -z "$(SKIP_PUBLISH)" ]; then \
 		printf "$(YELLOW)Загружаю в RuStore...$(RESET)\n"; \
 		./scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
 	else \
-		VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
-		OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
 		printf "$(YELLOW)SKIP_PUBLISH=1 — пропускаю загрузку в RuStore. AAB готов: $$OUTPUT_FILE$(RESET)\n"; \
 	fi
 
@@ -495,12 +490,7 @@ rustore-draft: _rustore_build_aab whats-new
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
 	printf "$(YELLOW)Загружаю в RuStore (auth → draft → upload, без commit)...$(RESET)\n"; \
-	RUSTORE_MODE=upload ./scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE" & \
-	SCRIPT_PID=$$!; \
-	while kill -0 $$SCRIPT_PID 2>/dev/null; do sleep 30; printf "$(YELLOW)Ждём загрузку...$(RESET)\n" >&2; done; \
-	wait $$SCRIPT_PID; \
-	SCRIPT_EXIT=$$?; \
-	if [ $$SCRIPT_EXIT -ne 0 ]; then exit $$SCRIPT_EXIT; fi; \
+	RUSTORE_MODE=upload ./scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
 	VID=$$(cat .secrets/.last_rustore_vid 2>/dev/null); \
 	printf "\n$(GREEN)Черновик создан в RuStore Console: VID=%s$(RESET)\n" "$$VID"; \
 	printf "Следующий шаг: $(YELLOW)make rustore-commit VID=%s$(RESET)\n" "$$VID"
@@ -515,7 +505,7 @@ rustore-commit:
 	fi
 	@printf "$(YELLOW)Отправляю черновик VID=$(VID) на модерацию...$(RESET)\n"
 	RUSTORE_MODE=commit RUSTORE_VID=$(VID) ./scripts/rustore_publish.sh \
-		.secrets/rustore-credentials.json "" 0
+		.secrets/rustore-credentials.json ""
 
 # Запуск всех задач
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство

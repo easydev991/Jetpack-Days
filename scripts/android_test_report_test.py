@@ -108,6 +108,9 @@ class AndroidTestReportTest(unittest.TestCase):
         self.assertIn("Всего тестов: 2", result.stdout)
 
     def test_script_when_variant_arg_unknown_then_fails(self):
+        # Без whitelist variant теперь просто ищет несуществующую директорию —
+        # и падает на «Директория с результатами... не найдена». Это та же защита
+        # от мусорного variant, просто с другим сообщением.
         env = os.environ.copy()
         env["ANDROID_TEST_GRADLE_EXIT_CODE"] = ""
 
@@ -120,7 +123,7 @@ class AndroidTestReportTest(unittest.TestCase):
         )
 
         self.assertEqual(1, result.returncode)
-        self.assertIn("Неизвестный variant", result.stdout)
+        self.assertIn("Директория с результатами", result.stdout)
 
 
 if __name__ == "__main__":

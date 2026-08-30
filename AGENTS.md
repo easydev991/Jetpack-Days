@@ -50,7 +50,7 @@ All user-facing commands live in the `Makefile`; run `Makefile` (`make help` lis
 ./gradlew :app:assembleRustoreDebug :screenshot-tests:assembleDebug --quiet                    # used by screenshots target
 ```
 
-**Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют `_GRADLE_PREREQS := _ensure_secrets`. На чистом чекауте без `.secrets/keystore` и `app/google-services.json` они упадут с «google-services.json not found» без пояснения. Для локальной разработки предпочтительны цели `make build` / `make test` / `make install` / `make android-test` — они подтягивают секреты через SSH автоматически.
+**Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют prerequisite `_ensure_secrets` (он инлайнен в `Makefile` напрямую в prereq-листы 11 gradle-целей: `build`/`install`/`test`/`android-test`/`_build_screenshots_apk`/`screenshots*`/`rustore`/`apk`/`_rustore_build_aab`). На чистом чекауте без `.secrets/keystore` и `app/google-services.json` они упадут с «google-services.json not found» без пояснения. Для локальной разработки предпочтительны цели `make build` / `make test` / `make install` / `make android-test` — они подтягивают секреты через SSH автоматически.
 
 **Gotcha:** `make test` runs `./gradlew test || true` — the exit code is
 **not** a failure signal. Read `scripts/test_report.py` output (it

@@ -30,18 +30,9 @@ def strip_ansi(text: str) -> str:
 
 
 # Вариант сборки: <flavor><BuildType> в lowercase (например, rustoreDebug, githubDebug).
-# Передаётся из Makefile (android-test: $(FLAVOR_LOWER)Debug) или аргументом CLI.
-# Default — rustoreDebug (обратная совместимость со старыми ручными вызовами скрипта).
-variant = (
-    sys.argv[1]
-    if len(sys.argv) > 1
-    else os.environ.get("ANDROID_TEST_VARIANT", "rustoreDebug")
-)
-if variant not in ("rustoreDebug", "githubDebug"):
-    print(
-        f"{RED}Неизвестный variant={variant}. Ожидается: rustoreDebug, githubDebug{RESET}"
-    )
-    sys.exit(1)
+# Передаётся из Makefile (android-test: $(FLAVOR)Debug) или аргументом CLI.
+# Default — rustoreDebug (если запущен без аргумента и без Makefile).
+variant = sys.argv[1] if len(sys.argv) > 1 else "rustoreDebug"
 
 # Каталог с результатами тестов - несколько возможных путей для выбранного variant.
 # Имя gradle-таски — connected<FlavorTitle><BuildType>AndroidTest: из `rustoreDebug` собираем `RustoreDebug`.
