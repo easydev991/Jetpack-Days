@@ -11,7 +11,7 @@ RESET=\033[0m
 RUBY_VERSION=3.2.2
 
 # Канал дистрибуции: rustore (по умолчанию) или github
-FLAVOR ?= rustore
+FLAVOR ?= github
 FLAVOR_TITLE := $(if $(filter rustore,$(FLAVOR)),Rustore,Github)
 FLAVOR_LOWER := $(shell echo $(FLAVOR_TITLE) | tr A-Z a-z)
 ifeq ($(filter rustore github,$(FLAVOR)),)
@@ -41,7 +41,7 @@ help:
 	@echo ""
 
 # Сборка проекта
-## build: Собрать debug APK. Использование: make build FLAVOR=github (по умолчанию FLAVOR=rustore).
+## build: Собрать debug APK. Использование: make build FLAVOR=rustore (по умолчанию FLAVOR=github).
 build: $(_GRADLE_PREREQS)
 	./gradlew assemble$(FLAVOR_TITLE)Debug
 
@@ -105,7 +105,7 @@ check: build test
 	./gradlew ktlintCheck detekt
 
 # Установка приложения
-## install: Установить debug APK на подключённое устройство. Использование: make install FLAVOR=github (по умолчанию FLAVOR=rustore).
+## install: Установить debug APK на подключённое устройство. Использование: make install FLAVOR=rustore (по умолчанию FLAVOR=github).
 install: $(_GRADLE_PREREQS)
 	./gradlew install$(FLAVOR_TITLE)Debug
 
@@ -130,7 +130,7 @@ _load_secrets:
 _ensure_secrets:
 	@if [ ! -d .secrets ] || [ ! -f app/google-services.json ]; then $(MAKE) _load_secrets; fi
 
-## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Использование: make apk FLAVOR=github (по умолчанию FLAVOR=rustore). Файл: dayscounter{VERSION_CODE}.apk
+## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Использование: make apk FLAVOR=rustore (по умолчанию FLAVOR=github). Файл: dayscounter{VERSION_CODE}.apk
 apk: $(_GRADLE_PREREQS)
 	@printf "$(YELLOW)Создаю релизный APK ($(FLAVOR))...$(RESET)\n"
 	@./gradlew assemble$(FLAVOR_TITLE)Release --console=plain

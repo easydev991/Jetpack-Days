@@ -19,17 +19,17 @@
 | Команда | Артефакт | Назначение |
 |---------|----------|------------|
 | `make rustore` | `dayscounter{VERSION_CODE}.aab` | Сборка AAB + загрузка в RuStore |
-| `make apk FLAVOR=<flavor>` | `dayscounter{VERSION_CODE}.apk` | Сборка APK (по умолчанию `FLAVOR=rustore`) |
-| `make build FLAVOR=<flavor>` | debug APK | Собрать debug APK (по умолчанию `FLAVOR=rustore`) |
-| `make install FLAVOR=<flavor>` | — | Установить debug APK (по умолчанию `FLAVOR=rustore`) |
-| `make test FLAVOR=<flavor>` | — | Unit-тесты (по умолчанию `FLAVOR=rustore`) |
-| `make android-test FLAVOR=<flavor>` | — | UI-тесты (по умолчанию `FLAVOR=rustore`) |
+| `make apk FLAVOR=<flavor>` | `dayscounter{VERSION_CODE}.apk` | Сборка APK (по умолчанию `FLAVOR=github`) |
+| `make build FLAVOR=<flavor>` | debug APK | Собрать debug APK (по умолчанию `FLAVOR=github`) |
+| `make install FLAVOR=<flavor>` | — | Установить debug APK (по умолчанию `FLAVOR=github`) |
+| `make test FLAVOR=<flavor>` | — | Unit-тесты (по умолчанию `FLAVOR=github`) |
+| `make android-test FLAVOR=<flavor>` | — | UI-тесты (по умолчанию `FLAVOR=github`) |
 
 Столбец «Назначение» — краткое; подробный поток — в таблице статусов автоматизации (раздел «Полная карта автоматизации релизов» ниже).
 
 **Изменения для пользователя:** команда `make release` **удаляется**; `make apk` сохраняется (имя описывает артефакт, а не канал); добавляется `make rustore` для канала с автопубликацией. CI/workflow-файлы в проекте сейчас не используются (`.github/workflows/` отсутствует), поэтому единственная правка, которая нужна — в самом `Makefile`.
 
-**Установка на эмулятор/устройство из разных flavors**: `make install FLAVOR=rustore`, `make install FLAVOR=github`. По умолчанию `FLAVOR=rustore` — основной канал. Для запуска поверх установки использовать стандартный `adb shell am start` или лаунчер IDE.
+**Установка на эмулятор/устройство из разных flavors**: `make install FLAVOR=rustore`, `make install FLAVOR=github`. По умолчанию `FLAVOR=github` — канал разработки (без зависимостей RuStore); `FLAVOR=rustore` — продакшен-канал. Для запуска поверх установки использовать стандартный `adb shell am start` или лаунчер IDE.
 
 ### Версионирование
 

@@ -4,41 +4,40 @@
 
 Документ описывает:
 
-- фактически реализованную часть релизного процесса;
+- фактически реализованную часть релизного процесса для GitHub-канала;
 - план автоматизации публикации APK в GitHub Releases.
 
 ## Часть 1: Что уже реализовано
 
 ### Текущее состояние в проекте
 
-На сегодня в `Makefile` доступны команды:
+На сегодня в `Makefile` доступны команды для GitHub-канала (`github` flavor, см. [docs/deployment.md → Каналы дистрибуции](deployment.md#каналы-дистрибуции)):
 
-- `make apk` — создает подписанный APK без повышения `VERSION_CODE`.
-- `make release` — повышает `VERSION_CODE`, собирает подписанный AAB и загружает mapping files в Firebase Crashlytics.
+- `make apk FLAVOR=github` — создаёт подписанный APK (`github` flavor) **без повышения `VERSION_CODE`**.
 - `make screenshots` — генерирует скриншоты и автоматически вызывает `make update_readme`.
 - `make update_readme` — обновляет README (скриншоты и версии).
 
-`gradle.properties` используется как источник `VERSION_NAME` и `VERSION_CODE`.
+`gradle.properties` используется как источник `VERSION_NAME` и `VERSION_CODE`. Оба flavor'а используют общий `VERSION_CODE` — `make rustore` увеличивает его на 1 перед сборкой AAB; `make apk FLAVOR=github` не трогает. Если релиз идёт только в GitHub Releases без `make rustore`, `VERSION_CODE` нужно поднять вручную перед запуском (см. [docs/deployment.md → Управление версией](deployment.md#управление-версией)).
 
 ### Что это дает уже сейчас
 
-- Стабильная локальная сборка релизных артефактов (`.apk` и `.aab`).
+- Стабильная локальная сборка подписанного APK (`github` flavor) без побочного эффекта на RuStore-канал.
 - Прозрачный контроль версий через `VERSION_NAME` и `VERSION_CODE`.
 - Подготовка материалов для релиза (скриншоты и README).
 
 ### Ограничение текущего решения
 
-В текущем `Makefile` **нет** команды `make github_release`, поэтому публикация GitHub Release выполняется вручную (через UI GitHub или `gh` CLI).
+В текущем `Makefile` **нет** команды `make github_release`, поэтому загрузка APK на GitHub Release выполняется вручную через UI GitHub или `gh` CLI. Подробный сценарий — в [docs/deployment.md → Релизный APK (для GitHub Release)](deployment.md#релизный-apk-для-github-release).
 
 ## Часть 2: План автоматизации релиза через GitHub
 
 ### Цель
 
-Добавить команду `make github_release`, которая:
+Добавить команду `make github_release` (или `make github-release`), которая:
 
-1. Создает подписанный APK (без изменения `VERSION_CODE`).
-2. Создает или обновляет тег формата `v{VERSION_NAME}`.
-3. Создает или обновляет GitHub Release и загружает APK как asset.
+1. Использует APK, собранный `make apk FLAVOR=github`.
+2. Создаёт или обновляет тег формата `v{VERSION_NAME}`.
+3. Создаёт или обновляет GitHub Release и загружает APK как asset.
 
 ### Технический подход
 
@@ -79,12 +78,11 @@ gh auth login
 Предлагаемая логика цели:
 
 1. Проверить `gh` и `gh auth status`.
-2. Проверить наличие `.secrets` (при необходимости вызвать `_load_secrets`).
-3. Выполнить `./gradlew assembleRelease`.
-4. Скопировать `app-release.apk` в `dayscounter{VERSION_CODE}.apk`.
-5. Проверить существование тега `v{VERSION_NAME}`:
-- если тег и релиз уже есть — обновить релиз и перезалить APK (`--clobber`);
-- если нет — создать тег, выполнить push тега, создать новый релиз.
+2. Вызвать prerequisite `apk FLAVOR=github` через `_GRADLE_PREREQS := _ensure_secrets` — секреты нужны для подписи APK.
+3. Использовать `dayscounter{VERSION_CODE}.apk` из корня проекта (результат `make apk FLAVOR=github`).
+4. Проверить существование тега `v{VERSION_NAME}`:
+   - если тег и релиз уже есть — обновить релиз и перезалить APK (`--clobber`);
+   - если нет — создать тег, выполнить push тега, создать новый релиз.
 
 #### Этап 3: Обновление `.PHONY`
 

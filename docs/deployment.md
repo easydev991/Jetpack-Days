@@ -92,7 +92,7 @@ make rustore-commit VID=<versionId>
 make apk FLAVOR=github
 ```
 
-Канал — `github`. По умолчанию `make apk` использует `FLAVOR=rustore` (RuStore-канал). Команда автоматически:
+Канал — `github`. По умолчанию `make apk` использует `FLAVOR=github` (канал разработки); для RuStore-канала передавайте `FLAVOR=rustore` явно. Команда автоматически:
 
 1. Создает подписанный APK-файл: `dayscounter{VERSION_CODE}.apk` (например, `dayscounter1.apk`, `dayscounter2.apk`) — flavor `github`
 2. Отображает версию и номер сборки
@@ -161,7 +161,7 @@ make whats-new
 
 `make whats-new` — prerequisite для `make rustore` и `make rustore-draft`: если файла нет, он будет сгенерирован автоматически.
 
-Шаблон для ручной редактуры: [`fastlane/metadata/TEMPLATE-whats-new.md`](../fastlane/metadata/TEMPLATE-whats-new.md). Контракт формата описан в [Этапе 5 плана flavors-implementation](plans/flavors-implementation.md#этап-5-release-notes-шаблон-и-интеграция-fastlane).
+Шаблон для ручной редактуры: [`fastlane/metadata/TEMPLATE-whats-new.md`](../fastlane/metadata/TEMPLATE-whats-new.md). Контракт формата описан в [Этапе 5 плана flavors-implementation](plans/flavors-implementation.md#этап-5-метаданные-для-публикации-fastlane).
 
 ### API-авторизация
 
