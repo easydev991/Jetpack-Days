@@ -34,9 +34,18 @@ def strip_ansi(text: str) -> str:
 # Default — rustoreDebug (если запущен без аргумента и без Makefile).
 variant = sys.argv[1] if len(sys.argv) > 1 else "rustoreDebug"
 
+# Разбор variant на flavor и buildType для layout AGP 9: connected/<buildType>/flavors/<flavor>
+if variant.endswith("Debug"):
+    flavor, build_type = variant[: -len("Debug")], "debug"
+else:
+    flavor, build_type = variant[: -len("Release")], "release"
+
 # Каталог с результатами тестов - несколько возможных путей для выбранного variant.
 # Имя gradle-таски — connected<FlavorTitle><BuildType>AndroidTest: из `rustoreDebug` собираем `RustoreDebug`.
 POSSIBLE_DIRS = [
+    Path(
+        f"app/build/outputs/androidTest-results/connected/{build_type}/flavors/{flavor}"
+    ),
     Path(f"app/build/outputs/androidTest-results/connected/{variant}"),
     Path(f"app/build/reports/androidTests/connected/{variant}/results"),
     Path(f"app/build/reports/androidTests/connectedTest-results/{variant}"),

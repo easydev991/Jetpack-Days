@@ -20,7 +20,7 @@ import com.dayscounter.data.database.entity.ReminderEntity
 @Database(
     entities = [ItemEntity::class, ReminderEntity::class],
     version = 2,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(DisplayOptionConverter::class)
 abstract class DaysDatabase : RoomDatabase() {
