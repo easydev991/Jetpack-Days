@@ -123,7 +123,7 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 
 > **Зависимости:** Этапы 1, 3 (Этап 1 вводит `productFlavors` в `app/build.gradle.kts` — это даёт терминологию для раздела «Каналы дистрибуции» в `docs/deployment.md`; Этап 3 вводит `make rustore`/`make apk FLAVOR=github` и `_ensure_secrets` — это требует синхронизации `AGENTS.md` и `firebase_integration.md`; `GitHub_Release_Automation_Plan.md` больше не затрагивается — имя `apk` сохраняется).
 
-- [x] **Документация:** `docs/deployment.md` (Каналы дистрибуции, `make release` → `make rustore`), `docs/firebase_integration.md` (`google-services.json` под `_load_secrets`, плагины `4.5.0`/`3.0.8`), `README.md`, `AGENTS.md`. `tech-stack.mdc` намеренно не тронут (описывает стек, не сборку).
+- [x] **Документация:** `docs/deployment.md` (Каналы дистрибуции, `make release` → `make rustore`), `docs/firebase_integration.md` (`google-services.json` под `_load_secrets`, плагины `4.5.0`/`3.0.8`), `README.md`, `AGENTS.md`. `tech-stack.md` намеренно не тронут (описывает стек, не сборку).
 
 ### Этап 5. Метаданные для публикации (fastlane)
 

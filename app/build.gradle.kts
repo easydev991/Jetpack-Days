@@ -93,6 +93,17 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    // Схемы Room в assets androidTest — MigrationTestHelper читает их оттуда по пути
+    // <package>/<version>.json. Без Room Gradle Plugin при KSP-конфигурации они туда не попадают.
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+}
+
+// Экспорт схем Room в app/schemas/ — история схем для MigrationTest и ревью миграций
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -151,6 +162,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.turbine)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

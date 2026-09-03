@@ -7,13 +7,14 @@ since events. Fully offline; backup format is shared with the iOS
 counterpart.
 
 **Hard constraints (do not violate):**
-- Offline only: no Retrofit / OkHttp / Ktor — see `.agents/rules/tech-stack.mdc`
+- Offline only: no Retrofit / OkHttp / Ktor — see `.opencode/rules/tech-stack.md`
 - Backup format must stay compatible with the iOS app (iOS uses
   `NSKeyedArchiver`; importer lives in `domain/usecase/ImportBackupUseCase.kt`)
 - Logs and user-facing comments are Russian by default
 - **Never use `!!`** — use `?`, `?:`, `let`, `checkNotNull`
 
-Per-area rules (auto-loaded by OpenCode) live in `.agents/rules/*.mdc`:
+Per-area rules (auto-loaded by OpenCode via `opencode.json` →
+`instructions`) live in `.opencode/rules/*.md`:
 `overview`, `architecture`, `code-style`, `code-quality`, `tech-stack`,
 `project-structure`, `performance-security`, `tdd`. Load them when in
 doubt — do not duplicate their content here.
@@ -77,13 +78,13 @@ Before writing tests, load the matching skill:
   in-memory, Turbine, real `AlarmManager`. No Espresso.
 
 TDD order (tests → logic → UI) and the 70/20/10 pyramid are defined in
-`.agents/rules/tdd.mdc` — read it before starting a new feature.
+`.opencode/rules/tdd.md` — read it before starting a new feature.
 
 ---
 
 ## Project Structure
 
-Full tree and placement rules live in `.agents/rules/project-structure.mdc`.
+Full tree and placement rules live in `.opencode/rules/project-structure.md`.
 Compact view of `app/src/main/java/com/dayscounter/`:
 
 ```
@@ -98,7 +99,7 @@ di/          # AppModule, FormatterModule — manual factory DI, no Hilt
 util/        # AndroidLogger, NoOpLogger, ClipboardHelper, ThemeUtils, AppConstants
 ```
 
-DI rationale + module breakdown: `.agents/rules/architecture.mdc`.
+DI rationale + module breakdown: `.opencode/rules/architecture.md`.
 
 ---
 
@@ -123,7 +124,7 @@ DI rationale + module breakdown: `.agents/rules/architecture.mdc`.
 
 ## Code Style (summary)
 
-Full rules: `.agents/rules/code-style.mdc`. Top reminders worth keeping
+Full rules: `.opencode/rules/code-style.md`. Top reminders worth keeping
 in mind while editing:
 
 - Data classes for models; sealed classes for UI states / `Result<T>`
@@ -157,7 +158,7 @@ val icon = screen.icon ?: defaultIcon
 
 ## Performance
 
-Full notes in `.agents/rules/performance-security.mdc`. Defaults used
+Full notes in `.opencode/rules/performance-security.md`. Defaults used
 across the codebase:
 
 - `viewModelScope.launch` for coroutines (auto-cancellation)

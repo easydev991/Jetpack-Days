@@ -81,7 +81,7 @@ lint:
 	./gradlew ktlintCheck
 	./gradlew app:detekt
 	@if command -v markdownlint >/dev/null 2>&1; then \
-		markdownlint "**/*.md" ".agents/rules/*.mdc"; \
+		markdownlint "**/*.md" ".opencode/rules/*.md"; \
 	else \
 		echo "$(YELLOW)markdownlint-cli не установлен. Для установки: npm install -g markdownlint-cli$(RESET)"; \
 	fi
@@ -91,7 +91,7 @@ format:
 	./gradlew ktlintFormat
 	./gradlew app:detekt -Pdetekt.autoCorrect=true
 	@if command -v markdownlint >/dev/null 2>&1; then \
-		markdownlint --fix "**/*.md" ".agents/rules/*.mdc"; \
+		markdownlint --fix "**/*.md" ".opencode/rules/*.md"; \
 	else \
 		echo "$(YELLOW)markdownlint-cli не установлен. Для установки: npm install -g markdownlint-cli$(RESET)"; \
 	fi
