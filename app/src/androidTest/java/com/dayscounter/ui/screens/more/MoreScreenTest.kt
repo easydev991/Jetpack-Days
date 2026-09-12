@@ -143,6 +143,44 @@ class MoreScreenTest {
     }
 
     /**
+     * Проверяет, что кнопка "Проверить обновления" отображается на экране
+     * при `BuildConfig.RUSTORE_FEATURES = false` (flavor github).
+     * На flavor rustore тест пропускается через Assume.
+     */
+    @Test
+    fun checkForUpdatesButton_visible_when_github_flavor() {
+        // SKIPPED на flavor rustore
+        Assume.assumeFalse(BuildConfig.RUSTORE_FEATURES)
+
+        // Given: экран MoreScreen отрендерен при BuildConfig.RUSTORE_FEATURES=false (flavor github)
+        composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+
+        // Then: кнопка проверки обновлений видна
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.check_for_updates))
+            .assertIsDisplayed()
+    }
+
+    /**
+     * Проверяет, что кнопка "Проверить обновления" скрыта на экране
+     * при `BuildConfig.RUSTORE_FEATURES = true` (flavor rustore).
+     * На flavor github тест пропускается через Assume.
+     */
+    @Test
+    fun checkForUpdatesButton_hidden_when_rustore_flavor() {
+        // SKIPPED на flavor github
+        Assume.assumeTrue(BuildConfig.RUSTORE_FEATURES)
+
+        // Given: экран MoreScreen отрендерен при BuildConfig.RUSTORE_FEATURES=true (flavor rustore)
+        composeTestRule.setContent { JetpackDaysTheme { MoreScreen() } }
+
+        // Then: кнопка проверки обновлений скрыта
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.check_for_updates))
+            .assertDoesNotExist()
+    }
+
+    /**
      * Проверяет, что версия приложения отображается внизу экрана.
      */
     @Test

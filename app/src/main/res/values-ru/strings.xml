@@ -120,6 +120,16 @@
     <string name="github_page">GitHub</string>
     <string name="app_version">Версия приложения: %1$s</string>
 
+    <!-- Update check -->
+    <string name="check_for_updates">Проверить обновления</string>
+    <string name="update_available_title">Доступно обновление</string>
+    <string name="update_available_message">Доступна версия %1$s</string>
+    <string name="update_open_button">Открыть на GitHub</string>
+    <string name="update_up_to_date">У вас установлена последняя версия</string>
+    <string name="update_up_to_date_title">Актуальная версия</string>
+    <string name="update_error_title">Ошибка</string>
+    <string name="update_error">Не удалось проверить обновления</string>
+
     <!-- Theme and Icon Screen -->
     <string name="app_theme">Тема приложения</string>
     <string name="dynamic_colors">Динамические цвета</string>
