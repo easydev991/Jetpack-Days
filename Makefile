@@ -50,9 +50,17 @@ clean:
 ## test: Запуск unit-тестов (JVM, без устройства). Использование: make test FLAVOR=github.
 test: _ensure_secrets
 	@if [ -f scripts/test_report.py ]; then chmod +x scripts/test_report.py; fi
-	./gradlew test$(FLAVOR_TITLE)DebugUnitTest --console=plain || true
-	@python3 scripts/test_report.py
 	@$(MAKE) scripts-test
+	# Отчёт запускается ВСЕГДА (даже при упавшей
+	# сборке), но exit код gradle не глотается — иначе ошибка компиляции оставила
+	# бы протухшие XML и make test показал бы зелёный отчёт прошлого прогона.
+	./gradlew test$(FLAVOR_TITLE)DebugUnitTest --console=plain; BUILD_STATUS=$$?; \
+	python3 scripts/test_report.py; REPORT_STATUS=$$?; \
+	if [ $$BUILD_STATUS -ne 0 ]; then \
+		printf "$(RED)[FAIL] СБОРКА ПРОВАЛИЛАСЬ (exit=$$BUILD_STATUS) — отчёт может быть от предыдущего прогона$(RESET)\n"; \
+		exit $$BUILD_STATUS; \
+	fi; \
+	exit $$REPORT_STATUS
 
 ## scripts-test: Запуск unit-тестов Python-скриптов
 scripts-test:
@@ -61,7 +69,10 @@ scripts-test:
 ## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации. Использование: make android-test FLAVOR=github.
 android-test: _ensure_secrets
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
-	./gradlew connected$(FLAVOR_TITLE)DebugAndroidTest --console=plain $(ANDROID_TEST_FILTER_FLAGS)
+	# ponytail: timeout_msec=60000 — каждый тест получает жёсткий потолок 60с: зависание
+	# (например, гонка waitForIdle при rotation на эмуляторе) превращается в падение теста,
+	# а не в бесконечное висение прогона.
+	./gradlew connected$(FLAVOR_TITLE)DebugAndroidTest --console=plain $(ANDROID_TEST_FILTER_FLAGS) -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000
 	ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVOR)Debug
 
 # ponytail: ANDROID_TEST_FILTER пробрасывается в gradle как -Pandroid.testInstrumentationRunnerArguments.class=...

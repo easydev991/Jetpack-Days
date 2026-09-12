@@ -120,6 +120,16 @@
     <string name="github_page">GitHub</string>
     <string name="app_version">App version: %1$s</string>
 
+    <!-- Update check -->
+    <string name="check_for_updates">Check for updates</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_available_message">Version %1$s is available</string>
+    <string name="update_open_button">Open on GitHub</string>
+    <string name="update_up_to_date">You\'re up to date</string>
+    <string name="update_up_to_date_title">Up to date</string>
+    <string name="update_error_title">Error</string>
+    <string name="update_error">Failed to check for updates</string>
+
     <!-- Theme and Icon Screen -->
     <string name="app_theme">App theme</string>
     <string name="dynamic_colors">Dynamic colors</string>

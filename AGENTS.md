@@ -8,6 +8,8 @@ counterpart.
 
 **Hard constraints (do not violate):**
 - Offline only: no Retrofit / OkHttp / Ktor — see `.opencode/rules/tech-stack.md`
+  (sole carve-out: manual update check uses platform `HttpsURLConnection`,
+  same file → «Исключение»)
 - Backup format must stay compatible with the iOS app (iOS uses
   `NSKeyedArchiver`; importer lives in `domain/usecase/ImportBackupUseCase.kt`)
 - Logs and user-facing comments are Russian by default
@@ -53,10 +55,11 @@ All user-facing commands live in the `Makefile`; run `Makefile` (`make help` lis
 
 **Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют prerequisite `_ensure_secrets` (он инлайнен в `Makefile` напрямую в prereq-листы 11 gradle-целей: `build`/`install`/`test`/`android-test`/`_build_screenshots_apk`/`screenshots*`/`rustore`/`apk`/`_rustore_build_aab`). На чистом чекауте без `.secrets/keystore` и `app/google-services.json` они упадут с «google-services.json not found» без пояснения. Для локальной разработки предпочтительны цели `make build` / `make test` / `make install` / `make android-test` — они подтягивают секреты через SSH автоматически.
 
-**Gotcha:** `make test` runs `./gradlew test || true` — the exit code is
-**not** a failure signal. Read `scripts/test_report.py` output (it
-parses `app/build/test-results/`) and treat any failing/non-passing test
-as a failure, even if `make` exits 0.
+**Gotcha:** `make test` propagates gradle build failures (explicit
+`[FAIL] СБОРКА ПРОВАЛИЛАСЬ` line, non-zero exit). Still, the human-readable
+verdict comes from `scripts/test_report.py` (it parses
+`app/build/test-results/`) — a failing/skipped test there is a failure even
+when `make` exits 0.
 
 `make lint` skips `markdownlint` with a yellow warning when the CLI is
 missing — install it (`npm i -g markdownlint-cli`) or run `make setup`

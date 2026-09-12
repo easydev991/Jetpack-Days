@@ -1,3 +1,6 @@
+// 11 функций: экран + кнопки + URL-хелперы (openUrl/openGitHub) — экран цельный, разбивать рано
+@file:Suppress("TooManyFunctions")
+
 package com.dayscounter.ui.screens.more
 
 import android.content.ActivityNotFoundException
@@ -25,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,11 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.dayscounter.BuildConfig
 import com.dayscounter.R
+import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
 import com.dayscounter.ui.theme.JetpackDaysTheme
+import com.dayscounter.ui.viewmodel.MoreScreenViewModel
 import com.dayscounter.util.AppConstants
 
 /** Экран с дополнительными функциями и настройками приложения. */
@@ -46,6 +54,7 @@ import com.dayscounter.util.AppConstants
 @Composable
 fun MoreScreen(navController: NavHostController? = null) {
     val context = LocalContext.current
+    val viewModel: MoreScreenViewModel = viewModel(factory = AppModule.createMoreScreenViewModelFactory())
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -78,13 +87,20 @@ fun MoreScreen(navController: NavHostController? = null) {
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
 
             // Кнопки действий
-            ActionButtons(context)
+            ActionButtons(context, onCheckForUpdate = viewModel::checkForUpdate)
 
             Spacer(modifier = Modifier.weight(1f))
 
             // Версия приложения (снизу с учетом paddingValues)
             AppVersionText()
         }
+
+        val state by viewModel.state.collectAsState()
+        UpdateCheckDialog(
+            state = state,
+            onDismiss = viewModel::dismissDialog,
+            onOpenRelease = { url -> openUrl(context, url) }
+        )
     }
 }
 
@@ -116,7 +132,10 @@ private fun SettingsButtons(navController: NavHostController?) {
 
 /** Кнопки действий. */
 @Composable
-private fun ActionButtons(context: Context) {
+private fun ActionButtons(
+    context: Context,
+    onCheckForUpdate: () -> Unit
+) {
     // Кнопка "Отправить отзыв"
     MoreButton(
         text = stringResource(R.string.send_feedback),
@@ -149,6 +168,16 @@ private fun ActionButtons(context: Context) {
         text = stringResource(R.string.github_page),
         onClick = { openGitHub(context) }
     )
+
+    // Кнопка "Проверить обновления" — только на github-сборке
+    if (!BuildConfig.RUSTORE_FEATURES) {
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xxsmall)))
+
+        MoreButton(
+            text = stringResource(R.string.check_for_updates),
+            onClick = onCheckForUpdate
+        )
+    }
 }
 
 /** Текст версии приложения. */
@@ -266,20 +295,22 @@ private fun shareApp(context: Context) {
     }
 }
 
-/** Открывает репозиторий приложения на GitHub. */
-private fun openGitHub(context: Context) {
-    val intent =
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse(AppConstants.GITHUB_REPOSITORY_URL)
-        )
+/** Открывает произвольный URL в браузере. */
+private fun openUrl(
+    context: Context,
+    url: String
+) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
     try {
         context.startActivity(intent)
     } catch (e: ActivityNotFoundException) {
-        Log.e("MoreScreen", "Не удалось открыть GitHub: ${e.message}")
+        Log.e("MoreScreen", "Не удалось открыть URL: $url", e)
     }
 }
+
+/** Открывает репозиторий приложения на GitHub. */
+private fun openGitHub(context: Context) = openUrl(context, AppConstants.GITHUB_REPOSITORY_URL)
 
 // ==================== PREVIEWS ====================
 

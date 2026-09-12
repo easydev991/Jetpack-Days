@@ -80,81 +80,79 @@ if not test_xml_files:
 # Подсчет статистики
 total = 0
 failed = 0
+skipped = 0
 failed_tests = []
 test_class_stats = {}
+
+# AssumptionViolatedException = тест пропущен через Assume (flavor-гейт),
+# это НЕ падение: AndroidJUnitRunner пишет его в <failure>, но сам раннер
+# учитывает как skipped (см. logcat: "run finished: N tests, 0 failed").
+ASSUME_MARKER = "AssumptionViolatedException"
+
+
+def is_assumption_skipped(element) -> bool:
+    """Тест пропущен через Assume (org.junit.AssumptionViolatedException)"""
+    if element is None:
+        return False
+    haystack = " ".join(filter(None, [element.get("message"), element.text]))
+    return ASSUME_MARKER in haystack
+
+
+def is_skipped(testcase, failure, error) -> bool:
+    if is_assumption_skipped(failure) or is_assumption_skipped(error):
+        return True
+    return testcase.find("skipped") is not None
+
 
 # Обработка каждого XML файла
 for xml_file in test_xml_files:
     try:
         tree = ET.parse(xml_file)
-        root = tree.getroot()
+    except ET.ParseError:
+        # ponytail: битый/недописанный XML (убитый посреди записи прогон)
+        # пропускаем — такой прогон в любом случае упал раньше по
+        # GRADLE_EXIT_CODE.
+        continue
+    root = tree.getroot()
 
-        # Получение всех testcase элементов
-        testcases = root.findall(".//testcase")
+    # Получение всех testcase элементов
+    testcases = root.findall(".//testcase")
 
-        # Подсчет всех тестов и группировка по классу
-        for testcase in testcases:
-            # Получение имени класса из атрибута classname каждого testcase
-            class_name = testcase.get("classname", "Unknown")
-            test_name = testcase.get("name", "Unknown")
+    # Подсчет всех тестов и группировка по классу
+    for testcase in testcases:
+        # Получение имени класса из атрибута classname каждого testcase
+        class_name = testcase.get("classname", "Unknown")
+        test_name = testcase.get("name", "Unknown")
 
-            # Подсчет общего количества тестов
-            total += 1
+        # Подсчет общего количества тестов
+        total += 1
 
-            # Инициализация статистики для класса, если её нет
-            if class_name not in test_class_stats:
-                test_class_stats[class_name] = {"total": 0, "failed": 0, "passed": 0}
+        # Инициализация статистики для класса, если её нет
+        if class_name not in test_class_stats:
+            test_class_stats[class_name] = {"total": 0, "failed": 0, "passed": 0}
 
-            # Обновление статистики класса
-            test_class_stats[class_name]["total"] += 1
+        # Обновление статистики класса
+        test_class_stats[class_name]["total"] += 1
 
-            # Поиск упавших тестов
-            failure = testcase.find("failure")
-            error = testcase.find("error")
+        # Поиск упавших тестов
+        failure = testcase.find("failure")
+        error = testcase.find("error")
 
-            if failure is not None or error is not None:
+        if (
+            failure is not None
+            or error is not None
+            or testcase.find("skipped") is not None
+        ):
+            if is_skipped(testcase, failure, error):
+                skipped += 1
+            else:
                 failed += 1
                 test_class_stats[class_name]["failed"] += 1
                 failed_tests.append(f"{class_name}::{test_name}")
-            else:
-                test_class_stats[class_name]["passed"] += 1
+        else:
+            test_class_stats[class_name]["passed"] += 1
 
-    except Exception:
-        # Если не удалось распарсить как XML, используем regex как запасной вариант
-        with open(xml_file, "r") as f:
-            content = f.read()
-
-        # Поиск всех блоков testcase (включая дочерние элементы)
-        testcases = re.findall(r"<testcase[^>]*>.*?</testcase>", content, re.DOTALL)
-
-        # Группировка тестов по классу
-        for testcase in testcases:
-            # Извлечение classname и name из атрибутов testcase
-            class_match = re.search(r'classname="([^"]+)"', testcase)
-            name_match = re.search(r'name="([^"]+)"', testcase)
-
-            class_name = class_match.group(1) if class_match else xml_file.stem
-            test_name = name_match.group(1) if name_match else "Unknown"
-
-            # Подсчет общего количества тестов
-            total += 1
-
-            # Инициализация статистики для класса, если её нет
-            if class_name not in test_class_stats:
-                test_class_stats[class_name] = {"total": 0, "failed": 0, "passed": 0}
-
-            # Обновление статистики класса
-            test_class_stats[class_name]["total"] += 1
-
-            # Поиск упавших тестов
-            if "<failure" in testcase or "<error" in testcase:
-                failed += 1
-                test_class_stats[class_name]["failed"] += 1
-                failed_tests.append(f"{class_name}::{test_name}")
-            else:
-                test_class_stats[class_name]["passed"] += 1
-
-passed = total - failed
+passed = total - failed - skipped
 
 # Вывод результатов
 print("=" * 80)
@@ -168,6 +166,8 @@ print()
 print(f"Статистика по интеграционным тестам (Android-эмулятор):")
 print(f"Всего тестов: {total}")
 print(f"{GREEN}Успешные: {passed}{RESET}")
+if skipped > 0:
+    print(f"Пропущенные (Assume/flavor-гейт): {skipped}")
 if failed > 0:
     print(f"{RED}Упавшие: {failed}{RESET}")
     print(f"{RED}Список упавших тестов:{RESET}")

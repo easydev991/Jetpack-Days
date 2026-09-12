@@ -10,4 +10,8 @@ object AppConstants {
 
     /** URL репозитория приложения на GitHub */
     const val GITHUB_REPOSITORY_URL = "https://github.com/easydev991/Jetpack-Days"
+
+    /** URL GitHub Releases API для проверки наличия новой версии (возвращает JSON, не HTML) */
+    const val GITHUB_RELEASES_API_URL =
+        "https://api.github.com/repos/easydev991/Jetpack-Days/releases/latest"
 }

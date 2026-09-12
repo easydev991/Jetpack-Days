@@ -22,6 +22,7 @@ import com.dayscounter.reminder.DefaultReminderManager
 import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.ui.viewmodel.ExactAlarmPermissionViewModel
+import com.dayscounter.ui.viewmodel.MoreScreenViewModel
 
 /**
  * Модуль внедрения зависимостей для приложения.
@@ -77,4 +78,7 @@ object AppModule {
         ExactAlarmPermissionViewModel.factory(
             helper = createExactAlarmPermissionHelper(context)
         )
+
+    fun createMoreScreenViewModelFactory(): ViewModelProvider.Factory =
+        MoreScreenViewModel.factory(FormatterModule.createCheckForAppUpdateUseCase())
 }
