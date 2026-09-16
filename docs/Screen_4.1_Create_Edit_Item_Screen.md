@@ -1,6 +1,6 @@
 # Экран 4.1: Create/Edit Item Screen (Создание и редактирование записей)
 
-Дата обновления: 2026-05-03
+Дата обновления: 2026-09-16
 Статус: Реализован и используется в навигации (`Screen.CreateItem`, `Screen.EditItem`)
 
 ## Назначение
@@ -23,7 +23,7 @@
    - описание (необязательное);
    - дата записи (через `DatePickerDialog`, конвертация дат для Material3 выполняется через UTC);
    - цветовая метка;
-   - формат отображения (`DAY`, `MONTH_DAY`, `YEAR_MONTH_DAY`).
+   - формат отображения (`DAY`, `MONTH_DAY`, `YEAR_MONTH_DAY`, `DEFAULT`).
 3. Блок напоминания (внизу формы):
    - toggle `Добавить напоминание`;
    - режим `На дату` (дата + время);
@@ -95,7 +95,7 @@
 
 1. Создание: `Screen.CreateItem.route`.
 2. Редактирование: `Screen.EditItem.createRoute(itemId)`.
-3. Переход из `Detail` в `Edit` использует prefill, чтобы минимизировать визуальные артефакты загрузки.
+3. Переход из `Detail` в `Edit` передает только `itemId`; данные записи и активный reminder загружаются в `CreateEditScreenViewModel.loadItem()` и применяются к форме через `loadItemData` (из `LaunchedEffect`).
 4. Открытие из уведомления маршрутизируется через `ReminderIntentContract` с передачей `itemId`.
 
 ## Тестирование (фактическое покрытие)
@@ -113,7 +113,7 @@
    - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditScreenCustomColorTest.kt`
    - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditReminderAutoScrollUiTest.kt`
    - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditSaveValidationUiTest.kt`
-   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/ReminderSettingsSectionUiTest.kt`
+   - `app/src/androidTest/java/com/dayscounter/ui/screens/createedit/CreateEditHasChangesRegressionUiTest.kt`
    - reminder receiver/scheduler сценарии в reminder instrumentation-тестах.
 
 ## Совместимость и ограничения

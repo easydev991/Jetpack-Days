@@ -18,7 +18,26 @@
 
 1. **BackupWrapper** (Android формат с полем `format: "android"`)
 2. **IosBackupWrapper** (iOS формат с полем `format: "ios"`)
-3. **List<BackupItem>** (старый формат без обёртки — fallback)
+3. **List<BackupItem>** (старый Android-формат без обёртки — fallback)
+
+Порядок основан на типе `timestamp`: у Android он `Long`, у iOS — `Double`,
+поэтому iOS-файл не декодируется как `BackupWrapper` и автоматически проваливается на шаг 2.
+
+**Ограничение:** старые iOS-бэкапы без обёртки (массив с дробным `timestamp`) не
+распознаются шагом 3 — Use Case вернёт ошибку парсинга. В тестах такие файлы
+парсятся напрямую через `List<IosBackupItem>` (см. `BackupImportRealFilesTest`).
+
+JSON при импорте читается с `ignoreUnknownKeys = true` — неизвестные поля игнорируются.
+
+### Обработка некорректных записей
+
+- Невалидный `displayOption` (не входит в `day`/`monthDay`/`yearMonthDay`) → запись пропускается (`toItem()`/`toBackupItem()` возвращают `null`).
+- Нераспознанный `colorTag` → запись импортируется без цвета (`colorTag = null`).
+
+### Обработка ошибок
+
+`ImportBackupUseCase` маппит исключения в `BackupException`:
+`FileNotFoundException`, `IOException`, `SerializationException`, `SQLException`.
 
 ### Обнаружение дубликатов
 
@@ -70,6 +89,8 @@
 |-----------------------------|-------------------------------------------------|
 | `BackupItem.kt`             | DTO для Android-формата, Item ↔ BackupItem      |
 | `BackupWrapper.kt`          | Обёртка с полем format                          |
+| `BackupFormat.kt`           | Enum формата (`android`/`ios`)                  |
+| `BackupFormatSerializer.kt` | Сериализация enum в lowercase-строки            |
 | `ExportBackupUseCase.kt`    | Экспорт в Android-формат                        |
 | `ImportBackupUseCase.kt`    | Импорт с автоопределением формата               |
 
@@ -88,6 +109,7 @@ iOS-совместимость (импорт):
 - `IosBackupItemTest.kt` — конвертация iOS timestamp/colorTag
 - `NsKeyedArchiverParserTest.kt` — парсинг iOS colorTag
 - `BackupWrapperTest.kt` — сериализация wrapper'ов
+- `IosBackupIntegrationTest.kt` — интеграция iOS → Android конвертации
 
 ### Интеграционные тесты
 

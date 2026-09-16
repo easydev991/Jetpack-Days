@@ -24,6 +24,7 @@ buildTypes {
     release {
         manifestPlaceholders["crashlyticsCollectionEnabled"] = true
         isMinifyEnabled = true
+        isShrinkResources = true
         proguardFiles(
             getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro"
@@ -52,8 +53,8 @@ buildTypes {
 | Компонент | Версия |
 |-----------|--------|
 | Firebase BOM | (через libs.versions.toml) |
-| Firebase Crashlytics | (через libs.versions.toml) |
-| Firebase Analytics | (через libs.versions.toml) |
+| Firebase Crashlytics | (через BOM) |
+| Firebase Analytics | (через BOM) |
 | Google Services plugin | 4.5.0 |
 | Crashlytics Gradle plugin | 3.0.8 |
 
@@ -61,13 +62,14 @@ buildTypes {
 
 ## google-services.json
 
-- Файл `app/google-services.json` создаётся автоматически в `app/` перед каждой gradle-сборкой из `_load_secrets` (`Makefile`)
+- Файл `app/google-services.json` **не коммитится** (добавлен в `.gitignore`) — исходник хранится в приватном репозитории `easydev991/android-secrets` (каталог `jetpackdays/google-services.json`)
+- Скачивается вместе с остальными секретами по SSH (доступ настраивается через `make setup_ssh`): цель `_load_secrets` в `Makefile` клонирует репозиторий и копирует файл в `app/`
+- Загрузка триггерится обёрткой `_ensure_secrets` — только если `.secrets/` или `app/google-services.json` отсутствуют, а не перед каждой gradle-сборкой
 - Один файл используется обоими `productFlavors` (`rustore` и `github` — оба работают с одним Firebase-проектом)
-- Добавлен в `.gitignore` — исходник хранится в приватном репозитории `easydev991/android-secrets` (каталог `jetpackdays/google-services.json`)
 - Проект Firebase: `days-counter-5ee1f`
 - Android App: `com.dayscounter`
 
-Исходник `google-services.json` живёт в `easydev991/android-secrets` — на каждом запуске gradle-цели `Makefile` клонирует репо по SSH и копирует файл в `app/` (см. «Секреты для подписи» в `docs/deployment.md`). На fresh checkout без SSH-доступа `make build` / `make apk` упадут с понятным сообщением об ошибке от `_load_secrets`.
+На fresh checkout без SSH-доступа `make build` / `make apk` упадут с понятным сообщением об ошибке от `_load_secrets` (см. «Секреты для подписи» в [docs/deployment.md](deployment.md#секреты-для-подписи)).
 
 ---
 
@@ -125,7 +127,7 @@ FirebaseAnalyticsProvider.log(event)  → Firebase Analytics
 
 ### Типы событий
 
-Определены в `AnalyticsEvent` (sealed class):
+Определены в `AnalyticsEvent` (sealed interface):
 
 | Событие | Триггер | Параметры |
 |---------|---------|-----------|
@@ -135,21 +137,21 @@ FirebaseAnalyticsProvider.log(event)  → Firebase Analytics
 
 ### screen_view на экранах
 
-Логирование `screen_view` происходит в `RootScreenComponents.kt` через `LaunchedEffect` при композиции каждого экрана:
+Логирование `screen_view` происходит в `ui/screens/common/RootScreenComponents.kt` через `LaunchedEffect` при композиции каждого экрана. Создание и редактирование — одна композиция `CreateEditScreen` (разные маршруты навигации):
 
 | Экран | AppScreen | screenClass |
 |-------|-----------|-------------|
 | Список событий | `EVENTS` | `MainScreen` |
 | Детали события | `DETAIL` | `DetailScreen` |
-| Создание события | `CREATE_EVENT` | `CreateEventScreen` |
-| Редактирование | `EDIT_EVENT` | `EditEventScreen` |
+| Создание события | `CREATE_EDIT` | `CreateEditScreen` |
+| Редактирование | `CREATE_EDIT` | `CreateEditScreen` |
 | Ещё (More) | `MORE` | `MoreScreen` |
 | Тема/иконка | `THEME_ICON` | `ThemeIconScreen` |
 | Данные приложения | `APP_DATA` | `AppDataScreen` |
 
 ### UserAction
 
-Логируются действия: `EDIT`, `DELETE`, `DELETE_ALL`, `SORT_CHANGED`, `CONFIRM_DELETE`, `CANCEL_DELETE`, `ICON_SELECTED`, `ICON_CHANGED`, `BACKUP_CREATED`, `BACKUP_RESTORED`, `SHARE`, и другие.
+Типы действий определены в enum `UserActionType`: `CREATE`, `EDIT`, `DELETE`, `SORT`, `OPEN_FILTER`, `ITEM_SAVED`, `ICON_SELECTED`, `CREATE_BACKUP`, `RESTORE_BACKUP`, `DELETE_ALL_DATA`.
 
 ---
 

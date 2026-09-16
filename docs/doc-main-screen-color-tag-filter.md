@@ -12,6 +12,7 @@
   - `app/src/main/java/com/dayscounter/ui/viewmodel/MainScreenViewModel.kt`
 - UI главного экрана:
   - `app/src/main/java/com/dayscounter/ui/screens/events/MainScreen.kt`
+  - `app/src/main/java/com/dayscounter/ui/screens/events/MainScreenScaffold.kt`
   - `app/src/main/java/com/dayscounter/ui/screens/events/MainScreenComponents.kt`
   - `app/src/main/java/com/dayscounter/ui/screens/events/ColorTagFilterDialog.kt`
 - Общий UI-компонент цветового тега:
@@ -44,7 +45,7 @@
 
 ### TopAppBar
 
-- Кнопка сортировки находится в `navigationIcon`.
+- Кнопка сортировки находится в `navigationIcon` и видна при `itemsCount > 1`.
 - Кнопка фильтра находится в `actions`, справа от сортировки.
 - Иконка фильтра показывает состояние:
   - `Icons.Outlined.Palette` при неактивном фильтре;
@@ -104,10 +105,11 @@
 - При выборе применяется двойная обводка:
   - внешний контур `outline`;
   - внутренний белый контур.
-- Толщина обоих контуров одинаковая.
+- Толщина обоих контуров одинаковая — `border_width` (2dp).
 - Актуальные размеры в `dimens.xml`:
   - `color_tag_size = 42dp`;
-  - `color_tag_size_small = 16dp`.
+  - `color_tag_size_small = 16dp`;
+  - `border_width = 2dp`.
 
 ## Аналитика
 

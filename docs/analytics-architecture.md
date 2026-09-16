@@ -49,6 +49,7 @@
 - `EDIT`
 - `DELETE`
 - `SORT`
+- `OPEN_FILTER`
 - `ITEM_SAVED`
 - `ICON_SELECTED`
 - `CREATE_BACKUP`
@@ -69,7 +70,7 @@
 
 В Firebase отправляются параметры:
 - `operation`
-- `error_domain` (имя класса исключения)
+- `error_domain` (полное имя класса исключения)
 - `error_code` (hashCode исключения)
 
 ## 5. Правила трекинга (фактически реализовано)
@@ -78,6 +79,7 @@
 - `user_action` логируется в точке нажатия пользователя (до выполнения долгих/потенциально падающих операций).
 - Ключевые кнопки навигации и действий логируются как `user_action`:
   - создание, редактирование, сортировка, удаление, сохранение
+  - открытие фильтра по цветным меткам
   - экспорт/импорт бэкапа, подтверждение удаления всех данных
   - выбор иконки приложения
 - Ошибки операций логируются как `app_error` в `catch`/`onFailure` ветках ViewModel.
@@ -95,19 +97,32 @@
 - В debug-сборке по умолчанию подключен `NoopAnalyticsProvider`, поэтому события не отправляются в Firebase.
 - Для проверки отправки в Firebase нужна не-debug конфигурация с активным `FirebaseAnalyticsProvider`.
 
-## 7. Приватность и ограничения
+## 7. Сборка и платформенный сбор
+
+Помимо выбора провайдера в коде, автосбор Firebase отключается на уровне манифеста через плейсхолдер `crashlyticsCollectionEnabled` (`app/build.gradle.kts`):
+
+- `debug`: `manifestPlaceholders["crashlyticsCollectionEnabled"] = false`
+- `release`: `manifestPlaceholders["crashlyticsCollectionEnabled"] = true`
+
+В `AndroidManifest.xml` оба флага ссылаются на один плейсхолдер, то есть Analytics и Crashlytics включаются/выключаются синхронно:
+- `firebase_crashlytics_collection_enabled` = `${crashlyticsCollectionEnabled}`
+- `firebase_analytics_collection_enabled` = `${crashlyticsCollectionEnabled}`
+
+Product flavors (`rustore` / `github`) на аналитику не влияют — отличаются только `RUSTORE_FEATURES` в `BuildConfig`.
+
+## 8. Приватность и ограничения
 
 - В события запрещено передавать PII.
 - Не передаются `user_id`, email, телефон, пользовательский текст, координаты и другие персональные данные.
 - Допускаются технические и сценарные значения, не идентифицирующие пользователя напрямую (например, `iconName` выбранной иконки).
 
-## 8. Текущее покрытие
+## 9. Текущее покрытие
 
 - `ScreenView`: все основные экраны root-навигации покрыты.
 - `UserAction`: покрыты ключевые действия на `Main`, `Create/Edit`, `ThemeIcon`, `AppData`.
 - `AppError`: покрыты критичные ветки ошибок в `CreateEditScreenViewModel`, `ThemeIconViewModel`, `AppDataScreenViewModel`.
 
-## 9. Ключевые файлы
+## 10. Ключевые файлы
 
 - `app/src/main/java/com/dayscounter/analytics/AnalyticsEvent.kt`
 - `app/src/main/java/com/dayscounter/analytics/AnalyticsProvider.kt`
@@ -118,7 +133,10 @@
 - `app/src/main/java/com/dayscounter/ui/screens/common/RootScreenComponents.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/createedit/CreateEditScreen.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/events/MainScreen.kt`
+- `app/src/main/java/com/dayscounter/ui/screens/events/MainScreenScaffold.kt`
 - `app/src/main/java/com/dayscounter/ui/screens/appdata/AppDataScreen.kt`
 - `app/src/main/java/com/dayscounter/ui/viewmodel/CreateEditScreenViewModel.kt`
 - `app/src/main/java/com/dayscounter/ui/viewmodel/ThemeIconViewModel.kt`
 - `app/src/main/java/com/dayscounter/ui/viewmodel/AppDataScreenViewModel.kt`
+- `app/src/main/AndroidManifest.xml`
+- `app/build.gradle.kts`

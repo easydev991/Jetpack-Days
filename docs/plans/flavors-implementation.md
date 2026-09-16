@@ -78,7 +78,7 @@
 |------|-----|---------|--------|
 | `RUSTORE_FEATURES` | `Boolean` | `true` | `false` |
 
-Один общий флаг достаточен: обе кнопки «Оценить» и «Поделиться» (MoreScreen.kt:126-142) ведут на `apps.rustore.ru` (AppConstants.kt:6,9) и одинаково условные. `FIREBASE_ENABLED` не нужен — Firebase SDK остаётся глобальной зависимостью для обоих flavor'ов (текущее поведение).
+Один общий флаг достаточен: обе кнопки «Оценить» и «Поделиться» (MoreScreen.kt:148-164) ведут на `apps.rustore.ru` (AppConstants.kt:6,9) и одинаково условные. `FIREBASE_ENABLED` не нужен — Firebase SDK остаётся глобальной зависимостью для обоих flavor'ов (текущее поведение). Позже флаг получил третьего потребителя — кнопка «Проверить обновления» гейтится инверсией `if (!BuildConfig.RUSTORE_FEATURES)` (MoreScreen.kt:173, openspec change `2026-09-12-app-update-check`) — модель один-флаг-на-канал сохранилась.
 
 ### 3. `google-services.json` — модель хранения
 
@@ -99,13 +99,13 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 
 > **Зависимости:** нет.
 
-- [x] **Flavors + google-services.json:** `app/build.gradle.kts` — `flavorDimensions + 2 productFlavors` с `BuildConfig.RUSTORE_FEATURES`; `Makefile:_load_secrets` копирует `app/google-services.json` из `.secrets/` (файл перенесён в `android-secrets/jetpackdays/`). 4 assemble-цели (`rustoreDebug/Release`, `githubDebug/Release`) собираются зелёно.
+- [x] **Flavors + google-services.json:** `flavorDimensions` + 2 `productFlavors` с `BuildConfig.RUSTORE_FEATURES` в `app/build.gradle.kts`; `_load_secrets` копирует `app/google-services.json` (файл — в `android-secrets/jetpackdays/`); 4 assemble-варианта собираются зелёно.
 
 ### Этап 2. UI: MoreScreen.kt + тесты на flavor'ах
 
 > **Зависимости:** Этап 1 (нужны `BuildConfig.*` поля).
 >
-> **TDD: пишем тест ДО UI-правки.** `BuildConfig.RUSTORE_FEATURES → видимость rate/share кнопок` — проверяемая логика. Сначала — UI-тест на условную видимость, потом — правка UI. Это исключение из общего правила «UI-правки без тестов»: для conditional-render по `BuildConfig.*` TDD применимо и нужно. Исключения — только для тривиальных визуальных правок (отступы, цвета), не для conditional-render.
+> **TDD:** для conditional-render по `BuildConfig.*` тест пишется до UI-правки (исключение из правила «UI-правки без тестов»; тривиальные визуальные правки — не исключение).
 
 - [x] **MoreScreen + тесты:** rate/share в одном `if (BuildConfig.RUSTORE_FEATURES)`; `Assume.assumeTrue/assumeFalse` для flavor'ов в `MoreScreenTest.kt`.
 
@@ -117,13 +117,13 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 >
 > **`_ensure_secrets` как prerequisite для 11 gradle-целей** (`build`, `install`, `test`, `android-test`, `_build_screenshots_apk`, `screenshots*`, `rustore`, `apk`, `_rustore_build_aab`): `processGoogleServices` читает `app/google-services.json`, `signingConfigs` тянет `secrets.properties`. Этап 6 не добавляет новую цель — встраивает `rustore_publish.sh` в существующую `rustore`. `check` получает секреты транзитивно через `build`; `clean`/`format`/`lint`/`update_readme_versions` — намеренно без них (Ponytail: YAGNI — `make format` не должен требовать SSH).
 
-- [x] **`release` → `rustore` + `apk` per-flavor; `FLAVOR ?= github` + guard; `_ensure_secrets` инлайнен в 11 prereq-листов; `scripts/android_test_report.py` параметризован под `<variant>`; `screenshot-tests/build.gradle.kts` — `missingDimensionStrategy("distribution", "rustore")`.** Inline-`_load_secrets` в `apk`/`release` удалены.
+- [x] **Makefile:** `release` → `rustore` + per-flavor `apk` (`FLAVOR ?= github` + guard); `_ensure_secrets` в 11 prereq-листах; `android_test_report.py` под `<variant>`; `missingDimensionStrategy("distribution", "rustore")` в screenshot-tests; inline-`_load_secrets` удалены.
 
 ### Этап 4. Документация
 
-> **Зависимости:** Этапы 1, 3 (Этап 1 вводит `productFlavors` в `app/build.gradle.kts` — это даёт терминологию для раздела «Каналы дистрибуции» в `docs/deployment.md`; Этап 3 вводит `make rustore`/`make apk FLAVOR=github` и `_ensure_secrets` — это требует синхронизации `AGENTS.md` и `firebase_integration.md`; `GitHub_Release_Automation_Plan.md` больше не затрагивается — имя `apk` сохраняется).
+> **Зависимости:** Этапы 1, 3 (терминология flavors и новые make-цели/`_ensure_secrets` требуют синхронизации документации).
 
-- [x] **Документация:** `docs/deployment.md` (Каналы дистрибуции, `make release` → `make rustore`), `docs/firebase_integration.md` (`google-services.json` под `_load_secrets`, плагины `4.5.0`/`3.0.8`), `README.md`, `AGENTS.md`. `tech-stack.md` намеренно не тронут (описывает стек, не сборку).
+- [x] **Документация:** `docs/deployment.md` (Каналы дистрибуции, `make release` → `make rustore`), `docs/firebase_integration.md` (`google-services.json` под `_load_secrets`), `README.md`, `AGENTS.md`. `tech-stack.md` намеренно не тронут.
 
 ### Этап 5. Метаданные для публикации (fastlane)
 
@@ -139,11 +139,11 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 
 ### Этап 6. Публикация в RuStore через bash + curl + openssl + jq
 
-> **Зависимости:** Этапы 3, 5 (Этап 3 вводит `make rustore`, в который встраивается вызов bash-скрипта; Этап 5 фиксирует шаблон, путь и схему имени `whats_new/<VERSION_NAME>.txt` — сам файл пишется руками перед релизом по шаблону из Этапа 5, см. Этап 7).
+> **Зависимости:** Этапы 3, 5 (`make rustore` + контракт `whats_new/<VERSION_NAME>.txt`).
 >
 > **Цель:** `make rustore` не только собирает AAB, но и автоматически загружает его в RuStore с release notes и отправляет на модерацию.
 >
-> **Подход:** прямые HTTP-вызовы к RuStore API через `bash + curl + openssl + jq`. Весь контракт API документирован RuStore — auth → create draft → upload AAB → submit. Реализация — bash-скрипт `scripts/rustore_publish.sh` (три позиционных аргумента: `<credentials.json> <app.aab> <priority>`). Зависимости Этапа 5 выполнены (шаблон release notes, контракт `whats_new/<VERSION_NAME>.txt`); Этап 6 — следующий в очереди.
+> **Подход:** прямые HTTP-вызовы к RuStore API через `bash + curl + openssl + jq` — скрипт `scripts/rustore_publish.sh` (аргументы: `<credentials.json> <app.aab> <priority>`).
 
 #### Почему bash, а не Gradle-плагин поверх HTTP
 
@@ -174,27 +174,23 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 
 #### Шаги реализации
 
-- [x] **`scripts/rustore_publish.sh` + интеграция:** 4-шаговый bash (auth → draft → upload → submit, fail-fast, `set +x`/`umask 077`); `make rustore` вызывает после `bundleRustoreRelease + uploadCrashlyticsMappingFileRustoreRelease` (`SKIP_PUBLISH=1` escape hatch); `rustore-credentials.json` подхватывается через `_load_secrets`.
+- [x] **Публикация:** `scripts/rustore_publish.sh` — 4 шага API (auth → draft → upload → submit), fail-fast, `set +x`/`umask 077`; встроен в `make rustore` после `bundleRustoreRelease + uploadCrashlyticsMappingFileRustoreRelease` (`SKIP_PUBLISH=1`); credentials через `_load_secrets`.
 
 ### Этап 7. Генерация release notes из git log + разделение `make rustore` на draft/commit
 
-> **Зависимости:** Этап 5 (контракт `whats_new/<VERSION>.txt`, шаблон). Активация отложенного 7 после реального юзкейса: ручной `make rustore` отправляет релиз сразу на модерацию — пользователь хочет видеть release notes до этого.
+> **Зависимости:** Этап 5 (контракт `whats_new/<VERSION>.txt`, шаблон). Повод: ручной `make rustore` отправляет релиз на модерацию сразу — release notes нужно проверить до этого.
 >
-> **Цель:** дать явный двухшаговый workflow — сначала создать черновик (с AAB и сгенерированными release notes), потом вручную отправить на модерацию после проверки в Console. Генерация `whats_new/<VERSION>.txt` из `git log<last_release_tag>..HEAD` — автогенератор для типового случая, ручная правка перед commit остаётся.
->
-> **TDD:** тесты пишутся первыми (red), затем реализация (green). Helper `scripts/_generate_whats_new.sh` отделён от Makefile для unit-тестирования.
+> **Цель:** двухшаговый workflow — `rustore-draft` (черновик с AAB и release notes) → ручной `rustore-commit` после проверки в Console. `whats_new/<VERSION>.txt` генерируется из `git log<last_release_tag>..HEAD`, ручная правка остаётся.
 
 #### Шаги реализации
 
-- [x] **Helper `_generate_whats_new.sh` + Makefile targets + `RUSTORE_MODE`:** helper создаёт `whats_new/<VERSION>.txt` из `git log<last_tag>..HEAD` (без тегов — пометка `(первый релиз)`; если файл есть — печатает без перезаписи + trailing newline). Цели: `whats-new`, `rustore-draft` (build AAB + `RUSTORE_MODE=upload`, VID → `.secrets/.last_rustore_vid`), `rustore-commit VID=<vid>` (`RUSTORE_MODE=commit`); `_rustore_build_aab` — общий build для `rustore`/`rustore-draft`. `make rustore` получил prerequisite `whats-new`. Upload AAB: `--max-time 600`, прогресс-бар через `curl -f#S` (ранее был polling-цикл в Makefile, удалён в Follow-up review).
-- [x] **Тесты (10 по TDD):** `whats_new_test.py` (3), `RustorePublishUploadModeTest`/`CommitModeTest` (3), `MakefileWhatsNewAndDraftTest` (4). Всего Python-тестов: 18 (было 8).
+- [x] **Helper + цели + тесты (TDD, 10 тестов):** `_generate_whats_new.sh` — `whats_new/<VERSION>.txt` из `git log<last_tag>..HEAD` (без тегов — `(первый релиз)`, существующий файл не перезаписывается). Цели: `whats-new`, `rustore-draft` (upload, VID → `.secrets/.last_rustore_vid`), `rustore-commit VID=<vid>` (`RUSTORE_MODE=commit`), общий `_rustore_build_aab`; `make rustore` получил prerequisite `whats-new`. Upload AAB: `--max-time 600`, прогресс `curl -f#S`. Всего Python-тестов: 18 (было 8).
 
 ### Этап 8. Финальная проверка
 
 > **Зависимости:** все предыдущие.
 
-- [x] **`make format`/`test` зелёные:** ktlint/detekt/markdownlint без issues (после pre-existing fix MD051); 22 unit-тест-класса + Python-тесты, нулевые failures.
-- [x] **Smoke-test + code review:** `bundleRustoreRelease` (33s, AAB 6.3M) и `assembleGithubRelease` (31s, APK 3.0M) — **раздельно** (4 задачи параллельно падали по OOM); `uploadCrashlyticsMappingFileRustoreRelease` загрузил mapping v20 в Firebase. Без `!!` в новом коде, KDoc на `ActionButtons` есть, нет deprecated APIs.
+- [x] **Финальная проверка:** `make format`/`test` зелёные (22 Kotlin unit-класса + Python-тесты, ноль failures; pre-existing fix MD051). Smoke-test **раздельно**: `bundleRustoreRelease` (33s, AAB 6.3M), `assembleGithubRelease` (31s, APK 3.0M) — параллельно падали по OOM; mapping v20 загружен в Firebase. Code review: без `!!`, KDoc на `ActionButtons`, нет deprecated APIs.
 
 ---
 
@@ -255,9 +251,8 @@ google-services plugin 4.5.0 (`gradle/libs.versions.toml:26`) **не предо�
 
 ## Follow-up (после плана flavors)
 
-- ✅ **Pre-existing фиксы и тесты:** `.gitignore` для `.serena/memories/`; MD051 в `docs/deployment.md:38`; smoke-test `rustore_publish.sh` (happy-path с fake curl через PATH) + баг `$2` в `make rustore` + интеграционный тест Makefile target; snake_case rename 5 `@Test` в `MoreScreenTest`.
-- ✅ **Этап 7: фиксы UX `rustore-draft`:** trailing newline в `_generate_whats_new.sh`; VID → `.secrets/.last_rustore_vid` (Makefile подставляет в подсказку); upload AAB: убран `> /dev/null` для диагностики, `--max-time 600`.
-- ✅ **Root cause «AAB загружен, но в Console его нет»:** без явного `Content-Type` RuStore интерпретирует AAB как APK, commit падает с `There can be only one main APK file`. Фикс: `-F "file=@$AAB_FILE;type=application/octet-stream"`. Всего Python-тестов: 19.
-- ✅ **Долг: документация под Этап 7 → закрыт:** `docs/deployment.md` (TOC + «Двухшаговый workflow» + «Release notes» с `make whats-new`), `README.md:45`, `AGENTS.md:107-115`.
-- ✅ **Защита от низкого VERSION_CODE:** скрипт падает ДО `create-draft` если `VERSION_CODE` из `gradle.properties` ≤ max существующих в RuStore. Без этого RuStore создавал пустой черновик (HTTP 200 на create-draft), а upload AAB падал с HTTP 400 — черновик оставался в Console без файла. Тест `test_low_version_code_fails_before_create_draft`. Всего Python-тестов: 20.
-- ✅ **Over-engineering review (11 справедливых + 1 несправедливый):** чистый выигрыш **-104 строки** в 6 файлах. **Makefile**: убраны `_GRADLE_PREREQS` обёртка, `FLAVOR_LOWER` round-trip, дублирование `VERSION_CODE`/`OUTPUT_FILE` в `rustore`, trailing `0` в `rustore-commit`, watch-цикл в `rustore-draft` (заменён на `curl -f#S` прогресс-бар). **`android_test_report.py`**: убраны whitelist `variant not in (...)` и env-fallback `ANDROID_TEST_VARIANT` (никто не ставит). **Тесты**: `_ModeTestBase` поднят выше `HappyPathTest` (наследование через `self._run({})`), убран `create_draft_calls` list-comp; `_MakefileTestBase` для двух setUp'ов, убран спекулятивный `if helper_src.exists()`. **Несправедливый** (сохранён): реконструкция query-string в fake-curl для `page=` asserts — без неё asserts падают, потому что curl `-G --data-urlencode` переносит параметры в URL. Все тесты зелёные (22 Kotlin + 20 Python), lint чист.
+- ✅ **Pre-existing фиксы и тесты:** `.gitignore` для `.serena/memories/`; MD051 в `docs/deployment.md:38`; smoke-test `rustore_publish.sh` (happy-path с fake curl через PATH) + баг `$2` в `make rustore`; snake_case rename 5 `@Test` в `MoreScreenTest`.
+- ✅ **Этап 7 UX + root cause «AAB загружен, но в Console его нет»:** отражено в Этапах 6–7 (Content-Type `application/octet-stream`, `--max-time 600`, прогресс `curl -f#S`, trailing newline, VID-подсказка). Python-тестов: 19.
+- ✅ **Долг: документация Этапа 7:** `docs/deployment.md` (двухшаговый workflow, `make whats-new`), `README.md:45`, `AGENTS.md:107-115`.
+- ✅ **Защита от низкого VERSION_CODE:** реализована в Этапе 6 (падение до `create-draft`). Python-тестов: 20.
+- ✅ **Over-engineering review (11 справедливых + 1 несправедливый):** чистый выигрыш **-104 строки** в 6 файлах — Makefile (`_GRADLE_PREREQS`, `FLAVOR_LOWER` round-trip, дубли в `rustore`, watch-цикл → `curl -f#S`), `android_test_report.py` (whitelist, env-fallback), тесты (`_ModeTestBase`, `_MakefileTestBase`, убраны спекулятивные конструкции). Несправедливый (сохранён): реконструкция query-string в fake-curl — без неё asserts на `page=` падают из-за `-G --data-urlencode`. Все тесты зелёные (22 Kotlin + 20 Python), lint чист.

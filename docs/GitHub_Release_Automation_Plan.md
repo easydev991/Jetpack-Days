@@ -11,23 +11,21 @@
 
 ### Текущее состояние в проекте
 
-На сегодня в `Makefile` доступны команды для GitHub-канала (`github` flavor, см. [docs/deployment.md → Каналы дистрибуции](deployment.md#каналы-дистрибуции)):
+В `Makefile` для GitHub-канала (`github` flavor, см. [docs/deployment.md → Каналы дистрибуции](deployment.md#каналы-дистрибуции)) доступны:
 
-- `make apk FLAVOR=github` — создаёт подписанный APK (`github` flavor) **без повышения `VERSION_CODE`**.
-- `make screenshots` — генерирует скриншоты и автоматически вызывает `make update_readme`.
-- `make update_readme` — обновляет README (скриншоты и версии).
+- `make apk FLAVOR=github` — подписанный APK **без повышения `VERSION_CODE`**.
+- `make screenshots` — скриншоты + автоматический вызов `make update_readme`.
+- `make update_readme` — обновление README (скриншоты и версии).
 
-`gradle.properties` используется как источник `VERSION_NAME` и `VERSION_CODE`. Оба flavor'а используют общий `VERSION_CODE` — `make rustore` увеличивает его на 1 перед сборкой AAB; `make apk FLAVOR=github` не трогает. Если релиз идёт только в GitHub Releases без `make rustore`, `VERSION_CODE` нужно поднять вручную перед запуском (см. [docs/deployment.md → Управление версией](deployment.md#управление-версией)).
+Источник версий — `gradle.properties` (`VERSION_NAME`, `VERSION_CODE` общий для обоих flavor'ов): `make rustore` увеличивает `VERSION_CODE` на 1 перед сборкой AAB, `make apk FLAVOR=github` — нет, поэтому для релиза только в GitHub Releases его поднимают вручную (см. [docs/deployment.md → Управление версией](deployment.md#управление-версией)).
 
 ### Что это дает уже сейчас
 
-- Стабильная локальная сборка подписанного APK (`github` flavor) без побочного эффекта на RuStore-канал.
-- Прозрачный контроль версий через `VERSION_NAME` и `VERSION_CODE`.
-- Подготовка материалов для релиза (скриншоты и README).
+Локальная сборка подписанного APK без влияния на RuStore-канал, прозрачный контроль версий, подготовка материалов релиза (скриншоты, README).
 
 ### Ограничение текущего решения
 
-В текущем `Makefile` **нет** команды `make github_release`, поэтому загрузка APK на GitHub Release выполняется вручную через UI GitHub или `gh` CLI. Подробный сценарий — в [docs/deployment.md → Релизный APK (для GitHub Release)](deployment.md#релизный-apk-для-github-release).
+Команды `make github_release` в `Makefile` **нет** — APK на GitHub Release загружается вручную через UI GitHub или `gh` CLI. Подробный сценарий — [docs/deployment.md → Релизный APK (для GitHub Release)](deployment.md#релизный-apk-для-github-release).
 
 ## Часть 2: План автоматизации релиза через GitHub
 
@@ -94,9 +92,10 @@ gh auth login
 
 ### Чеклист внедрения
 
-- [ ] Добавить проверку `gh` в `setup` (или отдельную цель `_check_gh`).
+- [ ] Добавить цель `_check_gh` по образцу существующих `_check_*`-целей (`_check_rbenv`, `_check_markdownlint`) и подключить её в `setup`.
 - [ ] Реализовать `github_release` в `Makefile`.
 - [ ] Обновить `.PHONY`.
+- [ ] Добавить тест цели в `scripts/` по образцу `makefile_rustore_target_test.py` (запуск: `make scripts-test`).
 - [ ] Протестировать создание нового релиза.
 - [ ] Протестировать обновление существующего релиза.
 - [ ] Обновить документацию.

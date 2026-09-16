@@ -21,7 +21,7 @@
 
 Секреты для подписи хранятся в отдельном приватном репозитории: `git@github.com:easydev991/android-secrets.git`
 
-Команды `make rustore` и `make apk` автоматически загружают их по SSH во временную директорию и копируют в `.secrets/` перед сборкой. Временная директория очищается автоматически.
+Команды `make rustore` и `make apk` автоматически загружают их по SSH во временную директорию и копируют в `.secrets/` перед сборкой (цель `_ensure_secrets` клонирует репозиторий, только если `.secrets/` или `app/google-services.json` ещё отсутствуют). Временная директория очищается автоматически.
 
 **Требования:**
 - SSH-доступ к GitHub (настраивается через `make setup_ssh`)
@@ -82,7 +82,7 @@ $EDITOR fastlane/metadata/android/ru-RU/whats_new/<VERSION_NAME>.txt
 make rustore-commit VID=<versionId>
 ```
 
-Под капотом `make rustore-draft` вызывает `scripts/rustore_publish.sh` с `RUSTORE_MODE=upload` (auth → create-draft → upload AAB, без commit), `make rustore-commit VID=<vid>` — с `RUSTORE_MODE=commit` (только POST `/commit?priorityUpdate=0`). Полный 4-шаговый `make rustore` остаётся как shortcut для типового случая.
+Под капотом `make rustore-draft` вызывает `scripts/rustore_publish.sh` с `RUSTORE_MODE=upload` (auth → create-draft → upload AAB, без commit), `make rustore-commit VID=<vid>` — с `RUSTORE_MODE=commit` (только POST `/commit?priorityUpdate=0`). Найденный `versionId` скрипт дополнительно сохраняет в `.secrets/.last_rustore_vid` — `make rustore-draft` читает его и печатает готовую команду `make rustore-commit VID=...`. Полный 4-шаговый `make rustore` остаётся как shortcut для типового случая.
 
 ### Релизный APK (для GitHub Release)
 
@@ -138,12 +138,13 @@ VERSION_NAME=1.1, VERSION_CODE=3 → make rustore → VERSION_CODE=4 → AAB: da
 
 ## Публикация в RuStore
 
-Публикация происходит автоматически через `make rustore` (см. [Создание сборки](#создание-сборки)). Команда вызывает `scripts/rustore_publish.sh`, который последовательно делает 4 запроса к RuStore API:
+Публикация происходит автоматически через `make rustore` (см. [Создание сборки](#создание-сборки)). Команда вызывает `scripts/rustore_publish.sh`, который последовательно выполняет проверку и 4 запроса к RuStore API:
 
 1. **Авторизация** (`POST /public/auth/`) — получает JWE-токен (TTL 900 с)
-2. **Создание черновика** (`POST /public/v1/application/{id}/version`) — payload `{whatsNew, publishType:"MANUAL", appType:"MAIN"}`, остальные поля (`seoTagIds`, `developerContacts`, описания) не передаются — они уже заполнены в RuStore Console
-3. **Загрузка AAB** (`POST /public/v1/application/{id}/version/{vid}/aab`) — multipart
-4. **Отправка на модерацию** (`POST /public/v1/application/{id}/version/{vid}/commit?priorityUpdate=0`)
+2. **Проверка VERSION_CODE** (`GET /public/v1/application/{id}/version`) — сравнивает `VERSION_CODE` из `gradle.properties` с максимальным `versionCode` уже существующих версий; если он не выше — скрипт падает **до** создания черновика (иначе RuStore принял бы create-draft, но отклонил upload AAB с HTTP 400, оставив orphan-черновик)
+3. **Создание черновика** (`POST /public/v1/application/{id}/version`) — payload `{whatsNew, publishType:"MANUAL", appType:"MAIN"}`, остальные поля (`seoTagIds`, `developerContacts`, описания) не передаются — они уже заполнены в RuStore Console
+4. **Загрузка AAB** (`POST /public/v1/application/{id}/version/{vid}/aab`) — multipart (таймаут 600 с)
+5. **Отправка на модерацию** (`POST /public/v1/application/{id}/version/{vid}/commit?priorityUpdate=0`)
 
 Скрипт использует base host `https://public-api.rustore.ru` (документация на `www.rustore.ru/help/...`, API на отдельном домене).
 
@@ -198,6 +199,15 @@ make screenshots
 - `screenshot-tests/` — модуль инструментальных тестов, который делает снимки
 - `fastlane/metadata/android/` — папка с итоговыми PNG для публикации
 
+Для генерации скриншотов только одной локали есть отдельные цели:
+
+```bash
+make screenshots-ru   # только ru-RU
+make screenshots-en   # только en-US
+```
+
+(они не вызывают `update_readme` — обновление README выполняется отдельно).
+
 **Важно:** Для успешного создания скриншотов необходимо чтобы был запущен эмулятор с соответствующими требованиями для RuStore:
 
 - Соотношение сторон экрана: 9 x 16
@@ -218,6 +228,13 @@ make update_readme
 1. Находит актуальные файлы скриншотов по шаблону `{номер}-{описание}_{временнаяМетка}.png`
 2. Заменяет HTML-комментарии в README.md на реальные теги `<img>` с путями к файлам
 3. Использует скриншоты только из локали `ru-RU`
+4. Обновляет версии библиотек в бейджах README.md (вызывает `make update_readme_versions`)
+
+Версии можно обновить и отдельно, без скриншотов:
+
+```bash
+make update_readme_versions
+```
 
 Порядок работы:
 

@@ -44,6 +44,7 @@ Main Screen является основным экраном приложени�
 - [x] Форматирование количества дней для каждой записи
 - [x] Цветовая метка (индикатор цвета) для каждой записи
 - [x] Фильтрация записей по поисковому запросу
+- [x] Фильтрация записей по цветовой метке (`ColorTagFilterDialog`, кнопка фильтра в шапке рядом с сортировкой)
 - [x] Сортировка записей по дате (возрастание/убывание)
 - [x] Сохранение порядка сортировки — выбор пользователя сохраняется в DataStore между запусками приложения
 - [x] Удаление записей (с диалогом подтверждения)
@@ -63,8 +64,9 @@ Main Screen является основным экраном приложени�
 - [x] Список записей в LazyColumn
 - [x] Карточка записи с количеством дней и цветовой меткой
 - [x] SearchField (SearchBar из material3) для поиска записей — отображается при 5+ записях или активном поиске с анимацией expandVertically/shrinkVertically + fadeIn/fadeOut (tween 200ms). Живёт в `ScreenBody` как `CollapsibleSearchField` через `NestedScrollConnection` + `Modifier.layout`, **не в topbar**; сворачивается по высоте при скролле вверх (от `expandedHeight` до `0dp`), разворачивается при скролле вниз
-- [x] Кнопка сортировки (возрастание/убывание) — отображается при наличии 2+ записей
-- [x] Кнопка добавления новой записи (+)
+- [x] Кнопка сортировки (старые/новые первыми, `SortMenu`) — отображается при наличии 2+ записей
+- [x] Кнопка фильтра по цветовой метке в шапке + `ColorTagFilterDialog` (применить/сбросить)
+- [x] Кнопка добавления новой записи — FAB (+)
 - [x] Контекстное меню при длинном нажатии (Просмотр/Редактирование/Удаление)
 - [x] Диалог подтверждения удаления записи
 - [x] Пустое состояние с иконкой, заголовком и описанием
@@ -123,8 +125,8 @@ Main Screen является основным экраном приложени�
 
 - **4.1** ListItemView — карточка записи, 7 preview-вариантов
 - **4.2** EmptyState — 4 варианта (empty, search, loading, error)
-- **4.3** Toolbar — сортировка (возрастание/убывание), заголовок "События"
-- **4.4** MainScreen — `ui/screens/events/MainScreen.kt` — LazyColumn, SearchField (SearchBar), SwipeToDismissBox, состояния
+- **4.3** Toolbar (`ScreenHeader`) — заголовок "События" в одной строке с `SortMenu` (старые/новые первыми) и кнопкой фильтра по цвету
+- **4.4** MainScreen — `MainScreen.kt` + `MainScreenScaffold.kt` (Scaffold, `NestedScrollConnection`, FAB) + `MainScreenComponents.kt` (SearchField, SortMenu, пустые состояния), `ColorTagFilterDialog.kt`, LazyColumn, состояния Loading/Success/Error
 - **4.5** Context Menu — Просмотр/Редактирование/Удаление, длинное нажатие, выделение
 - **4.6** Delete Dialog — AlertDialog с подтверждением
 - **4.7** RootScreen Integration — `EventsScreenContent()` в `ui/screens/common/RootScreenComponents.kt`, NavHost
@@ -135,7 +137,7 @@ Main Screen является основным экраном приложени�
 
 - **5.1** DetailScreen — маршрут `Screen.ItemDetail`, навигация при клике, factory метод
 - **5.2** CreateEditScreen (создание) — маршрут `Screen.CreateItem`, кнопка "+", factory метод
-- **5.3** CreateEditScreen (редактирование) — маршрут `Screen.EditItem`, свайп влево, factory метод
+- **5.3** CreateEditScreen (редактирование) — маршрут `Screen.EditItem`, через контекстное меню, factory метод
 - **5.4** Factory Methods — companion object в CreateEditScreenViewModel и DetailScreenViewModel
 - **5.5** Локализация — строковые ресурсы в `res/values/strings.xml` и `res/values-ru/strings.xml`
 
@@ -164,7 +166,7 @@ Main Screen является основным экраном приложени�
 
 - Repository с Room Database
 
-### UI-тесты (Espresso)
+### UI-тесты (Compose Testing)
 
 ⚠️ **Опционально можно добавить:**
 
@@ -189,8 +191,8 @@ Main Screen является основным экраном приложени�
 - Совместимость с iOS, производительность (LazyColumn), реактивность (Flow), тестирование компонентов
 - ✅ Зависимости: Этап 7 (Модель данных), Этап 6 (Форматирование)
 - ✅ Поиск: SearchField (SearchBar), отображается при 5+ записях с анимацией или активном поиске
-- ✅ Сортировка: SortOrder enum, сохраняется в DataStore
-- ✅ Свайп-действия: SwipeToDismissBox
+- ✅ Сортировка: SortOrder enum (ASCENDING/DESCENDING), сохраняется в DataStore
+- ✅ Фильтр по цвету: ColorTagFilterDialog, кнопка в шапке рядом с SortMenu
 - ✅ Factory методы: companion object в CreateEditScreenViewModel и DetailScreenViewModel
 
 ---
@@ -244,7 +246,7 @@ Main Screen является основным экраном приложени�
 
 ✅ **Приоритет 4: Unit-тесты для ViewModel**
 
-- `MainScreenViewModelTest.kt` с 10 тестами, FakeItemRepository (в `test/java/com/dayscounter/ui/viewmodel/`)
+- `MainScreenViewModelTest.kt` с 23 тестами, MockK
 
 ✅ **Приоритет 4.5: Реализация контекстного меню**
 
@@ -290,4 +292,5 @@ Main Screen является основным экраном приложени�
 - 2026-01-15: Реализовано сохранение порядка сортировки в DataStore (ASCENDING/DESCENDING)
 - 2026-01-15: Сжатие описания выполненных пунктов (удаление дублирования)
 - 2026-08-12: UI-тесты видимости SearchBar — `MainScreenSearchVisibilityUiTest` (5 тестов: Show/Hide при 4-5 элементах, анимация, удержание при активном вводе)
-- 2026-08-16: Возврат с MediumTopAppBar на TopAppBar (small) + CollapsibleSearchField в ScreenBody через NestedScrollConnection + Modifier.layout. 5 новых UI-тестов (12/12 зелёных). Заголовок Events теперь всегда в одной строке с SortMenu и PaletteFilter
+- 2026-08-16: Возврат с MediumTopAppBar на TopAppBar (small) + CollapsibleSearchField в ScreenBody через NestedScrollConnection + Modifier.layout. 5 новых UI-тестов (12/12 зелёных). Заголовок Events теперь всегда в одной строке с SortMenu и кнопкой фильтра по цвету
+- 2026-09-16: Актуализация — добавлена фильтрация по цветовой метке (ColorTagFilterDialog), удалены устаревшие упоминания SwipeToDismissBox (удален из реализации)
