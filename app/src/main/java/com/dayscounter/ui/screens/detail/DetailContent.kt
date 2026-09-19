@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -105,11 +106,11 @@ fun DetailContentByState(
 @Composable
 internal fun DetailContentInner(
     item: Item,
+    modifier: Modifier = Modifier,
     reminder: Reminder? = null,
     onCopyTitle: () -> Unit,
     onCopyDetails: () -> Unit,
-    getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase,
-    modifier: Modifier = Modifier
+    getDaysAnalysisTextUseCase: GetDaysAnalysisTextUseCase
 ) {
     Column(
         modifier =
@@ -189,8 +190,8 @@ fun ColorTagSection(colorTag: Int) {
 fun ReadSectionView(
     headerText: String,
     bodyText: String,
-    onCopy: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCopy: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -228,7 +229,7 @@ private fun ReadSectionBody(
 ) {
     var menuVisible by remember { mutableStateOf(false) }
     var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
-    var textHeightPx by remember { mutableStateOf(0) }
+    var textHeightPx by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
     Box(
         modifier =

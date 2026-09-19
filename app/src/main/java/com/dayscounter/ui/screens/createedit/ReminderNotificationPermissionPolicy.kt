@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screens.createedit
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -52,6 +53,9 @@ internal fun Context.hasPostNotificationsPermission(sdkInt: Int = Build.VERSION.
         return true
     }
 
+    // InlinedApi: константа инлайнится компилятором, значение стабильно
+    // на всех уровнях API; на API < 33 гвард выше вернёт true раньше
+    @SuppressLint("InlinedApi")
     return ContextCompat.checkSelfPermission(
         this,
         Manifest.permission.POST_NOTIFICATIONS

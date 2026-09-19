@@ -6,8 +6,12 @@ import android.content.Intent
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.dayscounter.ui.screens.createedit.hasPostNotificationsPermission
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -54,6 +58,30 @@ class ReminderAlarmReceiverInstrumentedTest {
 
             receiver.onReceive(context, intent)
         }
+    }
+
+    @Test
+    fun onReceive_whenPostNotificationsPermissionNotGranted_thenDoesNotPostNotification() {
+        // Гвард актуален только с API 33, где POST_NOTIFICATIONS — рантайм-permission
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        assumeFalse(context.hasPostNotificationsPermission())
+
+        val receiver = ReminderAlarmReceiver()
+        val intent =
+            Intent(context, ReminderAlarmReceiver::class.java).apply {
+                action = ReminderIntentContract.ACTION_FIRE_REMINDER
+                putExtra(ReminderIntentContract.EXTRA_ITEM_ID, 78L)
+                putExtra(ReminderIntentContract.EXTRA_ITEM_TITLE, "Без permission")
+            }
+
+        receiver.onReceive(context, intent)
+
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        val posted =
+            notificationManager.activeNotifications.any {
+                it.id == ReminderIntentContract.notificationIdForItem(78L)
+            }
+        assertFalse(posted)
     }
 
     private fun runWithNotificationPermission(block: () -> Unit) {

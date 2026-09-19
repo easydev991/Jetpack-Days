@@ -88,8 +88,8 @@ test-all: _ensure_secrets
 	@echo "Интеграционные: app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html"
 
 # Анализ кода
-## lint: Запуск ktlint, detekt и markdownlint (проверка)
-lint:
+## lint: Запуск ktlint, detekt, markdownlint и Android Lint (проверка)
+lint: lint-android
 	./gradlew ktlintCheck
 	./gradlew app:detekt
 	@if command -v markdownlint >/dev/null 2>&1; then \
@@ -97,6 +97,10 @@ lint:
 	else \
 		echo "$(YELLOW)markdownlint-cli не установлен. Для установки: npm install -g markdownlint-cli$(RESET)"; \
 	fi
+
+## lint-android: Запуск Android Lint для обоих flavor (github, rustore)
+lint-android:
+	./gradlew lintGithubDebug lintRustoreDebug
 
 ## format: Форматирование кода (ktlint + detekt с исправлениями) и Markdown-файлов
 format:
@@ -528,4 +532,4 @@ rustore-commit:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint

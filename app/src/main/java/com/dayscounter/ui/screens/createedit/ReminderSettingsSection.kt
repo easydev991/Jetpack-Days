@@ -65,30 +65,31 @@ internal const val REMINDER_TOGGLE_TEST_TAG = "reminder_toggle"
 internal fun ReminderSettingsSection(
     reminder: ReminderFormUiState,
     onReminderChange: (ReminderFormUiState) -> Unit,
+    modifier: Modifier = Modifier,
     onReminderToggleRequested: ((Boolean) -> Unit)? = null,
     expandedContentModifier: Modifier = Modifier
 ) {
-    Text(
-        text = stringResource(R.string.reminder_settings),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
-    ReminderToggleRow(
-        reminder = reminder,
-        onReminderChange = onReminderChange,
-        onReminderToggleRequested = onReminderToggleRequested
-    )
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.reminder_settings),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_xsmall)))
+        ReminderToggleRow(
+            reminder = reminder,
+            onReminderChange = onReminderChange,
+            onReminderToggleRequested = onReminderToggleRequested
+        )
 
-    if (!reminder.isEnabled) {
-        return
+        if (reminder.isEnabled) {
+            ReminderExpandedContent(
+                reminder = reminder,
+                onReminderChange = onReminderChange,
+                modifier = expandedContentModifier
+            )
+        }
     }
-
-    ReminderExpandedContent(
-        reminder = reminder,
-        onReminderChange = onReminderChange,
-        expandedContentModifier = expandedContentModifier
-    )
 }
 
 @Composable
@@ -123,11 +124,11 @@ private fun ReminderToggleRow(
 private fun ReminderExpandedContent(
     reminder: ReminderFormUiState,
     onReminderChange: (ReminderFormUiState) -> Unit,
-    expandedContentModifier: Modifier
+    modifier: Modifier
 ) {
     val validationErrorResId = reminder.validationErrorResId(currentDateTime = LocalDateTime.now())
 
-    Column(modifier = expandedContentModifier) {
+    Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
         DaysRadioButton(

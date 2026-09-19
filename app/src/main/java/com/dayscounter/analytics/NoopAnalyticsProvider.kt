@@ -7,6 +7,6 @@ package com.dayscounter.analytics
  */
 class NoopAnalyticsProvider : AnalyticsProvider {
     override fun log(event: AnalyticsEvent) {
-        Unit
+        // Намеренный no-op: не отправляем ничего
     }
 }

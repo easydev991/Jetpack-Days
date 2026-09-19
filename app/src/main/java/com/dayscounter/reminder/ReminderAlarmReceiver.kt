@@ -1,14 +1,17 @@
 package com.dayscounter.reminder
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.dayscounter.MainActivity
 import com.dayscounter.R
 
@@ -16,6 +19,9 @@ import com.dayscounter.R
  * Receiver, который показывает уведомление в момент срабатывания alarm.
  */
 class ReminderAlarmReceiver : BroadcastReceiver() {
+    // Guard-клаузы в BroadcastReceiver — идиома; гасим ReturnCount вместо
+    // выворачивания трёх ранних выходов в один return в ущерб читаемости.
+    @Suppress("ReturnCount")
     override fun onReceive(
         context: Context,
         intent: Intent
@@ -32,6 +38,22 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
         val itemTitle = intent.getStringExtra(ReminderIntentContract.EXTRA_ITEM_TITLE).orEmpty()
 
         createNotificationChannel(context)
+
+        // Без POST_NOTIFICATIONS (API 33+) система всё равно молча отбрасывает
+        // уведомление — гвард убирает lint MissingPermission, ничего не теряем.
+        // Прямой вызов checkSelfPermission: межпроцедурный анализ линта не видит
+        // гвард через extension hasPostNotificationsPermission().
+        // InlinedApi: константа инлайнится компилятором, значение стабильно на
+        // всех уровнях API; на API < 33 checkSelfPermission вернёт granted.
+        @SuppressLint("InlinedApi")
+        val hasNotificationPermission =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        if (!hasNotificationPermission) {
+            return
+        }
 
         val openIntent =
             Intent(context, MainActivity::class.java).apply {
@@ -70,10 +92,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
     }
 
     private fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return
-        }
-
+        // minSdk = 26: каналы доступны всегда, гвард SDK_INT не нужен
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
         val channel =
             NotificationChannel(

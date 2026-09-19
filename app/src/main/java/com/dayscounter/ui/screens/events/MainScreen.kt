@@ -21,21 +21,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,7 +62,6 @@ import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
 import com.dayscounter.data.preferences.createAppSettingsDataStore
 import com.dayscounter.di.AppModule.createItemRepository
-import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
@@ -436,64 +429,6 @@ private fun ItemsListContent(params: ItemsListParams) {
                 )
         )
     }
-}
-
-/**
- * Data class for parameters of main screen top bar.
- */
-internal data class MainScreenTopBarState(
-    val itemsCount: Int,
-    val sortOrder: SortOrder,
-    val searchQuery: String,
-    val onSearchQueryChange: (String) -> Unit,
-    val onSortClick: () -> Unit,
-    val onSortOrderChange: (SortOrder) -> Unit,
-    val availableColorTags: List<Int>,
-    val selectedColorTag: Int?,
-    val onFilterClick: () -> Unit
-)
-
-/**
- * Top bar for main screen with sort functionality.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MainScreenTopBar(state: MainScreenTopBarState) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.events)) },
-        navigationIcon = {
-            if (state.itemsCount > 1) {
-                SortMenu(
-                    sortOrder = state.sortOrder,
-                    onSortClick = state.onSortClick,
-                    onSortOrderChange = state.onSortOrderChange
-                )
-            }
-        },
-        actions = {
-            if (
-                (state.itemsCount >= 2 || state.selectedColorTag != null) &&
-                state.availableColorTags.isNotEmpty()
-            ) {
-                IconButton(onClick = state.onFilterClick) {
-                    Icon(
-                        imageVector =
-                            if (state.selectedColorTag != null) {
-                                Icons.Filled.Palette
-                            } else {
-                                Icons.Outlined.Palette
-                            },
-                        contentDescription = stringResource(R.string.open_filter)
-                    )
-                }
-            }
-        },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                titleContentColor = MaterialTheme.colorScheme.onSurface
-            )
-    )
 }
 
 /**

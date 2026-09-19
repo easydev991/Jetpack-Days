@@ -1,6 +1,7 @@
 package com.dayscounter.ui.screens.createedit
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -295,6 +296,10 @@ private fun rememberReminderToggleHandler(
             }
 
             ReminderToggleDecision.REQUEST_PERMISSION -> {
+                // InlinedApi: константа инлайнится компилятором, значение стабильно
+                // на всех уровнях API; решение о запуске принимает
+                // ReminderNotificationPermissionPolicy (гвард по sdkInt выше)
+                @SuppressLint("InlinedApi")
                 reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }

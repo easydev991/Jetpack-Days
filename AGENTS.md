@@ -61,7 +61,9 @@ verdict comes from `scripts/test_report.py` (it parses
 `app/build/test-results/`) — a failing/skipped test there is a failure even
 when `make` exits 0.
 
-`make lint` skips `markdownlint` with a yellow warning when the CLI is
+`make lint` runs ktlint, detekt, Android Lint (target `lint-android`,
+both flavors: `lintGithubDebug` + `lintRustoreDebug`) and `markdownlint`.
+It skips `markdownlint` with a yellow warning when the CLI is
 missing — install it (`npm i -g markdownlint-cli`) or run `make setup`
 to get the full check.
 

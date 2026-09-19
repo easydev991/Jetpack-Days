@@ -1,7 +1,6 @@
 package com.dayscounter.ui.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -36,14 +35,14 @@ private const val STATE_TIMEOUT_MS = 5000L
  * ViewModel для экрана App Data Screen. Управляет резервным копированием и восстановлением данных.
  *
  * @property repository Repository для работы с данными
- * @property context Контекст приложения
+ * @property context Application-контекст (живёт столько же, сколько ViewModel)
  * @property exportBackupUseCase Use Case для экспорта данных
  * @property importBackupUseCase Use Case для импорта данных
  * @property logger Logger для логирования (по умолчанию AndroidLogger)
  */
 class AppDataScreenViewModel(
     private val repository: ItemRepository,
-    private val context: Context,
+    private val context: Application,
     private val exportBackupUseCase: ExportBackupUseCase,
     private val importBackupUseCase: ImportBackupUseCase,
     private val analyticsService: AnalyticsService,

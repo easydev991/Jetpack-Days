@@ -13,6 +13,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,6 +47,37 @@ internal data class MainScreenScaffoldState(
 )
 
 /**
+ * Nested-scroll connection, растящий collapse поисковой строки при свайпе вверх
+ * и возвращающий его при свайпе вниз. Пока активен поиск (`searchQuery` не пуст),
+ * возвращает [Offset.Zero] — поле не должно уезжать во время набора текста.
+ *
+ * [searchFieldHeightPx] нужен для клампа: collapse не превышает реальную высоту поля.
+ */
+@Composable
+private fun rememberSearchBarCollapseConnection(
+    collapseState: MutableFloatState,
+    searchFieldHeightPx: Int,
+    searchQuery: String
+): NestedScrollConnection =
+    remember(searchFieldHeightPx, searchQuery) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (searchQuery.isNotEmpty()) return Offset.Zero
+                // swipe up → available.y<0; вычитаем, чтобы растить collapse.
+                val newOffset =
+                    (collapseState.floatValue - available.y)
+                        .coerceIn(0f, searchFieldHeightPx.toFloat())
+                val consumedY = newOffset - collapseState.floatValue
+                collapseState.floatValue = newOffset
+                return Offset(0f, consumedY)
+            }
+        }
+    }
+
+/**
  * Scaffold экрана со списком, шапкой и FAB.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,25 +88,13 @@ internal fun MainScreenScaffold(
     modifier: Modifier
 ) {
     var searchFieldHeightPx by remember { mutableIntStateOf(0) }
-    var searchBarCollapsePx by rememberSaveable { mutableFloatStateOf(0f) }
+    val searchBarCollapsePx = rememberSaveable { mutableFloatStateOf(0f) }
     val nestedScrollConnection =
-        remember(searchFieldHeightPx, state.searchQuery) {
-            object : NestedScrollConnection {
-                override fun onPreScroll(
-                    available: Offset,
-                    source: NestedScrollSource
-                ): Offset {
-                    if (state.searchQuery.isNotEmpty()) return Offset.Zero
-                    // swipe up → available.y<0; вычитаем, чтобы растить collapse.
-                    val newOffset =
-                        (searchBarCollapsePx - available.y)
-                            .coerceIn(0f, searchFieldHeightPx.toFloat())
-                    val consumedY = newOffset - searchBarCollapsePx
-                    searchBarCollapsePx = newOffset
-                    return Offset(0f, consumedY)
-                }
-            }
-        }
+        rememberSearchBarCollapseConnection(
+            collapseState = searchBarCollapsePx,
+            searchFieldHeightPx = searchFieldHeightPx,
+            searchQuery = state.searchQuery
+        )
     Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(nestedScrollConnection),
         contentWindowInsets =
@@ -104,16 +124,7 @@ internal fun MainScreenScaffold(
                     )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = params.onCreateClick
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_item)
-                )
-            }
-        }
+        floatingActionButton = { MainScreenFab(onCreateClick = params.onCreateClick) }
     ) { paddingValues ->
         ScreenBody(
             paddingValues = paddingValues,
@@ -124,13 +135,26 @@ internal fun MainScreenScaffold(
                     itemsCount = state.itemsCount,
                     onSearchQueryChange = { params.viewModel.updateSearchQuery(it) },
                     onSearchFieldHeightPxChange = { searchFieldHeightPx = it },
-                    searchBarCollapsePx = searchBarCollapsePx,
+                    searchBarCollapsePx = searchBarCollapsePx.floatValue,
                     listState = state.listState,
                     getFormattedDaysForItemUseCase = params.getFormattedDaysForItemUseCase,
                     onItemClick = params.onItemClick,
                     onEditClick = params.onEditClick,
                     viewModel = params.viewModel
                 )
+        )
+    }
+}
+
+/**
+ * FAB создания новой записи.
+ */
+@Composable
+private fun MainScreenFab(onCreateClick: () -> Unit) {
+    FloatingActionButton(onClick = onCreateClick) {
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(R.string.add_item)
         )
     }
 }

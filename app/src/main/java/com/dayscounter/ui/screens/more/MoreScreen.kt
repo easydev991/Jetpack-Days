@@ -256,7 +256,7 @@ private fun rateApp(context: Context) {
     val intent =
         Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(AppConstants.APP_RATE_URL)
+            AppConstants.APP_RATE_URL.toUri()
         )
 
     try {
@@ -300,7 +300,7 @@ private fun openUrl(
     context: Context,
     url: String
 ) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
 
     try {
         context.startActivity(intent)
