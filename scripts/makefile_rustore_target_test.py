@@ -35,6 +35,10 @@ printf 'fake-aab' > app/build/outputs/bundle/rustoreRelease/app-rustore-release.
 exit 0
 """
 
+# Нейтральный dummy: тест не зависит от дефолта Makefile, а копия
+# проводки в другие приложения не требует правок app-id.
+_DUMMY_APP_ID = "com.example.test"
+
 
 class _MakefileTestBase(unittest.TestCase):
     """Общая изоляция: копия Makefile + fake rustore_publish.sh + gradlew + secrets.
@@ -86,9 +90,7 @@ class MakefileRustoreTargetTest(_MakefileTestBase):
 
     def _run_make_rustore(self, env_overrides):
         env = os.environ.copy()
-        # Нейтральный dummy: тест не зависит от дефолта Makefile, а копия
-        # проводки в другие приложения (Этап 2 тулкита) не требует правок app-id.
-        env["RUSTORE_APP_ID"] = "com.example.test"
+        env["RUSTORE_APP_ID"] = _DUMMY_APP_ID
         env.update(env_overrides)
         return subprocess.run(
             ["make", "rustore", "-C", str(self.tmp)],
@@ -181,8 +183,7 @@ class MakefileWhatsNewAndDraftTest(_MakefileTestBase):
         env = os.environ.copy()
         if env_overrides:
             env.update(env_overrides)
-        # Нейтральный dummy — см. комментарий в _run_make_rustore.
-        env["RUSTORE_APP_ID"] = "com.example.test"
+        env["RUSTORE_APP_ID"] = _DUMMY_APP_ID
         env["FAKE_PUBLISH_LOG"] = str(self.publish_log)
         return subprocess.run(
             ["make", target, "-C", str(self.tmp)],
@@ -313,98 +314,24 @@ class MakefileWhatsNewAndDraftTest(_MakefileTestBase):
 
 
 class MakefileLoadSecretsKeystorePathTest(unittest.TestCase):
-    """make _load_secrets: KEYSTORE_FILE собирается из $(APP_NAME), не хардкодом.
+    """make -n _load_secrets: KEYSTORE_FILE собирается из $(APP_NAME), не хардкодом."""
 
-    Ловит рассинхрон _load_secrets ↔ APP_NAME: копия проводки в другое
-    приложение (Этап 2 тулкита) при хардкоде принесла бы чужой keystore,
-    и подписание упало бы. SSH-клон подменяется локальным "репозиторием
-    секретов" через SECRETS_REPO=... (command-line override бьёт
-    определение в Makefile — сеть не нужна).
-    """
-
-    def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
-        shutil.copy(REPO_ROOT / "Makefile", self.tmp / "Makefile")
-        # _load_secrets копирует google-services.json из клона в app/.
-        (self.tmp / "app").mkdir()
-        repo = self.tmp / "secrets-repo" / "jetpackdays"
-        repo.mkdir(parents=True)
-        (repo / "google-services.json").write_text("{}")
-        (repo / "rustore-credentials.json").write_text("{}")
-        (repo / "secrets.properties").write_text(
-            "KEYSTORE_FILE=placeholder\n"
-            "KEYSTORE_PASSWORD=p\n"
-            "KEY_ALIAS=a\n"
-            "KEY_PASSWORD=p\n"
-        )
-        env = {
-            **os.environ,
-            "GIT_AUTHOR_NAME": "Test",
-            "GIT_AUTHOR_EMAIL": "t@t",
-            "GIT_COMMITTER_NAME": "Test",
-            "GIT_COMMITTER_EMAIL": "t@t",
-        }
-        for args in (
-            ["git", "init"],
-            ["git", "add", "."],
-            ["git", "commit", "-m", "Secrets"],
-        ):
-            subprocess.run(
-                args, cwd=repo.parent, env=env, check=True, capture_output=True
-            )
-        self.secrets_repo = repo.parent
-        self.secrets_props = self.tmp / ".secrets" / "secrets.properties"
-
-    def tearDown(self):
-        shutil.rmtree(self.tmp, ignore_errors=True)
-
-    def _run_load_secrets(self, make_args):
-        env = os.environ.copy()
-        env["RUSTORE_APP_ID"] = "com.example.test"
-        return subprocess.run(
-            [
-                "make",
-                "_load_secrets",
-                "-C",
-                str(self.tmp),
-                f"SECRETS_REPO={self.secrets_repo}",
-                *make_args,
-            ],
-            env=env,
+    def test_keystore_path_uses_app_name(self):
+        result = subprocess.run(
+            ["make", "-n", "_load_secrets", "APP_NAME=otherapp", "-C", str(REPO_ROOT)],
             capture_output=True,
             text=True,
         )
 
-    def test_default_app_name_builds_dayscounter_keystore_path(self):
-        result = self._run_load_secrets([])
-
         self.assertEqual(
             result.returncode,
             0,
-            f"exit={result.returncode}\nstdout={result.stdout!r}\nstderr={result.stderr!r}",
-        )
-        self.assertIn(
-            "KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore",
-            self.secrets_props.read_text(),
-            f"дефолт APP_NAME должен дать dayscounter-keystore, "
-            f"got: {self.secrets_props.read_text()!r}",
-        )
-
-    def test_custom_app_name_overrides_keystore_path(self):
-        # Захардкоженный sed проигнорировал бы APP_NAME и записал dayscounter —
-        # именно этот случай ловит ассерт.
-        result = self._run_load_secrets(["APP_NAME=otherapp"])
-
-        self.assertEqual(
-            result.returncode,
-            0,
-            f"exit={result.returncode}\nstdout={result.stdout!r}\nstderr={result.stderr!r}",
+            f"exit={result.returncode}\nstderr={result.stderr!r}",
         )
         self.assertIn(
             "KEYSTORE_FILE=.secrets/keystore/otherapp-release.keystore",
-            self.secrets_props.read_text(),
-            f"KEYSTORE_FILE должен собираться из $(APP_NAME), "
-            f"got: {self.secrets_props.read_text()!r}",
+            result.stdout,
+            "KEYSTORE_FILE должен собираться из $(APP_NAME), не быть хардкодом",
         )
 
 

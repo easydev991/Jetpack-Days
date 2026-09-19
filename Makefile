@@ -462,10 +462,7 @@ android-test-report:
 VERSION_NAME := $(shell grep '^VERSION_NAME=' gradle.properties | cut -d= -f2)
 _WHATS_NEW_FILE := fastlane/metadata/android/ru-RU/whats_new/$(VERSION_NAME).txt
 
-# App-специфичные значения публикации: единственное место в репо с
-# идентификатором приложения — скрипты в tools/release (тулкит
-# android-release-toolkit) генерик. RUSTORE_APP_ID экспортируется: без export
-# make-переменная не попадает в env рецепта, и скрипт упадёт на guard.
+# APP-специфичные значения: единственное место с app-id в репо; export обязателен — скрипт тулкита читает RUSTORE_APP_ID из env.
 RUSTORE_APP_ID ?= com.dayscounter
 export RUSTORE_APP_ID
 APP_NAME ?= dayscounter
