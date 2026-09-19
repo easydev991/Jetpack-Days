@@ -114,6 +114,9 @@ class _ModeTestBase(unittest.TestCase):
         env = os.environ.copy()
         env["PATH"] = f"{self.fake_bin}{os.pathsep}{env['PATH']}"
         env["FAKE_CURL_LOG"] = str(self.log)
+        # Нейтральный dummy вместо app-специфичного id: тесты переезжают в общий
+        # тулкит (Этап 2) и не должны знать идентификатор приложения.
+        env["RUSTORE_APP_ID"] = "com.example.test"
         env.update(extra_env)
         return subprocess.run(
             [str(SCRIPT), str(self.creds), str(self.aab), "0"],
@@ -172,9 +175,14 @@ class RustorePublishReleaseNotesMissingTest(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_missing_release_notes_exits_with_error(self):
+        # Скрипт требует RUSTORE_APP_ID до проверки release notes — задаём dummy,
+        # чтобы тест проверял именно сообщения о release notes.
+        env = os.environ.copy()
+        env["RUSTORE_APP_ID"] = "com.example.test"
         result = subprocess.run(
             [str(SCRIPT), str(self.creds), str(self.aab)],
             cwd=self.cwd,
+            env=env,
             capture_output=True,
             text=True,
         )
@@ -331,6 +339,40 @@ class RustorePublishCommitModeTest(_ModeTestBase):
         self.assertIn("12345", urls[1], "VID должен попасть в URL commit")
         # create-draft (POST /version без /aab) НЕ должен вызываться —
         # уже доказано: len==2 и urls[1] содержит /commit (других URL нет).
+
+
+class RustorePublishAppIdRequiredTest(_ModeTestBase):
+    """Без RUSTORE_APP_ID скрипт падает с подсказкой до любых сетевых вызовов.
+
+    Защита от регрессии: APP_ID не хардкодится — без guard скрипт уходил бы
+    в auth с пустым/чужим package id. Guard срабатывает раньше curl и openssl,
+    поэтому тяжёлый setUp базы на результат не влияет.
+    """
+
+    def test_missing_app_id_fails_before_network(self):
+        # Пустая строка для ${VAR:?} эквивалентна unset.
+        result = self._run({"RUSTORE_APP_ID": ""})
+
+        self.assertNotEqual(
+            result.returncode,
+            0,
+            f"без RUSTORE_APP_ID ожидается exit != 0, got {result.returncode}\n"
+            f"stdout={result.stdout!r}\nstderr={result.stderr!r}",
+        )
+        self.assertIn(
+            "RUSTORE_APP_ID",
+            result.stderr,
+            f"stderr должен содержать имя переменной, got {result.stderr!r}",
+        )
+        self.assertIn(
+            "Makefile",
+            result.stderr,
+            f"stderr должен содержать подсказку с Makefile, got {result.stderr!r}",
+        )
+        self.assertFalse(
+            self.log.exists(),
+            "guard должен сработать до первого сетевого вызова (curl)",
+        )
 
 
 if __name__ == "__main__":

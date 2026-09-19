@@ -23,7 +23,7 @@
 # Зависимости: openssl, curl, jq (есть в macOS и стандартных CI-образах).
 #
 # При сбое между шагами 2 и 4 в RuStore Console останется черновик без AAB.
-# Очистка: DELETE /public/v1/application/com.dayscounter/version/{vid} или через Console.
+# Очистка: DELETE /public/v1/application/$APP_ID/version/{vid} или через Console.
 set -euo pipefail
 set +x # защита от случайного bash -x — иначе credentials утекут в логи
 umask 077
@@ -36,6 +36,10 @@ all | upload | commit) ;;
 	exit 1
 	;;
 esac
+
+# Guard до сети: тулкит генерик и не знает идентификаторы приложений;
+# ${VAR:?} печатает сообщение в stderr и завершает скрипт с кодом 1.
+APP_ID="${RUSTORE_APP_ID:?RUSTORE_APP_ID не задан. Укажите package name: RUSTORE_APP_ID ?= <package.id> в Makefile (постоянно) или make rustore RUSTORE_APP_ID=<id> (разово)}"
 
 CRED_FILE="${1:?usage: rustore_publish.sh <credentials.json> <app.aab> [priority]}"
 PRIORITY="${3:-0}"
@@ -50,7 +54,6 @@ if [[ "$RUSTORE_MODE" == "commit" ]]; then
 	: "${RUSTORE_VID:?RUSTORE_VID required for RUSTORE_MODE=commit}"
 fi
 
-APP_ID="com.dayscounter"
 BASE="https://public-api.rustore.ru"
 LAST_VID_FILE=".secrets/.last_rustore_vid"
 

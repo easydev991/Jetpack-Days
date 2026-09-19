@@ -4,8 +4,8 @@
 одном shell-вызове, а используется в другом — скрипт получает пустой $2.
 
 Реальные bundleRustoreRelease и rustore_publish.sh подменены: gradlew
-создаёт fake AAB, scripts/rustore_publish.sh пишет аргументы в лог.
-Работает в изолированном tmpdir с собственным Makefile — реальный
+создаёт fake AAB, tools/release/scripts/rustore_publish.sh пишет аргументы
+в лог. Работает в изолированном tmpdir с собственным Makefile — реальный
 gradle.properties не изменяется.
 """
 
@@ -35,6 +35,10 @@ printf 'fake-aab' > app/build/outputs/bundle/rustoreRelease/app-rustore-release.
 exit 0
 """
 
+# Нейтральный dummy: тест не зависит от дефолта Makefile, а копия
+# проводки в другие приложения не требует правок app-id.
+_DUMMY_APP_ID = "com.example.test"
+
 
 class _MakefileTestBase(unittest.TestCase):
     """Общая изоляция: копия Makefile + fake rustore_publish.sh + gradlew + secrets.
@@ -45,16 +49,18 @@ class _MakefileTestBase(unittest.TestCase):
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
-        # Изолированная копия Makefile + scripts/ + gradlew fakes.
+        # Изолированная копия Makefile + tools/release/scripts/ + gradlew fakes.
         shutil.copy(REPO_ROOT / "Makefile", self.tmp / "Makefile")
-        scripts = self.tmp / "scripts"
-        scripts.mkdir()
+        scripts = self.tmp / "tools" / "release" / "scripts"
+        scripts.mkdir(parents=True)
         publish = scripts / "rustore_publish.sh"
         publish.write_text(FAKE_PUBLISH_BODY)
         publish.chmod(0o755)
         # _generate_whats_new.sh нужен для prerequisite `whats-new` в rustore/rustore-draft.
-        # Файл добавлен в коммите 61a44374 вместе с этим тестом — guard не нужен.
-        helper_src = REPO_ROOT / "scripts" / "_generate_whats_new.sh"
+        # Файл живёт в subtree тулкита (tools/release/scripts/).
+        helper_src = (
+            REPO_ROOT / "tools" / "release" / "scripts" / "_generate_whats_new.sh"
+        )
         helper = scripts / "_generate_whats_new.sh"
         helper.write_text(helper_src.read_text())
         helper.chmod(0o755)
@@ -84,6 +90,7 @@ class MakefileRustoreTargetTest(_MakefileTestBase):
 
     def _run_make_rustore(self, env_overrides):
         env = os.environ.copy()
+        env["RUSTORE_APP_ID"] = _DUMMY_APP_ID
         env.update(env_overrides)
         return subprocess.run(
             ["make", "rustore", "-C", str(self.tmp)],
@@ -176,6 +183,7 @@ class MakefileWhatsNewAndDraftTest(_MakefileTestBase):
         env = os.environ.copy()
         if env_overrides:
             env.update(env_overrides)
+        env["RUSTORE_APP_ID"] = _DUMMY_APP_ID
         env["FAKE_PUBLISH_LOG"] = str(self.publish_log)
         return subprocess.run(
             ["make", target, "-C", str(self.tmp)],
@@ -302,6 +310,28 @@ class MakefileWhatsNewAndDraftTest(_MakefileTestBase):
         self.assertFalse(
             self.publish_log.exists(),
             "rustore-commit без VID не должен вызывать rustore_publish.sh",
+        )
+
+
+class MakefileLoadSecretsKeystorePathTest(unittest.TestCase):
+    """make -n _load_secrets: KEYSTORE_FILE собирается из $(APP_NAME), не хардкодом."""
+
+    def test_keystore_path_uses_app_name(self):
+        result = subprocess.run(
+            ["make", "-n", "_load_secrets", "APP_NAME=otherapp", "-C", str(REPO_ROOT)],
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            f"exit={result.returncode}\nstderr={result.stderr!r}",
+        )
+        self.assertIn(
+            "KEYSTORE_FILE=.secrets/keystore/otherapp-release.keystore",
+            result.stdout,
+            "KEYSTORE_FILE должен собираться из $(APP_NAME), не быть хардкодом",
         )
 
 

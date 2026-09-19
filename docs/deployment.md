@@ -82,7 +82,7 @@ $EDITOR fastlane/metadata/android/ru-RU/whats_new/<VERSION_NAME>.txt
 make rustore-commit VID=<versionId>
 ```
 
-Под капотом `make rustore-draft` вызывает `scripts/rustore_publish.sh` с `RUSTORE_MODE=upload` (auth → create-draft → upload AAB, без commit), `make rustore-commit VID=<vid>` — с `RUSTORE_MODE=commit` (только POST `/commit?priorityUpdate=0`). Найденный `versionId` скрипт дополнительно сохраняет в `.secrets/.last_rustore_vid` — `make rustore-draft` читает его и печатает готовую команду `make rustore-commit VID=...`. Полный 4-шаговый `make rustore` остаётся как shortcut для типового случая.
+Под капотом `make rustore-draft` вызывает `tools/release/scripts/rustore_publish.sh` с `RUSTORE_MODE=upload` (auth → create-draft → upload AAB, без commit), `make rustore-commit VID=<vid>` — с `RUSTORE_MODE=commit` (только POST `/commit?priorityUpdate=0`). Найденный `versionId` скрипт дополнительно сохраняет в `.secrets/.last_rustore_vid` — `make rustore-draft` читает его и печатает готовую команду `make rustore-commit VID=...`. Полный 4-шаговый `make rustore` остаётся как shortcut для типового случая.
 
 ### Релизный APK (для GitHub Release)
 
@@ -138,7 +138,7 @@ VERSION_NAME=1.1, VERSION_CODE=3 → make rustore → VERSION_CODE=4 → AAB: da
 
 ## Публикация в RuStore
 
-Публикация происходит автоматически через `make rustore` (см. [Создание сборки](#создание-сборки)). Команда вызывает `scripts/rustore_publish.sh`, который последовательно выполняет проверку и 4 запроса к RuStore API:
+Публикация происходит автоматически через `make rustore` (см. [Создание сборки](#создание-сборки)). Логика публикации живёт в тулките [android-release-toolkit](https://github.com/easydev991/android-release-toolkit), подключённом как `git subtree` в `tools/release/` — копии скриптов руками не правятся, только `git subtree pull` нового тега тулкита. Команда вызывает `tools/release/scripts/rustore_publish.sh`, который последовательно выполняет проверку и 4 запроса к RuStore API:
 
 1. **Авторизация** (`POST /public/auth/`) — получает JWE-токен (TTL 900 с)
 2. **Проверка VERSION_CODE** (`GET /public/v1/application/{id}/version`) — сравнивает `VERSION_CODE` из `gradle.properties` с максимальным `versionCode` уже существующих версий; если он не выше — скрипт падает **до** создания черновика (иначе RuStore принял бы create-draft, но отклонил upload AAB с HTTP 400, оставив orphan-черновик)
@@ -147,6 +147,17 @@ VERSION_NAME=1.1, VERSION_CODE=3 → make rustore → VERSION_CODE=4 → AAB: da
 5. **Отправка на модерацию** (`POST /public/v1/application/{id}/version/{vid}/commit?priorityUpdate=0`)
 
 Скрипт использует base host `https://public-api.rustore.ru` (документация на `www.rustore.ru/help/...`, API на отдельном домене).
+
+### Конфигурация приложения (RUSTORE_APP_ID / APP_NAME)
+
+Скрипт публикации генерик: package name задаётся переменной `RUSTORE_APP_ID`, префикс артефактов (`dayscounter{N}.aab` / `dayscounter{N}.apk`) — переменной `APP_NAME`. Обе объявлены в Makefile с дефолтами — это единственное место в репо с идентификатором приложения:
+
+```make
+RUSTORE_APP_ID ?= com.dayscounter
+APP_NAME ?= dayscounter
+```
+
+`RUSTORE_APP_ID` экспортируется в окружение и проверяется скриптом до сетевых вызовов: без него публикация падает с подсказкой. Разовая подмена — `make rustore RUSTORE_APP_ID=<package.id>`; префикс имени keystore в `.secrets/` собирается из `APP_NAME` (цель `_load_secrets`).
 
 ### Release notes
 
@@ -158,7 +169,7 @@ Release notes берутся из файла `fastlane/metadata/android/ru-RU/wh
 make whats-new
 ```
 
-Команда вызывает `scripts/_generate_whats_new.sh`, который берёт последний релизный тег (`git tag --sort=-version:refname | grep -E '^[0-9]' | head -1`) и пишет в `whats_new/<VERSION_NAME>.txt` заголовок `Что нового в <VERSION>` + буллеты из `git log <tag>..HEAD`. Если файл уже существует — печатает содержимое и **не перезаписывает** (для ручной редактуры).
+Команда вызывает `tools/release/scripts/_generate_whats_new.sh`, который берёт последний релизный тег (`git tag --sort=-version:refname | grep -E '^[0-9]' | head -1`) и пишет в `whats_new/<VERSION_NAME>.txt` заголовок `Что нового в <VERSION>` + буллеты из `git log <tag>..HEAD`. Если файл уже существует — печатает содержимое и **не перезаписывает** (для ручной редактуры).
 
 `make whats-new` — prerequisite для `make rustore` и `make rustore-draft`: если файла нет, он будет сгенерирован автоматически.
 
