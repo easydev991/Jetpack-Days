@@ -65,6 +65,7 @@ test: _ensure_secrets
 ## scripts-test: Запуск unit-тестов Python-скриптов
 scripts-test:
 	python3 -m unittest discover -s scripts -p "*_test.py"
+	python3 -m unittest discover -s tools/release/scripts -p "*_test.py"
 
 ## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации. Использование: make android-test FLAVOR=github.
 android-test: _ensure_secrets
@@ -131,20 +132,20 @@ _load_secrets:
 	mkdir -p .secrets; \
 	cp -r "$$TEMP_DIR/$(SECRETS_DIR)/*" .secrets/ 2>/dev/null || cp -r "$$TEMP_DIR/$(SECRETS_DIR)"/* .secrets/; \
 	cp .secrets/google-services.json app/google-services.json; \
-	sed -i.tmp 's|^KEYSTORE_FILE=.*|KEYSTORE_FILE=.secrets/keystore/dayscounter-release.keystore|' .secrets/secrets.properties && rm -f .secrets/secrets.properties.tmp; \
+	sed -i.tmp 's|^KEYSTORE_FILE=.*|KEYSTORE_FILE=.secrets/keystore/$(APP_NAME)-release.keystore|' .secrets/secrets.properties && rm -f .secrets/secrets.properties.tmp; \
 	printf "$(GREEN)Секреты загружены успешно$(RESET)\\n"
 
 ## _ensure_secrets: Обёртка над _load_secrets — триггерит SSH-клонирование только если .secrets/keystore или app/google-services.json отсутствуют
 _ensure_secrets:
 	@if [ ! -d .secrets ] || [ ! -f app/google-services.json ]; then $(MAKE) _load_secrets; fi
 
-## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Использование: make apk FLAVOR=rustore (по умолчанию FLAVOR=github). Файл: dayscounter{VERSION_CODE}.apk
+## apk: Создать подписанный APK для релизной конфигурации (без повышения версии). Использование: make apk FLAVOR=rustore (по умолчанию FLAVOR=github). Файл: $(APP_NAME){VERSION_CODE}.apk
 apk: _ensure_secrets
 	@printf "$(YELLOW)Создаю релизный APK ($(FLAVOR))...$(RESET)\n"
 	@./gradlew assemble$(FLAVOR_TITLE)Release --console=plain
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
 	VERSION_NAME=$$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2); \
-	OUTPUT_FILE="dayscounter$$VERSION_CODE.apk"; \
+	OUTPUT_FILE="$(APP_NAME)$$VERSION_CODE.apk"; \
 	cp app/build/outputs/apk/$(FLAVOR)/release/app-$(FLAVOR)-release.apk "$$OUTPUT_FILE"; \
 	printf "$(GREEN)APK создан: $$OUTPUT_FILE$(RESET)\n"; \
 	printf "$(YELLOW)Версия: $$VERSION_NAME (build $$VERSION_CODE)$(RESET)\n"
@@ -461,6 +462,14 @@ android-test-report:
 VERSION_NAME := $(shell grep '^VERSION_NAME=' gradle.properties | cut -d= -f2)
 _WHATS_NEW_FILE := fastlane/metadata/android/ru-RU/whats_new/$(VERSION_NAME).txt
 
+# App-специфичные значения публикации: единственное место в репо с
+# идентификатором приложения — скрипты в tools/release (тулкит
+# android-release-toolkit) генерик. RUSTORE_APP_ID экспортируется: без export
+# make-переменная не попадает в env рецепта, и скрипт упадёт на guard.
+RUSTORE_APP_ID ?= com.dayscounter
+export RUSTORE_APP_ID
+APP_NAME ?= dayscounter
+
 # Общий prerequisite для rustore и rustore-draft: инкремент VERSION_CODE,
 # build AAB, upload Crashlytics mapping, копирование в корень.
 _rustore_build_aab: _ensure_secrets
@@ -472,7 +481,7 @@ _rustore_build_aab: _ensure_secrets
 	@printf "$(YELLOW)Создаю релиз-сборку (AAB)...$(RESET)\n"
 	@./gradlew bundleRustoreRelease uploadCrashlyticsMappingFileRustoreRelease --console=plain
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
-	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	OUTPUT_FILE="$(APP_NAME)$$VERSION_CODE.aab"; \
 	cp app/build/outputs/bundle/rustoreRelease/app-rustore-release.aab "$$OUTPUT_FILE"; \
 	printf "$(GREEN)AAB создан и mapping files загружены в Firebase: $$OUTPUT_FILE$(RESET)\n"
 	@printf "$(YELLOW)Версия для публикации: $$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2)$(RESET)\n"
@@ -481,16 +490,16 @@ _rustore_build_aab: _ensure_secrets
 ##   Если файл уже существует — печатает содержимое и НЕ перезаписывает.
 ##   Используется автоматически как prerequisite для rustore/rustore-draft.
 whats-new:
-	@./scripts/_generate_whats_new.sh "$(VERSION_NAME)" "$(_WHATS_NEW_FILE)"
+	@./tools/release/scripts/_generate_whats_new.sh "$(VERSION_NAME)" "$(_WHATS_NEW_FILE)"
 
-## rustore: Собрать AAB и опубликовать в RuStore (все 4 шага: auth → draft → upload → commit). Файл: dayscounter{VERSION_CODE}.aab
+## rustore: Собрать AAB и опубликовать в RuStore (все 4 шага: auth → draft → upload → commit). Файл: $(APP_NAME){VERSION_CODE}.aab
 ##   SKIP_PUBLISH=1 — собрать AAB без загрузки в RuStore (escape hatch для локальной отладки)
 rustore: _rustore_build_aab whats-new
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
-	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	OUTPUT_FILE="$(APP_NAME)$$VERSION_CODE.aab"; \
 	if [ -z "$(SKIP_PUBLISH)" ]; then \
 		printf "$(YELLOW)Загружаю в RuStore...$(RESET)\n"; \
-		./scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
+		./tools/release/scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
 	else \
 		printf "$(YELLOW)SKIP_PUBLISH=1 — пропускаю загрузку в RuStore. AAB готов: $$OUTPUT_FILE$(RESET)\n"; \
 	fi
@@ -499,9 +508,9 @@ rustore: _rustore_build_aab whats-new
 ##   Используется для двухшагового workflow: draft → проверка в Console → make rustore-commit VID=<vid>.
 rustore-draft: _rustore_build_aab whats-new
 	@VERSION_CODE=$$(grep "^VERSION_CODE=" gradle.properties | cut -d'=' -f2); \
-	OUTPUT_FILE="dayscounter$$VERSION_CODE.aab"; \
+	OUTPUT_FILE="$(APP_NAME)$$VERSION_CODE.aab"; \
 	printf "$(YELLOW)Загружаю в RuStore (auth → draft → upload, без commit)...$(RESET)\n"; \
-	RUSTORE_MODE=upload ./scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
+	RUSTORE_MODE=upload ./tools/release/scripts/rustore_publish.sh .secrets/rustore-credentials.json "$$OUTPUT_FILE"; \
 	VID=$$(cat .secrets/.last_rustore_vid 2>/dev/null); \
 	printf "\n$(GREEN)Черновик создан в RuStore Console: VID=%s$(RESET)\n" "$$VID"; \
 	printf "Следующий шаг: $(YELLOW)make rustore-commit VID=%s$(RESET)\n" "$$VID"
@@ -515,7 +524,7 @@ rustore-commit:
 		exit 1; \
 	fi
 	@printf "$(YELLOW)Отправляю черновик VID=$(VID) на модерацию...$(RESET)\n"
-	RUSTORE_MODE=commit RUSTORE_VID=$(VID) ./scripts/rustore_publish.sh \
+	RUSTORE_MODE=commit RUSTORE_VID=$(VID) ./tools/release/scripts/rustore_publish.sh \
 		.secrets/rustore-credentials.json ""
 
 # Запуск всех задач

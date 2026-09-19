@@ -114,6 +114,9 @@ class _ModeTestBase(unittest.TestCase):
         env = os.environ.copy()
         env["PATH"] = f"{self.fake_bin}{os.pathsep}{env['PATH']}"
         env["FAKE_CURL_LOG"] = str(self.log)
+        # Нейтральный dummy вместо app-специфичного id: тесты переезжают в общий
+        # тулкит (Этап 2) и не должны знать идентификатор приложения.
+        env["RUSTORE_APP_ID"] = "com.example.test"
         env.update(extra_env)
         return subprocess.run(
             [str(SCRIPT), str(self.creds), str(self.aab), "0"],
@@ -172,9 +175,14 @@ class RustorePublishReleaseNotesMissingTest(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_missing_release_notes_exits_with_error(self):
+        # Скрипт требует RUSTORE_APP_ID до проверки release notes — задаём dummy,
+        # чтобы тест проверял именно сообщения о release notes.
+        env = os.environ.copy()
+        env["RUSTORE_APP_ID"] = "com.example.test"
         result = subprocess.run(
             [str(SCRIPT), str(self.creds), str(self.aab)],
             cwd=self.cwd,
+            env=env,
             capture_output=True,
             text=True,
         )
@@ -331,6 +339,67 @@ class RustorePublishCommitModeTest(_ModeTestBase):
         self.assertIn("12345", urls[1], "VID должен попасть в URL commit")
         # create-draft (POST /version без /aab) НЕ должен вызываться —
         # уже доказано: len==2 и urls[1] содержит /commit (других URL нет).
+
+
+class RustorePublishAppIdRequiredTest(unittest.TestCase):
+    """Без RUSTORE_APP_ID скрипт падает с подсказкой до любых сетевых вызовов.
+
+    Защита от регрессии: APP_ID больше не хардкодится (Этап 1 выноса публикации
+    в тулкит) — без guard скрипт уходил бы в auth с пустым/чужим package id.
+    """
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.fake_bin = self.tmp / "bin"
+        self.fake_bin.mkdir()
+        self.cwd = self.tmp / "project"
+        self.cwd.mkdir()
+        self.log = self.tmp / "curl.log"
+        self.creds = self.cwd / "creds.json"
+        self.creds.write_text(json.dumps({"key_id": "k", "client_secret": "c"}))
+        self.aab = self.cwd / "app.aab"
+        self.aab.write_bytes(b"fake")
+        curl = self.fake_bin / "curl"
+        curl.write_text(FAKE_CURL_BODY)
+        curl.chmod(0o755)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_missing_app_id_fails_before_network(self):
+        # RUSTORE_APP_ID вычищается из окружения: guard не должен зависеть от
+        # значений, унаследованных от локальной машины или CI.
+        env = {k: v for k, v in os.environ.items() if k != "RUSTORE_APP_ID"}
+        env["PATH"] = f"{self.fake_bin}{os.pathsep}{env['PATH']}"
+        env["FAKE_CURL_LOG"] = str(self.log)
+        result = subprocess.run(
+            [str(SCRIPT), str(self.creds), str(self.aab)],
+            cwd=self.cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(
+            result.returncode,
+            0,
+            f"без RUSTORE_APP_ID ожидается exit != 0, got {result.returncode}\n"
+            f"stdout={result.stdout!r}\nstderr={result.stderr!r}",
+        )
+        self.assertIn(
+            "RUSTORE_APP_ID",
+            result.stderr,
+            f"stderr должен содержать имя переменной, got {result.stderr!r}",
+        )
+        self.assertIn(
+            "Makefile",
+            result.stderr,
+            f"stderr должен содержать подсказку с Makefile, got {result.stderr!r}",
+        )
+        self.assertFalse(
+            self.log.exists(),
+            "guard должен сработать до первого сетевого вызова (curl)",
+        )
 
 
 if __name__ == "__main__":

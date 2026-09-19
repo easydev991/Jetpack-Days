@@ -148,6 +148,17 @@ VERSION_NAME=1.1, VERSION_CODE=3 → make rustore → VERSION_CODE=4 → AAB: da
 
 Скрипт использует base host `https://public-api.rustore.ru` (документация на `www.rustore.ru/help/...`, API на отдельном домене).
 
+### Конфигурация приложения (RUSTORE_APP_ID / APP_NAME)
+
+Скрипт публикации генерик: package name задаётся переменной `RUSTORE_APP_ID`, префикс артефактов (`dayscounter{N}.aab` / `dayscounter{N}.apk`) — переменной `APP_NAME`. Обе объявлены в Makefile с дефолтами — это единственное место в репо с идентификатором приложения:
+
+```make
+RUSTORE_APP_ID ?= com.dayscounter
+APP_NAME ?= dayscounter
+```
+
+`RUSTORE_APP_ID` экспортируется в окружение и проверяется скриптом до сетевых вызовов: без него публикация падает с подсказкой. Разовая подмена — `make rustore RUSTORE_APP_ID=<package.id>`; префикс имени keystore в `.secrets/` собирается из `APP_NAME` (цель `_load_secrets`).
+
 ### Release notes
 
 Release notes берутся из файла `fastlane/metadata/android/ru-RU/whats_new/<VERSION_NAME>.txt` — содержимое файла отправляется в поле `whatsNew` при создании черновика.

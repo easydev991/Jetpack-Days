@@ -45,7 +45,13 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = secretsProperties["KEYSTORE_FILE"] as? String ?: ".secrets/keystore/dayscounter-release.keystore"
+            // KEYSTORE_FILE всегда приходит из .secrets/secrets.properties —
+            // его записывает _load_secrets из $(APP_NAME) (см. Makefile). Отсутствие —
+            // сломанное окружение: падаем с понятной ошибкой вместо молчаливого fallback.
+            val keystoreFile =
+                checkNotNull(secretsProperties["KEYSTORE_FILE"] as? String) {
+                    "KEYSTORE_FILE не задан в .secrets/secrets.properties — запустите make (подтяните секреты) и повторите"
+                }
             val keystorePassword = secretsProperties["KEYSTORE_PASSWORD"] as? String ?: ""
             val keyAlias = secretsProperties["KEY_ALIAS"] as? String ?: "upload"
             val keyPassword = secretsProperties["KEY_PASSWORD"] as? String ?: ""

@@ -1,0 +1,9 @@
+Что нового в 1.13.4
+
+- Merge commit '7e8a777cf9e5f74131302b22007c7995a8b0b9fc' as 'tools/release'
+- Squashed 'tools/release/' content from commit 4c9a370e
+- План: первый релиз MyWorkouts — вручную через консоль
+- Параметризация публикации в RuStore
+- План
+- serena обновилась
+- Обновил документацию
