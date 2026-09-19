@@ -75,12 +75,16 @@ git subtree add --prefix tools/release git@github.com:easydev991/android-release
 git subtree pull --prefix tools/release git@github.com:easydev991/android-release-toolkit.git v1.1.0 --squash
 ```
 
-**Два предостережения:**
+**Три предостережения:**
 
 - `--squash` обязателен — иначе в историю твоего приложения втянется вся история тулкита.
 - **Не редактировать файлы `tools/release/` напрямую в приложении.** Следующий `pull` молча
   затрёт локальные правки. Багфикс делается в тулкит-репо (правка → тесты → тег), затем
   `subtree pull` во всех приложениях. В этом и есть смысл тулкита: одна копия логики.
+- **Не сквошить subtree-merge коммиты в истории приложения.** Сквош стирает метаданные,
+  по которым `pull` находит базу: следующий pull падает с «'tools/release' was never
+  added». Лечение проверено на обоих приложениях: `git rm -r tools/release` → коммит →
+  `git subtree add <тег> --squash` заново (пересоздание на актуальном теге).
 
 ### Почему не «просто скопировать» скрипты в каждое приложение
 
@@ -117,98 +121,71 @@ Homebrew tap, `curl | sh`), ставится в любой проект одно
 
 ### Этап 1. JetpackDays: параметризация скрипта публикации
 
-> **Зависимости:** нет. **Статус:** выполнено (ветка `feature/reusable-toolkit`).
+> **Зависимости:** нет. **Статус:** выполнено (ветка `feature/reusable-toolkit`, после
+> сквоша истории — коммит `ecf237da`).
 
-- [x] **TDD:** тесты на обязательность `RUSTORE_APP_ID` (скрипт падает с внятной ошибкой
-  до сетевых вызовов); в окружении обоих тестов (`rustore_publish_test.py`,
-  `makefile_rustore_target_test.py`) — нейтральный dummy `com.example.test`, не
-  `com.dayscounter`; в `makefile_rustore_target_test.py` добавлен ассерт на keystore-путь.
-- [x] **`rustore_publish.sh`:** хардкод `APP_ID` → обязательная env-переменная
-  `RUSTORE_APP_ID`; app-специфичный комментарий переписан через `$APP_ID`.
-- [x] **Makefile:** `RUSTORE_APP_ID ?= com.dayscounter` + `export`; `APP_NAME ?= dayscounter`
-  вместо хардкода префикса артефактов; `KEYSTORE_FILE` в `_load_secrets` собирается из
-  `$(APP_NAME)` (`.secrets/keystore/$(APP_NAME)-release.keystore`); комментарии целей обновлены.
-- [x] **`app/build.gradle.kts`:** удалён мёртвый fallback keystore — после `_load_secrets`
-  `KEYSTORE_FILE` всегда задан.
-- [x] **Проверено:** `make test`, `make scripts-test`, `make apk FLAVOR=github`,
-  `make rustore SKIP_PUBLISH=1`; grep по `com.dayscounter` в скриптах публикации пуст
-  (в `scripts/` единственный хит — fixture-строка стектрейса в `android_test_report_test.py`,
-  к публикации не относится; идентификатор остался только в дефолтах Makefile).
-- [x] **Документация:** `docs/deployment.md` — раздел «Конфигурация приложения
-  (RUSTORE_APP_ID / APP_NAME)».
+- [x] **Параметризация:** `rustore_publish.sh` (env `RUSTORE_APP_ID` вместо хардкода `APP_ID`);
+  Makefile (`RUSTORE_APP_ID ?= com.dayscounter` + export, `APP_NAME ?= dayscounter`,
+  `KEYSTORE_FILE` в `_load_secrets` через `$(APP_NAME)` →
+  `.secrets/keystore/$(APP_NAME)-release.keystore`); `app/build.gradle.kts` (удалён мёртвый
+  fallback keystore). TDD: тесты на обязательность `RUSTORE_APP_ID` (падение до сетевых
+  вызовов), dummy `com.example.test` в обоих тестах, ассерт на keystore-путь.
+- [x] **Проверки и документация:** `make test`/`scripts-test`/`apk FLAVOR=github`/
+  `rustore SKIP_PUBLISH=1` зелёные; grep по `com.dayscounter` в скриптах публикации пуст
+  (единственный хит — fixture в `android_test_report_test.py`, не относится к публикации);
+  раздел в `docs/deployment.md` → «Конфигурация приложения (RUSTORE_APP_ID / APP_NAME)».
 
 ### Этап 2. Тулкит-репозиторий + подключение JetpackDays и MyWorkouts
 
 > **Зависимости:** Этап 1 (в тулкит заезжает уже параметризованный скрипт).
 >
+> **Статус:** выполнено; остались два ручных шага — секреты MyWorkouts и первый
+> ручной релиз (открытые чекбоксы ниже).
+>
 > **Скоуп MyWorkouts:** тулкит + make-проводка + метаданные. Flavors `github`/`rustore`
 > уже влиты в main (задача `rustore-flavor-buttons` архивирована) — flavor-проводка
 > копируется из JetpackDays как есть.
 
-- [x] **Создать private-репо** `android-release-toolkit` на GitHub; залить 4 файла
+- [x] **Тулкит-репо `android-release-toolkit` (private) создан:** 4 файла из JetpackDays
   (`rustore_publish.sh`, `_generate_whats_new.sh`, `rustore_publish_test.py`,
-  `whats_new_test.py`) из JetpackDays **в `scripts/` тулкита** (после `git subtree add
-  --prefix tools/release` они разложатся в `tools/release/scripts/` — именно на это
-  рассчитаны все правки путей ниже); README (~20 строк): `RUSTORE_APP_ID`, конвенции путей
-  (`gradle.properties`, `fastlane/metadata/android/ru-RU/whats_new/<VERSION>.txt`,
-  `.secrets/rustore-credentials.json`), команды subtree, как выпускать новую версию
-  (правка → тесты → тег). Тег `v1.0.0`.
-- [x] **JetpackDays переходит на тулкит:** `git subtree add --prefix tools/release … v1.0.0 --squash`;
-  удалить локальные копии 4 файлов из `scripts/`; Makefile: пути
-  `scripts/rustore_publish.sh` → `tools/release/scripts/rustore_publish.sh` (3 места —
-  цели `rustore`, `rustore-draft`, `rustore-commit`) **и
-  `scripts/_generate_whats_new.sh` → `tools/release/scripts/_generate_whats_new.sh`**
-  (4-е место: цель `whats-new` — иначе она сломается после удаления локальной копии);
-  `makefile_rustore_target_test.py` — пути копируемых файлов → `tools/release/scripts/`;
-  `make scripts-test` — добавить второй discover-вызов
-  (`unittest discover -s tools/release/scripts -p "*_test.py"`) после существующего
-  `-s scripts`. Паттерн `-p "*_test.py"` обязателен: дефолтный pattern `unittest discover` —
-  `test*.py`, не совпадает с конвенцией `*_test.py`; без `-p` discover молча найдёт 0 тестов и
-  завершится с кодом 0 — sync-цикл (см. «Тренировочный sync-цикл» ниже в этом этапе)
-  станет ложно-зелёным. Старый discover
-  **оставить**: в `scripts/` остаются `android_test_report_test.py` и другие тесты;
-  удалять его не нужно.
-- [x] **MyWorkouts подключает тулкит:** `git subtree add` (та же команда); make-проводка
-  копией из JetpackDays — только rustore-цели (`rustore`, `rustore-draft`, `rustore-commit`,
-  `whats-new`, `_rustore_build_aab`); flavor-таск `bundleRustoreRelease`, flavor-путь
-  артефакта `app/build/outputs/bundle/rustoreRelease/…` и
-  `uploadCrashlyticsMappingFileRustoreRelease` копируются как есть — flavors уже в main.
-  Замены: `RUSTORE_APP_ID ?= com.myworkouts`; строку `APP_NAME` из копии не переносить —
-  в MyWorkouts `APP_NAME ?= myworkouts` уже объявлен. `_load_secrets` в MyWorkouts уже
-  целевого вида (`SECRETS_DIR=myworkouts`, keystore-путь собирается из `$(APP_NAME)`) —
-  JetpackDays-версию поверх не копировать (риск затереть отличающуюся структуру); это
-  независимое подтверждение схемы Этапа 1. Заодно убрать fallback keystore в
-  `app/build.gradle.kts` (`?: ".secrets/keystore/myworkouts-release.keystore"`) — после
-  `_load_secrets` он недостижим. **Тест проводки копируется вместе с проводкой:**
-  `makefile_rustore_target_test.py` с заменой `dayscounter21.aab` → `myworkouts{N}.aab`
-  (через дефолт `APP_NAME`) и путей fake-скриптов → `tools/release/scripts/` — три таргета
-  (`rustore`/`rustore-draft`/`rustore-commit`) проверяются тем же тестом, что и в JetpackDays.
-  **Плюс добавить в Makefile MyWorkouts цель `scripts-test`** (сейчас её нет) — два
-  discover, как в JetpackDays:
-  `python3 -m unittest discover -s scripts -p "*_test.py"` и
-  `python3 -m unittest discover -s tools/release/scripts -p "*_test.py"`
-  (в `scripts/` MyWorkouts появится копия `makefile_rustore_target_test.py` — её
-  гоняет первый discover); без раннера скопированный тест никто не запускает,
-  и критерий тренировочного sync-цикла «`make scripts-test` зелёный в обоих»
-  недостижим.
+  `whats_new_test.py`) — в `scripts/` тулкита (после `git subtree add --prefix tools/release`
+  разложатся в `tools/release/scripts/`); README (~20 строк): `RUSTORE_APP_ID`, конвенции
+  путей (`gradle.properties`, `fastlane/.../whats_new/<VERSION>.txt`,
+  `.secrets/rustore-credentials.json`), команды subtree, процесс релиза. Актуальный тег
+  `v1.0.3` (`v1.0.0` — старт; `v1.0.1` — тренировочный sync; `v1.0.2` — чистка
+  случайно закоммиченного `__pycache__` + `.gitignore`; `v1.0.3` — shrink guard-а по ревью).
+- [x] **JetpackDays на тулките:** `git subtree add --prefix tools/release … v1.0.0 --squash`;
+  локальные копии 4 файлов удалены из `scripts/`; Makefile: пути `scripts/X` →
+  `tools/release/scripts/X` в 3 rustore-целях + `whats-new` (4-е место, иначе сломается);
+  `makefile_rustore_target_test.py` обновлён; `make scripts-test` дополнен вторым discover
+  (`-s tools/release/scripts -p "*_test.py"`). `-p` обязателен: дефолт `test*.py` не ловит
+  конвенцию `*_test.py`, без него discover молча даёт 0 тестов и sync-цикл становится
+  ложно-зелёным. Старый `-s scripts` оставлен (`android_test_report_test.py` и др.).
+- [x] **MyWorkouts на тулките:** `git subtree add` (та же команда); rustore-цели скопированы
+  из JetpackDays (включая flavor-таск `bundleRustoreRelease`, flavor-путь артефакта и
+  `uploadCrashlyticsMappingFileRustoreRelease` — flavors уже в main). Замены:
+  `RUSTORE_APP_ID ?= com.myworkouts`; `APP_NAME`/`_load_secrets` уже корректны — не трогать
+  (независимое подтверждение схемы Этапа 1); fallback keystore удалён в `app/build.gradle.kts`.
+  Тест проводки скопирован (`dayscounter21.aab` → `myworkouts{N}.aab` через дефолт `APP_NAME`,
+  пути fake-скриптов → `tools/release/scripts/`); добавлена цель `scripts-test` (отсутствовала)
+  — два discover, как в JetpackDays. Без раннера скопированный тест никто не гоняет, и
+  критерий «`make scripts-test` зелёный в обоих» недостижим.
 - [ ] **Секреты MyWorkouts:** добавить только `rustore-credentials.json` в существующий
   `android-secrets/myworkouts/` — keystore и google-services.json там уже есть и работают
   (`_load_secrets` кладёт всё содержимое каталога через `cp -r`, отдельной правки не нужно).
   Выполняется **после первого ручного релиза** — пока у `com.myworkouts` нет активной версии,
   его нельзя включить в API-ключ (см. «Первый релиз» ниже).
-- [x] **Тренировочный sync-цикл** (отработать механизм до боевого применения): правка в
-  тулките (косметическая) → тег `v1.0.1` → `git subtree pull` в JetpackDays и MyWorkouts →
-  `make scripts-test` зелёный в обоих.
-- [x] **Fastlane-метаданные** (`fastlane/metadata/android/ru-RU/whats_new/`) — до первого
-  релиза (сейчас `fastlane/` в MyWorkouts нет совсем).
+- [x] **Тренировочный sync-цикл** отработан 3 раза (`v1.0.1`–`v1.0.3`), включая
+  modify/delete-конфликт на регенерируемом `__pycache__`.
+- [x] **Fastlane-метаданные MyWorkouts:** `fastlane/metadata/android/ru-RU/whats_new/`
+  (папки `fastlane/` не было).
 - [ ] **Первый релиз MyWorkouts — вручную через веб-консоль:** RuStore API требует
   «хотя бы 1 активную версию приложения» (доки api-upload-publication-app), и пока её нет,
   `com.myworkouts` нельзя выбрать в API-ключе. `make rustore SKIP_PUBLISH=1` даёт
   подписанный AAB — загрузить его в Console руками. Последующие релизы — через
   `make rustore-draft` (черновик безопасен — commit отправляется вручную после проверки
   в Console), после добавления `rustore-credentials.json` в секреты.
-- [x] **Документация:** `docs/deployment.md` в MyWorkouts нет — создать с разделом
-  «Публикация в RuStore» (зеркально JetpackDays).
+- [x] **Документация MyWorkouts:** создан `docs/deployment.md` с разделом «Публикация в RuStore» (зеркально JetpackDays).
 
 **Критерии завершения:** `make rustore SKIP_PUBLISH=1` в обоих приложениях; источник логики
 публикации один — тулкит-репо (копии в `tools/release/` обновляются только `git subtree pull`,
@@ -241,22 +218,32 @@ Homebrew tap, `curl | sh`), ставится в любой проект одно
   keystore в `app/build.gradle.kts:28`
   (`?: ".secrets/keystore/swparks-release.keystore"`) по той же логике — после
   `_load_secrets` он недостижим.
-- [ ] Тест проводки + раннер: скопировать `makefile_rustore_target_test.py` (замены — как
-  в Этапе 2 для MyWorkouts: через дефолт `APP_NAME` → `swparks{N}.aab`, пути fake-скриптов →
-  `tools/release/scripts/`) и добавить в Makefile `scripts-test` (цели сейчас нет) — два
-  discover, как в JetpackDays: `python3 -m unittest discover -s scripts -p "*_test.py"`
-  и `python3 -m unittest discover -s tools/release/scripts -p "*_test.py"`.
-- [ ] **Секреты WorkoutApp:** `rustore-credentials.json` (API-ключ из RuStore Console →
-  репозиторий `android-secrets/swparks/`); структура
-  `fastlane/metadata/android/ru-RU/whats_new/` и шаблон `TEMPLATE-whats-new.md`
+- [ ] Тест проводки + раннер: скопировать `makefile_rustore_target_test.py` из
+  JetpackDays/MyWorkouts (копия почти не требует замен: пути fake-скриптов уже
+  `tools/release/scripts/`, make -n тест `_load_secrets` app-агностичен, dummy
+  `_DUMMY_APP_ID` нейтрален — единственная замена: артефакт в ассерте
+  `myworkouts21.aab`/`dayscounter21.aab` → `swparks21.aab`) и добавить в Makefile
+  `scripts-test` (цели сейчас нет) — два discover, как в JetpackDays:
+  `python3 -m unittest discover -s scripts -p "*_test.py"` и
+  `python3 -m unittest discover -s tools/release/scripts -p "*_test.py"`.
+- [ ] **Секреты WorkoutApp:** `rustore-credentials.json` в `android-secrets/swparks/` —
+  ключ может быть тем же, что у JetpackDays/MyWorkouts (ключ привязан к аккаунту
+  RuStore, один ключ покрывает несколько приложений; главное — `com.swparks` включён
+  в его область действия); при ротации — одинаковый файл во всех каталогах. Плюс
+  структура `fastlane/metadata/android/ru-RU/whats_new/` и шаблон `TEMPLATE-whats-new.md`
   по конвенции.
-- [ ] **Первый релиз WorkoutApp** через `make rustore-draft` — механика как в Этапе 2.
+- [ ] **Первый релиз WorkoutApp.** Если у `com.swparks` уже есть активная версия в
+  RuStore — `make rustore-draft`, механика как в Этапе 2. Если нет — та же схема, что
+  у MyWorkouts: API требует «хотя бы 1 активную версию» и не даёт включить приложение
+  в API-ключ; `make rustore SKIP_PUBLISH=1` → загрузка AAB в Console руками →
+  включение в ключ → секреты → дальше `make rustore-draft`.
 - [ ] **Документация:** в `docs/doc-deployment.md` WorkoutApp — раздел
   «Публикация в RuStore» (у WorkoutApp файл называется `doc-deployment.md`).
 
-**Критерии завершения:** первый релиз WorkoutApp через `make rustore-draft` → `rustore-commit`
-без единой правки тулкита — только конфигурация (с flavor-оговоркой: до flavor-задачи
-`_rustore_build_aab` зовёт общий `bundleRelease`).
+**Критерии завершения:** первый релиз WorkoutApp (при активной версии — `make rustore-draft`
+→ `rustore-commit`; иначе — вручную через Console, как в Этапе 2) без единой правки
+тулкита — только конфигурация (с flavor-оговоркой: до flavor-задачи `_rustore_build_aab`
+зовёт общий `bundleRelease`).
 
 ---
 
@@ -279,7 +266,8 @@ Homebrew tap, `curl | sh`), ставится в любой проект одно
 - `docs/plans/flavors-implementation.md` — Этапы 6–7 (реализация публикации в RuStore);
   весь план — рецепт flavor-разделения для порта в WorkoutApp (в MyWorkouts flavors
   уже есть).
-- `scripts/rustore_publish.sh` — конвенции путей и контракты (Этап 1 — параметризация
-  на месте; в тулкит переезжает в Этапе 2).
+- Тулкит `android-release-toolkit` (private, `/Users/Oleg991/Documents/GitHub/android-release-toolkit`;
+  в приложениях живёт в `tools/release/`) — `scripts/rustore_publish.sh`: конвенции путей
+  и контракты.
 - `docs/deployment.md` → «Каналы дистрибуции» — термины flavor'ов и релизные команды.
 - Репозиторий секретов: `easydev991/android-secrets` (JetpackDays / swparks / myworkouts).
