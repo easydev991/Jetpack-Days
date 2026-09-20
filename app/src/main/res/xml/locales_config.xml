@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Поддерживаемые локали для системной настройки языка приложения (Настройки → Приложения → Счётчик дней → Язык).
+     На Android < 13 атрибут localeConfig игнорируется системой. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en-US" />
+    <locale android:name="ru-RU" />
+</locale-config>
