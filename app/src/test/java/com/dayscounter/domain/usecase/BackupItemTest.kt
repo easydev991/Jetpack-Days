@@ -330,16 +330,10 @@ class BackupItemTest {
                 "ABEAGgAkACkAMgA3AEkATABRAFMAVwBdAG4AhgCOAJUAnQCjAKoAsAC9AL8AxADJAM4A3ADeAOMA5QDs" +
                 "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
 
-        // Debug: проверяем длину
-        println("base64FromParserTest length: ${base64FromParserTest.length}")
-
         // When - сначала проверяем что парсер распознает формат
         val isNsKeyedArchiver = NsKeyedArchiverParser.isNsKeyedArchiver(base64FromParserTest)
-        println("isNsKeyedArchiver: $isNsKeyedArchiver")
         val hexFromParser = NsKeyedArchiverParser.parseHexColor(base64FromParserTest)
-        println("hexFromParser: $hexFromParser")
         val color = base64FromParserTest.parseColorTag()
-        println("color: $color")
 
         // Then
         assertEquals(true, isNsKeyedArchiver, "Should be recognized as NSKeyedArchiver")

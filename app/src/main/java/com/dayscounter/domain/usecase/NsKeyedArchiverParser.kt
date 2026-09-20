@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Base64
@@ -29,6 +30,7 @@ import kotlin.math.round
     "LoopWithTooManyJumpStatements" // Continue используется для early exit в циклах парсинга
 )
 object NsKeyedArchiverParser {
+    private const val TAG = "NsKeyedArchiverParser"
     private const val BPLIST_MAGIC = "bplist00"
     private const val TRAILER_SIZE = 32
     private const val MAX_OBJECTS = 1000 // Защита от OOM
@@ -73,12 +75,10 @@ object NsKeyedArchiverParser {
 
         return try {
             val bytes = Base64.getDecoder().decode(base64String)
-            println("DEBUG: bytes size = ${bytes.size}")
             val rgba = parseBplistColor(bytes)
-            println("DEBUG: rgba = $rgba")
             rgba?.let { rgbaToHex(it) }
         } catch (e: Exception) {
-            println("DEBUG: exception = ${e.message}")
+            Log.w(TAG, "Ошибка парсинга цвета iOS-бекапа: ${e.message}", e)
             null
         }
     }
@@ -104,24 +104,9 @@ object NsKeyedArchiverParser {
         if (bytes.size < BPLIST_MAGIC.length + TRAILER_SIZE) return null
         if (String(bytes, 0, BPLIST_MAGIC.length) != BPLIST_MAGIC) return null
 
-        val trailer =
-            parseTrailer(bytes) ?: run {
-                println("DEBUG: parseTrailer returned null")
-                return null
-            }
-        println("DEBUG: trailer = $trailer")
-        val offsetTable =
-            parseOffsetTable(bytes, trailer) ?: run {
-                println("DEBUG: parseOffsetTable returned null")
-                return null
-            }
-        println("DEBUG: offsetTable size = ${offsetTable.size}")
+        val trailer = parseTrailer(bytes) ?: return null
+        val offsetTable = parseOffsetTable(bytes, trailer) ?: return null
         val objects = parseObjects(bytes, offsetTable, trailer)
-        println("DEBUG: objects count = ${objects.size}")
-        objects.forEachIndexed { index, obj ->
-            println("DEBUG: object[$index] = ${obj?.javaClass?.simpleName} = $obj")
-        }
-
         return extractColorFromObjects(objects)
     }
 

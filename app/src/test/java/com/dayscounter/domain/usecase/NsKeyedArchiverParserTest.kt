@@ -28,9 +28,7 @@ class NsKeyedArchiverParserTest {
     fun parseHexColor_fromRedColorBase64_returnsFF3A30() {
         // Given - красный цвет из iOS
         // When
-        println("Parser test - redColorBase64 length: ${redColorBase64.length}")
         val hexColor = NsKeyedArchiverParser.parseHexColor(redColorBase64)
-        println("Parser test - hexColor: $hexColor")
 
         // Then - ожидаем #FF3A30 (R=255, G=58, B=48)
         assertEquals("#FF3A30", hexColor)
