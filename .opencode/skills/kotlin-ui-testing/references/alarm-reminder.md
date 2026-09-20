@@ -30,7 +30,9 @@ assertNull(findReminderPendingIntent(itemId))      // снято
 
 Поиск PendingIntent — без ожидания времени, через `FLAG_NO_CREATE`
 (вернуть существующий PendingIntent или null, не создавая новый).
-Позволяет проверять наличие без ожидания срабатывания:
+Позволяет проверять наличие без ожидания срабатывания. Определение
+`findReminderPendingIntent` — в `references/EXAMPLE.md`
+(раздел «Alarm-тест (PendingIntent + пермишены)»).
 
 ## Receiver: реальный вызов onReceive
 

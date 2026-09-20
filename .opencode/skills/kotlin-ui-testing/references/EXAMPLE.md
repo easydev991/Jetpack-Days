@@ -210,7 +210,7 @@ class MainScreenSearchVisibilityUiTest {
         // Then: поле поиска осталось
         composeTestRule.onNodeWithContentDescription(searchDescription).assertIsDisplayed()
 
-        // Cleanup
+        // Антирегрессия R5: клик по SearchField после rotation не падает
         composeTestRule.onNodeWithContentDescription(searchDescription).performClick()
         activity.requestedOrientation = originalOrientation
     }

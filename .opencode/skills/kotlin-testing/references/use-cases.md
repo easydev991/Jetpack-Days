@@ -31,7 +31,9 @@ class CalculateDaysDifferenceUseCaseTest {
 }
 ```
 
-Use Case создаётся один раз как `val` — он immutable.
+Use Case создаётся один раз как `val` — он immutable. Если тестам
+нужны разные зависимости (например, разные `Clock`) — допустимо
+создавать его внутри `@Test` (как в `references/EXAMPLE.md` §1).
 
 ### 2. С зависимостями (MockK)
 
@@ -81,53 +83,26 @@ class FormatDaysTextUseCaseTest {
 ### 3. С `Result<T>` и валидацией
 
 `BuildReminderUseCase` возвращает `Result<Reminder>` — ошибки для
-невалидных входов. Тесты проверяют обе ветки:
+невалидных входов. Тесты проверяют обе ветки. Канонический полный
+класс — `references/EXAMPLE.md`, раздел «1. Use Case без
+зависимостей + `Result<T>` + Clock»: happy path с `Clock.fixed`
+и `invoke_whenAfterIntervalAmountIsZero_thenReturnsFailure`.
+
+## `Result<T>` — assert-паттерны
 
 ```kotlin
-class BuildReminderUseCaseTest {
-    private val fixedInstant = Instant.parse("2026-04-27T10:15:30Z")
-    private val zoneId = ZoneId.of("Europe/Moscow")
-    private val clock: Clock = Clock.fixed(fixedInstant, zoneId)
+// Happy path
+val result = useCase(request)
+assertTrue(result.isSuccess, "Результат должен быть успешным")
+val value = result.getOrThrow()
 
-    @Test
-    fun invoke_whenAfterIntervalDays_thenKeepsCurrentTimeOfDayAndAddsDays() {
-        // Given
-        val useCase = BuildReminderUseCase(clock = clock)
-        val request = ReminderRequest(
-            itemId = 42L,
-            mode = ReminderMode.AFTER_INTERVAL,
-            afterAmount = 3,
-            afterUnit = ReminderIntervalUnit.DAY
-        )
+// Failure — есть ошибка
+val result = useCase(invalidRequest)
+assertTrue(result.isFailure, "Должна быть ошибка валидации")
 
-        // When
-        val result = useCase(request)
-
-        // Then
-        assertTrue(result.isSuccess, "Результат должен быть успешным")
-        val reminder = result.getOrThrow()
-        val expected = ZonedDateTime.ofInstant(fixedInstant, zoneId).plusDays(3)
-        assertEquals(expected.toInstant().toEpochMilli(), reminder.targetEpochMillis)
-    }
-
-    @Test
-    fun invoke_whenAfterIntervalAmountIsZero_thenReturnsFailure() {
-        // Given
-        val useCase = BuildReminderUseCase(clock = clock)
-        val request = ReminderRequest(
-            itemId = 42L,
-            mode = ReminderMode.AFTER_INTERVAL,
-            afterAmount = 0,
-            afterUnit = ReminderIntervalUnit.WEEK
-        )
-
-        // When
-        val result = useCase(request)
-
-        // Then
-        assertTrue(result.isFailure, "Должна быть ошибка валидации")
-    }
-}
+// Failure — конкретный тип ошибки
+val ex = result.exceptionOrNull()
+assertTrue(ex is MyException, "Тип ошибки должен быть MyException")
 ```
 
 ## `Clock.fixed` — обязательно для time-зависимых Use Case
@@ -176,23 +151,6 @@ fun calculate_when_30_days_difference_then_returns_30_days() {
 Исключение — тесты, которые явно проверяют поведение "сегодня"
 (например, `calculate_when_same_day_then_returns_today`).
 
-## `Result<T>` — assert-паттерны
-
-```kotlin
-// Happy path
-val result = useCase(request)
-assertTrue(result.isSuccess, "Результат должен быть успешным")
-val value = result.getOrThrow()
-
-// Failure — есть ошибка
-val result = useCase(invalidRequest)
-assertTrue(result.isFailure, "Должна быть ошибка валидации")
-
-// Failure — конкретный тип ошибки
-val ex = result.exceptionOrNull()
-assertTrue(ex is MyException, "Тип ошибки должен быть MyException")
-```
-
 ## Use Case + I/O (Context, ContentResolver)
 
 `ExportBackupUseCase`, `ImportBackupUseCase` работают с
@@ -212,11 +170,11 @@ class ExportBackupUseCaseTest {
     }
 
     @Test
-    fun invoke_whenexporting_thencontainsformatandroid() = runBlocking {
+    fun invoke_when_exporting_then_contains_format_android() = runBlocking {
         // Given
         val items = listOf(testItem)
         val uri: Uri = mockk()
-        coEvery { repository.getAllItems() } returns flowOf(items)
+        every { repository.getAllItems() } returns flowOf(items)
         every { contentResolver.openOutputStream(uri) } returns outputStream
 
         // When
@@ -231,24 +189,13 @@ class ExportBackupUseCaseTest {
 Здесь `runBlocking` допустим — нет `viewModelScope.launch`,
 нет `viewModelScope`. Это обычная suspend-функция без диспетчеризации.
 
-## Проверка исключений (не `Result<T`)
+## Проверка исключений (не `Result<T>`)
 
-Если Use Case **бросает** исключение (а не оборачивает в
-`Result.failure`), тестируй через `assertThrows`:
-
-```kotlin
-@Test
-fun invoke_whenJsonInvalid_thenThrowsSerializationException() = runTest {
-    // Given
-    val invalidJson = "{ invalid json }"
-    val uri = mockk<Uri>()
-
-    // When & Then
-    assertThrows<SerializationException> {
-        useCase(uri, invalidJson)
-    }
-}
-```
+Если функция **бросает** исключение (а не оборачивает в
+`Result.failure`). Канон с примерами — `references/assertions.md`,
+раздел «`assertThrows` для исключений»: для suspend-функций в
+`runTest` — `runCatching` (лямбда `assertThrows` не suspend),
+для не-suspend — `assertThrows(...::class.java)`.
 
 ## Частые ошибки
 
@@ -259,4 +206,4 @@ fun invoke_whenJsonInvalid_thenThrowsSerializationException() = runTest {
 | `runBlocking` для suspend use case | Допустимо, если нет `viewModelScope`. Иначе — `runTest` |
 | `assertEquals(Result.failure(...), result)` | Не сравнивай `Result` целиком. Используй `assertTrue(result.isFailure)` |
 | Тест Use Case с реальным `Context` | Не делай так — нужен `mockk<Context>()`, иначе это не unit |
-| `every` вместо `coEvery` для suspend | Тест не сработает, ошибка в рантайме |
+| `every` вместо `coEvery` для suspend-метода | Тест не сработает, ошибка в рантайме |

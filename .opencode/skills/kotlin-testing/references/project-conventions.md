@@ -23,15 +23,8 @@ assertNotNull(reminder, "Reminder должен быть не null")
 
 ### `snake_case` для имён тестов, без обратных кавычек
 
-```kotlin
-// ПЛОХО — обратные кавычки
-@Test
-fun `calculate when same day then returns today`() { }
-
-// ХОРОШО
-@Test
-fun calculate_when_same_day_then_returns_today() { }
-```
+Формат и допустимые вариации — `references/fundamentals.md`
+(раздел «Именование методов»).
 
 ### Файлы тестов в `app/src/test/`, зеркалят `app/src/main/`
 
@@ -69,7 +62,7 @@ assertEquals(2, items.size, "Должно быть 2 элемента")
 `com.dayscounter.util.NoOpLogger` — предпочтительный вариант:
 реализация `Logger`, которая ничего не делает. Альтернативно —
 `mockk(relaxed = true)` (relaxed-мок перехватывает любые вызовы
-без падения; см. правило 5 SKILL.md и `EXAMPLE.md`). Оба подхода
+без падения; см. правило 11 SKILL.md и `EXAMPLE.md`). Оба подхода
 живут в проекте: `MainScreenViewModelTest` использует
 `mockk(relaxed = true)`, `DetailScreenViewModelTest` и
 `CreateEditScreenViewModelTest` — `NoOpLogger()`. Смешивать
@@ -110,15 +103,13 @@ private val resourceProvider: ResourceProvider = StubResourceProvider()
 См. `references/fakes.md`. `FakeItemRepository` на `MutableStateFlow`
 вместо `mockk() returns flowOf(...)`.
 
-### Private inner class для Fake
+### Private nested class для Fake
 
-`FakeItemRepository`, `FakeReminderDao`, `FakeReminderManager` —
-объявляются как `private class` внутри тест-класса. Это даёт
-полный контракт рядом с тестом. Выносить в общий файл только если
-один Fake переиспользуется в 3+ тестах.
+Fake объявляется как `private class` внутри тест-класса; пороги
+и политика выноса в общий файл — `references/fakes.md`
+(«Где размещать Fakes»).
 
-### Имя Fake-класса — `Fake<InterfaceName>` или
-`Fake<InterfaceName>With<Modifier>`
+### Имя Fake-класса — `Fake<InterfaceName>` или `Fake<InterfaceName>With<Modifier>`
 
 ```kotlin
 private class FakeItemRepository : ItemRepository
@@ -169,14 +160,8 @@ fun whenAction_thenExpected() = runTest {
 
 ### Тестовые JSON-ресурсы в `app/src/test/resources/`
 
-```
-app/src/test/resources/old-backup-sample.json
-app/src/test/resources/new-backup-sample.json
-app/src/test/resources/old-ios-backup-sample.json
-app/src/test/resources/new-ios-backup.json
-```
-
-Загрузка через `javaClass.getResourceAsStream("/<filename>")`.
+Список файлов, конвенция имён и загрузка — `references/data-layer.md`
+(раздел «JSON парсинг с реальными файлами»).
 
 ### KDoc на тест-классе
 
@@ -195,10 +180,6 @@ class MainScreenViewModelTest
 ```
 
 ## Запреты (из AGENTS.md)
-
-### Запрет `!!` (см. выше)
-
-### Запрет обратных кавычек в именах тестов
 
 ### Запрет новых интеграционных тестов ViewModel
 

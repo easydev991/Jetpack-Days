@@ -167,40 +167,10 @@ class MainScreenViewModelTest {
         coVerify { dataStore.setSortOrder(SortOrder.ASCENDING) }
     }
 
-    private class FakeItemRepository : ItemRepository {
-        private val _items = MutableStateFlow<List<Item>>(emptyList())
-
-        fun setItems(items: List<Item>) { _items.value = items }
-
-        override fun getAllItems(): Flow<List<Item>> = _items
-
-        override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> =
-            _items.map { items ->
-                when (sortOrder) {
-                    SortOrder.ASCENDING -> items.sortedWith(compareBy({ it.timestamp }, { it.id }))
-                    SortOrder.DESCENDING ->
-                        items.sortedWith(compareByDescending<Item> { it.timestamp }.thenByDescending { it.id })
-                }
-            }
-
-        override suspend fun getItemById(id: Long): Item? = _items.value.find { it.id == id }
-        override fun getItemFlow(id: Long): Flow<Item?> = _items.map { it.find { item -> item.id == id } }
-        override fun searchItems(query: String): Flow<List<Item>> = _items
-
-        override suspend fun insertItem(item: Item): Long {
-            val newId = (_items.value.maxOfOrNull { it.id } ?: 0) + 1
-            _items.value = _items.value + item.copy(id = newId)
-            return newId
-        }
-        override suspend fun updateItem(item: Item) {
-            _items.value = _items.value.map { if (it.id == item.id) item else it }
-        }
-        override suspend fun deleteItem(item: Item) {
-            _items.value = _items.value.filterNot { it.id == item.id }
-        }
-        override suspend fun deleteAllItems() { _items.value = emptyList() }
-        override suspend fun getItemsCount(): Int = _items.value.size
-    }
+    // Канонический FakeItemRepository (setItems/containsItem + все
+    // методы ItemRepository) — references/fakes.md,
+    // раздел «Канонический FakeItemRepository».
+    private class FakeItemRepository : ItemRepository { /* см. fakes.md */ }
 }
 ```
 
@@ -208,85 +178,18 @@ class MainScreenViewModelTest {
 
 ## 3. Mapper (entity ↔ domain)
 
-```kotlin
-package com.dayscounter.data.database
-
-import com.dayscounter.data.database.entity.ItemEntity
-import com.dayscounter.domain.model.DisplayOption
-import com.dayscounter.domain.model.Item
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Test
-
-class ItemMapperTest {
-    @Test
-    fun roundTripConversion_thenPreservesAllFields() {
-        // Given
-        val original = Item(
-            id = 5L,
-            title = "Оригинальное событие",
-            details = "Детали",
-            timestamp = 9876543210000L,
-            colorTag = 0xFF00FF00.toInt(),
-            displayOption = DisplayOption.YEAR_MONTH_DAY
-        )
-
-        // When
-        val entity = original.toEntity()
-        val converted = entity.toDomain()
-
-        // Then
-        assertEquals(original.id, converted.id)
-        assertEquals(original.title, converted.title)
-        assertEquals(original.details, converted.details)
-        assertEquals(original.timestamp, converted.timestamp)
-        assertEquals(original.colorTag, converted.colorTag)
-        assertEquals(original.displayOption, converted.displayOption)
-    }
-}
-```
+Канонический пример — `references/data-layer.md`, раздел
+«Mapper (entity ↔ domain)»: три теста, включая
+`roundTripConversion_thenPreservesAllFields` со структурным
+сравнением `assertEquals(original, converted)`.
 
 ---
 
 ## 4. JSON-парсинг с реальными файлами
 
-`BackupImportRealFilesTest` (фрагмент):
-
-```kotlin
-package com.dayscounter.domain.usecase
-
-import kotlinx.serialization.json.Json
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Test
-import java.io.InputStream
-
-class BackupImportRealFilesTest {
-    private val json = Json { ignoreUnknownKeys = true }
-
-    @Test
-    fun parse_old_backup_sample_json_as_list_of_backupitem() {
-        // Given
-        val jsonString = loadResource("/old-backup-sample.json")
-
-        // When
-        val items = json.decodeFromString<List<BackupItem>>(jsonString)
-
-        // Then
-        assertEquals(8, items.size)
-
-        val firstItem = items[0]
-        assertEquals("День рождения", firstItem.title)
-        assertEquals("#FF5722", firstItem.colorTag)
-    }
-
-    private fun loadResource(path: String): String {
-        val stream: InputStream? = javaClass.getResourceAsStream(path)
-        assertNotNull(stream, "Resource not found: $path")
-        return stream!!.bufferedReader().use { it.readText() }
-    }
-}
-```
+Канонический пример — `references/data-layer.md`, раздел
+«JSON парсинг с реальными файлами»: два теста, `loadResource`
+и список тестовых JSON-ресурсов.
 
 ---
 

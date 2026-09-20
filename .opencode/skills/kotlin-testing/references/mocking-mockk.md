@@ -119,6 +119,19 @@ verify { mockRepo.insertItem(item) }
 coVerify { mockRepo.insertItem(item) }
 ```
 
+### Flow-возвращающий метод — `every`, не `coEvery`
+
+`fun getAllItems(): Flow<List<Item>>` — не suspend, поэтому `coEvery`
+на нём не компилируется:
+
+```kotlin
+// НЕПРАВИЛЬНО — метод не suspend
+coEvery { mockRepo.getAllItems() } returns flowOf(items)
+
+// ПРАВИЛЬНО
+every { mockRepo.getAllItems() } returns flowOf(items)
+```
+
 ### Мок Flow не эмитится в `StateFlow`
 
 `every { mockRepo.getAllItems() } returns flowOf(items)` создаёт
@@ -133,43 +146,9 @@ ViewModel слушает через `combine` / `flatMapLatest` на TestDispatc
 
 ## Полный пример: `FormatDaysTextUseCaseTest`
 
-```kotlin
-class FormatDaysTextUseCaseTest {
-    private val daysFormatter: DaysFormatter = mockk()
-    private val resourceProvider: ResourceProvider = StubResourceProvider()
+Канонический полный класс — `references/use-cases.md`, §2
+«С зависимостями (MockK)» (там же пояснение про
+`StubResourceProvider`).
 
-    private val useCase = FormatDaysTextUseCase(daysFormatter = daysFormatter)
-
-    @Test
-    fun invoke_when_calculated_negative_days_and_showminus_true_then_shows_negative_number() {
-        // Given
-        val period = TimePeriod(years = 0, months = 0, days = 7)
-        val difference = DaysDifference.Calculated(
-            period = period, totalDays = -7, timestamp = 1234567890000L
-        )
-        every {
-            daysFormatter.formatComposite(
-                period = period,
-                displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
-                totalDays = -7,
-                showMinus = true
-            )
-        } returns "-7 дней"
-
-        // When
-        val result = useCase.invoke(
-            difference = difference,
-            displayOption = DisplayOption.DAY,
-            resourceProvider = resourceProvider,
-            showMinus = true
-        )
-
-        // Then
-        assertEquals("-7 дней", result)
-    }
-}
-```
-
-Здесь `mockk()` без `relaxed`, потому что единственный метод форматтера
-стабится в каждом тесте.
+Ключевая деталь примера: `mockk()` без `relaxed`, потому что
+единственный метод форматтера стабится в каждом тесте.

@@ -34,8 +34,12 @@ import org.junit.jupiter.api.AfterEach
 
 ## Именование методов
 
-Формат: `functionName_whenCondition_thenExpectedResult` в `snake_case`.
-Без обратных кавычек (запрещено AGENTS.md).
+Формат: `functionName_whenCondition_thenExpectedResult` в
+`snake_case`-подобном стиле. Префикс `invoke_` / `when_` без имени
+функции и camelCase внутри сегментов (`invoke_whenAfterIntervalDays_
+thenKeepsCurrentTimeOfDayAndAddsDays`, `whenViewModelCreated_
+thenLoadsAllItems`) допустимы — канонические тесты проекта используют
+оба варианта. Главное — без обратных кавычек (запрещено AGENTS.md).
 
 **Хорошо:**
 
@@ -84,8 +88,8 @@ fun calculate_when_1_day_difference_then_returns_1_day() {
 }
 ```
 
-Простые тесты (одна проверка) могут опускать `// When`, если
-очевидно — но маркеры должны быть видны.
+Маркеры обязательны в каждом тесте — даже если `// When` и `// Then`
+занимают по одной строке (то же правило в `project-conventions.md`).
 
 ## Базовый шаблон (pure, без зависимостей)
 
@@ -112,10 +116,14 @@ class CalculateDaysDifferenceUseCaseTest {
 ```
 
 Объект `useCase` создаётся один раз как `val` — он immutable.
+Если тестам нужны разные зависимости (разные `Clock`) — допустимо
+создавать его внутри `@Test` (см. `references/EXAMPLE.md` §1).
 
 ## Шаблон с `@BeforeEach` / `@AfterEach`
 
-Когда нужна подготовка (диспетчер, fakes, mocks):
+Когда нужна подготовка (диспетчер, fakes, mocks). `FakeItemRepository`
+— канонический Fake из `references/fakes.md`; `mockk(relaxed = true)`
+— из `references/mocking-mockk.md`:
 
 ```kotlin
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -131,6 +139,8 @@ class MainScreenViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeItemRepository()
+        // Logger (последний слот) — предпочтительнее NoOpLogger(),
+        // mockk(relaxed = true) — допустимая альтернатива (project-conventions.md)
         viewModel = MainScreenViewModel(repository, mockk(relaxed = true), mockk(relaxed = true))
     }
 
@@ -187,4 +197,4 @@ class AppSettingsDataStoreTest {
 - Не пиши `// Should be 1` над `assertEquals` — сообщение уже там.
 - Не используй `!!` для распаковки результата — `as?` или
   `checkNotNull` + сообщение.
-- Не создавай helper-методы «для красоты» — AAA-маркеры достаточны.
+- Не создавай helper-методы «для красоты» — Given/When/Then-маркеры достаточны.

@@ -12,12 +12,26 @@ make android-test    # все androidTest на подключённом устр
 Команда выполняет:
 
 ```makefile
-./gradlew connectedDebugAndroidTest --console=plain
-ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py
+./gradlew connected$(FLAVOR_TITLE)DebugAndroidTest --console=plain
+ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVOR)Debug
 ```
 
-- `connectedDebugAndroidTest` — инструментированные тесты в debug-сборке
+- `connected<Flavor>DebugAndroidTest` — инструментированные тесты debug-сборки
+  flavor'а; flavor задаётся `FLAVOR` (дефолт `github` →
+  `connectedGithubDebugAndroidTest`)
 - Требуется подключённое устройство или запущенный эмулятор
+
+## Один класс
+
+Для быстрой итерации один тест-класс или метод фильтруется через
+`ANDROID_TEST_FILTER` (Makefile пробрасывает его в gradle как
+`-Pandroid.testInstrumentationRunnerArguments.class=...`). Опция `--tests`
+для connected-задач не работает — она только для JVM unit-тестов:
+
+```bash
+make android-test ANDROID_TEST_FILTER=com.dayscounter.ui.screens.events.MainScreenSortByTimeOfDayUiTest
+make android-test ANDROID_TEST_FILTER=com.dayscounter.data.database.dao.ItemDaoTest#selectAllItems_returnsSortedByTimestamp
+```
 
 ## Отчёт
 
@@ -45,7 +59,9 @@ make test-all
 
 Результаты:
 - Unit: `app/build/test-results/`
-- Интеграционные: `app/build/reports/androidTests/connected/debug/index.html`
+- Интеграционные: `app/build/reports/androidTests/connected/<buildType>/flavors/<flavor>/index.html`
+  (AGP 9 с flavors; для дефолтного `make android-test` с `FLAVOR=github` —
+  `connected/debug/flavors/github/index.html`)
 
 ## screenshot-tests модуль
 
@@ -59,15 +75,6 @@ make test-all
 - Скриншоты через `Screengrab` с `UiAutomatorScreenshotStrategy`
 - Демо-данные вставляются через `database.itemDao().insertItem()` напрямую
 - Результат: `fastlane/metadata/android` (см. `make screenshots`)
-
-## Один класс
-
-Отфильтровать один тест-класс можно параметром `--tests`
-(пример для unit-тестов из `kotlin-testing`, для androidTest — аналогично):
-
-```bash
-./gradlew connectedDebugAndroidTest --tests "com.dayscounter.ui.screens.events.MainScreenSortByTimeOfDayUiTest"
-```
 
 ## Зависимости androidTest (build.gradle.kts)
 

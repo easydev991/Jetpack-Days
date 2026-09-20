@@ -195,14 +195,9 @@ class ReminderRepositoryImplTest {
         assertEquals(ReminderStatus.CONSUMED, stored?.status)
     }
 
+    // Канонический FakeReminderDao (все 5 методов) — references/fakes.md
     private class FakeReminderDao : ReminderDao {
-        private val storage = linkedMapOf<Long, ReminderEntity>()
-
-        override suspend fun getReminderByItemId(itemId: Long): ReminderEntity? = storage[itemId]
-        override suspend fun upsertReminder(reminder: ReminderEntity) {
-            storage[reminder.itemId] = reminder
-        }
-        // ... остальные методы
+        // ... реализация по канону из fakes.md
     }
 }
 ```
@@ -250,15 +245,16 @@ class BackupImportRealFilesTest {
     }
 
     private fun loadResource(path: String): String {
-        val stream: InputStream? = javaClass.getResourceAsStream(path)
-        assertNotNull(stream, "Resource not found: $path")
-        return stream!!.bufferedReader().use { it.readText() }
+        val stream = checkNotNull(javaClass.getResourceAsStream(path)) {
+            "Ресурс не найден: $path"
+        }
+        return stream.bufferedReader().use { it.readText() }
     }
 }
 ```
 
-Тестовые файлы лежат в `app/src/test/resources/com/` или просто
-в `app/src/test/resources/`. Имя — `<format>-<platform>-sample.json`:
+Тестовые файлы лежат в `app/src/test/resources/`. Имя — `<format>-<platform>-sample.json`
+(историческое исключение — `new-ios-backup.json` без `-sample`):
 
 ```
 app/src/test/resources/old-backup-sample.json

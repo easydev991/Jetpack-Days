@@ -169,7 +169,7 @@ Robolectric, без эмулятора). Это:
 - **Проверяет ровно то, что фикс делает** — условие срабатывания
 
 Реальный пример из проекта — фикс бага навигации при ротации после пуша
-(см. `docs/Plan_2026-08-22_Fix_Rotation_Navigation_Bug.md`). В
+(см. `openspec/changes/archive/2026-08-22-fix-navigation-on-rotation-after-notification/design.md`). В
 `MainActivity.kt`:
 
 ```kotlin
@@ -245,8 +245,9 @@ recreate lifecycle.
 
 ## Реальный ViewModel с in-memory Room
 
-`CreateEditHasChangesRegressionUiTest` — гибрид: реальная in-memory БД
-+ ViewModel создаётся вручную с реальным репозиторием:
+`CreateEditHasChangesRegressionUiTest` — гибрид:
+- реальная in-memory БД
+- ViewModel создаётся вручную с реальным репозиторием:
 
 ```kotlin
 @Before
@@ -269,11 +270,12 @@ fun checkHasChanges_afterLoadItem_doesNotFalselyDetectTimeOfDayChange() {
         .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     val insertedId = runBlocking { repository.insertItem(item) }
     val viewModel = CreateEditScreenViewModel(
-        repository = repository,
-        resourceProvider = createTestResourceProvider(),
-        logger = NoOpLogger(),
-        savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId)),
-        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+        deps = CreateEditScreenViewModel.Deps(
+            repository = repository,
+            resourceProvider = createTestResourceProvider(),
+            analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+        ),
+        savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
     )
 
     // When: открываем экран редактирования без изменения данных
@@ -309,13 +311,13 @@ composeTestRule.waitForIdle()
 activity.requestedOrientation = originalOrientation
 ```
 
-**Caveat:** `setRequestedOrientation` ломает `ActivityScenario.close()`
-в `@After`, если в тесте также есть `activity.setIntent(...)` — cleanup
-зависает на 45-90 сек в `Activity never becomes DESTROYED`. Для логики
-recreation (например, gate `savedInstanceState == null`) предпочитайте
-pure-JVM gate через `companion object` — см. раздел выше.
+**Caveat:** `setRequestedOrientation` + `activity.setIntent(...)` вместе
+ломают `ActivityScenario.close()` в `@After` — см. раздел
+«Caveat: `setIntent` + recreation ломает cleanup» выше.
 
 ## Проверка сортировки через boundsInRoot
+
+Интеграционная часть: клики по меню сортировки и ожидание пересборки.
 
 ```kotlin
 @Test
@@ -329,21 +331,12 @@ fun sameDateDifferentTimeOfDay_ascOldFirst_thenEarlierTimeIsAboveLaterTime() {
         .onNodeWithText(context.getString(R.string.old_first))
         .performClick()
     composeTestRule.waitForIdle()
-
-    val nodeA = composeTestRule.onNodeWithText(titleA)
-    val nodeB = composeTestRule.onNodeWithText(titleB)
-    nodeA.assertIsDisplayed()
-    nodeB.assertIsDisplayed()
-
-    val topA = nodeA.fetchSemanticsNode("nodeA").boundsInRoot.top
-    val topB = nodeB.fetchSemanticsNode("nodeB").boundsInRoot.top
-    assertTrue(
-        "A (09:00) должен быть выше B (18:00) при сортировке «сначала старые», " +
-            "но topA=$topA, topB=$topB",
-        topA < topB
-    )
 }
 ```
+
+Взаимное расположение элементов после сортировки проверяется через
+`fetchSemanticsNode().boundsInRoot` — см. `references/compose-selectors.md`
+(раздел «Проверка позиции нод (boundsInRoot)»).
 
 ## Поиск и скрытие элементов
 

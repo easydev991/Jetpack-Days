@@ -3,7 +3,7 @@ name: kotlin-testing
 description: >
   Экспертное руководство по unit-тестированию в Android-проекте JetpackDays:
   JUnit 5, MockK, Fake-репозитории на MutableStateFlow, kotlinx-coroutines-test
-  для ViewModel и Use Case, AAA / Given-When-Then, проектные соглашения
+  для ViewModel и Use Case, Given-When-Then, проектные соглашения
   (snake_case, без !!, русские сообщения, NoOpLogger, StubResourceProvider),
   а также ограничения (запрет новых интеграционных тестов ViewModel).
   Использовать при написании новых unit-тестов, рефакторинге существующих,
@@ -14,75 +14,52 @@ description: >
 
 ## Overview
 
-Этот skill — для unit-тестов Kotlin-кода в JetpackDays. Стек:
-**JUnit 5** (`org.junit.jupiter.api.*`), **MockK** (`io.mockk.*`),
+Unit-тесты Kotlin-кода в JetpackDays. Стек: **JUnit 5**
+(`org.junit.jupiter.api.*`), **MockK** (`io.mockk.*`),
 **kotlinx-coroutines-test** (`runTest`, `StandardTestDispatcher`,
-`Dispatchers.setMain` / `resetMain`), плюс **Fake-репозитории** на
-`MutableStateFlow` для Flow-эмиссий.
+`Dispatchers.setMain` / `resetMain`) и **Fake-репозитории** на
+`MutableStateFlow` для Flow-эмиссий. Цель — читаемые, быстрые,
+независимые тесты (70% тестовой пирамиды).
 
-Цель — читаемые, быстрые, независимые unit-тесты, которые проектная
-конвенция требует как основу тестовой пирамиды (70% unit).
-
-> Интеграционные и UI тесты — `app/src/androidTest/` (JUnit 4, Espresso,
+> Интеграционные и UI тесты — `app/src/androidTest/` (JUnit 4,
 > Compose Testing, Room in-memory, Turbine). Этот skill про `app/src/test/`.
 
-## Agent behavior contract (следуй этим правилам)
+## Agent behavior contract
 
-1. **JUnit 5 — основной фреймворк unit-тестов.** Все импорты из
-   `org.junit.jupiter.api.*`. Используй `@Test`, `@BeforeEach`,
-   `@AfterEach`. JUnit 4 (`org.junit.*`, `@RunWith(AndroidJUnit4::class)`)
-   — только в `androidTest/`.
-2. **Given / When / Then в каждом тесте.** Разделяй тело тремя
-   комментариями-маркерами. Это и документация, и визуальный ритм.
-3. **snake_case для имён тестов, без обратных кавычек.** Формат:
-   `function_whenCondition_thenExpectedResult`. Обратные кавычки запрещены
-   AGENTS.md — пиши без них. Допустимы русские слова в snake_case для
-   названий свойств (`totaldays_в_calculated_содержит_общее_количество_дней`),
-   но английский формат предпочтительнее.
-4. **Никакого `!!`.** Даже в тестах. Используй `?.`, `?:`, `let`,
-   `checkNotNull`. Это требование AGENTS.md, не обсуждается.
-5. **MockK для интерфейсов, Fake для репозиториев с Flow.**
-   `mockk()` / `mockk(relaxed = true)` — для интерфейсов без сложной
-   логики эмиссий (`Logger`, `DataStore`, `ResourceProvider`).
-   Для `ItemRepository`, `ReminderRepository` — пиши `Fake<Name>` на
-   `MutableStateFlow` (см. `references/fakes.md`).
-6. **`coEvery` / `coVerify` для suspend-функций.** `every` / `verify` —
-   только для не-suspend. MockK не делает автоматический выбор.
-7. **ViewModel — только через unit-тест.** Никаких новых интеграционных
-   тестов ViewModel (причина: конфликт `runBlocking` ↔
-   `viewModelScope.launch`, Flow репозитория не активируется).
-   Существующие — обслуживай как есть.
-8. **`StandardTestDispatcher` + `Dispatchers.setMain` / `resetMain`.**
-   В `@BeforeEach` создавай `StandardTestDispatcher` и зови
-   `Dispatchers.setMain(testDispatcher)`. В `@AfterEach` —
-   `Dispatchers.resetMain()`. Аннотируй класс
-   `@OptIn(ExperimentalCoroutinesApi::class)`.
-9. **`advanceUntilIdle()` после действий ViewModel.** Любой вызов
-   `viewModel.someAction()` обязан сопровождаться
-   `testDispatcher.scheduler.advanceUntilIdle()` перед `assert`,
-   иначе корутины не отработают.
-10. **Use Case возвращают `Result<T>` для ошибок.**
-    `assertTrue(result.isSuccess)` / `assertTrue(result.isFailure)`,
-    `result.getOrThrow()` для happy path,
-    `result.exceptionOrNull()` для проверки типа ошибки.
-11. **Logger в тестах ViewModel — `NoOpLogger` или `mockk(relaxed = true)`.**
-    `com.dayscounter.util.NoOpLogger` — предпочтительный вариант.
-    `mockk(relaxed = true)` — тоже допустим (relaxed-мок перехватывает
-    любые вызовы; правило 5 и `EXAMPLE.md` отражают оба подхода).
-    Смешивать в одном тест-классе не нужно — выбери один.
+1. **JUnit 5** — импорты только из `org.junit.jupiter.api.*`
+   (детали — `references/fundamentals.md`).
+2. **Given / When / Then в каждом тесте** — три маркера-комментария
+   (`references/fundamentals.md`).
+3. **snake_case в именах тестов, без обратных кавычек** — формат и
+   допустимые вариации — `references/fundamentals.md`.
+4. **Никакого `!!`** — `?.`, `?:`, `let`, `checkNotNull`. Требование
+   AGENTS.md (примеры — `references/project-conventions.md`).
+5. **MockK — для stateless-интерфейсов** (`Logger`, `DataStore`,
+   `ResourceProvider`); **Fake на `MutableStateFlow` — для
+   `ItemRepository`** и любых Flow-эмиссий (`references/fakes.md`);
+   `ReminderRepositoryImpl` тестируется через `FakeReminderDao`
+   (`references/data-layer.md`).
+6. **`coEvery` / `coVerify` — для suspend-методов; `every` / `verify` —
+   для не-suspend, включая Flow-возвращающие** (`references/mocking-mockk.md`).
+7. **ViewModel — только unit-тест.** Новые интеграционные тесты
+   ViewModel запрещены (`references/project-conventions.md`).
+8. **`StandardTestDispatcher` + `Dispatchers.setMain` / `resetMain` +
+   `@OptIn(ExperimentalCoroutinesApi::class)`** в каждом
+   ViewModel-тесте (`references/viewmodel-testing.md`).
+9. **`advanceUntilIdle()` после каждого действия ViewModel** — иначе
+   корутины не отработают (`references/viewmodel-testing.md`).
+10. **Use Case возвращают `Result<T>`** — assert-паттерны
+    (`references/use-cases.md`).
+11. **`Logger` в тестах ViewModel — `NoOpLogger` или
+    `mockk(relaxed = true)`, не смешивать**
+    (`references/project-conventions.md`).
 
 ## Запуск тестов
 
-- **Предпочтительно**: `make test` — запуск `./gradlew test` с
-  человекочитаемым отчётом через `scripts/test_report.py`
-  (статистика + список упавших тестов + per-class таблица).
-- **Один класс**:
-  `./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"`.
-- **Поиск по паттерну**:
-  `./gradlew test --tests "*DaysDifferenceTest"`.
-- **Один метод**:
-  `./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate_when_same_day_then_returns_today"`.
-- **Полная проверка**: `make check` — build + test + lint.
+- `make test` — прогон с человекочитаемым отчётом
+  (`scripts/test_report.py`); `make check` — build + test + lint.
+- Одиночные классы/методы, фильтрация, где Gradle кладёт результаты —
+  `references/running-tests.md`.
 
 ## First 60 seconds (triage template)
 
@@ -91,14 +68,11 @@ description: >
 - **Цель**: новые unit-тесты, миграция с другого подхода, flaky failures,
   новый ViewModel, новый Use Case, рефакторинг?
 - **Факты**:
-  - Какой слой тестируется: domain model / Use Case / ViewModel /
-    repository (data/) / provider / mapper?
-  - Используется ли Flow / StateFlow / suspend? Это меняет диспетчер.
-  - Есть ли I/O: DAO, ContentResolver, Clock, system time?
-    Это меняет выбор Fake vs Mock vs Stub.
-  - Тесты TDD или покрытие существующего кода?
-  - Используется ли Room / DataStore / Android Context напрямую?
-    Если да — это уже не unit, а integration.
+  - Слой: domain model / Use Case / ViewModel / repository / provider / mapper?
+  - Flow / StateFlow / suspend? Это меняет диспетчер и выбор Fake vs Mock.
+  - I/O: DAO, ContentResolver, Clock, system time? Это меняет Fake vs Mock vs Stub.
+  - TDD или покрытие существующего кода?
+  - Room / DataStore / Android Context напрямую? Это уже integration, не unit.
 
 ## Routing map (читай нужный reference быстро)
 
@@ -122,45 +96,30 @@ description: >
   `references/running-tests.md`
 - Полные канонические примеры → `references/EXAMPLE.md`
 
-## Common pitfalls → next best move
+## Hot pitfalls → next best move
 
 | Проблема | Решение |
 |---|---|
-| Тест ViewModel зависает навечно | Не используй `runBlocking` в тесте с `viewModelScope.launch`. Замени на `runTest { ... }` + `StandardTestDispatcher` + `advanceUntilIdle()` |
-| `every { mockRepo.getAllItems() } returns flowOf(...)` не доезжает до UI state | Замени `mockk()` для `ItemRepository` на `FakeItemRepository` на `MutableStateFlow`. См. `references/fakes.md` |
-| `kotlinx.coroutines.test.UncompletedCoroutinesError` после теста | Добавь `testDispatcher.scheduler.advanceUntilIdle()` перед `assert` или после `Dispatchers.resetMain()` в `@AfterEach` |
-| Mockito / Mockito-Kotlin в импортах | В проекте только MockK (`io.mockk`). Замени на `mockk()` + `coEvery` |
-| Сообщение `assertEquals` на английском | Сообщения — на русском (как в существующих тестах: «Должен быть 1 элемент»). См. `references/assertions.md` |
-| `!!` в тесте (например, `successState.reminder!!`) | Запрещено AGENTS.md. Используй `assertNotNull(...)` или `?.let { ... }` |
-| Сравнение sealed-state через `assertEquals(Success(item), state)` | Работает, но принято `assertTrue(state is Success)` + доступ к полям — лучше видно намерение |
-| Зависимость от `System.currentTimeMillis()` в тесте | Используй `Clock.fixed(...)` + `currentTimeMillisProvider { ... }`. См. `references/use-cases.md` (по образцу `BuildReminderUseCaseTest`) |
-| Интеграционный тест ViewModel с Room | Запрещено. Используй unit-тест с Fake-репозиторием на `MutableStateFlow` |
-| Параметр `currentDate` не задан — flaky по дню | Передавай `currentDate` явно (`LocalDate.of(2024, ...)`) — см. `references/use-cases.md` |
-| Backticks в имени теста (`` `function with spaces` ``) | Запрещено AGENTS.md. Используй snake_case без обратных кавычек |
-| `mockk()` без `relaxed = true` падает на не-stub методах | Либо стабь через `every`, либо `mockk(relaxed = true)` (разрешено для интерфейсов) |
-| Flow с `.catch { }` — assertion не срабатывает | `.catch` поглощает исключение. В unit-тесте используй `first()` / `try-catch`. Turbine — только в `androidTest/` |
-| Дублирование `setupViewModel` в каждом `@Test` | Вынеси в `@BeforeEach fun setUp()` |
+| Тест ViewModel зависает | Не `runBlocking` с `viewModelScope.launch` — `runTest` + `StandardTestDispatcher` + `advanceUntilIdle()` (`references/viewmodel-testing.md`) |
+| `flowOf(...)` не доезжает до UI state | Заменить `mockk()` для `ItemRepository` на Fake на `MutableStateFlow` (`references/fakes.md`) |
+| `coEvery { repo.getAllItems() }` не компилируется | Метод не suspend — нужен `every` (правило 6) |
+| `StateFlow` с `WhileSubscribed` отдаёт initialValue | Подпишись до `advanceUntilIdle()`: `backgroundScope.launch { flow.collect { } }` — см. `references/viewmodel-testing.md`, раздел «StateFlow с `WhileSubscribed`» |
+| Mockito в импортах | Только MockK (`references/project-conventions.md`) |
+
+Типичные ошибки по слоям: `references/viewmodel-testing.md` и
+`references/use-cases.md` (таблицы), `references/mocking-mockk.md`
+(раздел «Типичные ошибки»), `references/assertions.md` («Что НЕ делать»).
 
 ## Verification checklist
 
-- [ ] Тест на JUnit 5: импорты из `org.junit.jupiter.api.*`
-- [ ] Имя метода в `snake_case` без обратных кавычек
-- [ ] Комментарии `// Given`, `// When`, `// Then` в каждом тесте
-- [ ] Нет `!!` — используй `?.`, `?:`, `let`, `checkNotNull`
-- [ ] Для `ViewModel` — Fake-репозиторий на `MutableStateFlow`,
-      не `mockk()` на `ItemRepository`
-- [ ] Для `ViewModel` — `@BeforeEach` ставит `setMain`,
-      `@AfterEach` — `resetMain`
-- [ ] После действий ViewModel — `advanceUntilIdle()`
-- [ ] Для suspend-функций — `coEvery` / `coVerify`
-- [ ] Сообщения `assert` на русском
+- [ ] Импорты из `org.junit.jupiter.api.*`; имя теста в snake_case без кавычек
+- [ ] `// Given`, `// When`, `// Then` в каждом тесте
+- [ ] Нет `!!`; сообщения assert на русском
+- [ ] ViewModel: Fake-репозиторий, `setMain`/`resetMain`, `advanceUntilIdle()`
+- [ ] suspend → `coEvery`/`coVerify`; Flow-методы → `every`/`verify`
+- [ ] Время — `Clock.fixed(...)` или явный `currentTimeMillisProvider`/`currentDate`
+- [ ] Файл в `app/src/test/` зеркалит `app/src/main/`; класс оканчивается на `Test`
 - [ ] Нет новых интеграционных тестов ViewModel
-- [ ] Файлы в `app/src/test/` зеркалят структуру `app/src/main/`
-- [ ] Имя класса оканчивается на `Test`
-- [ ] Если тест про время — `Clock.fixed(...)` или явный
-      `currentTimeMillisProvider`
-- [ ] `@OptIn(ExperimentalCoroutinesApi::class)` на классе,
-      если используется `StandardTestDispatcher`
 
 ## References
 

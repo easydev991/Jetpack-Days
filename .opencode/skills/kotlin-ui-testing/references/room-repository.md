@@ -5,8 +5,9 @@ DAO, база, репозиторий. Используют реальную Roo
 быстро, без устройства хранения, с полным SQL-движком.
 
 Примеры:
-- `data/database/dao/ItemDaoTest.kt` — 14 тестов DAO
+- `data/database/dao/ItemDaoTest.kt` — полный набор CRUD/сортировки/поиска DAO
 - `data/database/DaysDatabaseTest.kt` — создание базы
+- `data/database/MigrationTest.kt` — миграции схемы
 - `data/repository/ItemRepositoryIntegrationTest.kt` — CRUD + маппинг
 
 ## Скелет DAO-теста

@@ -8,7 +8,7 @@
 
 Инструментированные тесты — JUnit 4. Интеграционные тесты
 (Activity, data/, reminder/) и большинство компонентных Compose-тестов
-(7 из 10) аннотированы `@RunWith(AndroidJUnit4::class)`. Без него —
+аннотированы `@RunWith(AndroidJUnit4::class)`. Без него —
 DaysCountTextTest, ColorSelectorUiTest, ColorTagFilterDialogTest
 (v2 API не требует):
 
@@ -53,6 +53,16 @@ class SomeIntegrationTest {
   это фреймворк unit-тестов `app/src/test/`
 - Compose-правила — из `androidx.compose.ui.test.junit4.v2` (v2 API)
 
+## Два типа тестов — когда что использовать
+
+| Ситуация | Тип теста | Правило |
+|---|---|---|
+| Отдельный Compose-компонент (DaysCountText, ColorSelector, диалог, кнопка) | Компонентный | `createComposeRule()`, изоляция фейками, `JetpackDaysTheme` (по необходимости) |
+| Реальный экран / ротация / навигация | Интеграционный | `createAndroidComposeRule<MainActivity>()`, реальный Room |
+| DAO / база | Интеграционный | Room in-memory, `runBlocking` |
+| ViewModel с БД (legacy — новые не писать, см. `references/viewmodel-integration.md`) | Интеграционный | `MainDispatcherRule` + Turbine |
+| AlarmManager / Receiver | Интеграционный | `InstrumentationRegistry`, shell-пермишены |
+
 ## Именование тестов
 
 snake_case без обратных кавычек. В проекте встречаются три формата:
@@ -67,7 +77,7 @@ fun daysCountText_whenDisplayed_thenShowsCorrectText()
 fun when_items_count_4_then_search_field_not_displayed()
 fun when_user_typed_query_with_3_items_then_search_field_stays_visible()
 
-// Формат 3: составной — subject_verb_suffix_thenResult (ThemeIconScreenTest)
+// Формат 3: составной — subject_verb_suffix[_whenCondition] (ThemeIconScreenTest)
 fun themeIconScreen_displaysAppBarWithBackButton()
 fun themeIconScreen_clicksLightTheme_callsOnThemeChange()
 ```
@@ -179,13 +189,3 @@ fun moreScreen_when_rustore_features_false_then_hides_rate_and_share_buttons() {
 `:app:connectedGithubDebugAndroidTest`. В отчёте
 `app/build/reports/androidTests/connected/debug/flavors/<flavor>/<class>.html`
 skipped-тесты помечены как `class="skipped"`, passed — `class="success"`.
-
-## Два типа тестов — когда что использовать
-
-| Ситуация | Тип теста | Правило |
-|---|---|---|
-| Отдельный Compose-компонент (DaysCountText, ColorSelector, диалог, кнопка) | Компонентный | `createComposeRule()`, изоляция фейками, `JetpackDaysTheme` (по необходимости) |
-| Реальный экран / ротация / навигация | Интеграционный | `createAndroidComposeRule<MainActivity>()`, реальный Room |
-| DAO / база | Интеграционный | Room in-memory, `runBlocking` |
-| ViewModel с БД | Интеграционный | `MainDispatcherRule` + Turbine |
-| AlarmManager / Receiver | Интеграционный | `InstrumentationRegistry`, shell-пермишены |

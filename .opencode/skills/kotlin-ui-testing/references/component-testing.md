@@ -2,7 +2,7 @@
 
 Компонентные тесты проверяют отдельный Compose-компонент без реальной
 Activity. В JetpackDays так тестируются `DaysCountText`, `ColorSelector`,
-`ColorTagFilterDialog`, `SaveButton`, секции формы CreateEdit.
+`ColorTagFilterDialog`, секции формы CreateEdit.
 
 Примеры: `app/src/androidTest/java/com/dayscounter/ui/ds/DaysCountTextTest.kt`,
 `ui/screens/createedit/ColorSelectorUiTest.kt`,
@@ -69,10 +69,12 @@ composeTestRule.setContent {
 ```kotlin
 fun createTestViewModel(): CreateEditScreenViewModel =
     CreateEditScreenViewModel(
-        repository = createTestItemRepository(),
-        resourceProvider = createTestResourceProvider(),
-        savedStateHandle = SavedStateHandle(),
-        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+        deps = CreateEditScreenViewModel.Deps(
+            repository = createTestItemRepository(),
+            resourceProvider = createTestResourceProvider(),
+            analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider()))
+        ),
+        savedStateHandle = SavedStateHandle()
     )
 ```
 

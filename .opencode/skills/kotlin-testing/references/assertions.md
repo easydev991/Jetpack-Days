@@ -47,7 +47,7 @@ assertTrue(!condition)         // или assertFalse(condition)
 
 ```kotlin
 @Test
-fun whenitemloadedsuccessfully_thenupdatestosuccessstate() = runTest {
+fun when_item_loaded_successfully_then_updates_to_success_state() = runTest {
     // ...
     val currentState = viewModel.uiState.value
     assertTrue(currentState is DetailScreenState.Success, "Состояние должно быть Success")
@@ -89,6 +89,10 @@ assertEquals(3, AppTheme.entries.size, "Должны быть 3 значения
 
 ## `assertThrows` для исключений
 
+Лямбда `assertThrows` (`Executable`) не suspend — suspend-вызов
+внутри неё не скомпилируется. Для suspend-функций внутри `runTest`
+используй `runCatching` — она inline, suspend-вызов допустим:
+
 ```kotlin
 @Test
 fun invoke_whenJsonInvalid_thenThrowsSerializationException() = runTest {
@@ -97,17 +101,18 @@ fun invoke_whenJsonInvalid_thenThrowsSerializationException() = runTest {
     val uri = mockk<Uri>()
 
     // When & Then
-    assertThrows<SerializationException> {
-        useCase(uri, invalidJson)
-    }
+    val thrown = runCatching { useCase(uri, invalidJson) }.exceptionOrNull()
+    assertTrue(thrown is SerializationException, "Должна быть SerializationException")
 }
 ```
 
-`assertThrows` возвращает брошенное исключение — можно
-проверить поля:
+Для не-suspend кода — `assertThrows` с явным `::class.java`
+(reified-форма `assertThrows<T> { }` — это другой импорт:
+`org.junit.jupiter.api.assertThrows`). Он возвращает брошенное
+исключение — можно проверить поля:
 
 ```kotlin
-val ex = assertThrows<IllegalArgumentException> {
+val ex = assertThrows(IllegalArgumentException::class.java) {
     AppTheme.valueOf("INVALID_THEME")
 }
 assertEquals("INVALID_THEME", ex.message)   // если нужно
@@ -140,21 +145,21 @@ assertTrue(result is Success, "Состояние должно быть Success"
 assertEquals("День рождения", item.title, "Название должно совпадать")
 ```
 
-Исключение — если тест читает только автор и потом забудет.
-Но даже в этом случае русское сообщение полезнее — пройденный
-тест не виден, а проваленный читает только разработчик, и ему
-проще на русском.
+Русское сообщение полезнее всегда: пройденный тест не виден,
+а проваленный читает разработчик — ему проще на русском.
 
 ## Что НЕ делать
 
 - Не используй `assertEquals(true, x)` / `assertEquals(false, x)`.
 - Не комментируй то, что уже говорит сообщение assertion:
+
   ```kotlin
   // ПЛОХО
   assertEquals(2, size)  // Должно быть 2
   // ХОРОШО
   assertEquals(2, size, "Должно быть 2 элемента")
   ```
+
 - Не используй `assertTrue(x == null)` — `assertNull(x)` яснее.
 - Не используй `org.junit.Assert.assertEquals` — это JUnit 4.
 - Не глуши исключения в тесте: `try { ... } catch (e: Throwable) {}` —

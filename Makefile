@@ -453,8 +453,11 @@ _ensure_fastlane:
 	fi
 
 ## android-test-report: Открыть HTML отчет интеграционных тестов в браузере
+# AGP 9 складывает отчет в connected/<buildType>/flavors/<flavor>/, до AGP 9 был connected/<variant>/
 android-test-report:
-	@if [ -f app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html ]; then \
+	@if [ -f app/build/reports/androidTests/connected/debug/flavors/$(FLAVOR)/index.html ]; then \
+		open app/build/reports/androidTests/connected/debug/flavors/$(FLAVOR)/index.html; \
+	elif [ -f app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html ]; then \
 		open app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html; \
 	else \
 		printf "Отчет не найден. Сначала запустите: make android-test FLAVOR=$(FLAVOR)\n"; \

@@ -114,7 +114,7 @@ assertTrue(
 Списки элементов с одинаковым contentDescription:
 
 ```kotlin
-// 6 preset-цветов + 1 кастомный:
+// Пример для ColorSelector — 6 preset-цветов + 1 кастомный:
 composeTestRule
     .onAllNodesWithContentDescription(colorDescription)
     .assertCountEquals(7)
@@ -145,7 +145,7 @@ composeTestRule.onNodeWithText(resetText).performClick()
 
 composeTestRule.runOnIdle {
     org.junit.Assert.assertFalse(
-        "При сбросе черновика без фильтра onApply не должен вызываться",
+        "<причина: почему onApply не должен был вызваться — на русском>",
         onApplyCalled
     )
 }

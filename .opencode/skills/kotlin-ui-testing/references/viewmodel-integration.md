@@ -59,12 +59,15 @@ class DetailScreenViewModelIntegrationTest {
 }
 ```
 
-`clearAllTables()` в `@Before` — обязателен: база in-memory живёт
-весь процесс, между тестами данные остаются.
+База строится в `@Before` и закрывается в `@After` — при таком per-test
+паттерне `clearAllTables()` не нужен, данные между тестами не живут.
+Он обязателен только для process-wide базы через синглтон
+`DaysDatabase.getDatabase(...)` (используется в activity-тестах) —
+там данные остаются между тестами.
 
 ## Тест через Turbine
 
-Паттерн (полный тест — в EXAMPLE.md):
+Паттерн (полный тест — в `references/EXAMPLE.md`):
 
 ```kotlin
 viewModel.uiState.test {
@@ -86,15 +89,13 @@ viewModel.uiState.test {
 
 ```kotlin
 runTest {
-    ...
-    viewModel.uiState.test { ... }   // не используется
+    // advanceUntilIdle + сбор через backgroundScope
+    val collectedStates = mutableListOf<DetailScreenState>()
+    backgroundScope.launch {
+        viewModel.uiState.collect { collectedStates += it }
+    }
+    mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 }
-
-// Вариант 1: advanceUntilIdle + сбор через backgroundScope
-backgroundScope.launch {
-    viewModel.uiState.collect { collectedStates += it }
-}
-testDispatcher.scheduler.advanceUntilIdle()
 ```
 
 Проверка реактивности — обновление БД между эмиссиями:

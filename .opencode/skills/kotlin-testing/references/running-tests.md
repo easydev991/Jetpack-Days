@@ -1,6 +1,7 @@
 # Running Tests
 
-Команды для запуска unit-тестов в JetpackDays.
+Команды для запуска unit-тестов в JetpackDays (и androidTest —
+для справки).
 
 ## `make test` — основной путь
 
@@ -54,11 +55,15 @@ Gradle поддерживает `--tests` многократно.
 ## Фильтрация по тегу или группе
 
 JUnit 5 поддерживает `@Tag("fast")` / `@Tag("slow")`. В проекте
-не используется. Если введёшь — запуск:
+не используется. Если введёшь — фильтр настраивается в
+`app/build.gradle.kts` (у Gradle CLI нет флага `--groups`):
 
-```bash
-./gradlew test --tests "*" --groups "fast"          # только fast
-./gradlew test --tests "*" --exclude-groups "slow"  # всё кроме slow
+```kotlin
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform {
+        includeTags("fast")    // или excludeTags("slow")
+    }
+}
 ```
 
 ## Интеграционные тесты (`androidTest/`)
@@ -133,7 +138,9 @@ ViewModel использует `Logger` напрямую. Замени на `NoO
 
 - Используй `--console=plain` для логов без прогресс-бара.
 - Используй `--no-daemon` для CI (избегает проблем с кэшем демона):
+
   ```bash
   ./gradlew test --no-daemon --console=plain
   ```
+
 - `make test` уже включает нужные флаги для CI.

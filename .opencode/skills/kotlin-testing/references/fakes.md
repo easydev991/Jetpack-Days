@@ -81,7 +81,7 @@ private class FakeItemRepository : ItemRepository {
 Тонкости:
 - `private class` — внутри тест-класса, не выноси в общий файл.
 - Метод `setItems(items)` — публичный для теста, не часть интерфейса.
-- Дополнительные геттеры (`containsItem`, `items`) — допустимы,
+- Дополнительные геттеры (`containsItem`) — допустимы,
   если упрощают assertions.
 - `_items.value = newList` — триггерит эмиссию во всех подписчиках.
 

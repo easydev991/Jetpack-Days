@@ -87,7 +87,7 @@ viewModel = DetailScreenViewModel(
 для тестирования "будущих" и "прошедших" напоминаний:
 
 ```kotlin
-val nowMillis = 1_800_000_000_000L
+var nowMillis = 1_800_000_000_000L
 viewModel = DetailScreenViewModel(
     repository = repository,
     logger = NoOpLogger(),
@@ -107,7 +107,7 @@ testDispatcher.scheduler.advanceUntilIdle()
 
 ```kotlin
 @Test
-fun whenitemnotfound_thenremainsinloadingstate() = runTest {
+fun when_item_not_found_then_remains_in_loading_state() = runTest {
     // Given - Repository не содержит элемент
     val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
     viewModel = DetailScreenViewModel(
@@ -194,17 +194,34 @@ failures.
 В unit-тестах Flow проверяется через `viewModel.uiState.value` после
 `advanceUntilIdle()`. Turbine в unit-тестах не нужен и не используется.
 
+## StateFlow с `WhileSubscribed`
+
+Часть state собирается через `stateIn(..., WhileSubscribed(5000), ...)`
+(`AppDataScreenViewModel`, `ThemeIconViewModel`,
+`MainScreenViewModel.sortOrder`): upstream стартует только при
+подписчике, поэтому чтение `.value` без подписки вернёт initialValue.
+
+В проекте чтение `.value` после `advanceUntilIdle()` обычно работает —
+Flow подписан внутри самого ViewModel через `combine` в
+`viewModelScope`. Если тестируете изолированный Flow без внутренней
+подписки — подпишитесь до чтения:
+
+```kotlin
+backgroundScope.launch { viewModel.sortOrder.collect { } }
+testDispatcher.scheduler.advanceUntilIdle()
+```
+
 ## Проверка нескольких эмиссий без Turbine
 
 ```kotlin
 @Test
 fun whenItemReemits_thenStateUpdates() = runTest {
-    repository.setItem(testItem)
+    repository.setItems(listOf(testItem))
     testDispatcher.scheduler.advanceUntilIdle()
     val stateAfterFirstLoad = viewModel.uiState.value as DetailScreenState.Success
 
     // Имитируем re-emit (например, после сохранения из Edit screen)
-    repository.setItem(testItem.copy(timestamp = testItem.timestamp + 1))
+    repository.setItems(listOf(testItem.copy(timestamp = testItem.timestamp + 1)))
     testDispatcher.scheduler.advanceUntilIdle()
 
     val stateAfterReemit = viewModel.uiState.value as DetailScreenState.Success
@@ -212,7 +229,7 @@ fun whenItemReemits_thenStateUpdates() = runTest {
 }
 ```
 
-Каждый `setItem` + `advanceUntilIdle()` = один «снимок» Flow.
+Каждый `setItems` + `advanceUntilIdle()` = один «снимок» Flow.
 Промежуточные состояния смотри через `viewModel.uiState.value`.
 
 ## Типичные ошибки

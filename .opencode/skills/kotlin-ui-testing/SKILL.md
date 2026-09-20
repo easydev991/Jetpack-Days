@@ -48,35 +48,29 @@ description: >
    (`org.junit.jupiter.api.*`) — только в unit-тестах `app/src/test/`.
    `@RunWith(AndroidJUnit4::class)` — в интеграционных тестах
    (Activity, data/, reminder/) и в большинстве компонентных
-   Compose-тестов (7 из 10). Без него — DaysCountTextTest,
+   Compose-тестов. Без него — DaysCountTextTest,
    ColorSelectorUiTest, ColorTagFilterDialogTest (с v2 API
    не требуется).
 2. **ComposeTestRule — v2 API (`androidx.compose.ui.test.junit4.v2`).**
    Компонентный тест — `createComposeRule()`; тест с реальной
    MainActivity — `createAndroidComposeRule<MainActivity>()`. Правило
    объявляется как `@get:Rule val composeTestRule = ...`.
-   Для старта Activity с кастомным `Intent` (push, deep link) — **нет**
-   overload `createAndroidComposeRule(intent)` в v2 (см. `AndroidComposeTestRule.android.kt`):
-   собираем правило через `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)`.
-   `androidx.test.core.app.ActivityScenario` — `AutoCloseable`, не `TestRule`,
-   поэтому **не** передаётся напрямую — нужен `androidx.test.ext.junit.rules.ActivityScenarioRule`
-   (`extends ExternalResource`, `TestRule`). Внутренний `getActivityFromTestRule(rule)`
-   помечен `internal` и недоступен из androidTest module — нужен свой helper
-   через `lateinit var`. См. `references/activity-integration.md`.
+   Для старта Activity с кастомным `Intent` (push, deep link) —
+   следуй разделу «Кастомный launch Intent» в
+   `references/activity-integration.md`: там канонический рецепт и все
+   подводные камни v2 API.
    Если логика выносима в pure-функцию — используйте **pure-JVM gate**
    (companion-объект + `@VisibleForTesting`), см. тот же reference.
 3. **snake_case для имён тестов, без обратных кавычек.** Форматы:
-   `subject_whenCondition_thenResult` (`dialog_whenSameColorClicked_thenDeselects`),
-   `when_condition_then_result` (`when_items_count_4_then_search_field_not_displayed`),
-   составной `subject_verb_suffix_thenResult` (`themeIconScreen_displaysAppBarWithBackButton`,
-   `themeIconScreen_clicksLightTheme_callsOnThemeChange`).
-   Обратные кавычки в существующих тестах не используются.
+   `subject_whenCondition_thenResult`, `when_condition_then_result`,
+   составной `subject_verb_suffix[_whenCondition]`. Примеры —
+   `references/fundamentals.md` (раздел «Именование тестов»).
 4. **Given / When / Then в каждом тесте.** Разделяй тело тремя
    комментариями-маркерами.
 5. **Никакого `!!`.** Даже в тестах. Используй `?.`, `?:`, `let`,
    `checkNotNull`, `assertNotNull(...)` перед доступом к полям.
-6. **Сообщения `assert` — на русском.** По образцу существующих тестов:
-   «A (09:00) должен быть выше B (18:00) при сортировке «сначала старые»...».
+6. **Сообщения `assert` — на русском**, с контекстом и фактическими
+   значениями. Образец — `references/fundamentals.md` (раздел «Правила»).
 7. **Строки UI — через ресурсы, не хардкод.** `context.getString(R.string.save)`
    вместо «Сохранить». `context` — из `InstrumentationRegistry.getInstrumentation().targetContext`
    или `ApplicationProvider.getApplicationContext()`.
@@ -87,12 +81,14 @@ description: >
    (см. `references/component-testing.md` — `TestViewModel.kt`).
 9. **Интеграционный тест с данными — реальный Room in-memory.**
    `Room.inMemoryDatabaseBuilder(...).allowMainThreadQueries().build()`,
-   `@After` закрывает базу (`database.close()`). Для ViewModel-теста —
-   `clearAllTables()` в `@Before`. Вставка данных — через `runBlocking`.
+   `@After` закрывает базу (`database.close()`) — при per-test базе
+   cleanup данных не нужен; `clearAllTables()` обязателен только для
+   process-wide базы через синглтон `getDatabase()` (activity-тесты).
+   Вставка данных — через `runBlocking`.
 10. **`waitForIdle()` после вставки данных.** Любой `runBlocking { ... }`
     с изменением БД перед assert обязан сопровождаться
     `composeTestRule.waitForIdle()`.
-11. **Никакого `Thread.sleep`.** Для ожидания условий — 
+11. **Никакого `Thread.sleep`.** Для ожидания условий —
     `waitUntil(timeoutMillis = ...) { ... }` или `waitForIdle()`.
     `Thread.sleep` в существующих тестах не используется.
 12. **Turbine — только для ViewModel-интеграции** в `androidTest/`
@@ -102,14 +98,24 @@ description: >
     `@get:Rule val mainDispatcherRule = MainDispatcherRule()` — заменяет
     `Dispatchers.Main` на `StandardTestDispatcher`. Без него
     `viewModelScope.launch` не контролируется тестом.
+14. **Один `setContent` на тест (sealed v2 API).** Повторный
+    `composeTestRule.setContent` в том же тесте бросает
+    `IllegalStateException: ... has already set content`. «Второй экран»
+    в рамках теста — подмена состояния через `mutableStateOf` внутри
+    первого `setContent` (по образцу `ThemeIconScreenTest`: свой
+    хелпер `setContent(...)` с параметрами вместо повторных вызовов).
 
 ## Запуск тестов
 
 - **Все androidTest**: `make android-test` — запуск
-  `./gradlew connectedDebugAndroidTest --console=plain` + человекочитаемый
-  отчёт через `scripts/android_test_report.py`.
-- **Отчёт в браузере**: `make android-test-report` — открывает
-  `app/build/reports/androidTests/connected/debug/index.html`.
+  `./gradlew connected<Flavor>DebugAndroidTest` (для дефолта `FLAVOR=github` —
+  `connectedGithubDebugAndroidTest`) + человекочитаемый отчёт через
+  `scripts/android_test_report.py`.
+- **Отчёт в браузере**: `make android-test-report` — открывает index.html
+  из `app/build/reports/androidTests/connected/`. Путь зависит от
+  варианта (AGP 9 с flavors): `connected/<buildType>/flavors/<flavor>/` —
+  для дефолтного `make android-test` (`FLAVOR=github`) это
+  `connected/debug/flavors/github/index.html`.
 - **Все тесты (unit + интеграционные)**: `make test-all`.
 - Отчёт `android_test_report.py`: exit code 0 при успехе, 1 при упавших
   тестах или ошибке Gradle. Подробности — `references/running-tests.md`.
@@ -163,6 +169,14 @@ description: >
 | `onNodeWithText` не находит строку | Используй `context.getString(R.string.xxx)` — строка может быть в ресурсах, а не хардкодом; проверь, что вызван `setContent` (тема `JetpackDaysTheme` — если компонент её использует) |
 | Данные вставил, а UI их не видит | После `runBlocking { ... }` вызови `composeTestRule.waitForIdle()` |
 | `onAllNodesWithContentDescription` без проверки количества | Добавь `.assertCountEquals(n)` — иначе тест проходит при 0 нод |
+| `onAllNodesWithTag` / `onNodeWithText` находит 0 нод, хотя нода есть | Нода внутри контейнера с `mergeDescendants = true` (строка списка, кнопка, диалог) не видна в merged-дереве — ищи с `useUnmergedTree = true` |
+| `performClick` на недоступной (disabled) ноде падает | У disabled-ноды нет click-action — паттерн «тап по недоступному → ничего не произошло» не работает. Проверяй `assertIsNotEnabled` или подсчёт disabled-нод |
+| `Unresolved reference 'click'` в `performTouchInput` | `click`/`longClick`/`doubleClick` — extension-функции `TouchInjectionScope`, каждой нужен свой импорт: `import androidx.compose.ui.test.click` |
+| `onNodeWithText("15")` не находит день в M3 `DatePicker` | В material3 1.4+ номер дня вычищен из семантики ячейки (доступен только локализованный description даты). Актуально для `DatePickerDialogSection` в CreateEdit — проверяй через `context.getString` description или тестировать колбэки, а не тексты ячеек |
+| Нод в диалоге больше, чем ожидал `assertCountEquals` | `onAllNodes(...)` видит форму под диалогом (DatePickerDialog в CreateEdit) — сужай матчер или учитывай фон |
+| `navController.navigate(...)` бросает `IllegalArgumentException: destination not found` | Компонентный тест без графа навигации: оберни экран в `NavHost`-харнесс с заглушкой destination (`NavHost(navController, startDestination = ...) { composable(...) { ТестируемыйЭкран(...) } }`) |
+| `navController` нужен снаружи `setContent` | `lateinit var navController; composeTestRule.setContent { rememberNavController().also { navController = it } }` |
+| Второй `setContent` бросает `IllegalStateException: has already set content` | Sealed v2 API — один `setContent` на тест; смену экрана/состояния делай через `mutableStateOf` внутри первого `setContent` (правило 14) |
 | `assertIsDisplayed()` падает, хотя нода есть вне экрана | Проверяй позицию через `fetchSemanticsNode().boundsInRoot` или проскролль до ноды |
 | ViewModel в тесте не реагирует на действия | Добавь `MainDispatcherRule` (`Dispatchers.setMain`), иначе `viewModelScope` использует реальный Main |
 | Тест Room падает «cannot access database on the main thread» | `.allowMainThreadQueries()` при создании in-memory базы |
@@ -170,13 +184,13 @@ description: >
 | `assertTrue(x is Y)` без проверки sealed перед `as Y` | Сначала `assertTrue(state is DetailScreenState.Success)`, потом `as` — иначе ClassCastException |
 | Alarm-тест не видит PendingIntent | Ищи через `PendingIntent.getBroadcast(...)` с `FLAG_NO_CREATE or FLAG_IMMUTABLE` (см. `references/alarm-reminder.md`) |
 | Тест уведомлений падает на API 33+ | Оберни в `runWithNotificationPermission { ... }` — `adoptShellPermissionIdentity(POST_NOTIFICATIONS)` (см. `references/alarm-reminder.md`) |
-| Ротация не работает в тесте | `composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` + `waitForIdle()` (см. `references/activity-integration.md`). **Caveat:** `setRequestedOrientation` + `Activity.setIntent(intent)` ломают `ActivityScenario.close()` в `@After` (таймаут 45-90 сек в `Activity never becomes DESTROYED`). Для логики recreation — предпочитайте pure-JVM gate или `scenario.recreate()` без `setIntent`. |
-| Нужно передать кастомный Intent на старте (push, deep link) | В v2 нет `createAndroidComposeRule(intent)`; используй `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)` (см. `references/activity-integration.md`). **`ActivityScenario.launch(intent)` не компилируется** (`ActivityScenario` не `TestRule`). **`scenario.getActivity()` не существует** — используй свой `activityFromRule` через `lateinit var`. |
+| Ротация не работает в тесте | `composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` + `waitForIdle()` (см. `references/activity-integration.md`). **Caveat:** `setRequestedOrientation` + `Activity.setIntent(intent)` ломают `ActivityScenario.close()` в `@After` — см. «Caveat: `setIntent` + recreation ломает cleanup» там же. |
+| Нужно передать кастомный Intent на старте (push, deep link) | В v2 нет `createAndroidComposeRule(intent)`; используй `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)` — детали и подводные камни в `references/activity-integration.md` (раздел «Кастомный launch Intent»). |
 
 ## Verification checklist
 
-- [ ] Тест на JUnit 4: импорты из `org.junit.*`, класс аннотирован
-      `@RunWith(AndroidJUnit4::class)`
+- [ ] Тест на JUnit 4: импорты из `org.junit.*`;
+      `@RunWith(AndroidJUnit4::class)` где требуется (см. правило 1)
 - [ ] `@get:Rule val composeTestRule` — `createComposeRule()` (компонент)
       или `createAndroidComposeRule<MainActivity>()` (экран); для кастомного
       launch-intent — `AndroidComposeTestRule(activityRule = ActivityScenarioRule(intent), activityProvider = ::activityFromRule)`
@@ -188,10 +202,15 @@ description: >
 - [ ] Компонентный тест — изоляция через `TestViewModel` / фейковые
       зависимости, обёртка в `JetpackDaysTheme` (по необходимости)
 - [ ] Интеграционный тест — Room in-memory с `allowMainThreadQueries()`,
-      `database.close()` в `@After` (или `clearAllTables()` в `@Before`),
-      вставки через `runBlocking` + `waitForIdle()`
+      `database.close()` в `@After` (cleanup данных — только для
+      process-wide базы, см. правило 9), вставки через `runBlocking` +
+      `waitForIdle()`
 - [ ] ViewModel-тест — `MainDispatcherRule`; Turbine только в `androidTest/`
 - [ ] Нет `Thread.sleep` — `waitUntil(timeoutMillis = ...)` / `waitForIdle()`
+- [ ] Один `setContent` на тест; смена экрана — через `mutableStateOf`
+      внутри первого `setContent`
+- [ ] Поиск нод внутри merged-контейнеров (строки списка, диалоги,
+      тест-теги) — с `useUnmergedTree = true`, где нужно
 - [ ] Файлы в `app/src/androidTest/` зеркалят структуру `app/src/main/`
 - [ ] Имя класса оканчивается на `Test` (или `UiTest` / `IntegrationTest` /
       `InstrumentedTest`)
