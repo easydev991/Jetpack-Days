@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test
  *
  * Гейт — pure-функция от `savedInstanceState`, поэтому тестируется без Activity,
  * без Compose, без Robolectric, без эмулятора. Дополнительная интеграционная
- * антирегрессия — `MainActivityDeepLinkRotationUiTest.given_regular_launch_when_activity_recreated_then_open_detail_item_id_remains_null`
- * (androidTest, эмулятор).
+ * антирегрессия — `given_regular_launch_when_activity_recreated_then_open_detail_item_id_remains_null`
+ * из `MainActivityDeepLinkRotationUiTest` (androidTest, эмулятор).
  */
 class MainActivityReminderGatingTest {
     @Test

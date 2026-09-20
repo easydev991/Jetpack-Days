@@ -39,6 +39,13 @@ doubt — do not duplicate their content here.
 Do not pin versions in this file — they change often, and stale values
 have caused wrong answers before. Read the files above.
 
+**Detekt**: лимит `maxIssues: 5` (`config/detekt/detekt.yml`). Повышать
+лимит **без прямого согласования с владельцем репо запрещено**. Новые
+detekt-предупреждения исправляются до завершения задачи. Исключение —
+заранее известное предупреждение, запланированное к исправлению на
+следующих этапах той же задачи: допустимо на промежуточном этапе,
+злоупотреблять нельзя.
+
 ---
 
 ## Build / Lint / Test
