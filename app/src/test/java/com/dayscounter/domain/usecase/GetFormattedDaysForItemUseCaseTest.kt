@@ -1,14 +1,23 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.crash.CrashlyticsHelper
+import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.TimePeriod
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.unmockkAll
+import io.mockk.verify
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.ZoneId
@@ -30,6 +39,17 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase = formatDaysTextUseCase,
             resourceProvider = resourceProvider
         )
+
+    @BeforeEach
+    fun setUp() {
+        mockkObject(CrashlyticsHelper)
+        every { CrashlyticsHelper.logException(any(), any()) } just runs
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun invoke_when_event_in_future_and_showminus_true_then_shows_minus_sign() {
@@ -522,5 +542,51 @@ class GetFormattedDaysForItemUseCaseTest {
 
         // Then
         assertEquals("-7 дней", result)
+    }
+
+    @Test
+    fun invoke_when_formatter_throws_then_fallback_text_and_logs_to_crashlytics() {
+        // Given
+        val item =
+            Item(
+                id = 1L,
+                title = "Событие",
+                details = "",
+                timestamp = 0L,
+                colorTag = null,
+                displayOption = DisplayOption.DAY
+            )
+
+        every { calculateDaysDifferenceUseCase(any(), any()) } returns
+            DaysDifference.Calculated(
+                period = TimePeriod(years = 0, months = 0, days = 7),
+                totalDays = 7,
+                timestamp = 0L
+            )
+        every {
+            formatDaysTextUseCase(
+                difference = any(),
+                displayOption = any(),
+                resourceProvider = any(),
+                showMinus = any()
+            )
+        } throws IllegalStateException("formatter broken")
+
+        // When
+        val result = useCase.invoke(item = item, showMinus = true)
+
+        // Then: на экране прежний fallback-текст ...
+        assertEquals(
+            "${resourceProvider.getString(ResourceIds.ERROR_FORMATTING)}: 7",
+            result,
+            "При сбое форматирования должен вернуться fallback-текст"
+        )
+        // ... и сбой должен попасть в crash-канал
+        verify(exactly = 1) {
+            CrashlyticsHelper.logException(
+                ofType(IllegalStateException::class),
+                match { it.contains("Ошибка форматирования") }
+            )
+        }
     }
 }

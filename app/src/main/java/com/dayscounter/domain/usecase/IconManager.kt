@@ -2,6 +2,7 @@ package com.dayscounter.domain.usecase
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
@@ -49,14 +50,10 @@ class IconManager(
                 PackageManager.DONT_KILL_APP
             )
             logger.d(TAG, "Иконка $targetComponentClassName АКТИВИРОВАНА")
-        } catch (e: SecurityException) {
-            logger.e(TAG, "Ошибка при активации иконки: нет прав", e)
-            throw e
-        } catch (e: PackageManager.NameNotFoundException) {
-            logger.e(TAG, "Компонент не найден при активации иконки", e)
-            throw e
-        } catch (e: IllegalArgumentException) {
-            logger.e(TAG, "Неверный аргумент при активации иконки", e)
+        } catch (e: Exception) {
+            logger.e(TAG, "Ошибка при активации иконки", e)
+            // Запрошенное действие не выполнено — репортим, исключение доставляем как раньше
+            CrashlyticsHelper.logException(e, "Ошибка смены иконки: ${e.message}")
             throw e
         }
 
@@ -96,6 +93,9 @@ class IconManager(
             // Не выбрасываем исключение - продолжаем деактивацию остальных
         } catch (e: Exception) {
             logger.e(TAG, "Неожиданная ошибка при деактивации иконки", e)
+            // Сброс не удался, но действие уже выполнено: один non-fatal о сбросе,
+            // throw-семантика (глотание) не меняется
+            CrashlyticsHelper.logException(e, "Ошибка сброса иконки: ${e.message}")
             // Не выбрасываем исключение - продолжаем деактивацию остальных
         }
     }

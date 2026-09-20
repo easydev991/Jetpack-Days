@@ -7,6 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
@@ -108,8 +109,12 @@ class DetailScreenViewModel(
                     )
                 }
             } catch (e: DeleteFailed) {
-                val message = "Ошибка удаления события: ${e.message}"
+                // Идентификатор в сообщении — по паттерну репозиториев (design: Goals),
+                // чтобы диагностировать сбой без отладчика
+                val message = "Ошибка удаления события itemId=$itemId: ${e.message}"
                 logger.e("DetailScreenViewModel", message, e)
+                // Удаление не сработало, а UI об этом не знает — отчёт обязателен
+                CrashlyticsHelper.logException(e, message)
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.ExactAlarmPermissionState
 import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.util.AndroidLogger
@@ -55,7 +56,10 @@ class ExactAlarmPermissionViewModel(
             // (OOM, StackOverflow); ловить и логировать их бессмысленно,
             // рантайм сам завершит процесс. По паттерну MoreScreen.kt:214-218
             // (UI-слой ловит системные ошибки запуска intent'а).
-            logger.w(TAG, "Не удалось открыть настройки SCHEDULE_EXACT_ALARM", e)
+            val message = "Не удалось открыть настройки SCHEDULE_EXACT_ALARM"
+            logger.w(TAG, message, e)
+            // Тот же текст, что и в logcat: канал одного сообщения
+            CrashlyticsHelper.logException(e, message)
         }
         refresh()
     }

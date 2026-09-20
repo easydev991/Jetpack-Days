@@ -1,6 +1,8 @@
 package com.dayscounter.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.dayscounter.crash.CrashlyticsHelper
+import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderMode
@@ -9,6 +11,12 @@ import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ReminderRequest
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.NoOpLogger
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +59,9 @@ class DetailScreenViewModelTest {
         testDispatcher = StandardTestDispatcher()
         Dispatchers.setMain(testDispatcher)
 
+        mockkObject(CrashlyticsHelper)
+        every { CrashlyticsHelper.logException(any(), any()) } just runs
+
         repository = FakeItemRepository()
         reminderManager = FakeReminderManager()
     }
@@ -58,6 +69,7 @@ class DetailScreenViewModelTest {
     @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkAll()
     }
 
     @Test
@@ -420,12 +432,50 @@ class DetailScreenViewModelTest {
         }
     }
 
+    @Test
+    fun whendeletefails_then_logs_to_crashlytics() {
+        runTest {
+            // Given - ViewModel с загруженным элементом и сбоем удаления в репозитории
+            val deleteError = ItemException.DeleteFailed("DB constraint failed")
+            repository.nextDeleteException = deleteError
+            repository.setItem(testItem)
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId))
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // When - Подтверждаем удаление, репозиторий бросает DeleteFailed
+            viewModel.confirmDelete()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then: молчаливая неудача удаления должна попасть в crash-канал
+            verify(exactly = 1) {
+                CrashlyticsHelper.logException(
+                    eq(deleteError),
+                    match { it.contains("Ошибка удаления события itemId=$testItemId") }
+                )
+            }
+            assertTrue(
+                repository.containsItem(testItemId),
+                "Элемент должен остаться при сбое удаления"
+            )
+        }
+    }
+
     /**
      * Fake repository для тестов DetailScreenViewModel.
      * Минимальная реализация ItemRepository.
      */
     private class FakeItemRepository : ItemRepository {
         private val items = MutableStateFlow<List<Item>>(emptyList())
+
+        /** Если установлен — deleteItem бросает это исключение (симуляция сбоя БД). */
+        var nextDeleteException: Throwable? = null
 
         private fun List<Item>.sortedByOrder(sortOrder: com.dayscounter.domain.model.SortOrder): List<Item> =
             when (sortOrder) {
@@ -475,6 +525,7 @@ class DetailScreenViewModelTest {
         }
 
         override suspend fun deleteItem(item: Item) {
+            nextDeleteException?.let { throw it }
             items.value = items.value.filterNot { it.id == item.id }
         }
 

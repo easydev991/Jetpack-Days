@@ -6,12 +6,12 @@
 
 ## What Changes
 
-- Добавить `CrashlyticsHelper.logException(e, message)` в 6 точек отказа — всего 8 catch-блоков, сгруппированных в 6 пунктов (приоритет A аудита catch-сайтов, сент. 2026):
+- Добавить `CrashlyticsHelper.logException(e, message)` в 6 точек отказа — всего 6 catch-блоков, сгруппированных в 6 пунктов (приоритет A аудита catch-сайтов, сент. 2026):
   - `AlarmReminderScheduler` — `SecurityException` (нет exact alarm) → fallback на inexact;
   - `GetFormattedDaysForItemUseCase` — сбой форматирования (fallback-текст на экране без причины);
   - `ExactAlarmPermissionViewModel` — сбой открытия настроек;
   - `DetailScreenViewModel` — `ItemException.DeleteFailed` (удаление молча не срабатывает);
-  - `IconManager.changeIcon` — 3 узких catch при установке иконки;
+  - `IconManager.changeIcon` — один общий catch при установке иконки (3 исходных узких catch сведены к одному по итогам ревью, throw-семантика сохранена);
   - `IconManager.disableComponent` — logException в его существующем общем catch при сбросе иконок (throw-семантика не меняется).
 - Для каждого сайта — unit-тест Red/Green с `mockkObject(CrashlyticsHelper)` и verify `logException`.
 - Поведение приложения не меняется: fallback-ветки, `Result.failure` и UI-состояния остаются как есть; добавляется только наблюдаемость (non-fatal в консоли).

@@ -4,13 +4,17 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
 import com.dayscounter.util.Logger
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
@@ -34,6 +38,10 @@ class AlarmReminderSchedulerTest {
         every { context.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
         mockkStatic(PendingIntent::class)
         every { PendingIntent.getBroadcast(any(), any(), any<Intent>(), any<Int>()) } returns pendingIntent
+        // Канал crash-отчётов мокаем явно: в JVM-тестах Firebase SDK не активен,
+        // но полагаемся на детерминированный verify, а не на "повезёт/не повезёт"
+        mockkObject(CrashlyticsHelper)
+        every { CrashlyticsHelper.logException(any(), any()) } just runs
     }
 
     @AfterEach
@@ -87,6 +95,13 @@ class AlarmReminderSchedulerTest {
                 "AlarmReminderScheduler",
                 match { it.contains("SCHEDULE_EXACT_ALARM") && it.contains("setAndAllowWhileIdle") },
                 ofType(SecurityException::class)
+            )
+        }
+        // Скрытый сбой доставки уведомлений должен попадать в crash-канал
+        verify(exactly = 1) {
+            CrashlyticsHelper.logException(
+                ofType(SecurityException::class),
+                match { it.contains("SCHEDULE_EXACT_ALARM") && it.contains("setAndAllowWhileIdle") }
             )
         }
     }

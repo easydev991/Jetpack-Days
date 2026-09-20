@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
@@ -68,6 +69,8 @@ class GetFormattedDaysForItemUseCase(
             // Обрабатываем исключения при форматировании
             val message = "Ошибка форматирования: ${e.message}"
             android.util.Log.e("GetFormattedDaysForItemUseCase", message, e)
+            // Тот же текст, что и в logcat: канал одного сообщения
+            CrashlyticsHelper.logException(e, message)
             // Вычисляем общее количество дней как заглушку
             when (difference) {
                 is DaysDifference.Today -> resourceProvider.getString(ResourceIds.TODAY)
