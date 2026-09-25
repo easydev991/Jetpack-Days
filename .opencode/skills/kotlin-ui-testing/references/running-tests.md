@@ -21,6 +21,16 @@ ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVO
   `connectedGithubDebugAndroidTest`)
 - Требуется подключённое устройство или запущенный эмулятор
 
+### Ускорение прогонов: `make emulator-fast`
+
+После каждого старта эмулятора вызывайте `make emulator-fast` — отключает
+анимации (`window_animation_scale`, `transition_animation_scale`,
+`animator_duration_scale` → 0). На A/B-замерах 2026-09-26 `make android-test`
+стал в ~2× быстрее (≈63 с → ≈28 с на 108 тестах); откат — те же
+`adb shell settings put … 1`. Настройка не переживает перезапуск
+эмулятора — это и есть причина отдельной цели, а не вставки в
+`android-test`.
+
 ## Один класс
 
 Для быстрой итерации один тест-класс или метод фильтруется через

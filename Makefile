@@ -10,7 +10,7 @@ RESET=\033[0m
 # Версия Ruby в проекте
 RUBY_VERSION=3.2.2
 
-# Канал дистрибуции: rustore (по умолчанию) или github
+# Канал дистрибуции: rustore или github (по умолчанию)
 FLAVOR ?= github
 FLAVOR_TITLE := $(if $(filter rustore,$(FLAVOR)),Rustore,Github)
 ifeq ($(filter rustore github,$(FLAVOR)),)
@@ -86,6 +86,12 @@ test-all: _ensure_secrets
 	@echo "Все тесты выполнены"
 	@echo "Unit: app/build/test-results/"
 	@echo "Интеграционные: app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html"
+
+## emulator-fast: Отключить анимации эмулятора для ускорения androidTest. Вызывать после каждого старта эмулятора; откат — те же три команды со значением 1.
+emulator-fast:
+	@adb shell settings put global window_animation_scale 0
+	@adb shell settings put global transition_animation_scale 0
+	@adb shell settings put global animator_duration_scale 0
 
 # Анализ кода
 ## lint: Запуск ktlint, detekt, markdownlint и Android Lint (проверка)
@@ -535,4 +541,4 @@ rustore-commit:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint
+.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast

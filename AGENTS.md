@@ -74,6 +74,19 @@ It skips `markdownlint` with a yellow warning when the CLI is
 missing — install it (`npm i -g markdownlint-cli`) or run `make setup`
 to get the full check.
 
+`make emulator-fast` отключает анимации эмулятора (`window_animation_scale`,
+`transition_animation_scale`, `animator_duration_scale` → 0) — вызывать
+после каждого старта эмулятора; откат — те же три `settings put` со
+значением `1`. Ускоряет `make android-test` в ~2× (см.
+`docs/plans/ui-tests-optimization.md`, A/B 2026-09-26).
+
+**Канон androidTest:** в разработке/итерации —
+`make android-test ANDROID_TEST_FILTER=<FQN класса затронутого экрана>`
+(быстрая итерация по одному классу — механизм фильтра в
+`.opencode/skills/kotlin-ui-testing/references/running-tests.md`).
+Полный `make android-test` без фильтра — перед коммитом задачи и
+перед релизом (ловит регрессии в соседних экранах).
+
 ---
 
 ## Testing
