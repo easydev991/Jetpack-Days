@@ -226,4 +226,8 @@ description: >
 - `references/viewmodel-integration.md`
 - `references/alarm-reminder.md`
 - `references/running-tests.md`
+- Ручная проверка на эмуляторе (MCP `mobile-mcp`) сценариев, которые
+  UI-тесты не покрывают (long-press + меню, Toast на API <33, тайминг
+  уведомлений, ротация) — правила и шпаргалка инструментов в
+  `.opencode/rules/android-emulator.md`
 - `references/EXAMPLE.md`

@@ -162,22 +162,9 @@ in mind while editing:
 - Logs in Russian, error messages user-facing only when localized via
   `ResourceProvider`
 
-Safe-unwrapping patterns (mandatory):
-
-```kotlin
-// ❌ val itemId = savedStateHandle["itemId"]!!
-
-// ✅ checkNotNull with informative message
-private val itemId: Long = checkNotNull(savedStateHandle["itemId"]) {
-    "ItemId parameter is required"
-}
-
-// ✅ let for null-safe call
-repository.getItemById(itemId)?.let { item -> /* ... */ }
-
-// ✅ Elvis for default
-val icon = screen.icon ?: defaultIcon
-```
+Safe unwrapping (mandatory; `!!` is caught mechanically by detekt
+`UnsafeCallOnNullableType`): `?`, `?:`, `let`, `checkNotNull` —
+patterns and examples: `.opencode/rules/code-style.md`.
 
 ---
 

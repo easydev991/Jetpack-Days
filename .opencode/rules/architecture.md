@@ -1,69 +1,29 @@
 # Архитектура
 
-## MVVM
+## MVVM + Clean Architecture
 
-- **Model**: Data layer (Room, repositories)
-- **View**: Compose UI
-- **ViewModel**: UI state management
+- **Model** — Data layer (Room, repositories); **View** — Compose UI;
+  **ViewModel** — состояние UI
+- Слои: Presentation (UI, ViewModel) → Domain (Use Cases, entities) →
+  Data (Repositories, только локальные источники)
+- **Нет сетевых источников данных**
 
-## Clean Architecture
+## Dependency Injection
 
-```
-Presentation (UI, ViewModel)
-├── Domain (Use Cases, entities)
-└── Data (Repositories, только локальные источники)
-```
-
-**Важно:** Нет сетевых источников данных.
-
----
-
-## Dependency Injection (DI)
-
-**Ручной DI через factory методы** в `FormatterModule` и `AppModule`. Проект не использует Hilt.
-
-**Причины:** простой граф зависимостей, быстрая компиляция, меньше зависимостей, простые тесты.
-
-**DI модули:**
-
-- `FormatterModule` - factory методы для форматирования и use cases
-- `AppModule` - factory методы для репозитория и DataStore
-
-**Примечание:** Hilt стоит рассмотреть при росте проекта (>10 ViewModel, сложные графы зависимостей). См. `docs/Hilt_Setup_Plan.md`
+Ручной DI через factory-методы: `FormatterModule` (форматирование, use
+cases) и `AppModule` (репозиторий, DataStore). Hilt не используется —
+простой граф, быстрая компиляция, простые тесты. Пересмотреть при росте
+(>10 ViewModel, сложные графы) — план в `docs/Hilt_Setup_Plan.md`.
 
 ## Слои
 
-### Data
-
-- **Room**: `ItemEntity`, `ItemDao`, `DaysDatabase`, конвертеры
-- **Repository**: `ItemRepositoryImpl` - реализация репозитория
-- **Provider**: `DaysFormatter`, `ResourceProvider` - форматирование и локализация
-- **Preferences**: `AppSettingsDataStore` - хранение настроек (тема, иконка, сортировка)
-
-### Domain
-
-- **Use Cases**: бизнес-логика, один use case - одна ответственность:
-  - `CalculateDaysDifferenceUseCase`, `FormatDaysTextUseCase`, `GetFormattedDaysForItemUseCase`
-  - `GetDaysAnalysisTextUseCase`, `ExportBackupUseCase`, `ImportBackupUseCase`
-  - `IconManager` - смена иконки приложения
-- **Entities**: `Item`, `DaysDifference`, `DisplayOption`, `SortOrder`, `AppTheme`, `AppIcon`, `TimePeriod`
-- **Repository Interface**: `ItemRepository` - абстракция репозитория
-
-### Presentation
-
-- **ViewModels**: `MainScreenViewModel`, `CreateEditScreenViewModel`, `DetailScreenViewModel`, `RootScreenViewModel`, `AppDataScreenViewModel`, `ThemeIconViewModel`, `MainActivityViewModel`
-- **UI State**: sealed классы (Loading/Success/Error), `AppDataUiState`, `RootScreenState`, `ThemeIconUiState`
-- **Screens**: Compose экраны в `ui/screens/`
-- **Navigation**: `navigation/Screen.kt`
-- **Theme**: тема в `ui/theme/`
-
-### Reminder
-
-- **ReminderWorker**: периодическая проверка и уведомления о прошедших событиях
-- **NotificationHelper**: создание и управление уведомлениями
-
-### Utilities
-
-- **Logger**: `Logger` интерфейс (`AndroidLogger`, `NoOpLogger`)
-- **Analytics**: `FirebaseAnalyticsHelper` - screen_view, события (только release)
-- **Crash**: `CrashlyticsHelper` - отчеты о крашах (только release)
+- **Data**: `data/database/` (Room: entities, DAO, DB, конвертеры, мапперы),
+  `data/repository/` (реализации), `data/preferences/` (AppSettingsDataStore),
+  `data/provider/` (DaysFormatter, ResourceProvider)
+- **Domain**: `domain/usecase/` (один use case — одна ответственность),
+  `domain/model/`, `domain/repository/` (интерфейсы), `domain/exception/`
+- **Presentation**: `ui/screens/`, `ui/viewmodel/`, `ui/state/` (sealed
+  Loading/Success/Error, data class для простых состояний), `ui/ds/`,
+  `ui/theme/`, `navigation/Screen.kt`
+- **Reminder**: `reminder/` — планировщик напоминаний и уведомления
+- **Прочее**: `analytics/`, `crash/` (только release), `di/`, `util/`

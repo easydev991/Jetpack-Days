@@ -17,7 +17,7 @@ ij_kotlin_name_count_to_use_star_import = 999
 ij_kotlin_name_count_to_use_star_import_for_members = 999
 ij_kotlin_import_nested_classes = false
 ij_kotlin_packages_to_use_import_on_demand =
-ktlint_standard_function-naming = disabled
+ktlint_function_naming_ignore_when_annotated_with = Composable, Test, ParameterizedTest, BeforeEach, AfterEach, Nested, TestFactory, TestTemplate, RepeatableTest
 
 [*.xml]
 indent_style = space

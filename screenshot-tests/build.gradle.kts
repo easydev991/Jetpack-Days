@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
 
         testInstrumentationRunner = "com.dayscounter.screenshots.ScreenshotTestRunner"
 

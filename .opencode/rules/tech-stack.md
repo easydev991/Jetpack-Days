@@ -1,22 +1,22 @@
 # Технологический стек
 
-## Зависимости
+- **UI**: Jetpack Compose, Navigation Compose, ViewModel
+- **Данные**: Room, DataStore, Coroutines, kotlinx-serialization (JSON бэкапа,
+  совместим с iOS-приложением)
+- **Тесты**: JUnit 5, MockK, kotlinx-coroutines-test (unit); Compose Testing
+  (androidTest)
+- **Telemetry**: Firebase Crashlytics + Analytics — только release
 
-- **Jetpack Compose** - UI
-- **Navigation Compose** - навигация
-- **ViewModel** - управление состоянием UI
-- **Room** - локальная БД
-- **DataStore** - простое хранение
-- **Coroutines** - асинхронность
-- **kotlinx-serialization** - JSON для резервного копирования
-- **Firebase Crashlytics** - сбор ошибок (только release)
-- **Firebase Analytics** - breadcrumb logs для отладки крашей
-- **JUnit 5** - unit-тесты
-- **MockK** - мокирование
-- **Espresso** - UI тесты
+**ВАЖНО:** Сетевые библиотеки (Retrofit, OkHttp, Ktor) НЕ используются —
+приложение полностью офлайн.
 
-**ВАЖНО:** Сетевые библиотеки (Retrofit, OkHttp, Ktor) НЕ используются.
+**Исключение (carve-out):** ручная проверка обновлений
+(`CheckForAppUpdateUseCase`) использует платформенный
+`javax.net.ssl.HttpsURLConnection` (нативный Android API с API 1, без
+сетевых библиотек и новых зависимостей) через узкую абстракцию
+`HttpRequestExecutor`. Единственное разрешённое сетевое взаимодействие
+в проекте и НЕ прецедент для других фич — новые сетевые фичи по-прежнему
+запрещены офлайн-правилом.
 
-**Исключение (carve-out):** ручная проверка обновлений (`CheckForAppUpdateUseCase`) использует платформенный `javax.net.ssl.HttpsURLConnection` (нативный Android API с API 1, без сетевых библиотек и новых зависимостей) через узкую абстракцию `HttpRequestExecutor`. Это единственное разрешённое сетевое взаимодействие в проекте и НЕ прецедент для других фич — новые сетевые фичи по-прежнему запрещены офлайн-правилом.
-
-Версии зависимостей автоматически обновляются в `gradle/libs.versions.toml` и отображаются в `README.md`. Ручное указание версий здесь не требуется.
+Версии — только в `gradle/libs.versions.toml` (source of truth), обновляются
+автоматически и отображаются в `README.md`.

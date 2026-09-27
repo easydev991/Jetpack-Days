@@ -2,35 +2,21 @@
 
 ## Производительность
 
-### Память
-
-- `viewModelScope.launch` для корутин с автоматической отменой при очистке
-- `StateFlow` с `SharingStarted.WhileSubscribed` (таймаут 5000мс) в DetailScreenViewModel
-- `rememberSaveable` для сохранения состояния при реконфигурации
-
-### БД
-
-- Room DAO с Flow для реактивных запросов
-- `searchItems` с LIKE без индексов (текущее состояние)
-
-### UI
-
-- `LazyColumn` с `key = { it.id }` для стабильной идентификации
-- `rememberLazyListState()` для сохранения состояния прокрутки
-- `verticalScroll(rememberScrollState())` для форм
-- `rememberSaveable` для локального состояния (title, details, selectedDate, selectedColor)
+- Корутины — `viewModelScope.launch` (автоотмена); `StateFlow` +
+  `SharingStarted.WhileSubscribed(5000)`
+- `rememberSaveable` — состояние при реконфигурации и локальные поля форм;
+  `rememberLazyListState()` — позиция прокрутки
+- `LazyColumn` с `key = { it.id }`; Room DAO через `Flow` для реактивных
+  запросов
+- `searchItems` — LIKE без индексов (текущее состояние)
 
 ## Безопасность
 
-### Данные
-
-- `TextField` с `minLines` для ограничения ввода (detailsSection.kt:199)
-- Room для безопасного хранения данных
-- Безопасное разворачивание опционалов: `checkNotNull`, `?.let`, `?:`
-
-### Файлы
-
-- ImportBackupUseCase: обработка `FileNotFoundException`, `IOException`, `SerializationException`, `SQLException`
-- JSON с `ignoreUnknownKeys = true` для игнорирования неизвестных полей
-- Фильтрация дубликатов при импорте по title/details/timestamp/displayOption
-- `contentResolver.openInputStream()` с автоматическим закрытием через `use`
+- `TextField` с `minLines` ограничивает ввод (detailsSection.kt:199)
+- Room для безопасного локального хранения; безопасное разворачивание
+  опционалов: `checkNotNull`, `?.let`, `?:`
+- ImportBackupUseCase: обработка `FileNotFoundException`, `IOException`,
+  `SerializationException`, `SQLException`; JSON с `ignoreUnknownKeys = true`
+  для неизвестных полей; фильтрация дубликатов по
+  title/details/timestamp/displayOption; `contentResolver.openInputStream()`
+  закрывается через `use`

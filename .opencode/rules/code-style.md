@@ -2,17 +2,21 @@
 
 ## Kotlin
 
-- Data классы для моделей
-- **Безопасное разворачивание опционалов**: использовать `?`, `?:`, `let`, `checkNotNull` вместо `!!`
-- Sealed классы для состояний/результатов
+- Data классы для моделей; sealed классы для состояний/результатов
 - Extension functions для читаемости
+- **Никогда `!!`**: `?`, `?:`, `let`, `checkNotNull` — нарушение ловит detekt (`UnsafeCallOnNullableType`)
+
+```kotlin
+private val itemId: Long = checkNotNull(savedStateHandle["itemId"]) { "ItemId parameter is required" }
+repository.getItemById(itemId)?.let { item -> /* ... */ }
+val icon = screen.icon ?: defaultIcon
+```
 
 ## Compose
 
-- `State`/`MutableState` для UI состояния
-- Однонаправленный поток данных (состояние flows down, события flows up)
-- `ViewModel` для состояния UI
-- `CompositionLocal` только для темы/глобальной конфигурации
+- `State`/`MutableState` для UI состояния, однонаправленный поток данных
+  (состояние течёт вниз, события — вверх)
+- `ViewModel` для состояния UI; `CompositionLocal` только для темы/глобальной конфигурации
 
 ```kotlin
 @Preview
@@ -26,99 +30,28 @@ fun ComponentPreview() {
 
 ## Обработка ошибок
 
-**В Use Cases** - использовать стандартный `Result<T>`:
+- Use Cases — стандартный `Result<T>`, исключения мапятся в доменные
+  (`BackupException`, `ItemException`):
 
 ```kotlin
 suspend operator fun invoke(uri: Uri): Result<Int> =
     try {
-        // логика
         Result.success(items.size)
     } catch (e: IOException) {
         Result.failure(BackupException("Не удалось экспортировать данные: ${e.message}", e))
     }
 ```
 
-**Для UI состояний** - использовать sealed классы:
-
-```kotlin
-sealed class DetailScreenState {
-    data object Loading : DetailScreenState()
-    data class Success(val item: Item) : DetailScreenState()
-    data class Error(val message: String) : DetailScreenState()
-}
-```
-
-**Безопасное разворачивание опционалов**:
-
-```kotlin
-// ❌ Плохо: использовать !!
-val itemId = savedStateHandle["itemId"]!!
-
-// ✅ Хорошо: использовать checkNotNull с информативным сообщением
-private val itemId: Long =
-    checkNotNull(savedStateHandle["itemId"]) {
-        "ItemId parameter is required"
-    }
-
-// ✅ Хорошо: использовать let для null-safe вызова
-repository.getItemById(itemId)?.let { item ->
-    // работаем с item
-}
-
-// ✅ Хорошо: использовать Elvis оператор
-val icon = screen.icon ?: defaultIcon
-```
+- UI-состояния — sealed классы (`Loading` / `Success(item)` / `Error(message)`);
+  простое состояние — data class (`RootScreenState`)
 
 ## Навигация
 
-```kotlin
-sealed class Screen(
-    val route: String,
-    val icon: ImageVector? = null,
-    val titleResId: Int? = null,
-) {
-    object Events : Screen(
-        route = "events",
-        icon = Icons.AutoMirrored.Filled.List,
-        titleResId = R.string.events,
-    )
-
-    object ItemDetail : Screen(
-        route = "item_detail/{itemId}",
-    ) {
-        fun createRoute(itemId: Long) = "item_detail/$itemId"
-    }
-}
-```
-
-## Именование
-
-- Классы: `PascalCase`
-- Функции/переменные: `camelCase`
-- Константы: `UPPER_SNAKE_CASE`
-- Пакеты: `lowercase.with.dots`
+Маршруты — в `navigation/Screen.kt`: sealed class с `route` и опциональными
+`icon`/`titleResId`, хелперы `createRoute(...)` для параметризованных маршрутов
+(живой пример — `Screen.ItemDetail`).
 
 ## Комментарии
 
-- KDoc для публичных API
-- Объяснять "почему", не "что"
-- Логи на русском
-
-## UI State
-
-Использовать `data class` для сложных состояний, `sealed class` для состояний с несколькими вариантами:
-
-```kotlin
-// Простой state - data class
-data class RootScreenState(
-    val currentTab: Screen = Screen.Events,
-    val tabs: List<Screen> = listOf(Screen.Events, Screen.More),
-)
-
-// Сложный state с вариантами - sealed class
-sealed class DetailScreenState {
-    data object Loading : DetailScreenState()
-    data class Success(val item: Item) : DetailScreenState()
-    data class Error(val message: String) : DetailScreenState()
-}
-```
+- KDoc для публичных API; объяснять «почему», не «что»
+- Логи на русском; сообщения пользователю — только через `ResourceProvider`

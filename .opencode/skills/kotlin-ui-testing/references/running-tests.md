@@ -19,7 +19,9 @@ ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVO
 - `connected<Flavor>DebugAndroidTest` — инструментированные тесты debug-сборки
   flavor'а; flavor задаётся `FLAVOR` (дефолт `github` →
   `connectedGithubDebugAndroidTest`)
-- Требуется подключённое устройство или запущенный эмулятор
+- Требуется подключённое устройство или запущенный эмулятор.
+  Проверка — `adb devices` (или `mobile_list_available_devices` через MCP).
+  Без девайса androidTest не запустятся — это ожидаемо, не повторять попытки.
 
 ### Ускорение прогонов: `make emulator-fast`
 
