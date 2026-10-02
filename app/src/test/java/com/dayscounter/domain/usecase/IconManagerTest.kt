@@ -92,7 +92,9 @@ class IconManagerTest {
         } answers {
             disableCallCount += 1
             if (disableCallCount == 1) {
-                throw RuntimeException("disable failed")
+                // Не IllegalStateException: та ловится в disableComponent отдельной
+                // веткой без non-fatal — тест проверяет generic-ветку с Crashlytics
+                throw UnsupportedOperationException("disable failed")
             }
         }
 

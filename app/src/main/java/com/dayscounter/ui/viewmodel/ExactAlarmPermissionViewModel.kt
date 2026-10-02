@@ -47,15 +47,20 @@ class ExactAlarmPermissionViewModel(
      * Если helper бросил [android.content.ActivityNotFoundException]
      * (кастомные прошивки MIUI/HyperOS без экрана SCHEDULE_EXACT_ALARM) —
      * исключение логируется и поглощается, refresh() всё равно вызывается.
+     *
+     * `TooGenericExceptionCaught` подавлен сознательно: catch широкий
+     * (см. комментарий внутри catch), чтобы любой системный сбой запуска
+     * intent'а на кривых прошивках логировался вместо крэша.
      */
+    @Suppress("TooGenericExceptionCaught")
     fun onRequestPermission() {
         try {
             helper.requestSettings()
         } catch (e: Exception) {
             // Ловим Exception, но не Throwable: Error — неустранимые сбои JVM
             // (OOM, StackOverflow); ловить и логировать их бессмысленно,
-            // рантайм сам завершит процесс. По паттерну MoreScreen.kt:214-218
-            // (UI-слой ловит системные ошибки запуска intent'а).
+            // рантайм сам завершит процесс. По паттерну MoreScreen.kt (UI-слой
+            // ловит системные ошибки запуска intent'а).
             val message = "Не удалось открыть настройки SCHEDULE_EXACT_ALARM"
             logger.w(TAG, message, e)
             // Тот же текст, что и в logcat: канал одного сообщения
