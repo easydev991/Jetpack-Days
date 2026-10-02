@@ -7,19 +7,38 @@ since events. Fully offline; backup format is shared with the iOS
 counterpart.
 
 **Hard constraints (do not violate):**
-- Offline only: no Retrofit / OkHttp / Ktor — see `.opencode/rules/tech-stack.md`
-  (sole carve-out: manual update check uses platform `HttpsURLConnection`,
-  same file → «Исключение»)
-- Backup format must stay compatible with the iOS app (iOS uses
-  `NSKeyedArchiver`; importer lives in `domain/usecase/ImportBackupUseCase.kt`)
+- Offline only: no Retrofit / OkHttp / Ktor (единственный carve-out — Stack ниже)
+- Backup format must stay compatible with the iOS app (importer —
+  `domain/usecase/ImportBackupUseCase.kt`; правила — навык `backup`)
 - Logs and user-facing comments are Russian by default
-- **Never use `!!`** — use `?`, `?:`, `let`, `checkNotNull`
+- **Never use `!!`** — use `?`, `?:`, `let`, `checkNotNull` (ловит detekt)
 
-Per-area rules (auto-loaded by OpenCode via `opencode.json` →
-`instructions`) live in `.opencode/rules/*.md`:
-`overview`, `architecture`, `code-style`, `code-quality`, `tech-stack`,
-`project-structure`, `performance-security`, `tdd`. Load them when in
-doubt — do not duplicate their content here.
+Operational rules (auto-loaded by OpenCode via `opencode.json` →
+`instructions` glob): `.opencode/rules/test-execution.md` (прогоны тестов,
+gotcha gradle-задач) and `.opencode/rules/android-emulator.md` (MCP-эмулятор).
+
+---
+
+## Stack
+
+UI — Compose + Navigation Compose + ViewModel; данные — Room, DataStore,
+Coroutines, kotlinx-serialization; тесты — JUnit 5 + MockK (unit),
+Compose Testing (androidTest); телеметрия — Firebase, только release.
+
+**Carve-out:** ручная проверка обновлений (`CheckForAppUpdateUseCase`) —
+единственное сетевое взаимодействие в проекте: платформенный
+`HttpsURLConnection` через узкую абстракцию `HttpRequestExecutor`.
+Не прецедент — новые сетевые фичи запрещены офлайн-правилом.
+
+---
+
+## Architecture
+
+MVVM + Clean: Presentation (UI, ViewModel) → Domain (Use Cases, entities)
+→ Data (Room, repositories — только локальные источники).
+
+DI — ручной, factory-методы: `FormatterModule`, `AppModule` (в `di/`).
+Hilt не используется; пересмотреть при росте (>10 ViewModel, сложные графы).
 
 ---
 
@@ -30,157 +49,94 @@ doubt — do not duplicate their content here.
 | Library / plugin versions | `gradle/libs.versions.toml` |
 | `compileSdk` / `minSdk` / `targetSdk` | `app/build.gradle.kts` |
 | App version (`VERSION_NAME`, `VERSION_CODE`) | `gradle.properties` |
-| Version badges rendered in README | `<!-- BEGIN_VERSIONS -->` block in `README.md` (kept current by `make update_readme_versions`) |
-| Build flavors | `app/build.gradle.kts` (`productFlavors`) — каналы дистрибуции в [docs/deployment.md → Каналы дистрибуции](docs/deployment.md#каналы-дистрибуции) |
-| Release / signing flow | `docs/deployment.md` + `Makefile` |
+| Version badges in README | `<!-- BEGIN_VERSIONS -->` (обновляет `make update_readme_versions`) |
+| Build flavors / release flow | [docs/deployment.md](docs/deployment.md) + `Makefile` |
 | Detekt config | `config/detekt/detekt.yml` |
-| ktlint / detekt plugins | `app/build.gradle.kts` |
 
-Do not pin versions in this file — they change often, and stale values
-have caused wrong answers before. Read the files above.
-
-**Detekt**: лимит `maxIssues: 5` (`config/detekt/detekt.yml`). Повышать
-лимит **без прямого согласования с владельцем репо запрещено**. Новые
-detekt-предупреждения исправляются до завершения задачи. Исключение —
-заранее известное предупреждение, запланированное к исправлению на
-следующих этапах той же задачи: допустимо на промежуточном этапе,
-злоупотреблять нельзя.
+Do not pin versions in this file — they change often. Read the files above.
 
 ---
 
 ## Build / Lint / Test
 
-All user-facing commands live in the `Makefile`; run `Makefile` (`make help` lists the full set — no need to duplicate here). Direct gradle entrypoints for finer control:
+Все команды — через `make` (`make help` — полный список); правила прогонов
+и gotcha gradle-задач — `.opencode/rules/test-execution.md`. Цели
+`make build` / `make test` / `make install` / `make android-test` сами
+подтягивают секреты через SSH.
 
-```bash
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"      # single class
-./gradlew test --tests "*DaysDifferenceTest"                                                   # pattern
-./gradlew test --tests "…UseCaseTest.calculate_when_same_day_then_returns_today"               # single method
-./gradlew ktlintCheck && ./gradlew app:detekt                                                 # lint only
-./gradlew :app:assembleRustoreDebug :screenshot-tests:assembleDebug --quiet                    # used by screenshots target
-```
+**Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют
+`_ensure_secrets` — на чистом чекауте упадут с «google-services.json not
+found» без пояснения.
 
-**Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют prerequisite `_ensure_secrets` (он инлайнен в `Makefile` напрямую в prereq-листы 11 gradle-целей: `build`/`install`/`test`/`android-test`/`_build_screenshots_apk`/`screenshots*`/`rustore`/`apk`/`_rustore_build_aab`). На чистом чекауте без `.secrets/keystore` и `app/google-services.json` они упадут с «google-services.json not found» без пояснения. Для локальной разработки предпочтительны цели `make build` / `make test` / `make install` / `make android-test` — они подтягивают секреты через SSH автоматически.
+`make lint` = ktlint + detekt + Android Lint (оба флейвора) + markdownlint
+(CLI опционален, ставится `make setup`).
 
-**Gotcha:** `make test` propagates gradle build failures (explicit
-`[FAIL] СБОРКА ПРОВАЛИЛАСЬ` line, non-zero exit). Still, the human-readable
-verdict comes from `scripts/test_report.py` (it parses
-`app/build/test-results/`) — a failing/skipped test there is a failure even
-when `make` exits 0.
-
-`make lint` runs ktlint, detekt, Android Lint (target `lint-android`,
-both flavors: `lintGithubDebug` + `lintRustoreDebug`) and `markdownlint`.
-It skips `markdownlint` with a yellow warning when the CLI is
-missing — install it (`npm i -g markdownlint-cli`) or run `make setup`
-to get the full check.
-
-`make emulator-fast` отключает анимации эмулятора (`window_animation_scale`,
-`transition_animation_scale`, `animator_duration_scale` → 0) — вызывать
-после каждого старта эмулятора; откат — те же три `settings put` со
-значением `1`. Ускоряет `make android-test` в ~2× (см.
-`docs/plans/ui-tests-optimization.md`, A/B 2026-09-26).
-
-**Канон androidTest:** в разработке/итерации —
-`make android-test ANDROID_TEST_FILTER=<FQN класса затронутого экрана>`
-(быстрая итерация по одному классу — механизм фильтра в
-`.opencode/skills/kotlin-ui-testing/references/running-tests.md`).
-Полный `make android-test` без фильтра — перед коммитом задачи и
-перед релизом (ловит регрессии в соседних экранах).
+**Detekt**: `maxIssues: 5`. Повышать лимит **без согласования с владельцем
+репо запрещено**; новые предупреждения исправляются до завершения задачи.
 
 ---
 
 ## Testing
 
-Before writing tests, load the matching skill:
+- Unit (`app/src/test/`) — навык `kotlin-testing`; androidTest
+  (`app/src/androidTest/`) — навык `kotlin-ui-testing`; прогоны —
+  `.opencode/rules/test-execution.md`
+- TDD: строго Тесты → Логика (домен и данные) → UI — Compose создаётся
+  после покрытия логики тестами; пирамида 70/20/10; именование и AAA —
+  навык `kotlin-testing`
 
-- `kotlin-testing` (`.opencode/skills/kotlin-testing/SKILL.md`) — for
-  `app/src/test/` (unit). JUnit 5, MockK, kotlinx-coroutines-test,
-  Turbine, Fake repos on `MutableStateFlow`, AAA structure with
-  `// Given / // When / // Then` markers, snake_case test names without
-  backticks. ViewModel integration tests are **forbidden** here.
-- `kotlin-ui-testing` (`.opencode/skills/kotlin-ui-testing/SKILL.md`) —
-  for `app/src/androidTest/`. JUnit 4, Compose Testing v2, Room
-  in-memory, Turbine, real `AlarmManager`. No Espresso.
+Конвенции Room (миграция без теста не принимается):
 
-TDD order (tests → logic → UI) and the 70/20/10 pyramid are defined in
-`.opencode/rules/tdd.md` — read it before starting a new feature.
+- каждая `Migration` коммитится в паре с `MigrationTest` (androidTest,
+  `MigrationTestHelper`) и новым `N.json` в `app/schemas/`
+- простые изменения схемы — `@AutoMigration`; рукописный SQL — для сложных
+- мок-юниты на SQL миграций запрещены (`verify { execSQL }` с relaxed не
+  ловит синтаксические ошибки) — только интеграционный тест
+
+---
+
+## Code Style
+
+Проектные конвенции (сверх дефолтов Kotlin/Compose):
+
+- Use Cases возвращают `Result<T>`, исключения мапятся в доменные
+  (`BackupException`, `ItemException`)
+- UI-состояния: взаимоисключающие визуальные состояния — sealed-классы
+  (`Loading`/`Success`/`Error`); простое состояние — data class
+- Маршруты — `navigation/Screen.kt`: sealed class + хелперы
+  `createRoute(...)` (живой пример — `Screen.ItemDetail`)
+- Сообщения пользователю — только через `ResourceProvider`; строки — в
+  `strings.xml` (навык `localization`)
+
+---
+
+## Performance & Security
+
+Нюансы текущего состояния (не дефолты платформы):
+
+- `searchItems` — LIKE без индексов (известное ограничение)
+- `TextField` с `minLines` ограничивает ввод (CreateEditFormContent.kt)
+- Импорт бэкапа: толерантный парсинг (`ignoreUnknownKeys`), фильтрация
+  дубликатов, стримы через `use` — детали в навыке `backup`
 
 ---
 
 ## Project Structure
 
-Full tree and placement rules live in `.opencode/rules/project-structure.md`.
-Compact view of `app/src/main/java/com/dayscounter/`:
-
 ```
-data/        # Room (database/, mappers), provider/, preferences/, repository/
-domain/      # model/, repository/ (interface), usecase/, exception/
-ui/          # ds/ (reusable), screens/<feature>/, state/, theme/, viewmodel/
-reminder/    # AlarmReminderScheduler, ReminderBootReceiver, ReminderAlarmReceiver
-navigation/  # Screen.kt (sealed class with createRoute helpers)
-analytics/   # FirebaseAnalyticsHelper (release-only)
-crash/       # CrashlyticsHelper (release-only)
-di/          # AppModule, FormatterModule — manual factory DI, no Hilt
-util/        # AndroidLogger, NoOpLogger, ClipboardHelper, ThemeUtils, AppConstants
+app/src/main/java/com/dayscounter/
+├── data/        # database/ (Room), provider/, preferences/, repository/
+├── domain/      # model/, repository/ (interface), usecase/, exception/
+├── ui/          # ds/ (переиспользуемые компоненты), screens/, state/, theme/, viewmodel/
+├── navigation/  # Screen.kt — маршруты
+├── reminder/    # worker, notification
+├── analytics/   # Firebase, release-only
+├── crash/       # Crashlytics, release-only
+├── di/          # AppModule, FormatterModule — manual DI
+└── util/        # Logger, AppConstants, ThemeUtils
 ```
 
-DI rationale + module breakdown: `.opencode/rules/architecture.md`.
-
----
-
-## Release / Signing
-
-- Signing secrets live in a private repo (`easydev991/android-secrets`),
-  fetched over SSH by `make rustore` / `make apk` into a temp `.secrets/`
-  dir. Configure SSH access with `make setup_ssh` first.
-- `make rustore` increments `VERSION_CODE`, builds a signed AAB
-  (`rustore` flavor → `dayscounter{N}.aab`), and uploads Crashlytics
-  mapping files. For a two-step workflow (draft + manual moderation),
-  use `make rustore-draft` then `make rustore-commit VID=<vid>`
-  after checking release notes in the RuStore Console.
-  Use `make apk FLAVOR=github` when you want a signed APK
-  (`github` flavor → `dayscounter{N}.apk`) without bumping the build
-  number.
-- Fastlane uses the Ruby version pinned in `.ruby-version` (rbenv);
-  `make setup` installs the full toolchain. Screenshots live in
-  `fastlane/metadata/android/<locale>/images/phoneScreenshots/`.
-
----
-
-## Code Style (summary)
-
-Full rules: `.opencode/rules/code-style.md`. Top reminders worth keeping
-in mind while editing:
-
-- Data classes for models; sealed classes for UI states / `Result<T>`
-- Use Cases return `Result<T>`, mapping exceptions to domain failures
-  (`BackupException`, `ItemException`)
-- Navigation routes live in `navigation/Screen.kt` (sealed class with
-  `createRoute(...)` helpers); screen entries take an optional `icon`
-  and `titleResId`
-- KDoc for public APIs; comment *why*, not *what*
-- Logs in Russian, error messages user-facing only when localized via
-  `ResourceProvider`
-
-Safe unwrapping (mandatory; `!!` is caught mechanically by detekt
-`UnsafeCallOnNullableType`): `?`, `?:`, `let`, `checkNotNull` —
-patterns and examples: `.opencode/rules/code-style.md`.
-
----
-
-## Performance
-
-Full notes in `.opencode/rules/performance-security.md`. Defaults used
-across the codebase:
-
-- `viewModelScope.launch` for coroutines (auto-cancellation)
-- `StateFlow` with `SharingStarted.WhileSubscribed(5000)`
-- `rememberSaveable` for state across config changes
-- `LazyColumn` with `key = { it.id }`; `rememberLazyListState()` for
-  scroll position
-- Room DAO via `Flow` for reactive queries
-- Crashlytics + Analytics enabled only in `release` build type
-  (`manifestPlaceholders["crashlyticsCollectionEnabled"]`)
+Тесты — `app/src/test/` (unit) и `app/src/androidTest/`, структура зеркалит код.
 
 ---
 
@@ -188,6 +144,6 @@ across the codebase:
 
 1. `make format` — fixes ktlint + detekt + markdown issues
 2. `make test` — read the report; do not trust exit code alone
-3. No `!!` operators
-4. KDoc on public APIs
+3. Все замечания ktlint/detekt устранены; новый код не добавляет проблем
+4. KDoc on public APIs; осмысленные имена
 5. No deprecated APIs (`./gradlew lint` flags them)
