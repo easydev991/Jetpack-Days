@@ -29,7 +29,7 @@
 
 ## Каналы дистрибуции
 
-Проект собирается в двух `productFlavors` (`app/build.gradle.kts:36-44`) — flavor определяет канал дистрибуции и набор интегрированных фич.
+Проект собирается в двух `productFlavors` (см. `productFlavors` в `app/build.gradle.kts`) — flavor определяет канал дистрибуции и набор интегрированных фич.
 
 | Flavor | Канал | `BuildConfig.RUSTORE_FEATURES` | Назначение |
 | --- | --- | --- | --- |

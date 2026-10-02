@@ -32,21 +32,22 @@ python3 scripts/test_report.py
 # Все unit-тесты (без отчёта)
 ./gradlew test
 
-# Один тестовый класс
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"
+# Один тестовый класс (имена задач flavor-aware после AGP 9;
+# голый `test` — агрегатор, `--tests` не принимает)
+./gradlew testGithubDebugUnitTest --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest"
 
 # По паттерну (Class содержит подстроку)
-./gradlew test --tests "*DaysDifferenceTest"
+./gradlew testGithubDebugUnitTest --tests "*DaysDifferenceTest"
 
 # Один тестовый метод
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate_when_same_day_then_returns_today"
+./gradlew testGithubDebugUnitTest --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest.calculate_when_same_day_then_returns_today"
 
 # Все тесты в пакете
-./gradlew test --tests "com.dayscounter.ui.viewmodel.*"
+./gradlew testGithubDebugUnitTest --tests "com.dayscounter.ui.viewmodel.*"
 
 # Несколько классов
-./gradlew test --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest" \
-                --tests "com.dayscounter.domain.usecase.FormatDaysTextUseCaseTest"
+./gradlew testGithubDebugUnitTest --tests "com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCaseTest" \
+                 --tests "com.dayscounter.domain.usecase.FormatDaysTextUseCaseTest"
 ```
 
 JUnit Platform понимает wildcard `*` как часть имени класса.
@@ -108,8 +109,8 @@ app/build/reports/tests/testDebugUnitTest/classes/    # детали по кла
 ### Тест не нашёлся класс
 
 ```bash
-# Проверь, что компилируется testDebugUnitTest
-./gradlew compileDebugUnitTestKotlin
+# Проверь, что компилируется (имена задач flavor-aware после AGP 9)
+./gradlew compileGithubDebugUnitTestKotlin
 ```
 
 ### Gradle кэш не подхватил изменения в тестах

@@ -26,6 +26,7 @@ HTML-отчёта `app/build/reports/tests/.../index.html`, после фикс�
 make test                                    # JVM (JUnit 5) — XML в app/build/test-results/
 make android-test                            # androidTest (JUnit 4) — XML в app/build/outputs/androidTest-results/
 make android-test ANDROID_TEST_FILTER=<FQN>  # один класс/метод (Class#method) — итерация по экрану
+make android-test-report                     # открыть HTML-отчёт androidTest в браузере
 make emulator-fast                           # после каждого старта эмулятора — выключает анимации
 
 # Перечитать отчёт БЕЗ нового прогона (make clean стирает XML):
@@ -34,9 +35,15 @@ python3 scripts/android_test_report.py GithubDebug   # androidTest (аргуме
 ```
 
 Полный `make android-test` — перед коммитом задачи и перед релизом.
-Отладочный запуск без отчёта — `./gradlew testDebugUnitTest --tests
-"..." --info`, но результат всё равно проверять через `test_report.py`
-по XML на диске, не через повторный `make`.
+Отладочный запуск без отчёта — `./gradlew testGithubDebugUnitTest --tests
+"..." --info` (голый `test` агрегатор, `--tests` не принимает), но
+результат всё равно проверять через `test_report.py` по XML на диске, не
+через повторный `make`.
+
+**Gotcha AGP 9:** имена gradle-задач flavor-aware — `testDebugUnitTest` /
+`compileDebugUnitTestKotlin` НЕ существуют (candidates:
+`testGithubDebugUnitTest`, `compileGithubDebugUnitTestKotlin`, ...).
+Работают корневые `test` / `lint` / `ktlintCheck` / `app:detekt`.
 
 ## Эмулятор для androidTest
 
