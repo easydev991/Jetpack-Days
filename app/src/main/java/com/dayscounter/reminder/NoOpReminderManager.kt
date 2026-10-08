@@ -7,6 +7,7 @@ import com.dayscounter.domain.usecase.ReminderRequest
  * Заглушка ReminderManager для тестов и превью.
  */
 object NoOpReminderManager : ReminderManager {
+    @Suppress("UNUSED_PARAMETER")
     override suspend fun saveReminder(
         request: ReminderRequest,
         itemTitle: String

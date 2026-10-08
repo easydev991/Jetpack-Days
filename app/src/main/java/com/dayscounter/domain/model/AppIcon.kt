@@ -1,14 +1,10 @@
 package com.dayscounter.domain.model
 
 /**
- * Перечисление доступных иконок приложения.
- *
- * @property DEFAULT Основная иконка (по умолчанию)
- * @property ICON_2 Второй вариант иконки
- * @property ICON_3 Третий вариант иконки
- * @property ICON_4 Четвёртый вариант иконки
- * @property ICON_5 Пятый вариант иконки
- * @property ICON_6 Шестой вариант иконки
+ * Перечисление доступных иконок приложения:
+ * [AppIcon.DEFAULT] — основная (по умолчанию),
+ * [AppIcon.ICON_2] — второй вариант, [AppIcon.ICON_3] — третий,
+ * [AppIcon.ICON_4] — четвёртый, [AppIcon.ICON_5] — пятый, [AppIcon.ICON_6] — шестой.
  */
 enum class AppIcon {
     DEFAULT,

@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
  *
  * Проверяет контракт:
  * - при ненулевом [ReadSectionView] долгое нажатие открывает меню,
- *   клик по пункту «Скопировать» вызывает [ReadSectionView.onCopy] ровно один раз;
+ *   клик по пункту «Скопировать» вызывает `onCopy` ровно один раз;
  * - при `onCopy == null` долгое нажатие НЕ открывает меню.
  */
 @RunWith(AndroidJUnit4::class)

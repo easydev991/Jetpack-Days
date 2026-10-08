@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Документация: https://docs.github.com/en/rest/releases/releases#get-the-latest-release
  *
  * Все поля nullable: отсутствие ключа в ответе не должно приводить к падению
- * парсинга ([MissingFieldException]); defensive-проверка выполняется в use case.
+ * парсинга ([kotlinx.serialization.MissingFieldException]); defensive-проверка выполняется в use case.
  *
  * @property tagName Тег релиза, например "v1.2.3"
  * @property htmlUrl URL страницы релиза на GitHub

@@ -3,7 +3,6 @@ package com.dayscounter.ui.screens.common
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -47,7 +46,6 @@ import com.dayscounter.ui.viewmodel.ThemeIconViewModel
 /**
  * Навигационная панель.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NavigationBarContent(
     items: List<Screen>,
@@ -107,7 +105,6 @@ private fun NavGraphBuilder.mainScreenDestination(
 /**
  * Навигационное назначение для экрана деталей события.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.detailScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
     reminderManager: ReminderManager,
@@ -145,7 +142,6 @@ private fun NavGraphBuilder.detailScreenDestination(
 /**
  * Навигационное назначение для экрана создания/редактирования события.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 private fun NavGraphBuilder.createEditScreenDestination(
     repository: com.dayscounter.domain.repository.ItemRepository,
@@ -233,7 +229,6 @@ private fun NavGraphBuilder.moreScreenDestination(
 /**
  * Навигационное назначение для экрана темы и иконки.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.themeIconScreenDestination(
     analyticsService: AnalyticsService,
     navController: NavHostController,
@@ -256,7 +251,6 @@ private fun NavGraphBuilder.themeIconScreenDestination(
 /**
  * Навигационное назначение для экрана данных приложения.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.appDataScreenDestination(
     analyticsService: AnalyticsService,
     navController: NavHostController,
@@ -280,7 +274,6 @@ private fun NavGraphBuilder.appDataScreenDestination(
 /**
  * NavHost с маршрутами.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NavHostContent(
     navController: NavHostController,

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -25,7 +24,6 @@ import java.time.ZoneOffset
  * DatePicker Dialog.
  * Принимает plain-значения и callback'и вместо MutableState.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DatePickerDialogSection(
     selectedDate: LocalDate?,

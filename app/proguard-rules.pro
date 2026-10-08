@@ -1,30 +1,17 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Кастомные ProGuard/R8 правила.
+# Compose, Room и прочие AndroidX/Google-библиотеки несут consumer-правила
+# в самих AAR — дополнительные keep-правила для них не нужны.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-# Сохранить информацию о стек-трейсах для Crashlytics
--keepattributes *Annotation*
+# Читаемые стек-трейсы в Crashlytics — пара из доков Firebase:
+# атрибуты имён/строк сохраняются, оригинальные имена файлов в трейсах
+# скрыты константой SourceFile; деобфускация — через загруженный mapping
+# (uploadCrashlyticsMappingFile* на release-сборке).
 -keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Crashlytics
+# Crashlytics/Firebase: аннотации, исключения и generic-сигнатуры
+# (нужны SDK для рефлексии).
+-keepattributes *Annotation*
 -keepattributes exceptions
 -keepattributes signature
--keep class com.google.firebase.crashlytics.** { *; }
 -dontwarn com.google.firebase.crashlytics.**

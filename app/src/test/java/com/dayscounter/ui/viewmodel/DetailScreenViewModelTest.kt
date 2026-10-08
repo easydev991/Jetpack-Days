@@ -516,7 +516,7 @@ class DetailScreenViewModelTest {
             }
 
         override suspend fun insertItem(item: Item): Long {
-            items.value = items.value + item
+            items.value += item
             return item.id
         }
 
@@ -540,6 +540,7 @@ class DetailScreenViewModelTest {
         var activeReminder: Reminder? = null
         val clearedItemIds = mutableListOf<Long>()
 
+        @Suppress("UNUSED_PARAMETER")
         override suspend fun saveReminder(
             request: ReminderRequest,
             itemTitle: String

@@ -97,7 +97,7 @@ data class ReminderFormUiState(
 
 // 2. Единственный MutableState на уровне экрана
 @Composable
-fun CreateEditScreen(...) {
+fun CreateEditScreen(/* параметры экрана */) {
     val formState = rememberCreateEditUiState()
     // ...
 }

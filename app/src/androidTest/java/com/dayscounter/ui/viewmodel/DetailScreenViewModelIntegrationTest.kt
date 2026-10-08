@@ -40,7 +40,6 @@ class DetailScreenViewModelIntegrationTest {
     private lateinit var viewModel: DetailScreenViewModel
     private lateinit var context: Context
 
-    private val testItemId = 1L
     private val testItem =
         Item(
             id = 0L, // Используем id = 0L, чтобы Room генерировал новый ID

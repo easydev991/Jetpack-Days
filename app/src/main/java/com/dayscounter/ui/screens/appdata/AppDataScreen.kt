@@ -72,7 +72,6 @@ internal data class AppDataScreenParams(
  * @param viewModel ViewModel для управления состоянием экрана
  * @param onBackClick Callback для возврата на предыдущий экран
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDataScreen(
     viewModel: AppDataScreenViewModel,
@@ -105,9 +104,8 @@ fun AppDataScreen(
 
     // Показываем Toast при наличии сообщения о результате операции
     LaunchedEffect(uiState.resultMessage) {
-        uiState.resultMessage?.let { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
+        val message = uiState.resultMessage ?: return@LaunchedEffect
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     // Очищаем сообщение после показа Toast
@@ -265,7 +263,6 @@ private fun AppDataScreenDeleteButton(params: AppDataScreenParams) {
 /**
  * Диалог подтверждения удаления всех данных.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppDataScreenDeleteConfirmDialog(params: AppDataScreenParams) {
     AlertDialog(

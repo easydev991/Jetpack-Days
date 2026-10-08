@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test
  * Unit-тесты для [AlarmReminderScheduler] без Robolectric.
  *
  * Подход: мокаем `Context`, `AlarmManager` и статический [PendingIntent.getBroadcast]
- * (как в [ClipboardHelperTest] — на JVM без Robolectric реальная реализация падает).
+ * (как в [com.dayscounter.util.ClipboardHelperTest] — на JVM без Robolectric реальная реализация падает).
  */
 class AlarmReminderSchedulerTest {
     private val context: Context = mockk()

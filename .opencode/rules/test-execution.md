@@ -27,7 +27,7 @@ make test                                    # JVM (JUnit 5) — XML в app/buil
 make android-test                            # androidTest (JUnit 4) — XML в app/build/outputs/androidTest-results/
 make android-test ANDROID_TEST_FILTER=<FQN>  # один класс/метод (Class#method) — итерация по экрану
 make android-test-report                     # открыть HTML-отчёт androidTest в браузере
-make emulator-fast                           # после каждого старта эмулятора — выключает анимации
+make emulator-fast                           # после старта эмулятора — выключает анимации; android-test чинит их сам перед каждым прогоном
 
 # Перечитать отчёт БЕЗ нового прогона (make clean стирает XML):
 python3 scripts/test_report.py                       # JVM

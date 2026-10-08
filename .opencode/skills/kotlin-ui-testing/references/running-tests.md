@@ -23,15 +23,27 @@ ANDROID_TEST_GRADLE_EXIT_CODE=$$? python3 scripts/android_test_report.py $(FLAVO
   Проверка — `adb devices` (или `mobile_list_available_devices` через MCP).
   Без девайса androidTest не запустятся — это ожидаемо, не повторять попытки.
 
-### Ускорение прогонов: `make emulator-fast`
+### Масштабы анимаций: авто-защита от дрейфа
 
-После каждого старта эмулятора вызывайте `make emulator-fast` — отключает
-анимации (`window_animation_scale`, `transition_animation_scale`,
-`animator_duration_scale` → 0). На A/B-замерах 2026-09-26 `make android-test`
-стал в ~2× быстрее (≈63 с → ≈28 с на 108 тестах); откат — те же
-`adb shell settings put … 1`. Настройка не переживает перезапуск
-эмулятора — это и есть причина отдельной цели, а не вставки в
-`android-test`.
+`make android-test` **сам** проверяет и чинит масштабы анимаций перед каждым
+прогоном (prereq `_ensure_animations_off`; эмулятора нет — no-op) — вызывать
+`make emulator-fast` руками больше не обязательно для корректности, только для
+скорости первого прогона. `emulator-fast` отключает анимации
+(`window_animation_scale`, `transition_animation_scale`,
+`animator_duration_scale` → 0; на A/B-замерах 2026-09-26 прогон ~2× быстрее)
+со сверкой read-back: запись не прижилась → exit 1.
+
+Зачем защита: масштабы умеют откатываться уже **после** записи — 2026-10-08
+`animator_duration_scale` сам вернулся в `null` (= 1.0) через минуты после
+`make emulator-fast`, и UI-тесты шли втрое дольше (~2:33 → ~8:40). Причина
+сброса — на стороне системы эмулятора; полагаться на память («не забудь
+emulator-fast») нельзя — точка проверки = точка использования.
+
+Симптом-диагностика (прямой gradle-вызов мимо защиты): UI-тесты втрое дольше
+обычного или `qemu-system-aarch64` под сотнями процентов дольше ~минуты →
+`adb shell settings get global animator_duration_scale` (и соседние). Сам по
+себе краткий всплеск CPU эмулятора во время UI-теста — норма (рендер +
+оркестратор + GPU-эмуляция).
 
 ## Один класс
 

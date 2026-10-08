@@ -104,8 +104,8 @@ class ItemDaoTest {
             val timestamp = 2000000000000L
             val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
             val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
-            val idA = itemDao.insertItem(itemA)
-            val idB = itemDao.insertItem(itemB)
+            itemDao.insertItem(itemA)
+            itemDao.insertItem(itemB)
 
             // When
             val allItems = itemDao.getAllItems().first()
@@ -123,8 +123,8 @@ class ItemDaoTest {
             val timestamp = 2000000000000L
             val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
             val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
-            val idA = itemDao.insertItem(itemA)
-            val idB = itemDao.insertItem(itemB)
+            itemDao.insertItem(itemA)
+            itemDao.insertItem(itemB)
 
             // When
             val allItems = itemDao.getAllItemsAsc().first()
@@ -142,8 +142,8 @@ class ItemDaoTest {
             val timestamp = 2000000000000L
             val itemA = ItemEntity(title = "A (старое)", timestamp = timestamp)
             val itemB = ItemEntity(title = "B (новое)", timestamp = timestamp)
-            val idA = itemDao.insertItem(itemA)
-            val idB = itemDao.insertItem(itemB)
+            itemDao.insertItem(itemA)
+            itemDao.insertItem(itemB)
 
             // When
             val allItems = itemDao.getAllItemsDesc().first()

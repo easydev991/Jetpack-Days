@@ -443,7 +443,7 @@ private fun ItemsListContent(params: ItemsListParams) {
  *
  * Реализует UX-критерий «SearchField сворачивается при скролле вверх» без перевода экрана на
  * [androidx.compose.material3.MediumTopAppBar] (который ломает «title всегда в одной строке с
- * SortMenu и PaletteFilter» в [TopAppBar]).
+ * SortMenu и PaletteFilter» в [androidx.compose.material3.TopAppBar]).
  *
  * Механика: `clipToBounds()` стоит ВНЕ `Modifier.layout` — клип по свернувшейся высоте,
  * которую репортит layout. Контент размещается `placeRelative(0, -collapsePx)` — поле

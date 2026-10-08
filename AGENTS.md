@@ -133,10 +133,12 @@ app/src/main/java/com/dayscounter/
 ├── analytics/   # Firebase, release-only
 ├── crash/       # Crashlytics, release-only
 ├── di/          # AppModule, FormatterModule — manual DI
-└── util/        # Logger, AppConstants, ThemeUtils
+└── util/        # Logger, AppConstants
 ```
 
-Тесты — `app/src/test/` (unit) и `app/src/androidTest/`, структура зеркалит код.
+Тесты — `app/src/test/` (unit), `app/src/androidTest/` (инструментальные,
+структура зеркалит код) и модуль `screenshot-tests/` (скриншот-тесты,
+детали — docs/deployment.md).
 
 ---
 

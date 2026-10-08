@@ -88,7 +88,6 @@ internal fun CreateEditTopAppBar(
  * Основные секции формы (название, детали, дата).
  * Принимает plain-значения и callback'и.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainFormSections(
     params: CreateEditFormParams,
@@ -150,7 +149,7 @@ private fun ColorAndDisplayOptionSection(
  * Принимает CreateEditFormParams с plain-значениями и callback'ами.
  */
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CreateEditFormContent(params: CreateEditFormParams) {
     val reminderSettingsBringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -345,7 +344,6 @@ internal fun DetailsSection(
  * Секция с датой.
  * Принимает plain-значения и callback'и вместо MutableState.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DateSection(
     selectedDate: LocalDate?,

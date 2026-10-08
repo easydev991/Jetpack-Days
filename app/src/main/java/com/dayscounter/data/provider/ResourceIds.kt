@@ -45,12 +45,6 @@ object ResourceIds {
     /** Идентификатор строкового ресурса "Ошибка форматирования" */
     val ERROR_FORMATTING = R.string.error_formatting
 
-    /** Идентификатор строкового ресурса "Ошибка при вычислении: %1$s" */
-    val ERROR_CALCULATING = R.string.error_calculating
-
-    /** Идентификатор строкового ресурса "Ошибка форматирования: %1$s" */
-    val ERROR_FORMATTING_DETAILS = R.string.error_formatting_details
-
     /** Ресурс для строки "осталось" */
     val REMAINING = R.string.remaining
 

@@ -48,21 +48,19 @@ object NsKeyedArchiverParser {
      * @param base64String Строка для проверки
      * @return true если это валидный Base64 и начинается с "bplist00"
      */
-    fun isNsKeyedArchiver(base64String: String): Boolean {
-        if (base64String.isBlank()) return false
-
-        return try {
-            val bytes = Base64.getDecoder().decode(base64String)
-            bytes.size >= BPLIST_MAGIC.length &&
-                String(
-                    bytes,
-                    0,
-                    BPLIST_MAGIC.length
-                ) == BPLIST_MAGIC
-        } catch (_: IllegalArgumentException) {
-            false
-        }
-    }
+    fun isNsKeyedArchiver(base64String: String): Boolean =
+        base64String.isNotBlank() &&
+            try {
+                val bytes = Base64.getDecoder().decode(base64String)
+                bytes.size >= BPLIST_MAGIC.length &&
+                    String(
+                        bytes,
+                        0,
+                        BPLIST_MAGIC.length
+                    ) == BPLIST_MAGIC
+            } catch (_: IllegalArgumentException) {
+                false
+            }
 
     /**
      * Парсит Base64 NSKeyedArchiver и извлекает цвет в hex-формате.

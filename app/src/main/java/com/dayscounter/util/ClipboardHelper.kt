@@ -36,6 +36,8 @@ class SystemClipboardHelper : ClipboardHelper {
         val manager =
             context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 ?: error("ClipboardManager недоступен")
+        // ponytail: setPrimaryClip не конвертируется в property-присваивание —
+        // synthetic property primaryClip read-only (IDE-фикс ломает компиляцию)
         manager.setPrimaryClip(ClipData.newPlainText(label, text))
     }
 }

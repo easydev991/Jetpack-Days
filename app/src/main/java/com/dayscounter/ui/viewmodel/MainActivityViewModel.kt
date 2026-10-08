@@ -19,7 +19,7 @@ private const val STATE_TIMEOUT_MS = 5000L
  * Используется для передачи текущей темы в JetpackDaysTheme() на уровне Activity.
  */
 class MainActivityViewModel(
-    private val dataStore: AppSettingsDataStore
+    dataStore: AppSettingsDataStore
 ) : ViewModel() {
     companion object {
         /**

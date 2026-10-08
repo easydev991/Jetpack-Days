@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * UI-тесты для V2: видимость [SearchBar] на главном экране
+ * UI-тесты для V2: видимость [androidx.compose.material3.SearchBar] на главном экране
  * в зависимости от количества элементов и активного поискового запроса.
  *
  * Удаление элементов выполняется через DAO напрямую, чтобы не зависеть от long-press +

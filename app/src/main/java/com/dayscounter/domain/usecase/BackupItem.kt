@@ -45,9 +45,8 @@ fun Int.toHexColor(): String {
 }
 
 /**
- * Конвертирует hex-строку в ARGB цвет.
+ * Конвертирует hex-строку (формат #RRGGBB) в ARGB цвет.
  *
- * @param hexColor Hex-строка в формате #RRGGBB
  * @return ARGB цвет (Int) или null, если формат некорректный
  */
 @Suppress("TooGenericExceptionCaught", "SwallowedException")
