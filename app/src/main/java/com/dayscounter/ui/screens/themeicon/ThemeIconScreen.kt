@@ -39,7 +39,6 @@ import com.dayscounter.ui.viewmodel.ThemeIconViewModel
 /**
  * Экран для выбора темы и иконки приложения.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeIconScreen(
     viewModel: ThemeIconViewModel,
@@ -241,7 +240,6 @@ private fun IconSection(
  * Сетка иконок приложения с адаптивным количеством колонок.
  * При повороте экрана сетка автоматически перестраивается для оптимального размещения.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("MagicNumber")
 @Composable
 private fun IconGrid(

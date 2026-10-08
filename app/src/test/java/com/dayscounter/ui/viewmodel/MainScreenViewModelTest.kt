@@ -934,17 +934,16 @@ class MainScreenViewModelTest {
      * Fake repository для тестирования.
      */
     private class FakeItemRepository : ItemRepository {
-        private val _items = MutableStateFlow<List<Item>>(emptyList())
-        val items: Flow<List<Item>> = _items
+        private val items = MutableStateFlow<List<Item>>(emptyList())
 
-        fun setItems(items: List<Item>) {
-            _items.value = items
+        fun setItems(newItems: List<Item>) {
+            items.value = newItems
         }
 
-        override fun getAllItems(): Flow<List<Item>> = _items
+        override fun getAllItems(): Flow<List<Item>> = items
 
         override fun getAllItems(sortOrder: SortOrder): Flow<List<Item>> =
-            _items.map { items ->
+            items.map { items ->
                 when (sortOrder) {
                     SortOrder.ASCENDING -> items.sortedWith(compareBy({ it.timestamp }, { it.id }))
                     SortOrder.DESCENDING ->
@@ -954,16 +953,16 @@ class MainScreenViewModelTest {
                 }
             }
 
-        override suspend fun getItemById(id: Long): Item? = _items.value.find { it.id == id }
+        override suspend fun getItemById(id: Long): Item? = items.value.find { it.id == id }
 
         override fun getItemFlow(id: Long): Flow<Item?> =
-            _items.map { items ->
+            items.map { items ->
                 items.find { it.id == id }
             }
 
         override fun searchItems(query: String): Flow<List<Item>> {
             val filteredItems =
-                _items.value.filter { item ->
+                items.value.filter { item ->
                     item.title.contains(query, ignoreCase = true) ||
                         item.details.contains(query, ignoreCase = true)
                 }
@@ -971,24 +970,24 @@ class MainScreenViewModelTest {
         }
 
         override suspend fun insertItem(item: Item): Long {
-            val newId = (_items.value.maxOfOrNull { it.id } ?: 0) + 1
+            val newId = (items.value.maxOfOrNull { it.id } ?: 0) + 1
             val newItem = item.copy(id = newId)
-            _items.value = _items.value + newItem
+            items.value += newItem
             return newId
         }
 
         override suspend fun updateItem(item: Item) {
-            _items.value = _items.value.map { if (it.id == item.id) item else it }
+            items.value = items.value.map { if (it.id == item.id) item else it }
         }
 
         override suspend fun deleteItem(item: Item) {
-            _items.value = _items.value.filterNot { it.id == item.id }
+            items.value = items.value.filterNot { it.id == item.id }
         }
 
         override suspend fun deleteAllItems() {
-            _items.value = emptyList()
+            items.value = emptyList()
         }
 
-        override suspend fun getItemsCount(): Int = _items.value.size
+        override suspend fun getItemsCount(): Int = items.value.size
     }
 }

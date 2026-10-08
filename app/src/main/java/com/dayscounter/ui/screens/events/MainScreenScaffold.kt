@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -63,7 +62,7 @@ private fun rememberSearchBarCollapseConnection(
         object : NestedScrollConnection {
             override fun onPreScroll(
                 available: Offset,
-                source: NestedScrollSource
+                @Suppress("UNUSED_PARAMETER") source: NestedScrollSource
             ): Offset {
                 if (searchQuery.isNotEmpty()) return Offset.Zero
                 // swipe up → available.y<0; вычитаем, чтобы растить collapse.
@@ -80,7 +79,6 @@ private fun rememberSearchBarCollapseConnection(
 /**
  * Scaffold экрана со списком, шапкой и FAB.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MainScreenScaffold(
     state: MainScreenScaffoldState,

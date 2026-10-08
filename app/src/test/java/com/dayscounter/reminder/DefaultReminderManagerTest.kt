@@ -266,9 +266,7 @@ class DefaultReminderManagerTest {
         }
 
         override suspend fun getFutureActiveReminders(nowEpochMillis: Long): List<Reminder> =
-            if (futureReminders.isNotEmpty()) {
-                futureReminders
-            } else {
+            futureReminders.ifEmpty {
                 remindersByItemId.values.filter { reminder ->
                     reminder.status == ReminderStatus.ACTIVE && reminder.targetEpochMillis > nowEpochMillis
                 }

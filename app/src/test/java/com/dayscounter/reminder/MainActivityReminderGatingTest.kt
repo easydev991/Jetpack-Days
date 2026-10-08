@@ -40,7 +40,7 @@ class MainActivityReminderGatingTest {
     @Test
     fun recreate_skips_handle() {
         // Given: recreation — Android сохранил Bundle при rotation / theme change.
-        val savedInstanceState: Bundle? = Bundle()
+        val savedInstanceState = Bundle()
 
         // When: проверяем гейт.
         val shouldHandle = MainActivity.shouldHandleReminderIntent(savedInstanceState)

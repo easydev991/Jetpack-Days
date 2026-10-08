@@ -13,12 +13,11 @@ import java.time.ZoneId
  */
 class LocalDateSaverTest {
     private fun saveLocalDate(localDate: LocalDate?): Long =
-        localDate?.let {
-            it
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-        } ?: -1L
+        localDate
+            ?.atStartOfDay(ZoneId.systemDefault())
+            ?.toInstant()
+            ?.toEpochMilli()
+            ?: -1L
 
     private fun restoreLocalDate(epochMilli: Long): LocalDate? =
         if (epochMilli == -1L) {

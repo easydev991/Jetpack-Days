@@ -21,6 +21,7 @@ import com.dayscounter.util.NoOpLogger
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -971,17 +972,17 @@ class CreateEditScreenViewModelTest {
 
         override suspend fun getItemById(id: Long): Item? {
             if (loadingDelayMs > 0) {
-                kotlinx.coroutines.delay(loadingDelayMs)
+                delay(loadingDelayMs)
             }
             if (shouldThrowOnGetById) {
                 throw ItemException.LoadFailed("Ошибка загрузки")
             }
-            return storedItem.value?.takeIf<Item> { it.id == id }
+            return storedItem.value?.takeIf { it.id == id }
         }
 
         override fun getItemFlow(id: Long): Flow<Item?> =
             storedItem.map { itemValue ->
-                itemValue?.takeIf<Item> { it.id == id }
+                itemValue?.takeIf { it.id == id }
             }
 
         override fun searchItems(query: String): Flow<List<Item>> = flowOf(emptyList())
@@ -1045,6 +1046,7 @@ class CreateEditScreenViewModelTest {
     private class FakeReminderManager : ReminderManager {
         var activeReminder: Reminder? = null
 
+        @Suppress("UNUSED_PARAMETER")
         override suspend fun saveReminder(
             request: ReminderRequest,
             itemTitle: String

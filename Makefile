@@ -68,7 +68,7 @@ scripts-test:
 	python3 -m unittest discover -s tools/release/scripts -p "*_test.py"
 
 ## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации. Использование: make android-test FLAVOR=github.
-android-test: _ensure_secrets
+android-test: _ensure_secrets _ensure_animations_off
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
 	# ponytail: timeout_msec=60000 — каждый тест получает жёсткий потолок 60с: зависание
 	# (например, гонка waitForIdle при rotation на эмуляторе) превращается в падение теста,
@@ -88,10 +88,26 @@ test-all: _ensure_secrets
 	@echo "Интеграционные: app/build/reports/androidTests/connected/$(FLAVOR)Debug/index.html"
 
 ## emulator-fast: Отключить анимации эмулятора для ускорения androidTest. Вызывать после каждого старта эмулятора; откат — те же три команды со значением 1.
+# Запись сверяется read-back: масштабы умеют сами откатываться в 1.0 уже после
+# записи (дрейф на стороне системы эмулятора; наблюдалось 2026-10-08 — это дало
+# ×3 к длительности прогонов) — запись не прижилась → exit 1.
 emulator-fast:
-	@adb shell settings put global window_animation_scale 0
-	@adb shell settings put global transition_animation_scale 0
-	@adb shell settings put global animator_duration_scale 0
+	@FAILED=0; \
+	for k in window_animation_scale transition_animation_scale animator_duration_scale; do \
+		adb shell settings put global $$k 0; \
+		V=$$(adb shell settings get global $$k | tr -d '\r'); \
+		if [ "$$V" != "0" ]; then \
+			printf "$(RED)[FAIL] $$k = $$V (ожидалось 0) — запись не прижилась$(RESET)\n"; \
+			FAILED=1; \
+		fi; \
+	done; \
+	if [ $$FAILED -ne 0 ]; then exit 1; fi; \
+	printf "$(GREEN)Анимации выключены (read-back сверен)$(RESET)\n"
+
+# дрейф масштабов после записи — чиним перед каждым прогоном (эмулятора нет — no-op)
+_ensure_animations_off:
+	@if [ "$$(adb get-serialno 2>/dev/null)" = "unknown" ]; then exit 0; fi; \
+	$(MAKE) --no-print-directory emulator-fast
 
 # Анализ кода
 ## lint: Запуск ktlint, detekt, markdownlint и Android Lint (проверка)
@@ -541,4 +557,4 @@ rustore-commit:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast
+.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets _ensure_animations_off setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast

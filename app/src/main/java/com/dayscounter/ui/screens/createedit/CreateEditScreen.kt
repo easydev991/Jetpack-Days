@@ -1,7 +1,6 @@
 package com.dayscounter.ui.screens.createedit
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -33,7 +32,6 @@ import java.time.ZoneId
 /**
  * Экран создания/редактирования события.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEditScreen(
     itemId: Long?,
@@ -56,7 +54,6 @@ fun CreateEditScreen(
  * Использует единственный MutableState<CreateEditUiState> для всей формы.
  */
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateEditScreenContent(
     itemId: Long?,

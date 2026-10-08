@@ -76,21 +76,19 @@ internal fun ReminderFormUiState.toReminderRequest(itemId: Long): ReminderReques
     }
 }
 
-internal fun ReminderFormUiState.isInputValid(currentDateTime: LocalDateTime = LocalDateTime.now()): Boolean {
-    if (!isEnabled) return true
+internal fun ReminderFormUiState.isInputValid(currentDateTime: LocalDateTime = LocalDateTime.now()): Boolean =
+    !isEnabled ||
+        when (mode) {
+            ReminderMode.AT_DATE ->
+                selectedDate?.let { date ->
+                    LocalDateTime.of(date, LocalTime.of(hour, minute)).isAfter(currentDateTime)
+                } ?: false
 
-    return when (mode) {
-        ReminderMode.AT_DATE ->
-            selectedDate?.let { date ->
-                LocalDateTime.of(date, LocalTime.of(hour, minute)).isAfter(currentDateTime)
-            } ?: false
-
-        ReminderMode.AFTER_INTERVAL ->
-            intervalValue
-                .toIntOrNull()
-                ?.let { amount -> amount >= 1 } ?: false
-    }
-}
+            ReminderMode.AFTER_INTERVAL ->
+                intervalValue
+                    .toIntOrNull()
+                    ?.let { amount -> amount >= 1 } ?: false
+        }
 
 internal fun ReminderFormUiState.validationErrorResId(currentDateTime: LocalDateTime = LocalDateTime.now()): Int? {
     if (!isEnabled) {

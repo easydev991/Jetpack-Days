@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -285,7 +284,7 @@ private fun ReadSectionBody(
  * Навешивает `pointerInput` с `detectTapGestures(onLongPress)` и компенсирует
  * `topToAnchorBottom` Material3 1.4: при жесте вызывает [showMenu] с [DpOffset],
  * который ставит top-left [DropdownMenu] в точку касания — `menu.top =
- * anchor.top + touchOffset.y`. Из [touchOffset]`.y` вычитается [textHeightPx]
+ * anchor.top + touchOffset.y`. Из `touchOffset`.y` вычитается [textHeightPx]
  * (замеренная высота Text через `Modifier.onSizeChanged`).
  *
  * @param density [Density] для px → Dp
@@ -322,7 +321,6 @@ private fun Modifier.copyOnLongPress(
  * @param getDaysAnalysisTextUseCase Use case для получения текста анализа с префиксом
  * @param modifier Modifier для компонента
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailDatePicker(
     item: Item,

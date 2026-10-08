@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.FileNotFoundException
@@ -39,7 +38,6 @@ class ImportBackupUseCase(
      * @param uri URI файла для импорта
      * @return Result с количеством импортированных записей или ошибкой
      */
-    @OptIn(ExperimentalSerializationApi::class)
     suspend operator fun invoke(uri: Uri): Result<Int> =
         try {
             val existingItems =
@@ -92,7 +90,6 @@ class ImportBackupUseCase(
      * @param inputStream Поток с JSON данными
      * @return Список BackupItem в Android-формате
      */
-    @OptIn(ExperimentalSerializationApi::class)
     private fun parseBackupFile(inputStream: java.io.InputStream): List<BackupItem> {
         val jsonString = inputStream.bufferedReader().use { it.readText() }
 

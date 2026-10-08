@@ -155,8 +155,6 @@
     <string name="error_creating_event">Ошибка создания события: %1$s</string>
     <string name="error_updating_event">Ошибка обновления события: %1$s</string>
     <string name="error_formatting">Ошибка форматирования</string>
-    <string name="error_calculating">Ошибка при вычислении: %1$s</string>
-    <string name="error_formatting_details">Ошибка форматирования: %1$s</string>
 
     <!-- Days formatting - full forms -->
 

@@ -1,6 +1,5 @@
 package com.dayscounter.ui.screens.root
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +21,6 @@ import com.dayscounter.ui.viewmodel.RootScreenViewModel
  * @param analyticsService Сервис аналитики
  * @param viewModel ViewModel для управления состоянием
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootScreen(
     modifier: Modifier = Modifier,
@@ -45,7 +43,6 @@ fun RootScreen(
 /**
  * Основной контент экрана.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RootScreenContent(
     modifier: Modifier = Modifier,

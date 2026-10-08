@@ -155,8 +155,6 @@
     <string name="error_creating_event">Error creating event: %1$s</string>
     <string name="error_updating_event">Error updating event: %1$s</string>
     <string name="error_formatting">Formatting error</string>
-    <string name="error_calculating">Calculation error: %1$s</string>
-    <string name="error_formatting_details">Formatting error: %1$s</string>
 
     <!-- Days formatting - full forms -->
 

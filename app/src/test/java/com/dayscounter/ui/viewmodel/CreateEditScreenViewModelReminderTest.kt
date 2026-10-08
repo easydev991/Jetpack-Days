@@ -172,7 +172,7 @@ class CreateEditScreenViewModelReminderTest {
         private var nextId = 101L
 
         fun seed(item: Item) {
-            items.value = items.value + (item.id to item)
+            items.value += (item.id to item)
             if (item.id >= nextId) {
                 nextId = item.id + 1
             }
@@ -190,16 +190,16 @@ class CreateEditScreenViewModelReminderTest {
 
         override suspend fun insertItem(item: Item): Long {
             val id = if (item.id == 0L) nextId++ else item.id
-            items.value = items.value + (id to item.copy(id = id))
+            items.value += (id to item.copy(id = id))
             return id
         }
 
         override suspend fun updateItem(item: Item) {
-            items.value = items.value + (item.id to item)
+            items.value += (item.id to item)
         }
 
         override suspend fun deleteItem(item: Item) {
-            items.value = items.value - item.id
+            items.value -= item.id
         }
 
         override suspend fun deleteAllItems() {
@@ -217,7 +217,7 @@ class CreateEditScreenViewModelReminderTest {
 
         override suspend fun saveReminder(
             request: ReminderRequest,
-            itemTitle: String
+            @Suppress("UNUSED_PARAMETER") itemTitle: String
         ): Result<Unit> {
             if (shouldFailOnSave) {
                 return Result.failure(IllegalStateException("save failed"))

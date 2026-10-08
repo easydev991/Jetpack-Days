@@ -77,7 +77,6 @@ object NsKeyedArchiverBuilder {
 
     // MARK: - Bplist Building
 
-    @Suppress("SimplifiableCall")
     private fun buildBplist(
         r: Float,
         g: Float,
@@ -93,36 +92,36 @@ object NsKeyedArchiverBuilder {
         objects.add(byteArrayOf(0x00))
 
         // Object 1: "$version" -> "100000"
-        objects.add(encodeAsciiString("\$version"))
+        objects.add(encodeAsciiString($$"$version"))
         objects.add(encodeAsciiString("100000"))
 
         // Object 3: "$archiver" -> "NSKeyedArchiver"
-        objects.add(encodeAsciiString("\$archiver"))
+        objects.add(encodeAsciiString($$"$archiver"))
         objects.add(encodeAsciiString("NSKeyedArchiver"))
 
         // Object 5: "$top" -> {root: ref}
-        objects.add(encodeAsciiString("\$top"))
+        objects.add(encodeAsciiString($$"$top"))
 
         // Object 6: "root"
         objects.add(encodeAsciiString("root"))
 
         // Object 7: "$objects" array placeholder
-        objects.add(encodeAsciiString("\$objects"))
+        objects.add(encodeAsciiString($$"$objects"))
 
         // Object 8: "$null"
-        objects.add(encodeAsciiString("\$null"))
+        objects.add(encodeAsciiString($$"$null"))
 
         // Object 9: "$class"
-        objects.add(encodeAsciiString("\$class"))
+        objects.add(encodeAsciiString($$"$class"))
 
         // Object 10: "$classname"
-        objects.add(encodeAsciiString("\$classname"))
+        objects.add(encodeAsciiString($$"$classname"))
 
         // Object 11: "$classes"
-        objects.add(encodeAsciiString("\$classes"))
+        objects.add(encodeAsciiString($$"$classes"))
 
         // Object 12: "$classhints"
-        objects.add(encodeAsciiString("\$classhints"))
+        objects.add(encodeAsciiString($$"$classhints"))
 
         // Object 13: "UIColor"
         objects.add(encodeAsciiString("UIColor"))

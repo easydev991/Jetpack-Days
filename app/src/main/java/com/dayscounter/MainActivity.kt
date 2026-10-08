@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 private fun AppContent(
-    theme: com.dayscounter.domain.model.AppTheme,
+    theme: AppTheme,
     useDynamicColors: Boolean,
     analyticsService: AnalyticsService,
     pendingOpenDetailItemId: Long?,

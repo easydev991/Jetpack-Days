@@ -2,11 +2,9 @@ package com.dayscounter.domain.model
 
 /**
  * Опция отображения дней для события.
- * Используется для форматирования количества дней в различных форматах.
- *
- * @property DAY Отображать только количество дней
- * @property MONTH_DAY Отображать месяц и день
- * @property YEAR_MONTH_DAY Отображать год, месяц и день
+ * Используется для форматирования количества дней в различных форматах:
+ * [DisplayOption.DAY] — только количество дней, [DisplayOption.MONTH_DAY] — месяц и день,
+ * [DisplayOption.YEAR_MONTH_DAY] — год, месяц и день.
  */
 enum class DisplayOption {
     /**

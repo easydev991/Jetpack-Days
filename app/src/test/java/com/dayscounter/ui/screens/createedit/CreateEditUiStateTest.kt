@@ -127,9 +127,10 @@ class CreateEditUiStateTest {
     @Test
     fun whenCopy_thenOriginalIsUnchanged() {
         val state = CreateEditUiState()
-        state.copy(title = "Новое название")
+        val newState = state.copy(title = "Новое название")
 
         assertEquals("", state.title)
+        assertEquals("Новое название", newState.title)
     }
 
     @Test
