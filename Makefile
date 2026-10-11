@@ -80,6 +80,10 @@ android-test: _ensure_secrets _ensure_animations_off
 # Пустое значение не передаётся, чтобы не ломать прогон без фильтра.
 ANDROID_TEST_FILTER_FLAGS = $(if $(ANDROID_TEST_FILTER),-Pandroid.testInstrumentationRunnerArguments.class=$(ANDROID_TEST_FILTER),)
 
+## memory-check: LeakCanary-прогон только по leak-тестам. Требует подключённого эмулятора. Использование: make memory-check FLAVOR=github.
+memory-check: ANDROID_TEST_FILTER = com.dayscounter.ui.screens.root.MemoryLeakRegressionTest
+memory-check: android-test
+
 ## test-all: Запуск всех тестов (unit + интеграционные)
 test-all: _ensure_secrets
 	@echo ""
@@ -557,4 +561,4 @@ rustore-commit:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint lint-android format check install all android-test test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets _ensure_animations_off setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast
+.PHONY: build clean test lint lint-android format check install all android-test memory-check test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets _ensure_animations_off setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast

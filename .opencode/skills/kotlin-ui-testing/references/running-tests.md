@@ -7,6 +7,7 @@
 
 ```bash
 make android-test    # все androidTest на подключённом устройстве/эмуляторе
+make memory-check    # только leak-тесты (LeakCanary, MemoryLeakRegressionTest) — нужен подключённый эмулятор
 ```
 
 Команда выполняет:

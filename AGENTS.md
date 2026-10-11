@@ -61,8 +61,8 @@ Do not pin versions in this file — they change often. Read the files above.
 
 Все команды — через `make` (`make help` — полный список); правила прогонов
 и gotcha gradle-задач — `.opencode/rules/test-execution.md`. Цели
-`make build` / `make test` / `make install` / `make android-test` сами
-подтягивают секреты через SSH.
+`make build` / `make test` / `make install` / `make android-test` /
+`make memory-check` сами подтягивают секреты через SSH.
 
 **Осторожно:** прямые gradle-вызовы мимо `make` не подцепляют
 `_ensure_secrets` — на чистом чекауте упадут с «google-services.json not
@@ -149,3 +149,4 @@ app/src/main/java/com/dayscounter/
 3. Все замечания ktlint/detekt устранены; новый код не добавляет проблем
 4. KDoc on public APIs; осмысленные имена
 5. No deprecated APIs (`./gradlew lint` flags them)
+6. `make memory-check` — если задача трогала UI, навигацию или ViewModel

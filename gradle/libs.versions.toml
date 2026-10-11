@@ -28,6 +28,7 @@ google-services = "4.5.0"
 firebase-crashlytics-gradle = "3.0.8"
 detekt = "1.23.8"
 ktlint = "14.2.0"
+leakcanary = "2.14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,8 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+leakcanary-android-instrumentation = { group = "com.squareup.leakcanary", name = "leakcanary-android-instrumentation", version.ref = "leakcanary" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }

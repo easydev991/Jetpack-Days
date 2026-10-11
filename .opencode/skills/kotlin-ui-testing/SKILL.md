@@ -111,6 +111,8 @@ description: >
   `./gradlew connected<Flavor>DebugAndroidTest` (для дефолта `FLAVOR=github` —
   `connectedGithubDebugAndroidTest`) + человекочитаемый отчёт через
   `scripts/android_test_report.py`.
+- **Только leak-тесты**: `make memory-check` — запуск только
+  MemoryLeakRegressionTest с DetectLeaksAfterTestSuccess.
 - **Отчёт в браузере**: `make android-test-report` — открывает index.html
   из `app/build/reports/androidTests/connected/`. Путь зависит от
   варианта (AGP 9 с flavors): `connected/<buildType>/flavors/<flavor>/` —

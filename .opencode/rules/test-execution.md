@@ -25,6 +25,7 @@ HTML-отчёта `app/build/reports/tests/.../index.html`, после фикс�
 ```bash
 make test                                    # JVM (JUnit 5) — XML в app/build/test-results/
 make android-test                            # androidTest (JUnit 4) — XML в app/build/outputs/androidTest-results/
+make memory-check                            # LeakCanary-прогон только по leak-тестам (нужен подключенный эмулятор)
 make android-test ANDROID_TEST_FILTER=<FQN>  # один класс/метод (Class#method) — итерация по экрану
 make android-test-report                     # открыть HTML-отчёт androidTest в браузере
 make emulator-fast                           # после старта эмулятора — выключает анимации; android-test чинит их сам перед каждым прогоном
