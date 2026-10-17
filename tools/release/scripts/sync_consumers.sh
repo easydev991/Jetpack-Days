@@ -32,7 +32,9 @@ for subtree in "$CONSUMERS_DIR"/*/tools/release; do
 	[[ -d "$subtree" ]] || continue
 	app="$(basename "$(dirname "$(dirname "$subtree")")")"
 	echo "— $app: git subtree pull --prefix tools/release $TAG --squash"
-	if git -C "$CONSUMERS_DIR/$app" subtree pull --prefix tools/release "$URL" "$TAG" --squash; then
+	# GIT_MERGE_AUTOEDIT=no: merge внутри subtree не должен открывать редактор
+	# (в интерактивном терминале без рабочей $EDITOR подвешивает merge)
+	if GIT_MERGE_AUTOEDIT=no git -C "$CONSUMERS_DIR/$app" subtree pull --prefix tools/release "$URL" "$TAG" --squash; then
 		echo "— $app: обновлён"
 	else
 		echo "— $app: ОШИБКА синка" >&2
