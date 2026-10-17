@@ -2,12 +2,13 @@ package com.dayscounter.ui.screens.themeicon
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
@@ -26,8 +27,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
 import com.dayscounter.domain.model.AppIcon
@@ -237,31 +240,77 @@ private fun IconSection(
 }
 
 /**
- * Сетка иконок приложения с адаптивным количеством колонок.
- * При повороте экрана сетка автоматически перестраивается для оптимального размещения.
+ * Сетка иконок приложения с адаптивным количеством колонок: доступная ширина
+ * делится на минимальные ячейки «превью иконки + отступ», а недостающая до
+ * полного ряда ширина распределяется по ячейкам — превью остаётся своим
+ * размером по центру ячейки. При повороте экрана или на широких экранах
+ * сетка автоматически перестраивается.
  */
-@Suppress("MagicNumber")
 @Composable
 private fun IconGrid(
     icons: List<AppIcon>,
     selectedIcon: AppIcon,
     onIconClick: (AppIcon) -> Unit
 ) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp)
-    ) {
-        icons.forEach { appIcon ->
-            Box(
-                modifier = Modifier.width(64.dp)
-            ) {
-                IconPreviewItem(
-                    appIcon = appIcon,
-                    isSelected = appIcon == selectedIcon,
-                    onClick = { onIconClick(appIcon) }
-                )
+    val spacing = dimensionResource(R.dimen.spacing_xsmall)
+    val previewSize = dimensionResource(R.dimen.icon_size_app_preview)
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val (columns, cellSize) =
+            iconGridCells(
+                maxWidth = maxWidth,
+                spacing = spacing,
+                minCellSize = previewSize,
+                density = LocalDensity.current.density
+            )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            maxItemsInEachRow = columns,
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing)
+        ) {
+            icons.forEach { appIcon ->
+                Box(
+                    modifier = Modifier.size(cellSize),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconPreviewItem(
+                        appIcon = appIcon,
+                        isSelected = appIcon == selectedIcon,
+                        onClick = { onIconClick(appIcon) }
+                    )
+                }
             }
         }
     }
+}
+
+/** Результат расчёта сетки иконок. */
+internal data class IconGridCells(
+    val columns: Int,
+    val cellSize: Dp
+)
+
+/**
+ * Расчёт сетки иконок от доступной ширины: колонок столько, сколько минимальных
+ * ячеек «[minCellSize] + [spacing]» помещается в [maxWidth], а недостающая до
+ * полного ряда ширина (суммарно меньше minCellSize + spacing на ряд) делится
+ * поровну между ячейками.
+ *
+ * Усечение размера ячейки до целого пикселя обязательно: `Modifier.size`
+ * измеряет ячейку roundToPx, и округление каждой ячейки вверх переполняет ряд
+ * на 1–2px — FlowRow переносит последнюю ячейку ряда, справа остаётся пустой
+ * «столбец под ещё одну иконку».
+ */
+internal fun iconGridCells(
+    maxWidth: Dp,
+    spacing: Dp,
+    minCellSize: Dp,
+    density: Float
+): IconGridCells {
+    // Минимум minCellSize на ячейку + spacing между ними; Dp/Dp даёт Float,
+    // toInt усекает вниз
+    val columns = ((maxWidth + spacing) / (minCellSize + spacing)).toInt().coerceAtLeast(1)
+    val cellSize = (maxWidth - spacing * (columns - 1)) / columns
+    val cellSizePx = (cellSize.value * density).toInt()
+    return IconGridCells(columns, Dp(cellSizePx / density))
 }

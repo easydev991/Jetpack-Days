@@ -15,6 +15,9 @@
     <dimen name="color_tag_size">42dp</dimen>
     <dimen name="color_tag_size_small">16dp</dimen>
 
+    <!-- Icon Sizes -->
+    <dimen name="icon_size_app_preview">64dp</dimen>
+
     <!-- Border Width -->
     <dimen name="border_width">2dp</dimen>
 </resources>

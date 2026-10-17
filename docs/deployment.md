@@ -169,7 +169,7 @@ Release notes берутся из файла `fastlane/metadata/android/ru-RU/wh
 make whats-new
 ```
 
-Команда вызывает `tools/release/scripts/_generate_whats_new.sh`, который берёт последний релизный тег (`git tag --sort=-version:refname | grep -E '^[0-9]' | head -1`) и пишет в `whats_new/<VERSION_NAME>.txt` заголовок `Что нового в <VERSION>` + буллеты из `git log <tag>..HEAD`. Если файл уже существует — печатает содержимое и **не перезаписывает** (для ручной редактуры).
+Команда вызывает `tools/release/scripts/_generate_whats_new.sh`, который берёт последний релизный тег (`git tag --sort=-version:refname | grep -E '^[0-9]' | head -1`) и пишет в `whats_new/<VERSION_NAME>.txt` буллеты из `git log <tag>..HEAD` (без заголовка — только буллеты). Если файл уже существует — печатает содержимое и **не перезаписывает** (для ручной редактуры).
 
 `make whats-new` — prerequisite для `make rustore` и `make rustore-draft`: если файла нет, он будет сгенерирован автоматически.
 

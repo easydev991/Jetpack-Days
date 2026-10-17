@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dayscounter.R
@@ -35,14 +36,12 @@ import com.dayscounter.domain.model.AppIcon
  * @param appIcon Иконка приложения для отображения
  * @param isSelected Выбрана ли эта иконка
  * @param onClick Обработчик клика
- * @param modifier Modifier для настройки внешнего вида
  */
 @Composable
 fun IconPreviewItem(
     appIcon: AppIcon,
     isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
     val iconResource = appIcon.iconResource()
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
@@ -54,8 +53,8 @@ fun IconPreviewItem(
         )
     Box(
         modifier =
-            modifier
-                .size(64.dp)
+            Modifier
+                .size(dimensionResource(R.dimen.icon_size_app_preview))
                 .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
