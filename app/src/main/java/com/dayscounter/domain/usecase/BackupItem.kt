@@ -2,6 +2,7 @@ package com.dayscounter.domain.usecase
 
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.util.Logger
 import kotlinx.serialization.Serializable
 import java.util.Locale
 
@@ -76,16 +77,22 @@ fun String.fromHexColor(): Int? =
  * - Hex: #RRGGBB (Android формат)
  * - Base64: NSKeyedArchiver с UIColor (iOS формат)
  *
+ * @param logger Logger для логирования ошибок парсинга
  * @return ARGB цвет (Int) или null, если формат некорректный
  */
-fun String?.parseColorTag(): Int? {
+fun String?.parseColorTag(logger: Logger): Int? {
     if (this.isNullOrBlank()) return null
-    return when {
-        startsWith("#") -> fromHexColor()
-        // Формат iOS NSKeyedArchiver (Base64 bplist00)
-        NsKeyedArchiverParser.isNsKeyedArchiver(this) ->
-            NsKeyedArchiverParser.parseHexColor(this)?.fromHexColor()
-        else -> null
+    if (startsWith("#")) return fromHexColor()
+    return parseIosColorTag(logger)
+}
+
+/** Парсит цвет из iOS-формата NSKeyedArchiver (Base64 bplist00); null — не удалось. */
+private fun String.parseIosColorTag(logger: Logger): Int? {
+    val parser = NsKeyedArchiverParser(logger)
+    return if (parser.isNsKeyedArchiver(this)) {
+        parser.parseHexColor(this)?.fromHexColor()
+    } else {
+        null
     }
 }
 
@@ -112,8 +119,10 @@ fun Item.toBackupItem(): BackupItem =
  * Поддерживает импорт colorTag в двух форматах:
  * - Hex (#RRGGBB) - Android формат
  * - Base64 NSKeyedArchiver - iOS формат
+ *
+ * @param logger Logger для логирования ошибок парсинга цвета
  */
-fun BackupItem.toItem(): Item? {
+fun BackupItem.toItem(logger: Logger): Item? {
     val displayOption =
         when (displayOption) {
             "day" -> DisplayOption.DAY
@@ -125,7 +134,7 @@ fun BackupItem.toItem(): Item? {
         }
 
     // Конвертируем colorTag, поддерживая оба формата (hex и Base64)
-    val androidColorTag: Int? = colorTag.parseColorTag()
+    val androidColorTag: Int? = colorTag.parseColorTag(logger)
 
     return Item(
         id = 0, // ID будет присвоен базой данных

@@ -1,7 +1,5 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.provider.DaysFormatter
-import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 
@@ -19,20 +17,20 @@ class FormatDaysTextUseCase(
      *
      * @param difference Результат вычисления разницы дат
      * @param displayOption Опция отображения
-     * @param resourceProvider Провайдер строковых ресурсов
+     * @param textProvider Провайдер семантических строк
      * @param showMinus Показывать ли минус для отрицательных чисел (по умолчанию true)
      * @return Отформатированная строка
      */
     operator fun invoke(
         difference: DaysDifference,
         displayOption: DisplayOption,
-        resourceProvider: ResourceProvider,
+        textProvider: DaysTextProvider,
         showMinus: Boolean
     ): String =
         when (difference) {
             is DaysDifference.Today -> {
                 // Возвращаем локализованную строку "Сегодня"
-                resourceProvider.getString(com.dayscounter.data.provider.ResourceIds.TODAY)
+                textProvider.today()
             }
 
             is DaysDifference.Calculated -> {
@@ -42,7 +40,7 @@ class FormatDaysTextUseCase(
                 daysFormatter.formatComposite(
                     period = difference.period,
                     displayOption = displayOption,
-                    resourceProvider = resourceProvider,
+                    textProvider = textProvider,
                     totalDays = difference.totalDays,
                     showMinus = showMinus
                 )

@@ -2,6 +2,7 @@ package com.dayscounter.domain.usecase
 
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.util.NoOpLogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,6 +13,9 @@ import org.junit.jupiter.api.Test
  * Проверяет корректность конвертации между Item и BackupItem.
  */
 class BackupItemTest {
+    private val logger = NoOpLogger()
+    private val parser = NsKeyedArchiverParser(logger)
+
     @Test
     fun tohexcolor_converts_int_color_to_hex_string() {
         // Given
@@ -173,7 +177,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -197,7 +201,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -221,7 +225,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -245,7 +249,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -269,7 +273,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNull(item)
@@ -290,7 +294,7 @@ class BackupItemTest {
 
         // When
         val backupItem = originalItem.toBackupItem()
-        val restoredItem = backupItem.toItem()
+        val restoredItem = backupItem.toItem(logger)
 
         // Then
         assertNotNull(restoredItem)
@@ -310,7 +314,7 @@ class BackupItemTest {
         val hexColor = "#FF0000"
 
         // When
-        val color = hexColor.parseColorTag()
+        val color = hexColor.parseColorTag(logger)
 
         // Then
         assertNotNull(color)
@@ -331,9 +335,9 @@ class BackupItemTest {
                 "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
 
         // When - сначала проверяем что парсер распознает формат
-        val isNsKeyedArchiver = NsKeyedArchiverParser.isNsKeyedArchiver(base64FromParserTest)
-        val hexFromParser = NsKeyedArchiverParser.parseHexColor(base64FromParserTest)
-        val color = base64FromParserTest.parseColorTag()
+        val isNsKeyedArchiver = parser.isNsKeyedArchiver(base64FromParserTest)
+        val hexFromParser = parser.parseHexColor(base64FromParserTest)
+        val color = base64FromParserTest.parseColorTag(logger)
 
         // Then
         assertEquals(true, isNsKeyedArchiver, "Should be recognized as NSKeyedArchiver")
@@ -348,7 +352,7 @@ class BackupItemTest {
         val nullColor: String? = null
 
         // When
-        val color = nullColor.parseColorTag()
+        val color = nullColor.parseColorTag(logger)
 
         // Then
         assertNull(color)
@@ -360,7 +364,7 @@ class BackupItemTest {
         val emptyColor = ""
 
         // When
-        val color = emptyColor.parseColorTag()
+        val color = emptyColor.parseColorTag(logger)
 
         // Then
         assertNull(color)
@@ -372,7 +376,7 @@ class BackupItemTest {
         val invalidColor = "INVALID_COLOR"
 
         // When
-        val color = invalidColor.parseColorTag()
+        val color = invalidColor.parseColorTag(logger)
 
         // Then
         assertNull(color)
@@ -401,7 +405,7 @@ class BackupItemTest {
             )
 
         // When
-        val item = backupItem.toItem()
+        val item = backupItem.toItem(logger)
 
         // Then
         assertNotNull(item)

@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dayscounter.R
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.NoopAnalyticsProvider
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.model.DisplayOption
@@ -53,7 +54,7 @@ class CreateEditHasChangesRegressionUiTest {
                     DaysDatabase::class.java
                 ).allowMainThreadQueries()
                 .build()
-        repository = ItemRepositoryImpl(database.itemDao())
+        repository = ItemRepositoryImpl(database.itemDao(), crashReporter = NoopCrashReporter())
     }
 
     @After

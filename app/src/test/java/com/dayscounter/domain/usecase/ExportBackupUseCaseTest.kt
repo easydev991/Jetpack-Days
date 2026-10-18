@@ -1,12 +1,9 @@
 package com.dayscounter.domain.usecase
 
-import android.content.Context
-import android.net.Uri
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -25,8 +22,6 @@ import java.io.ByteArrayOutputStream
  */
 class ExportBackupUseCaseTest {
     private val repository: ItemRepository = mockk()
-    private val context: Context = mockk()
-    private val contentResolver: android.content.ContentResolver = mockk()
 
     private lateinit var useCase: ExportBackupUseCase
     private val outputStream = ByteArrayOutputStream()
@@ -37,8 +32,7 @@ class ExportBackupUseCaseTest {
 
     @BeforeEach
     fun setup() {
-        every { context.contentResolver } returns contentResolver
-        useCase = ExportBackupUseCase(repository, context)
+        useCase = ExportBackupUseCase(repository)
         outputStream.reset()
     }
 
@@ -59,13 +53,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -99,13 +91,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.MONTH_DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -136,13 +126,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -184,13 +172,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.YEAR_MONTH_DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -220,13 +206,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -242,13 +226,11 @@ class ExportBackupUseCaseTest {
         runBlocking {
             // Given
             val items = emptyList<Item>()
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -294,13 +276,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.YEAR_MONTH_DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -335,13 +315,11 @@ class ExportBackupUseCaseTest {
                         displayOption = DisplayOption.DAY
                     )
                 )
-            val uri: Uri = mockk()
 
             coEvery { repository.getAllItems() } returns flowOf(items)
-            every { contentResolver.openOutputStream(uri) } returns outputStream
 
             // When
-            val result = useCase(uri)
+            val result = useCase(outputStream)
 
             // Then
             assertTrue(result.isSuccess)

@@ -300,7 +300,7 @@ class DetailScreenViewModelIntegrationTest {
         database = Room.inMemoryDatabaseBuilder(context, DaysDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = ItemRepositoryImpl(database.itemDao())
+        repository = ItemRepositoryImpl(database.itemDao(), NoopCrashReporter())
         database.clearAllTables()
     }
 
@@ -317,7 +317,7 @@ class DetailScreenViewModelIntegrationTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
 
             // When
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Then
             viewModel.uiState.test {
@@ -352,7 +352,7 @@ class AlarmReminderSchedulerInstrumentedTest {
     @Test
     fun cancel_whenScheduled_thenPendingIntentIsRemoved() {
         // Given
-        val scheduler = AlarmReminderScheduler(context)
+        val scheduler = AlarmReminderScheduler(context, crashReporter = NoopCrashReporter())
         val itemId = 777L
         val reminder = Reminder(itemId = itemId, ...)
 

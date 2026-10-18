@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.domain.model.DaysDifference
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,7 +12,7 @@ import java.time.ZoneId
  * Тесты для [CalculateDaysDifferenceUseCase].
  */
 class CalculateDaysDifferenceUseCaseTest {
-    private val useCase = CalculateDaysDifferenceUseCase()
+    private val useCase = CalculateDaysDifferenceUseCase(NoopCrashReporter())
 
     @Test
     fun calculate_when_same_day_then_returns_today() {

@@ -1,13 +1,13 @@
 package com.dayscounter.domain.usecase
 
-import android.content.Context
-import android.net.Uri
+import com.dayscounter.domain.exception.BackupException
 import com.dayscounter.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import java.io.OutputStream
 
 /**
  * Use Case для экспорта данных в резервную копию.
@@ -16,11 +16,9 @@ import java.io.IOException
  * содержащей поле format = "android" для указания платформы-источника.
  *
  * @property repository Repository для работы с данными
- * @property context Контекст приложения
  */
 class ExportBackupUseCase(
-    private val repository: ItemRepository,
-    private val context: Context
+    private val repository: ItemRepository
 ) {
     private val json =
         Json {
@@ -28,12 +26,12 @@ class ExportBackupUseCase(
         }
 
     /**
-     * Экспортирует все записи в файл (Android формат).
+     * Экспортирует все записи в поток (Android формат).
      *
-     * @param uri URI файла для сохранения
+     * @param outputStream Поток для записи JSON данных резервной копии
      * @return Result с количеством экспортированных записей или ошибкой
      */
-    suspend operator fun invoke(uri: Uri): Result<Int> =
+    suspend operator fun invoke(outputStream: OutputStream): Result<Int> =
         try {
             val items =
                 repository
@@ -51,9 +49,7 @@ class ExportBackupUseCase(
 
             val jsonString = json.encodeToString(BackupWrapper.serializer(), wrapper)
 
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(jsonString.toByteArray())
-            } ?: throw BackupException("Не удалось открыть OutputStream для записи")
+            outputStream.use { it.write(jsonString.toByteArray()) }
 
             Result.success(items.size)
         } catch (e: IOException) {

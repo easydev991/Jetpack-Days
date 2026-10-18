@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.NoOpLogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test
  * и конвертации в hex-формат (#RRGGBB).
  */
 class NsKeyedArchiverParserTest {
+    private val parser = NsKeyedArchiverParser(NoOpLogger())
+
     // Реальный пример из iOS: красный цвет (iOS system red)
     // Декодированные RGBA значения: R=1.0, G=0.228, B=0.187, A=1.0
     // Ожидаемый hex: #FF3A30
@@ -28,7 +31,7 @@ class NsKeyedArchiverParserTest {
     fun parseHexColor_fromRedColorBase64_returnsFF3A30() {
         // Given - красный цвет из iOS
         // When
-        val hexColor = NsKeyedArchiverParser.parseHexColor(redColorBase64)
+        val hexColor = parser.parseHexColor(redColorBase64)
 
         // Then - ожидаем #FF3A30 (R=255, G=58, B=48)
         assertEquals("#FF3A30", hexColor)
@@ -40,7 +43,7 @@ class NsKeyedArchiverParserTest {
         val invalidBase64 = "not-valid-base64!!!"
 
         // When
-        val hexColor = NsKeyedArchiverParser.parseHexColor(invalidBase64)
+        val hexColor = parser.parseHexColor(invalidBase64)
 
         // Then
         assertNull(hexColor)
@@ -52,7 +55,7 @@ class NsKeyedArchiverParserTest {
         val emptyString = ""
 
         // When
-        val hexColor = NsKeyedArchiverParser.parseHexColor(emptyString)
+        val hexColor = parser.parseHexColor(emptyString)
 
         // Then
         assertNull(hexColor)
@@ -64,7 +67,7 @@ class NsKeyedArchiverParserTest {
         val nonBplist = "SGVsbG8gV29ybGQ=" // "Hello World"
 
         // When
-        val hexColor = NsKeyedArchiverParser.parseHexColor(nonBplist)
+        val hexColor = parser.parseHexColor(nonBplist)
 
         // Then
         assertNull(hexColor)
@@ -79,7 +82,7 @@ class NsKeyedArchiverParserTest {
                 "S2V5ZWRBcmNoaXZlctEICVRyb290gAGjCwwdVSRudWxs2A0ODxAREhMUFRYXGBkaGw=="
 
         // When
-        val hexColor = NsKeyedArchiverParser.parseHexColor(bplistWithoutColor)
+        val hexColor = parser.parseHexColor(bplistWithoutColor)
 
         // Then
         assertNull(hexColor)
@@ -91,7 +94,7 @@ class NsKeyedArchiverParserTest {
         val validBase64 = redColorBase64
 
         // When
-        val result = NsKeyedArchiverParser.isNsKeyedArchiver(validBase64)
+        val result = parser.isNsKeyedArchiver(validBase64)
 
         // Then
         assertEquals(true, result)
@@ -103,7 +106,7 @@ class NsKeyedArchiverParserTest {
         val hexColor = "#FF0000"
 
         // When
-        val result = NsKeyedArchiverParser.isNsKeyedArchiver(hexColor)
+        val result = parser.isNsKeyedArchiver(hexColor)
 
         // Then
         assertEquals(false, result)
@@ -115,7 +118,7 @@ class NsKeyedArchiverParserTest {
         val invalidBase64 = "not-valid!!!"
 
         // When
-        val result = NsKeyedArchiverParser.isNsKeyedArchiver(invalidBase64)
+        val result = parser.isNsKeyedArchiver(invalidBase64)
 
         // Then
         assertEquals(false, result)
@@ -127,7 +130,7 @@ class NsKeyedArchiverParserTest {
         val emptyString = ""
 
         // When
-        val result = NsKeyedArchiverParser.isNsKeyedArchiver(emptyString)
+        val result = parser.isNsKeyedArchiver(emptyString)
 
         // Then
         assertEquals(false, result)

@@ -3,10 +3,10 @@ package com.dayscounter.ui.viewmodel
 import android.app.Application
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.NoopAnalyticsProvider
+import com.dayscounter.data.icon.IconManager
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
-import com.dayscounter.domain.usecase.IconManager
 import com.dayscounter.util.Logger
 import io.mockk.coEvery
 import io.mockk.coVerify

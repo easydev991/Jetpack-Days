@@ -1,7 +1,6 @@
 package com.dayscounter.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
@@ -10,12 +9,9 @@ import com.dayscounter.domain.model.ReminderStatus
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ReminderRequest
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.NoOpLogger
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockkObject
-import io.mockk.runs
-import io.mockk.unmockkAll
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +39,8 @@ class DetailScreenViewModelTest {
     private lateinit var viewModel: DetailScreenViewModel
     private lateinit var testDispatcher: TestDispatcher
 
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
+
     private val testItemId = 1L
     private val testItem =
         Item(
@@ -59,9 +57,6 @@ class DetailScreenViewModelTest {
         testDispatcher = StandardTestDispatcher()
         Dispatchers.setMain(testDispatcher)
 
-        mockkObject(CrashlyticsHelper)
-        every { CrashlyticsHelper.logException(any(), any()) } just runs
-
         repository = FakeItemRepository()
         reminderManager = FakeReminderManager()
     }
@@ -69,7 +64,6 @@ class DetailScreenViewModelTest {
     @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
-        unmockkAll()
     }
 
     @Test
@@ -82,7 +76,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
 
             // Then - Начальное состояние должно быть Loading
@@ -104,7 +99,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
 
             // When - Пытаемся загрузить несуществующий элемент
@@ -132,7 +128,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -173,7 +170,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    currentTimeMillisProvider = { nowMillis },
+                    crashReporter = crashReporter
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -208,7 +206,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    currentTimeMillisProvider = { nowMillis },
+                    crashReporter = crashReporter
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -243,7 +242,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    currentTimeMillisProvider = { nowMillis },
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -272,7 +272,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    currentTimeMillisProvider = { nowMillis },
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -320,7 +321,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -343,7 +345,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
             // Ждем загрузки элемента
             testDispatcher.scheduler.advanceUntilIdle()
@@ -389,7 +392,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
-                    currentTimeMillisProvider = { nowMillis }
+                    currentTimeMillisProvider = { nowMillis },
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -419,7 +423,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
             viewModel.requestDelete()
 
@@ -445,7 +450,8 @@ class DetailScreenViewModelTest {
                     repository = repository,
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
-                    reminderManager = reminderManager
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -455,7 +461,7 @@ class DetailScreenViewModelTest {
 
             // Then: молчаливая неудача удаления должна попасть в crash-канал
             verify(exactly = 1) {
-                CrashlyticsHelper.logException(
+                crashReporter.logException(
                     eq(deleteError),
                     match { it.contains("Ошибка удаления события itemId=$testItemId") }
                 )

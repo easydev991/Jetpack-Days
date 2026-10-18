@@ -1,18 +1,15 @@
-package com.dayscounter.domain.usecase
+package com.dayscounter.data.icon
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.AppIcon
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.runs
-import io.mockk.unmockkAll
 import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,23 +30,17 @@ class IconManagerTest {
     private val context: Context = mockk()
     private val packageManager: PackageManager = mockk()
     private val logger: Logger = mockk(relaxed = true)
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
         every { context.packageName } returns "com.dayscounter"
         every { context.packageManager } returns packageManager
-        mockkObject(CrashlyticsHelper)
-        every { CrashlyticsHelper.logException(any(), any()) } just runs
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
-
-    @ParameterizedTest(name = "changeIcon при активации {0} репортит в Crashlytics")
+    @ParameterizedTest(name = "changeIcon при активации {0} репортит в crash-канал")
     @MethodSource("enableExceptions")
-    fun changeIcon_when_enable_throws_then_logs_to_crashlytics(exception: Exception) {
+    fun changeIcon_when_enable_throws_then_logs_to_crash_reporter(exception: Exception) {
         // Given
         every { packageManager.setComponentEnabledSetting(any(), any(), any()) } throws exception
 
@@ -57,14 +48,14 @@ class IconManagerTest {
         assertEquals(
             exception,
             assertThrows<Exception> {
-                IconManager(context, logger).changeIcon(AppIcon.ICON_2)
+                IconManager(context, logger, crashReporter).changeIcon(AppIcon.ICON_2)
             },
             "Исключение должно быть доставлено вызывающему коду"
         )
 
         // Then: сбой попал в crash-канал
         verify(exactly = 1) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 eq(exception),
                 match { it.contains("Ошибка смены иконки") }
             )
@@ -72,7 +63,7 @@ class IconManagerTest {
     }
 
     @Test
-    fun changeIcon_when_disable_component_fails_then_logs_to_crashlytics() {
+    fun changeIcon_when_disable_component_fails_then_logs_to_crash_reporter() {
         // Given: включение целевой иконки успешно, первая деактивация падает
         // неожиданным исключением (общий catch Exception внутри disableComponent)
         every {
@@ -93,19 +84,19 @@ class IconManagerTest {
             disableCallCount += 1
             if (disableCallCount == 1) {
                 // Не IllegalStateException: та ловится в disableComponent отдельной
-                // веткой без non-fatal — тест проверяет generic-ветку с Crashlytics
+                // веткой без non-fatal — тест проверяет generic-ветку с crash-каналом
                 throw UnsupportedOperationException("disable failed")
             }
         }
 
         // When: результат смены иконки остаётся успешным (сбой сброса глотается)
         assertDoesNotThrow {
-            IconManager(context, logger).changeIcon(AppIcon.ICON_2)
+            IconManager(context, logger, crashReporter).changeIcon(AppIcon.ICON_2)
         }
 
         // Then: один non-fatal о сбросе
         verify(exactly = 1) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 ofType(RuntimeException::class),
                 match { it.contains("Ошибка сброса иконки") }
             )

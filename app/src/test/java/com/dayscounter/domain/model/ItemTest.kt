@@ -1,7 +1,10 @@
 package com.dayscounter.domain.model
 
-import com.dayscounter.data.provider.DaysFormatterImpl
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.di.FormatterModule
+import com.dayscounter.domain.usecase.DefaultDaysFormatter
+import com.dayscounter.domain.usecase.FakeDaysTextProvider
+import com.dayscounter.util.NoOpLogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -98,15 +101,17 @@ class ItemTest {
         val currentDate = LocalDate.now()
 
         // Создаём use case через FormatterModule
-        val daysFormatter = DaysFormatterImpl()
+        val daysFormatter = DefaultDaysFormatter()
         val formatDaysTextUseCase = FormatterModule.createFormatDaysTextUseCase(daysFormatter)
-        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase()
-        val resourceProvider = FormatterModule.createStubResourceProvider()
+        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase(NoopCrashReporter())
+        val textProvider = FakeDaysTextProvider()
         val useCase =
             FormatterModule.createGetFormattedDaysForItemUseCase(
                 calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase,
-                resourceProvider
+                textProvider,
+                NoopCrashReporter(),
+                logger = NoOpLogger()
             )
 
         // When
@@ -135,15 +140,17 @@ class ItemTest {
         val currentDate2 = LocalDate.of(2024, 1, 7) // Через 6 дней
 
         // Создаём use case через FormatterModule
-        val daysFormatter = DaysFormatterImpl()
+        val daysFormatter = DefaultDaysFormatter()
         val formatDaysTextUseCase = FormatterModule.createFormatDaysTextUseCase(daysFormatter)
-        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase()
-        val resourceProvider = FormatterModule.createStubResourceProvider()
+        val calculateDaysDifferenceUseCase = FormatterModule.createCalculateDaysDifferenceUseCase(NoopCrashReporter())
+        val textProvider = FakeDaysTextProvider()
         val useCase =
             FormatterModule.createGetFormattedDaysForItemUseCase(
                 calculateDaysDifferenceUseCase,
                 formatDaysTextUseCase,
-                resourceProvider
+                textProvider,
+                NoopCrashReporter(),
+                logger = NoOpLogger()
             )
 
         // When

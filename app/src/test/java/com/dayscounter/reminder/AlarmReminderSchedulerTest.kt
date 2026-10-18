@@ -4,17 +4,14 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderIntervalUnit
 import com.dayscounter.domain.model.ReminderMode
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
@@ -32,16 +29,13 @@ class AlarmReminderSchedulerTest {
     private val alarmManager: AlarmManager = mockk(relaxed = true)
     private val pendingIntent: PendingIntent = mockk(relaxed = true)
     private val logger: Logger = mockk(relaxed = true)
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
         every { context.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
         mockkStatic(PendingIntent::class)
         every { PendingIntent.getBroadcast(any(), any(), any<Intent>(), any<Int>()) } returns pendingIntent
-        // Канал crash-отчётов мокаем явно: в JVM-тестах Firebase SDK не активен,
-        // но полагаемся на детерминированный verify, а не на "повезёт/не повезёт"
-        mockkObject(CrashlyticsHelper)
-        every { CrashlyticsHelper.logException(any(), any()) } just runs
     }
 
     @AfterEach
@@ -53,7 +47,7 @@ class AlarmReminderSchedulerTest {
     fun schedule_when_set_exact_succeeds_then_no_fallback() {
         // Given
         every { alarmManager.canScheduleExactAlarms() } returns true
-        val scheduler = AlarmReminderScheduler(context, logger)
+        val scheduler = AlarmReminderScheduler(context, logger, crashReporter)
         val reminder = sampleReminder(itemId = 1L)
 
         // When
@@ -76,7 +70,7 @@ class AlarmReminderSchedulerTest {
         // Given
         every { alarmManager.setExactAndAllowWhileIdle(any(), any(), any()) } throws
             SecurityException("missing SCHEDULE_EXACT_ALARM")
-        val scheduler = AlarmReminderScheduler(context, logger)
+        val scheduler = AlarmReminderScheduler(context, logger, crashReporter)
         val reminder = sampleReminder(itemId = 2L)
 
         // When
@@ -99,7 +93,7 @@ class AlarmReminderSchedulerTest {
         }
         // Скрытый сбой доставки уведомлений должен попадать в crash-канал
         verify(exactly = 1) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 ofType(SecurityException::class),
                 match { it.contains("SCHEDULE_EXACT_ALARM") && it.contains("setAndAllowWhileIdle") }
             )

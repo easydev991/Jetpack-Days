@@ -1,34 +1,18 @@
 package com.dayscounter.ui.viewmodel
 
 import android.content.ActivityNotFoundException
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.ExactAlarmPermissionState
 import com.dayscounter.reminder.ExactAlarmPermissionHelper
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
-import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.runs
-import io.mockk.unmockkAll
 import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 
 class ExactAlarmPermissionViewModelTest {
-    @BeforeEach
-    fun setUp() {
-        mockkObject(CrashlyticsHelper)
-        every { CrashlyticsHelper.logException(any(), any()) } just runs
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
 
     @Test
     fun initial_state_when_helper_allowed_then_state_allowed() {
@@ -40,7 +24,7 @@ class ExactAlarmPermissionViewModelTest {
         val logger: Logger = NoOpLoggerForVmTest
 
         // When
-        val viewModel = ExactAlarmPermissionViewModel(helper, logger)
+        val viewModel = ExactAlarmPermissionViewModel(helper, logger, crashReporter)
 
         // Then
         assertEquals(
@@ -60,7 +44,7 @@ class ExactAlarmPermissionViewModelTest {
         val logger: Logger = NoOpLoggerForVmTest
 
         // When
-        val viewModel = ExactAlarmPermissionViewModel(helper, logger)
+        val viewModel = ExactAlarmPermissionViewModel(helper, logger, crashReporter)
 
         // Then
         assertEquals(
@@ -77,7 +61,7 @@ class ExactAlarmPermissionViewModelTest {
             FakeExactAlarmPermissionHelper().apply {
                 currentState = ExactAlarmPermissionState.Allowed
             }
-        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest)
+        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest, crashReporter)
 
         // When
         helper.currentState = ExactAlarmPermissionState.Denied(canRequest = true)
@@ -99,7 +83,7 @@ class ExactAlarmPermissionViewModelTest {
             FakeExactAlarmPermissionHelper().apply {
                 nextException = ActivityNotFoundException("test")
             }
-        val viewModel = ExactAlarmPermissionViewModel(helper, logger)
+        val viewModel = ExactAlarmPermissionViewModel(helper, logger, crashReporter)
 
         // When
         viewModel.onRequestPermission()
@@ -127,7 +111,7 @@ class ExactAlarmPermissionViewModelTest {
                 currentState = ExactAlarmPermissionState.Denied(canRequest = true)
                 nextException = ActivityNotFoundException("no settings screen")
             }
-        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest)
+        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest, crashReporter)
 
         // When
         viewModel.onRequestPermission()
@@ -145,7 +129,7 @@ class ExactAlarmPermissionViewModelTest {
         )
         // ... и сбой должен попасть в crash-канал
         verify(exactly = 1) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 ofType(ActivityNotFoundException::class),
                 match { it.contains("SCHEDULE_EXACT_ALARM") }
             )
@@ -159,7 +143,7 @@ class ExactAlarmPermissionViewModelTest {
             FakeExactAlarmPermissionHelper().apply {
                 currentState = ExactAlarmPermissionState.Denied(canRequest = true)
             }
-        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest)
+        val viewModel = ExactAlarmPermissionViewModel(helper, NoOpLoggerForVmTest, crashReporter)
 
         // When: между вызовами getState() пользователь включил permission
         helper.currentState = ExactAlarmPermissionState.Allowed

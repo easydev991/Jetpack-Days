@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.model.DisplayOption
@@ -63,7 +64,7 @@ class DetailScreenViewModelIntegrationTest {
                 ).allowMainThreadQueries()
                 .build()
 
-        repository = ItemRepositoryImpl(database.itemDao())
+        repository = ItemRepositoryImpl(database.itemDao(), NoopCrashReporter())
 
         // Очищаем базу данных перед каждым тестом
         database.clearAllTables()
@@ -80,7 +81,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {
@@ -109,7 +110,7 @@ class DetailScreenViewModelIntegrationTest {
     fun whenItemDoesNotExistInDatabase_thenRemainsInLoadingState() {
         runTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Подписываемся на uiState для активации StateFlow
             backgroundScope.launch {
@@ -132,7 +133,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
             backgroundScope.launch {
                 viewModel.uiState.collect {}
             }
@@ -150,7 +151,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
             backgroundScope.launch {
                 viewModel.uiState.collect {}
             }
@@ -176,7 +177,7 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithColorTag)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {
@@ -205,7 +206,7 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {
@@ -259,7 +260,7 @@ class DetailScreenViewModelIntegrationTest {
             val id2 = repository.insertItem(item2)
 
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to id2))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {
@@ -292,7 +293,7 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithEmptyDetails)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {
@@ -323,7 +324,7 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithTimestamp)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle)
+            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
 
             // Тестируем эмиссии StateFlow с помощью Turbine
             viewModel.uiState.test {

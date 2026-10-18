@@ -11,8 +11,9 @@ import com.dayscounter.R
 import com.dayscounter.analytics.AnalyticsEvent
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.AppErrorOperation
+import com.dayscounter.di.AppModule
+import com.dayscounter.domain.exception.BackupException
 import com.dayscounter.domain.repository.ItemRepository
-import com.dayscounter.domain.usecase.BackupException
 import com.dayscounter.domain.usecase.ExportBackupUseCase
 import com.dayscounter.domain.usecase.ImportBackupUseCase
 import com.dayscounter.ui.state.AppDataUiState
@@ -26,6 +27,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
 import java.sql.SQLException
 
 private const val TAG = "AppDataScreenViewModel"
@@ -67,8 +71,8 @@ class AppDataScreenViewModel(
                     AppDataScreenViewModel(
                         repository = repository,
                         context = application,
-                        exportBackupUseCase = ExportBackupUseCase(repository, application),
-                        importBackupUseCase = ImportBackupUseCase(repository, application),
+                        exportBackupUseCase = ExportBackupUseCase(repository),
+                        importBackupUseCase = ImportBackupUseCase(repository, logger = AppModule.createLogger()),
                         analyticsService = analyticsService
                     )
                 }
@@ -109,6 +113,8 @@ class AppDataScreenViewModel(
      * Создает резервную копию данных в JSON файл.
      * Использует FilePicker для выбора места сохранения.
      *
+     * Стрим открывается через contentResolver здесь (UI-слой).
+     *
      * @param uri URI файла для сохранения
      */
     fun exportBackup(uri: Uri) {
@@ -117,7 +123,14 @@ class AppDataScreenViewModel(
                 _uiState.value =
                     _uiState.value.copy(isExporting = true, resultMessage = null, isError = false)
 
-                val result = exportBackupUseCase(uri)
+                val outputStream =
+                    try {
+                        context.contentResolver.openOutputStream(uri)
+                    } catch (e: IOException) {
+                        throw BackupException("Не удалось экспортировать данные: ${e.message}", e)
+                    } ?: throw BackupException("Не удалось открыть OutputStream для записи")
+
+                val result = exportBackupUseCase(outputStream)
 
                 result
                     .onSuccess { count ->
@@ -129,26 +142,12 @@ class AppDataScreenViewModel(
                                 isError = false
                             )
                     }.onFailure { e ->
-                        logger.e(TAG, "Ошибка при экспорте данных", e)
-                        analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_BACKUP, e))
-                        _uiState.value =
-                            _uiState.value.copy(
-                                isExporting = false,
-                                resultMessage =
-                                    e.message
-                                        ?: context.getString(R.string.error),
-                                isError = true
-                            )
+                        _uiState.value = _uiState.value.copy(isExporting = false)
+                        reportError("Ошибка при экспорте данных", AppErrorOperation.CREATE_BACKUP, e)
                     }
             } catch (e: BackupException) {
-                logger.e(TAG, "Ошибка при экспорте данных", e)
-                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.CREATE_BACKUP, e))
-                _uiState.value =
-                    _uiState.value.copy(
-                        isExporting = false,
-                        resultMessage = e.message ?: context.getString(R.string.error),
-                        isError = true
-                    )
+                _uiState.value = _uiState.value.copy(isExporting = false)
+                reportError("Ошибка при экспорте данных", AppErrorOperation.CREATE_BACKUP, e)
             }
         }
     }
@@ -156,6 +155,8 @@ class AppDataScreenViewModel(
     /**
      * Восстанавливает данные из JSON файла.
      * Использует FilePicker для выбора файла.
+     *
+     * Стрим открывается через contentResolver здесь (UI-слой).
      *
      * @param uri URI файла для импорта
      */
@@ -165,7 +166,11 @@ class AppDataScreenViewModel(
                 _uiState.value =
                     _uiState.value.copy(isImporting = true, resultMessage = null, isError = false)
 
-                val result = importBackupUseCase(uri)
+                val inputStream =
+                    openInputStreamOrNull(uri)
+                        ?: throw BackupException("Не удалось открыть InputStream для чтения")
+
+                val result = importBackupUseCase(inputStream)
 
                 result
                     .onSuccess { count ->
@@ -177,29 +182,44 @@ class AppDataScreenViewModel(
                                 isError = false
                             )
                     }.onFailure { e ->
-                        logger.e(TAG, "Ошибка при импорте данных", e)
-                        analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.RESTORE_BACKUP, e))
-                        _uiState.value =
-                            _uiState.value.copy(
-                                isImporting = false,
-                                resultMessage =
-                                    e.message
-                                        ?: context.getString(R.string.error),
-                                isError = true
-                            )
+                        _uiState.value = _uiState.value.copy(isImporting = false)
+                        reportError("Ошибка при импорте данных", AppErrorOperation.RESTORE_BACKUP, e)
                     }
             } catch (e: BackupException) {
-                logger.e(TAG, "Ошибка при импорте данных", e)
-                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.RESTORE_BACKUP, e))
-                _uiState.value =
-                    _uiState.value.copy(
-                        isImporting = false,
-                        resultMessage = e.message ?: context.getString(R.string.error),
-                        isError = true
-                    )
+                _uiState.value = _uiState.value.copy(isImporting = false)
+                reportError("Ошибка при импорте данных", AppErrorOperation.RESTORE_BACKUP, e)
             }
         }
     }
+
+    /**
+     * Общий хвост обработки ошибки экспорта/импорта: лог, событие аналитики,
+     * сообщение пользователю и isError. Снятие busy-флага (isExporting/isImporting)
+     * остаётся на месте вызова — это единственное различие между операциями.
+     */
+    private fun reportError(
+        logMessage: String,
+        operation: AppErrorOperation,
+        e: Throwable
+    ) {
+        logger.e(TAG, logMessage, e)
+        analyticsService.log(AnalyticsEvent.AppError(operation, e))
+        _uiState.value =
+            _uiState.value.copy(
+                resultMessage = e.message ?: context.getString(R.string.error),
+                isError = true
+            )
+    }
+
+    /** Открывает InputStream для импорта; FileNotFoundException/IOException мапятся в BackupException. */
+    private fun openInputStreamOrNull(uri: Uri): InputStream? =
+        try {
+            context.contentResolver.openInputStream(uri)
+        } catch (e: FileNotFoundException) {
+            throw BackupException("Не удалось найти файл: ${e.message}", e)
+        } catch (e: IOException) {
+            throw BackupException("Не удалось прочитать файл: ${e.message}", e)
+        }
 
     /**
      * Удаляет все записи из базы данных.

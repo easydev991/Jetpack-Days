@@ -1,12 +1,12 @@
-package com.dayscounter.domain.usecase
+package com.dayscounter.domain.exception
 
 /**
- * Исключение при ошибке работы с резервными копиями (экспорт/импорт).
+ * Исключение при ошибке проверки обновлений приложения.
  *
  * @property message Сообщение об ошибке
  * @property cause Причина ошибки (опционально)
  */
-class BackupException(
+class AppUpdateException(
     message: String,
     cause: Throwable? = null
 ) : Exception(message, cause)

@@ -1,5 +1,6 @@
 package com.dayscounter.data.repository
 
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.dao.ReminderDao
 import com.dayscounter.data.database.entity.ReminderEntity
 import com.dayscounter.domain.model.Reminder
@@ -17,7 +18,7 @@ class ReminderRepositoryImplTest {
         runTest {
             // Given
             val dao = FakeReminderDao()
-            val repository = ReminderRepositoryImpl(dao)
+            val repository = ReminderRepositoryImpl(dao, crashReporter = NoopCrashReporter())
             val reminder =
                 Reminder(
                     itemId = 15L,
@@ -44,7 +45,7 @@ class ReminderRepositoryImplTest {
         runTest {
             // Given
             val dao = FakeReminderDao()
-            val repository = ReminderRepositoryImpl(dao)
+            val repository = ReminderRepositoryImpl(dao, crashReporter = NoopCrashReporter())
             val reminder =
                 Reminder(
                     itemId = 2L,
@@ -70,7 +71,7 @@ class ReminderRepositoryImplTest {
         runTest {
             // Given
             val dao = FakeReminderDao()
-            val repository = ReminderRepositoryImpl(dao)
+            val repository = ReminderRepositoryImpl(dao, crashReporter = NoopCrashReporter())
             val reminder =
                 Reminder(
                     itemId = 100L,

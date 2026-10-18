@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dayscounter.R
+import com.dayscounter.di.AppModule
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.ui.viewmodel.DetailScreenState
@@ -51,29 +52,42 @@ fun DetailScreen(
     onEditClick: (Long) -> Unit = {}
 ) {
     val context = LocalContext.current
-    // Создаем use cases для форматирования
-    val resourceProvider =
-        com.dayscounter.di.FormatterModule
-            .createResourceProvider(context)
+    // Создаем use cases для форматирования (remember — чтобы не пересоздавать граф на каждой рекомпозиции)
+    val textProvider =
+        remember(context) {
+            com.dayscounter.di.FormatterModule
+                .createDaysTextProvider(context)
+        }
     val daysFormatter =
-        com.dayscounter.di.FormatterModule
-            .createDaysFormatter()
-    val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
-    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+        remember {
+            com.dayscounter.di.FormatterModule
+                .createDaysFormatter()
+        }
+    val formatDaysTextUseCase = remember(daysFormatter) { FormatDaysTextUseCase(daysFormatter) }
+    val calculateDaysDifferenceUseCase =
+        remember {
+            CalculateDaysDifferenceUseCase(crashReporter = AppModule.createCrashReporter())
+        }
     val getFormattedDaysForItemUseCase =
-        com.dayscounter.di.FormatterModule
-            .createGetFormattedDaysForItemUseCase(
-                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
-                formatDaysTextUseCase = formatDaysTextUseCase,
-                resourceProvider = resourceProvider
-            )
+        remember(textProvider, formatDaysTextUseCase, calculateDaysDifferenceUseCase) {
+            com.dayscounter.di.FormatterModule
+                .createGetFormattedDaysForItemUseCase(
+                    calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                    formatDaysTextUseCase = formatDaysTextUseCase,
+                    textProvider = textProvider,
+                    crashReporter = AppModule.createCrashReporter(),
+                    logger = AppModule.createLogger()
+                )
+        }
     val getDaysAnalysisTextUseCase =
-        com.dayscounter.di.FormatterModule
-            .createGetDaysAnalysisTextUseCase(
-                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
-                getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-                resourceProvider = resourceProvider
-            )
+        remember(textProvider, getFormattedDaysForItemUseCase) {
+            com.dayscounter.di.FormatterModule
+                .createGetDaysAnalysisTextUseCase(
+                    calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                    getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
+                    textProvider = textProvider
+                )
+        }
 
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteDialog by viewModel.showDeleteDialog.collectAsState()

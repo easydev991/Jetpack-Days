@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.dayscounter.crash.NoopCrashReporter
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -24,7 +25,7 @@ class AlarmReminderSchedulerInstrumentedTest {
 
     @Test
     fun cancel_whenScheduled_thenPendingIntentIsRemoved() {
-        val scheduler = AlarmReminderScheduler(context)
+        val scheduler = AlarmReminderScheduler(context, crashReporter = NoopCrashReporter())
         val itemId = 777L
         val reminder =
             com.dayscounter.domain.model.Reminder(
@@ -46,7 +47,7 @@ class AlarmReminderSchedulerInstrumentedTest {
 
     @Test
     fun schedule_whenCalled_thenPendingIntentCanBeTriggered() {
-        val scheduler = AlarmReminderScheduler(context)
+        val scheduler = AlarmReminderScheduler(context, crashReporter = NoopCrashReporter())
         val itemId = 778L
         val reminder =
             com.dayscounter.domain.model.Reminder(

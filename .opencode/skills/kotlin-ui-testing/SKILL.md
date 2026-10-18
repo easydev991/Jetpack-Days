@@ -118,7 +118,8 @@ description: >
   варианта (AGP 9 с flavors): `connected/<buildType>/flavors/<flavor>/` —
   для дефолтного `make android-test` (`FLAVOR=github`) это
   `connected/debug/flavors/github/index.html`.
-- **Все тесты (unit + интеграционные)**: `make test-all`.
+- **Все тесты (unit + интеграционные)**: `make test`, затем `make android-test`
+  (по одному прогону за раз, разные устройства/флейворы не смешивать).
 - Отчёт `android_test_report.py`: exit code 0 при успехе, 1 при упавших
   тестах или ошибке Gradle. Подробности — `references/running-tests.md`.
 

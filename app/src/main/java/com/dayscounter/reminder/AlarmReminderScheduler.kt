@@ -4,9 +4,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 
 /**
@@ -14,7 +14,8 @@ import com.dayscounter.util.Logger
  */
 class AlarmReminderScheduler(
     private val context: Context,
-    private val logger: Logger = AndroidLogger()
+    private val logger: Logger = AndroidLogger(),
+    private val crashReporter: CrashReporter
 ) : ReminderScheduler {
     private val alarmManager: AlarmManager? =
         context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
@@ -40,15 +41,15 @@ class AlarmReminderScheduler(
             )
         } catch (securityException: SecurityException) {
             // Fallback на случай отсутствия права exact alarm.
-            // Не глотаем молча: разработчик и Crashlytics увидят причину
+            // Не глотаем молча: разработчик и crash-канал увидят причину
             // задержки уведомлений в минуты/часы (Doze) при отключённом permission.
             val message =
                 "Нет permission SCHEDULE_EXACT_ALARM — fallback на setAndAllowWhileIdle. " +
                     "Уведомления могут приходить с задержкой."
             logger.w(TAG, message, securityException)
             // Тот же текст, что и в logcat: поиск по ключевым словам работает
-            // и в logcat, и в консоли Crashlytics
-            CrashlyticsHelper.logException(securityException, message)
+            // и в logcat, и в crash-канале
+            crashReporter.logException(securityException, message)
             alarm.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 reminder.targetEpochMillis,

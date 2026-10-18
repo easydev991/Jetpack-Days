@@ -21,29 +21,4 @@ class ResourceProviderImpl(
         } else {
             context.getString(resId, *formatArgs)
         }
-
-    override fun getQuantityString(
-        resId: Int,
-        quantity: Int,
-        vararg formatArgs: Any
-    ): String =
-        if (formatArgs.isEmpty()) {
-            context.resources.getQuantityString(resId, quantity, quantity)
-        } else {
-            context.resources.getQuantityString(resId, quantity, quantity, *formatArgs)
-        }
-
-    override fun getYearsString(quantity: Int): String =
-        context.resources.getQuantityString(
-            ResourceIds.YEARS_COUNT,
-            quantity,
-            quantity
-        )
-
-    override fun getMonthsString(quantity: Int): String =
-        context.resources.getQuantityString(
-            ResourceIds.MONTHS_COUNT,
-            quantity,
-            quantity
-        )
 }

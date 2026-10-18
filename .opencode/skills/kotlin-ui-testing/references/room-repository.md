@@ -30,14 +30,15 @@ assertEquals(expectedCount, all.size)
 
 ## Репозиторий-интеграция
 
-`ItemRepositoryIntegrationTest` — реальный `ItemRepositoryImpl(itemDao)`:
+`ItemRepositoryIntegrationTest` — реальный
+`ItemRepositoryImpl(itemDao, NoopCrashReporter())`:
 
 ```kotlin
 @Before
 fun setup() {
     database = Room.inMemoryDatabaseBuilder(...).allowMainThreadQueries().build()
     itemDao = database.itemDao()
-    repository = ItemRepositoryImpl(itemDao)
+    repository = ItemRepositoryImpl(itemDao, NoopCrashReporter())
 }
 
 @Test
@@ -73,7 +74,8 @@ fun fullCycle_createReadUpdateDelete_thenWorksCorrectly() =
 - null-safe поля (`conversionWithNullColorTag_preservesNull`)
 
 Правила:
-- Репозиторий создаётся вручную: `ItemRepositoryImpl(itemDao)` — без DI
+- Репозиторий создаётся вручную: `ItemRepositoryImpl(itemDao, NoopCrashReporter())` —
+  без DI
 - Доменные модели в assertions — `Item`, а не `ItemEntity`
 - Turbine не используется — обычные `assertEquals` / `assertNotNull`
 - `runBlocking` для синхронных проверок

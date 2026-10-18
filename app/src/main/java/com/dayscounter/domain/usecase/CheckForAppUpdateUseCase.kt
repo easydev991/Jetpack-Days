@@ -1,11 +1,10 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.BuildConfig
+import com.dayscounter.domain.exception.AppUpdateException
 import com.dayscounter.domain.model.UpdateInfo
 import com.dayscounter.domain.usecase.http.GitHubRelease
 import com.dayscounter.domain.usecase.http.HttpRequest
 import com.dayscounter.domain.usecase.http.HttpRequestExecutor
-import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.AppConstants
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.CancellationException
@@ -30,8 +29,8 @@ import kotlinx.serialization.json.Json
 @Suppress("TooGenericExceptionCaught")
 class CheckForAppUpdateUseCase internal constructor(
     private val executor: HttpRequestExecutor,
-    private val currentVersion: String = BuildConfig.VERSION_NAME,
-    private val logger: Logger = AndroidLogger()
+    private val currentVersion: String,
+    private val logger: Logger
 ) {
     companion object {
         private const val TAG = "CheckForAppUpdateUseCase"

@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.domain.exception.AppUpdateException
 import com.dayscounter.domain.usecase.http.HttpRequestExecutor
 import com.dayscounter.domain.usecase.http.HttpResponse
 import com.dayscounter.util.NoOpLogger

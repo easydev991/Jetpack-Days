@@ -1,6 +1,6 @@
 package com.dayscounter.domain.usecase
 
-import android.util.Log
+import com.dayscounter.util.Logger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Base64
@@ -17,6 +17,8 @@ import kotlin.math.round
  * - Объекты: различные типы данных
  * - Offset table: смещения объектов
  * - Trailer: метаданные (32 байта в конце)
+ *
+ * @property logger Logger для логирования ошибок парсинга
  */
 @Suppress(
     "MagicNumber", // Бинарный формат bplist00 использует специфицированные байтовые маркеры
@@ -29,13 +31,17 @@ import kotlin.math.round
     "SwallowedException", // Ошибки парсинга возвращают null вместо выброса исключений
     "LoopWithTooManyJumpStatements" // Continue используется для early exit в циклах парсинга
 )
-object NsKeyedArchiverParser {
-    private const val TAG = "NsKeyedArchiverParser"
-    private const val BPLIST_MAGIC = "bplist00"
-    private const val TRAILER_SIZE = 32
-    private const val MAX_OBJECTS = 1000 // Защита от OOM
-    private const val COLOR_MAX = 255
-    private const val COLOR_MIN = 0
+class NsKeyedArchiverParser(
+    private val logger: Logger
+) {
+    companion object {
+        private const val TAG = "NsKeyedArchiverParser"
+        private const val BPLIST_MAGIC = "bplist00"
+        private const val TRAILER_SIZE = 32
+        private const val MAX_OBJECTS = 1000 // Защита от OOM
+        private const val COLOR_MAX = 255
+        private const val COLOR_MIN = 0
+    }
 
     // Специальный объект для представления null в bplist
     private object BplistNull
@@ -51,13 +57,7 @@ object NsKeyedArchiverParser {
     fun isNsKeyedArchiver(base64String: String): Boolean =
         base64String.isNotBlank() &&
             try {
-                val bytes = Base64.getDecoder().decode(base64String)
-                bytes.size >= BPLIST_MAGIC.length &&
-                    String(
-                        bytes,
-                        0,
-                        BPLIST_MAGIC.length
-                    ) == BPLIST_MAGIC
+                hasBplistMagic(Base64.getDecoder().decode(base64String))
             } catch (_: IllegalArgumentException) {
                 false
             }
@@ -69,17 +69,35 @@ object NsKeyedArchiverParser {
      * @return Hex-строка "#RRGGBB" или null если парсинг не удался
      */
     fun parseHexColor(base64String: String): String? {
-        if (!isNsKeyedArchiver(base64String)) return null
+        // Строка декодируется один раз: повторный вызов isNsKeyedArchiver дал бы второй decode
+        val bytes =
+            if (base64String.isBlank()) {
+                return null
+            } else {
+                try {
+                    Base64.getDecoder().decode(base64String)
+                } catch (_: IllegalArgumentException) {
+                    return null
+                }
+            }
+        if (!hasBplistMagic(bytes)) return null
 
         return try {
-            val bytes = Base64.getDecoder().decode(base64String)
             val rgba = parseBplistColor(bytes)
             rgba?.let { rgbaToHex(it) }
         } catch (e: Exception) {
-            Log.w(TAG, "Ошибка парсинга цвета iOS-бекапа: ${e.message}", e)
+            logger.w(TAG, "Ошибка парсинга цвета iOS-бекапа: ${e.message}", e)
             null
         }
     }
+
+    private fun hasBplistMagic(bytes: ByteArray): Boolean =
+        bytes.size >= BPLIST_MAGIC.length &&
+            String(
+                bytes,
+                0,
+                BPLIST_MAGIC.length
+            ) == BPLIST_MAGIC
 
     // MARK: - Bplist Parsing
 

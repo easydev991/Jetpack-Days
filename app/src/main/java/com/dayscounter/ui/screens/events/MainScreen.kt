@@ -61,6 +61,7 @@ import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.database.DaysDatabase.Companion.getDatabase
 import com.dayscounter.data.preferences.createAppSettingsDataStore
+import com.dayscounter.di.AppModule
 import com.dayscounter.di.AppModule.createItemRepository
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
@@ -109,21 +110,32 @@ fun MainScreen(
                     createAppSettingsDataStore(context.applicationContext)
                 )
         )
-    // Создаем use cases для форматирования
-    val resourceProvider =
-        com.dayscounter.di.FormatterModule
-            .createResourceProvider(context)
+    // Создаем use cases для форматирования (remember — чтобы не пересоздавать граф на каждой рекомпозиции)
+    val textProvider =
+        remember(context) {
+            com.dayscounter.di.FormatterModule
+                .createDaysTextProvider(context)
+        }
     val daysFormatter =
-        com.dayscounter.di.FormatterModule
-            .createDaysFormatter()
-    val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
-    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+        remember {
+            com.dayscounter.di.FormatterModule
+                .createDaysFormatter()
+        }
+    val formatDaysTextUseCase = remember(daysFormatter) { FormatDaysTextUseCase(daysFormatter) }
+    val calculateDaysDifferenceUseCase =
+        remember {
+            CalculateDaysDifferenceUseCase(crashReporter = AppModule.createCrashReporter())
+        }
     val getFormattedDaysForItemUseCase =
-        GetFormattedDaysForItemUseCase(
-            calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
-            formatDaysTextUseCase = formatDaysTextUseCase,
-            resourceProvider = resourceProvider
-        )
+        remember(textProvider, formatDaysTextUseCase, calculateDaysDifferenceUseCase) {
+            GetFormattedDaysForItemUseCase(
+                calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
+                formatDaysTextUseCase = formatDaysTextUseCase,
+                textProvider = textProvider,
+                crashReporter = AppModule.createCrashReporter(),
+                logger = AppModule.createLogger()
+            )
+        }
 
     MainScreenContent(
         params =

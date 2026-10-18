@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dayscounter.R
+import com.dayscounter.di.AppModule
 import com.dayscounter.di.FormatterModule
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
@@ -105,25 +106,28 @@ fun ReadSectionViewTitleWithCopyPreview() {
 @Composable
 fun DetailDatePickerPastDayPreview() {
     val context = LocalContext.current
-    val resourceProvider = FormatterModule.createResourceProvider(context)
+    val textProvider = FormatterModule.createDaysTextProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
     val formatDaysTextUseCase =
         com.dayscounter.domain.usecase
             .FormatDaysTextUseCase(daysFormatter)
+    val crashReporter = AppModule.createCrashReporter()
     val calculateDaysDifferenceUseCase =
         com.dayscounter.domain.usecase
-            .CalculateDaysDifferenceUseCase()
+            .CalculateDaysDifferenceUseCase(crashReporter)
     val getFormattedDaysForItemUseCase =
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            AppModule.createLogger()
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider
+            textProvider
         )
 
     JetpackDaysTheme {
@@ -159,25 +163,28 @@ fun DetailDatePickerPastDayPreview() {
 @Composable
 fun DetailDatePickerFutureMonthDayPreview() {
     val context = LocalContext.current
-    val resourceProvider = FormatterModule.createResourceProvider(context)
+    val textProvider = FormatterModule.createDaysTextProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
     val formatDaysTextUseCase =
         com.dayscounter.domain.usecase
             .FormatDaysTextUseCase(daysFormatter)
+    val crashReporter = AppModule.createCrashReporter()
     val calculateDaysDifferenceUseCase =
         com.dayscounter.domain.usecase
-            .CalculateDaysDifferenceUseCase()
+            .CalculateDaysDifferenceUseCase(crashReporter)
     val getFormattedDaysForItemUseCase =
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            AppModule.createLogger()
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider
+            textProvider
         )
 
     JetpackDaysTheme {
@@ -213,25 +220,28 @@ fun DetailDatePickerFutureMonthDayPreview() {
 @Composable
 fun DetailDatePickerPastYearMonthDayPreview() {
     val context = LocalContext.current
-    val resourceProvider = FormatterModule.createResourceProvider(context)
+    val textProvider = FormatterModule.createDaysTextProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
     val formatDaysTextUseCase =
         com.dayscounter.domain.usecase
             .FormatDaysTextUseCase(daysFormatter)
+    val crashReporter = AppModule.createCrashReporter()
     val calculateDaysDifferenceUseCase =
         com.dayscounter.domain.usecase
-            .CalculateDaysDifferenceUseCase()
+            .CalculateDaysDifferenceUseCase(crashReporter)
     val getFormattedDaysForItemUseCase =
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            AppModule.createLogger()
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider
+            textProvider
         )
 
     JetpackDaysTheme {
@@ -283,25 +293,28 @@ fun DetailDisplayOptionPickerPreview() {
 @Composable
 fun DetailContentInnerPreview() {
     val context = LocalContext.current
-    val resourceProvider = FormatterModule.createResourceProvider(context)
+    val textProvider = FormatterModule.createDaysTextProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
     val formatDaysTextUseCase =
         com.dayscounter.domain.usecase
             .FormatDaysTextUseCase(daysFormatter)
+    val crashReporter = AppModule.createCrashReporter()
     val calculateDaysDifferenceUseCase =
         com.dayscounter.domain.usecase
-            .CalculateDaysDifferenceUseCase()
+            .CalculateDaysDifferenceUseCase(crashReporter)
     val getFormattedDaysForItemUseCase =
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            AppModule.createLogger()
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider
+            textProvider
         )
 
     JetpackDaysTheme {
@@ -332,25 +345,28 @@ fun DetailContentInnerPreview() {
 @Composable
 fun DetailContentInnerSimplePreview() {
     val context = LocalContext.current
-    val resourceProvider = FormatterModule.createResourceProvider(context)
+    val textProvider = FormatterModule.createDaysTextProvider(context)
     val daysFormatter = FormatterModule.createDaysFormatter()
     val formatDaysTextUseCase =
         com.dayscounter.domain.usecase
             .FormatDaysTextUseCase(daysFormatter)
+    val crashReporter = AppModule.createCrashReporter()
     val calculateDaysDifferenceUseCase =
         com.dayscounter.domain.usecase
-            .CalculateDaysDifferenceUseCase()
+            .CalculateDaysDifferenceUseCase(crashReporter)
     val getFormattedDaysForItemUseCase =
         FormatterModule.createGetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            AppModule.createLogger()
         )
     val getDaysAnalysisTextUseCase =
         FormatterModule.createGetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase,
-            resourceProvider
+            textProvider
         )
 
     JetpackDaysTheme {

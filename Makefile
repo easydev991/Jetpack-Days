@@ -67,6 +67,10 @@ scripts-test:
 	python3 -m unittest discover -s scripts -p "*_test.py"
 	python3 -m unittest discover -s tools/release/scripts -p "*_test.py"
 
+## guard_domain: Guard-тест чистоты домена (DomainPurityTest); вызывается pre-commit хуком
+guard_domain: _ensure_secrets
+	./gradlew test$(FLAVOR_TITLE)DebugUnitTest --tests "com.dayscounter.domain.DomainPurityTest" --quiet
+
 ## android-test: Запуск интеграционных тестов на Android устройстве. ANDROID_TEST_FILTER=ClassName#method фильтрует один тест/класс для быстрой итерации. Использование: make android-test FLAVOR=github.
 android-test: _ensure_secrets _ensure_animations_off
 	@if [ -f scripts/android_test_report.py ]; then chmod +x scripts/android_test_report.py; fi
@@ -383,7 +387,7 @@ setup_git_hooks:
 	@chmod +x .githooks/pre-commit
 	@git config core.hooksPath .githooks
 	@printf "$(GREEN)Git hooks настроены: core.hooksPath = .githooks$(RESET)\n"
-	@printf "$(YELLOW)Теперь pre-commit хук будет автоматически обновлять версии в README.md$(RESET)\n"
+	@printf "$(YELLOW)Теперь pre-commit хук проверяет схемы Room (bump версии), чистоту домена и обновляет версии в README.md$(RESET)\n"
 
 ## update_fastlane: Проверить и установить обновления fastlane
 update_fastlane:
@@ -561,4 +565,4 @@ rustore-commit:
 ## all: Полная проверка (сборка + тесты + линтер) и установка APK на устройство
 all: check install
 
-.PHONY: build clean test lint lint-android format check install all android-test memory-check test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets _ensure_animations_off setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast
+.PHONY: build clean test scripts-test guard_domain lint lint-android format check install all android-test memory-check test-all android-test-report screenshots screenshots-ru screenshots-en update_readme update_readme_versions _build_screenshots_apk _cleanup_screenshots_apk _ensure_fastlane _ensure_secrets _ensure_animations_off setup setup_fastlane setup_ssh setup_git_hooks update_fastlane fastlane help rustore rustore-draft rustore-commit whats-new apk _load_secrets _check_rbenv _check_ruby _check_ruby_version_file _check_bundler _check_gemfile _install_gemfile_deps _check_markdownlint emulator-fast

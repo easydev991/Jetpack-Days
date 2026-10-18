@@ -7,7 +7,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.exception.ItemException.DeleteFailed
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
@@ -15,6 +14,7 @@ import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.reminder.NoOpReminderManager
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,18 +30,21 @@ class DetailScreenViewModel(
     private val logger: Logger = AndroidLogger(),
     savedStateHandle: SavedStateHandle,
     private val reminderManager: ReminderManager = NoOpReminderManager,
-    private val currentTimeMillisProvider: () -> Long = { System.currentTimeMillis() }
+    private val currentTimeMillisProvider: () -> Long = { System.currentTimeMillis() },
+    private val crashReporter: CrashReporter
 ) : ViewModel() {
     companion object {
         fun factory(
             repository: ItemRepository,
-            reminderManager: ReminderManager = NoOpReminderManager
+            reminderManager: ReminderManager = NoOpReminderManager,
+            crashReporter: CrashReporter
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     DetailScreenViewModel(
                         repository = repository,
                         reminderManager = reminderManager,
+                        crashReporter = crashReporter,
                         savedStateHandle =
                             checkNotNull(createSavedStateHandle()) {
                                 "SavedStateHandle is required"
@@ -114,7 +117,7 @@ class DetailScreenViewModel(
                 val message = "Ошибка удаления события itemId=$itemId: ${e.message}"
                 logger.e("DetailScreenViewModel", message, e)
                 // Удаление не сработало, а UI об этом не знает — отчёт обязателен
-                CrashlyticsHelper.logException(e, message)
+                crashReporter.logException(e, message)
             }
         }
     }

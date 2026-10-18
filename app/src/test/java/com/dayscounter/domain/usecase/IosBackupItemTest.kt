@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.NoOpLogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -36,7 +37,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -58,7 +59,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -78,7 +79,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -99,7 +100,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -119,7 +120,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -139,7 +140,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNull(backupItem)
@@ -158,7 +159,7 @@ class IosBackupItemTest {
             )
 
         // When - colorTag парсится из Base64 NSKeyedArchiver в hex
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then - colorTag должен быть в hex формате "#RRGGBB"
         assertNotNull(backupItem)
@@ -178,7 +179,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)
@@ -198,7 +199,7 @@ class IosBackupItemTest {
             )
 
         // When
-        val backupItem = iosBackupItem.toBackupItem()
+        val backupItem = iosBackupItem.toBackupItem(NoOpLogger())
 
         // Then
         assertNotNull(backupItem)

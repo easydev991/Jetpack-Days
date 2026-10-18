@@ -1,8 +1,5 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.provider.DaysFormatter
-import com.dayscounter.data.provider.ResourceProvider
-import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.TimePeriod
@@ -19,7 +16,7 @@ import org.junit.jupiter.api.Test
  */
 class FormatDaysTextUseCaseTest {
     private val daysFormatter: DaysFormatter = mockk()
-    private val resourceProvider: ResourceProvider = StubResourceProvider()
+    private val textProvider: DaysTextProvider = FakeDaysTextProvider()
 
     private val useCase = FormatDaysTextUseCase(daysFormatter = daysFormatter)
 
@@ -33,7 +30,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
 
@@ -51,7 +48,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
 
@@ -73,7 +70,7 @@ class FormatDaysTextUseCaseTest {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = 10,
                 showMinus = true
             )
@@ -84,7 +81,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
 
@@ -106,7 +103,7 @@ class FormatDaysTextUseCaseTest {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = 10,
                 showMinus = false
             )
@@ -117,7 +114,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
 
@@ -139,7 +136,7 @@ class FormatDaysTextUseCaseTest {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -7,
                 showMinus = true
             )
@@ -150,7 +147,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
 
@@ -170,12 +167,12 @@ class FormatDaysTextUseCaseTest {
                 timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
-        // а DaysFormatterImpl сам решает, показывать минус или нет
+        // а DefaultDaysFormatter сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -7,
                 showMinus = false
             )
@@ -186,7 +183,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
 
@@ -208,7 +205,7 @@ class FormatDaysTextUseCaseTest {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -40,
                 showMinus = true
             )
@@ -219,7 +216,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
 
@@ -238,12 +235,12 @@ class FormatDaysTextUseCaseTest {
                 timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
-        // а DaysFormatterImpl сам решает, показывать минус или нет
+        // а DefaultDaysFormatter сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -40,
                 showMinus = false
             )
@@ -254,7 +251,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
 
@@ -276,7 +273,7 @@ class FormatDaysTextUseCaseTest {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -800,
                 showMinus = true
             )
@@ -287,7 +284,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
 
@@ -306,12 +303,12 @@ class FormatDaysTextUseCaseTest {
                 timestamp = 1234567890000L
             )
         // После исправления бага FormatDaysTextUseCase передает оригинальное totalDays,
-        // а DaysFormatterImpl сам решает, показывать минус или нет
+        // а DefaultDaysFormatter сам решает, показывать минус или нет
         every {
             daysFormatter.formatComposite(
                 period = period,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 totalDays = -800,
                 showMinus = false
             )
@@ -322,7 +319,7 @@ class FormatDaysTextUseCaseTest {
             useCase.invoke(
                 difference = difference,
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
 

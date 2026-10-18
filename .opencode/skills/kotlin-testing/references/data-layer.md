@@ -108,38 +108,14 @@ class DisplayOptionConverterTest {
 }
 ```
 
-## Provider (с моком ResourceProvider)
+## Форматтеры и провайдеры строк
 
-`DaysFormatterImplTest` — `DaysFormatterImpl` использует
-`ResourceProvider` для plurals. Мокируем провайдер, проверяем
-форматирование:
-
-```kotlin
-class DaysFormatterImplTest {
-    private val resourceProvider = mockk<ResourceProvider>()
-    private val formatter = DaysFormatterImpl()
-
-    @Test
-    fun formatdays_when_singular_then_returns_singular_form() {
-        // Given
-        every {
-            resourceProvider.getQuantityString(
-                resId = R.plurals.days_count,
-                quantity = 1
-            )
-        } returns "1 день"
-
-        // When
-        val result = formatter.format(1, resourceProvider)
-
-        // Then
-        assertEquals("1 день", result, "Ожидалась форма единственного числа")
-    }
-}
-```
-
-Здесь `R.plurals.days_count` — реальный resource ID из production.
-Мок подменяет результат, тест проверяет только логику форматтера.
+Форматирование тестируется не через мок ресурсов, а через
+`DefaultDaysFormatterTest`: на вход `formatComposite(...)` подаётся
+`mockk<DaysTextProvider>()` или `FakeDaysTextProvider` (см. примеры в
+`use-cases.md`). Реализация `DaysTextProviderImpl` поверх
+`R.plurals` юнит-тестами не покрыта — она проверяется реальными
+ресурсами в интеграционных прогонах.
 
 ## RepositoryImpl с FakeDao
 
@@ -152,7 +128,7 @@ class ReminderRepositoryImplTest {
     fun saveReminder_whenValid_thenPersistsAndReturnsFromGetByItemId() = runTest {
         // Given
         val dao = FakeReminderDao()
-        val repository = ReminderRepositoryImpl(dao)
+        val repository = ReminderRepositoryImpl(dao, crashReporter = NoopCrashReporter())
         val reminder = Reminder(
             itemId = 15L,
             mode = ReminderMode.AFTER_INTERVAL,
@@ -176,7 +152,7 @@ class ReminderRepositoryImplTest {
     fun markAsConsumed_whenReminderExists_thenChangesStatus() = runTest {
         // Given
         val dao = FakeReminderDao()
-        val repository = ReminderRepositoryImpl(dao)
+        val repository = ReminderRepositoryImpl(dao, crashReporter = NoopCrashReporter())
         val reminder = Reminder(
             itemId = 2L,
             mode = ReminderMode.AT_DATE,
@@ -234,7 +210,7 @@ class BackupImportRealFilesTest {
         val wrapper = json.decodeFromString<IosBackupWrapper>(jsonString)
 
         // When
-        val androidItems = wrapper.items.mapNotNull { it.toBackupItem() }
+        val androidItems = wrapper.items.mapNotNull { it.toBackupItem(NoOpLogger()) }
 
         // Then
         val victoryDay = androidItems.find { it.title == "День победы" }
@@ -275,7 +251,8 @@ javaClass.getResourceAsStream("/old-backup-sample.json")
 
 - [ ] Mapper: round-trip тест (entity → domain → entity → equals)
 - [ ] Converter: каждый enum-значение + round-trip
-- [ ] Provider: тесты на каждый публичный метод, мок `ResourceProvider`
+- [ ] Провайдер строк: тесты на каждый публичный метод, мок
+      `DaysTextProvider` (или `FakeDaysTextProvider`)
 - [ ] Repository: Fake DAO / DataStore (не реальный), каждая ветка CRUD
 - [ ] JSON парсер: реальные файлы из resources, разные форматы
       (старый Android, новый Android, старый iOS, новый iOS)

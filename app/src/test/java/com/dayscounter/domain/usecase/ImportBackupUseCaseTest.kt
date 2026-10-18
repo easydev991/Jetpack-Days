@@ -1,11 +1,9 @@
 package com.dayscounter.domain.usecase
 
-import android.content.Context
-import android.net.Uri
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.NoOpLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -21,15 +19,12 @@ import java.io.ByteArrayInputStream
  */
 class ImportBackupUseCaseTest {
     private val repository: ItemRepository = mockk()
-    private val context: Context = mockk()
-    private val contentResolver: android.content.ContentResolver = mockk()
 
     private lateinit var useCase: ImportBackupUseCase
 
     @BeforeEach
     fun setup() {
-        every { context.contentResolver } returns contentResolver
-        useCase = ImportBackupUseCase(repository, context)
+        useCase = ImportBackupUseCase(repository, NoOpLogger())
     }
 
     // MARK: - Импорт Android-бекапа с полем format: "android"
@@ -53,15 +48,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -94,15 +87,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -131,15 +122,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -172,15 +161,13 @@ class ImportBackupUseCaseTest {
                     }
                 ]
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -208,15 +195,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -245,7 +230,6 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
             val existingItem =
@@ -258,12 +242,11 @@ class ImportBackupUseCaseTest {
                     displayOption = com.dayscounter.domain.model.DisplayOption.DAY
                 )
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(listOf(existingItem))
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -306,15 +289,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)
@@ -350,15 +331,13 @@ class ImportBackupUseCaseTest {
                     ]
                 }
                 """.trimIndent()
-            val uri: Uri = mockk()
             val inputStream = ByteArrayInputStream(json.toByteArray())
 
-            every { contentResolver.openInputStream(uri) } returns inputStream
             coEvery { repository.getAllItems() } returns flowOf(emptyList())
             coEvery { repository.insertItem(any()) } returns 1L
 
             // When
-            val result = useCase(uri)
+            val result = useCase(inputStream)
 
             // Then
             assertTrue(result.isSuccess)

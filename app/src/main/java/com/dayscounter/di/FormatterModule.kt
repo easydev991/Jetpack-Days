@@ -1,18 +1,22 @@
 package com.dayscounter.di
 
 import android.content.Context
-import com.dayscounter.data.provider.DaysFormatter
-import com.dayscounter.data.provider.DaysFormatterImpl
+import com.dayscounter.BuildConfig
+import com.dayscounter.data.provider.DaysTextProviderImpl
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.data.provider.ResourceProviderImpl
-import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.CheckForAppUpdateUseCase
+import com.dayscounter.domain.usecase.DaysFormatter
+import com.dayscounter.domain.usecase.DaysTextProvider
+import com.dayscounter.domain.usecase.DefaultDaysFormatter
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
 import com.dayscounter.domain.usecase.GetDaysAnalysisTextUseCase
 import com.dayscounter.domain.usecase.GetFormattedDaysForItemUseCase
 import com.dayscounter.domain.usecase.http.HttpRequestExecutor
 import com.dayscounter.domain.usecase.http.HttpResponse
+import com.dayscounter.util.CrashReporter
+import com.dayscounter.util.Logger
 import java.net.HttpURLConnection
 import java.net.URI
 import javax.net.ssl.HttpsURLConnection
@@ -59,29 +63,35 @@ object FormatterModule {
         }
 
     /**
-     * Создает [StubResourceProvider].
-     */
-    fun createStubResourceProvider(): ResourceProvider = StubResourceProvider()
-
-    /**
      * Создает [ResourceProvider].
      */
     fun createResourceProvider(context: Context): ResourceProvider = ResourceProviderImpl(context)
 
     /**
+     * Создает [DaysTextProvider].
+     */
+    fun createDaysTextProvider(context: Context): DaysTextProvider = DaysTextProviderImpl(context)
+
+    /**
      * Создает [DaysFormatter].
      */
-    fun createDaysFormatter(): DaysFormatter = DaysFormatterImpl()
+    fun createDaysFormatter(): DaysFormatter = DefaultDaysFormatter()
 
     /**
      * Создает [CalculateDaysDifferenceUseCase].
      */
-    fun createCalculateDaysDifferenceUseCase(): CalculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+    fun createCalculateDaysDifferenceUseCase(crashReporter: CrashReporter): CalculateDaysDifferenceUseCase =
+        CalculateDaysDifferenceUseCase(crashReporter)
 
     /**
      * Создает [CheckForAppUpdateUseCase] с executor'ом на [HttpsURLConnection].
      */
-    fun createCheckForAppUpdateUseCase(): CheckForAppUpdateUseCase = CheckForAppUpdateUseCase(httpsExecutor)
+    fun createCheckForAppUpdateUseCase(): CheckForAppUpdateUseCase =
+        CheckForAppUpdateUseCase(
+            httpsExecutor,
+            currentVersion = BuildConfig.VERSION_NAME,
+            logger = AppModule.createLogger()
+        )
 
     /**
      * Создает [FormatDaysTextUseCase].
@@ -95,12 +105,16 @@ object FormatterModule {
     fun createGetFormattedDaysForItemUseCase(
         calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
         formatDaysTextUseCase: FormatDaysTextUseCase,
-        resourceProvider: ResourceProvider
+        textProvider: DaysTextProvider,
+        crashReporter: CrashReporter,
+        logger: Logger
     ): GetFormattedDaysForItemUseCase =
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase,
             formatDaysTextUseCase,
-            resourceProvider
+            textProvider,
+            crashReporter,
+            logger
         )
 
     /**
@@ -108,18 +122,18 @@ object FormatterModule {
      *
      * @param calculateDaysDifferenceUseCase Use case для вычисления разницы дат
      * @param getFormattedDaysForItemUseCase Use case для получения форматированного текста
-     * @param resourceProvider Провайдер строковых ресурсов для локализации
+     * @param textProvider Провайдер семантических строк для локализации
      * @return Экземпляр GetDaysAnalysisTextUseCase
      */
     @Suppress("MaxLineLength")
     fun createGetDaysAnalysisTextUseCase(
         calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
         getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-        resourceProvider: ResourceProvider
+        textProvider: DaysTextProvider
     ): GetDaysAnalysisTextUseCase =
         GetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-            resourceProvider = resourceProvider
+            textProvider = textProvider
         )
 }

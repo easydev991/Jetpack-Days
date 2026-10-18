@@ -1,38 +1,37 @@
-# AGENTS.md - Guidelines for AI Coding Agents
+# AGENTS.md — руководство для ИИ-агентов
 
-## Project Overview
+## Обзор проекта
 
-"Days Counter" — Android app (Kotlin + Jetpack Compose) for tracking days
-since events. Fully offline; backup format is shared with the iOS
-counterpart.
+"Days Counter" — Android-приложение (Kotlin + Jetpack Compose) для учёта
+дней с событий. Полностью офлайн; формат бэкапа общий с iOS-версией.
 
-**Hard constraints (do not violate):**
-- Offline only: no Retrofit / OkHttp / Ktor (единственный carve-out — Stack ниже)
-- Backup format must stay compatible with the iOS app (importer —
+**Жёсткие ограничения (нарушать нельзя):**
+- Только офлайн: без Retrofit / OkHttp / Ktor (единственное исключение — стек ниже)
+- Формат бэкапа должен оставаться совместимым с iOS-приложением (импортёр —
   `domain/usecase/ImportBackupUseCase.kt`; правила — навык `backup`)
-- Logs and user-facing comments are Russian by default
-- **Never use `!!`** — use `?`, `?:`, `let`, `checkNotNull` (ловит detekt)
+- Логи и комментарии для пользователя — по умолчанию на русском
+- **Никогда не использовать `!!`** — вместо неё `?`, `?:`, `let`, `checkNotNull`
 
-Operational rules (auto-loaded by OpenCode via `opencode.json` →
+Операционные правила (грузятся OpenCode автоматически через `opencode.json` →
 `instructions` glob): `.opencode/rules/test-execution.md` (прогоны тестов,
-gotcha gradle-задач) and `.opencode/rules/android-emulator.md` (MCP-эмулятор).
+подводные камни gradle-задач) и `.opencode/rules/android-emulator.md` (MCP-эмулятор).
 
 ---
 
-## Stack
+## Стек
 
 UI — Compose + Navigation Compose + ViewModel; данные — Room, DataStore,
 Coroutines, kotlinx-serialization; тесты — JUnit 5 + MockK (unit),
 Compose Testing (androidTest); телеметрия — Firebase, только release.
 
-**Carve-out:** ручная проверка обновлений (`CheckForAppUpdateUseCase`) —
+**Исключение:** ручная проверка обновлений (`CheckForAppUpdateUseCase`) —
 единственное сетевое взаимодействие в проекте: платформенный
 `HttpsURLConnection` через узкую абстракцию `HttpRequestExecutor`.
 Не прецедент — новые сетевые фичи запрещены офлайн-правилом.
 
 ---
 
-## Architecture
+## Архитектура
 
 MVVM + Clean: Presentation (UI, ViewModel) → Domain (Use Cases, entities)
 → Data (Room, repositories — только локальные источники).
@@ -40,27 +39,29 @@ MVVM + Clean: Presentation (UI, ViewModel) → Domain (Use Cases, entities)
 DI — ручной, factory-методы: `FormatterModule`, `AppModule` (в `di/`).
 Hilt не используется; пересмотреть при росте (>10 ViewModel, сложные графы).
 
+Домен чист: `domain/` не импортирует `android.*`/`androidx.*`/`data`/`crash`/`analytics`/`di`/`reminder`/`ui`/`navigation`/`R`/`BuildConfig`/`util.AndroidLogger` — ловит guard-тест `DomainPurityTest`.
+
 ---
 
-## Where to find things
+## Где что искать
 
-| Concern | Source of truth |
+| Что | Источник истины |
 | --- | --- |
-| Library / plugin versions | `gradle/libs.versions.toml` |
+| Версии библиотек / плагинов | `gradle/libs.versions.toml` |
 | `compileSdk` / `minSdk` / `targetSdk` | `app/build.gradle.kts` |
-| App version (`VERSION_NAME`, `VERSION_CODE`) | `gradle.properties` |
-| Version badges in README | `<!-- BEGIN_VERSIONS -->` (обновляет `make update_readme_versions`) |
-| Build flavors / release flow | [docs/deployment.md](docs/deployment.md) + `Makefile` |
-| Detekt config | `config/detekt/detekt.yml` |
+| Версия приложения (`VERSION_NAME`, `VERSION_CODE`) | `gradle.properties` |
+| Бейджи версий в README | `<!-- BEGIN_VERSIONS -->` (обновляет `make update_readme_versions`) |
+| Флейворы сборки / релизный процесс | [docs/deployment.md](docs/deployment.md) + `Makefile` |
+| Конфигурация Detekt | `config/detekt/detekt.yml` |
 
-Do not pin versions in this file — they change often. Read the files above.
+Не фиксируй версии в этом файле — они часто меняются. Читай файлы выше.
 
 ---
 
-## Build / Lint / Test
+## Сборка / Линт / Тесты
 
 Все команды — через `make` (`make help` — полный список); правила прогонов
-и gotcha gradle-задач — `.opencode/rules/test-execution.md`. Цели
+и подводные камни gradle-задач — `.opencode/rules/test-execution.md`. Цели
 `make build` / `make test` / `make install` / `make android-test` /
 `make memory-check` сами подтягивают секреты через SSH.
 
@@ -76,7 +77,7 @@ found» без пояснения.
 
 ---
 
-## Testing
+## Тестирование
 
 - Unit (`app/src/test/`) — навык `kotlin-testing`; androidTest
   (`app/src/androidTest/`) — навык `kotlin-ui-testing`; прогоны —
@@ -95,22 +96,22 @@ found» без пояснения.
 
 ---
 
-## Code Style
+## Стиль кода
 
 Проектные конвенции (сверх дефолтов Kotlin/Compose):
 
-- Use Cases возвращают `Result<T>`, исключения мапятся в доменные
-  (`BackupException`, `ItemException`)
+- Use Cases с I/O возвращают `Result<T>`, исключения мапятся в доменные
+  (`BackupException`, `ItemException`); чистые расчёты отдают значение напрямую
 - UI-состояния: взаимоисключающие визуальные состояния — sealed-классы
   (`Loading`/`Success`/`Error`); простое состояние — data class
-- Маршруты — `navigation/Screen.kt`: sealed class + хелперы
+- Маршруты — `navigation/Screen.kt`: sealed-класс + хелперы
   `createRoute(...)` (живой пример — `Screen.ItemDetail`)
-- Сообщения пользователю — только через `ResourceProvider`; строки — в
-  `strings.xml` (навык `localization`)
+- Сообщения пользователю — через `ResourceProvider` (UI-слои) или
+  `DaysTextProvider` (домен); строки — в `strings.xml` (навык `localization`)
 
 ---
 
-## Performance & Security
+## Производительность и безопасность
 
 Нюансы текущего состояния (не дефолты платформы):
 
@@ -121,19 +122,19 @@ found» без пояснения.
 
 ---
 
-## Project Structure
+## Структура проекта
 
 ```
 app/src/main/java/com/dayscounter/
-├── data/        # database/ (Room), provider/, preferences/, repository/
+├── data/        # database/ (Room), icon/, provider/, preferences/, repository/
 ├── domain/      # model/, repository/ (interface), usecase/, exception/
 ├── ui/          # ds/ (переиспользуемые компоненты), screens/, state/, theme/, viewmodel/
 ├── navigation/  # Screen.kt — маршруты
-├── reminder/    # worker, notification
-├── analytics/   # Firebase, release-only
-├── crash/       # Crashlytics, release-only
-├── di/          # AppModule, FormatterModule — manual DI
-└── util/        # Logger, AppConstants
+├── reminder/    # воркер, уведомления
+├── analytics/   # Firebase, только release
+├── crash/       # CrashReporter-реализации (Firebase — release-only)
+├── di/          # AppModule, FormatterModule — ручной DI
+└── util/        # Logger, AndroidLogger/NoOpLogger, CrashReporter, AppConstants, ClipboardHelper
 ```
 
 Тесты — `app/src/test/` (unit), `app/src/androidTest/` (инструментальные,
@@ -142,11 +143,11 @@ app/src/main/java/com/dayscounter/
 
 ---
 
-## Checklist Before Commit
+## Чеклист перед коммитом
 
-1. `make format` — fixes ktlint + detekt + markdown issues
-2. `make test` — read the report; do not trust exit code alone
+1. `make format` — чинит проблемы ktlint + detekt + markdown
+2. `make test` — читай отчёт; не доверяй только коду выхода
 3. Все замечания ktlint/detekt устранены; новый код не добавляет проблем
-4. KDoc on public APIs; осмысленные имена
-5. No deprecated APIs (`./gradlew lint` flags them)
+4. KDoc на публичных API; осмысленные имена
+5. Никаких устаревших API (`./gradlew lint` подсвечивает их)
 6. `make memory-check` — если задача трогала UI, навигацию или ViewModel

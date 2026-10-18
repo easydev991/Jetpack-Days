@@ -160,11 +160,6 @@
 
 
 
-    <!-- Days formatting - abbreviated -->
-    <string name="days_abbreviated">дн.</string>
-    <string name="months_abbreviated">мес.</string>
-    <string name="years_abbreviated">г.</string>
-
     <!-- Days formatting -->
     <plurals name="days_count">
         <item quantity="one">%d дн.</item>

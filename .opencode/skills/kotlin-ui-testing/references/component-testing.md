@@ -103,9 +103,6 @@ private fun createTestItemRepository(): ItemRepository =
 internal fun createTestResourceProvider(): ResourceProvider =
     object : ResourceProvider {
         override fun getString(resId: Int, vararg formatArgs: Any): String = ""
-        override fun getQuantityString(resId: Int, quantity: Int, vararg formatArgs: Any): String = ""
-        override fun getYearsString(quantity: Int): String = ""
-        override fun getMonthsString(quantity: Int): String = ""
     }
 ```
 

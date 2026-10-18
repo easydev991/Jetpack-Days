@@ -1,7 +1,5 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.provider.ResourceProvider
-import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
@@ -23,7 +21,7 @@ import java.time.ZoneId
  * "осталось"/"прошло" и без знака минус для будущих событий.
  */
 class GetDaysAnalysisTextUseCaseTest {
-    private val resourceProvider: ResourceProvider = StubResourceProvider()
+    private val textProvider: DaysTextProvider = FakeDaysTextProvider()
 
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase = mockk()
     private val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase = mockk()
@@ -32,7 +30,7 @@ class GetDaysAnalysisTextUseCaseTest {
         GetDaysAnalysisTextUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-            resourceProvider = resourceProvider
+            textProvider = textProvider
         )
 
     @Test

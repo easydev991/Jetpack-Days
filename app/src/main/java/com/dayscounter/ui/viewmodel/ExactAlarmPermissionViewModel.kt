@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.ExactAlarmPermissionState
 import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class ExactAlarmPermissionViewModel(
     private val helper: ExactAlarmPermissionHelper,
-    private val logger: Logger = AndroidLogger()
+    private val logger: Logger = AndroidLogger(),
+    private val crashReporter: CrashReporter
 ) : ViewModel() {
     private val _state = MutableStateFlow(helper.getState())
     val state: StateFlow<ExactAlarmPermissionState> = _state.asStateFlow()
@@ -64,7 +65,7 @@ class ExactAlarmPermissionViewModel(
             val message = "Не удалось открыть настройки SCHEDULE_EXACT_ALARM"
             logger.w(TAG, message, e)
             // Тот же текст, что и в logcat: канал одного сообщения
-            CrashlyticsHelper.logException(e, message)
+            crashReporter.logException(e, message)
         }
         refresh()
     }
@@ -76,10 +77,13 @@ class ExactAlarmPermissionViewModel(
          * Фабрика для `viewModel(factory = ...)`. Конвенция проекта — `companion object factory()`
          * (см. `CreateEditScreenViewModel.factory`). Делегирует `AppModule.createExactAlarmPermissionViewModelFactory`.
          */
-        fun factory(helper: ExactAlarmPermissionHelper): ViewModelProvider.Factory =
+        fun factory(
+            helper: ExactAlarmPermissionHelper,
+            crashReporter: CrashReporter
+        ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    ExactAlarmPermissionViewModel(helper = helper)
+                    ExactAlarmPermissionViewModel(helper = helper, crashReporter = crashReporter)
                 }
             }
     }

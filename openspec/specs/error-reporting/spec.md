@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Каждая ошибка, которую приложение поглощает (fallback без сигнала пользователю), должна попадать в Firebase Crashlytics как non-fatal через существующий канал `CrashlyticsHelper.logException`, чтобы разработчик видел скрытые сбои в консоли без Android Studio.
+Каждая ошибка, которую приложение поглощает (fallback без сигнала пользователю), должна попадать в Firebase Crashlytics как non-fatal через инъекцию `CrashReporter` (реализация для release — `FirebaseCrashReporter`), чтобы разработчик видел скрытые сбои в консоли без Android Studio.
 
 ## Requirements
 

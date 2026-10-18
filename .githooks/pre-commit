@@ -18,6 +18,21 @@ if ! git diff --cached --quiet -- app/schemas; then
     fi
 fi
 
+# Guard чистоты домена: домен не тянет android/androidx и слои приложения —
+# проверка в DomainPurityTest (импорты + голые FQN). Запускается, только
+# когда коммит трогает domain/ (код или сам guard-тест): тест сканирует
+# рабочее дерево, а не индекс,
+# поэтому постороннее WIP-нарушение не должно блокировать чужие коммиты.
+# shortcut: застейдженное нарушение с исправленным деревом хук пропустит —
+# index-based скан не нужен до выноса домена в отдельный модуль.
+if git diff --cached --name-only | grep -qE '^app/src/(main|test)/java/com/dayscounter/domain/'; then
+    if ! make guard_domain; then
+        echo "✗ Guard-прогон домена упал — реальная причина в выводе выше; отчёт: app/build/reports/tests/testGithubDebugUnitTest/index.html"
+        echo "  Отчёт тестов перезаписан этим прогоном: для полного отчёта прогони make test."
+        exit 1
+    fi
+fi
+
 echo "Updating versions in README.md..."
 if ./gradlew updateReadmeVersions --no-configuration-cache --quiet; then
     echo "✓ Versions updated successfully"

@@ -12,7 +12,7 @@ make test
 Под капотом:
 
 ```bash
-./gradlew test --console=plain
+./gradlew test$(FLAVOR_TITLE)DebugUnitTest --console=plain
 python3 scripts/test_report.py
 ```
 
@@ -79,7 +79,7 @@ make android-test-report       # открыть HTML-отчёт в браузе�
 Внутри:
 
 ```bash
-./gradlew connectedAndroidTest --console=plain
+./gradlew connected$(FLAVOR_TITLE)DebugAndroidTest --console=plain
 python3 scripts/android_test_report.py
 ```
 
@@ -92,15 +92,19 @@ python3 scripts/android_test_report.py
 make check
 ```
 
-Build + test + lint.
+Build + test.
 
 ## Где Gradle кладёт результаты
 
 ```
-app/build/reports/tests/testDebugUnitTest/index.html   # HTML-отчёт
-app/build/test-results/testDebugUnitTest/*.xml        # XML для test_report.py
-app/build/reports/tests/testDebugUnitTest/classes/    # детали по классам
+app/build/reports/tests/testGithubDebugUnitTest/index.html   # HTML-отчёт
+app/build/test-results/testGithubDebugUnitTest/*.xml        # XML для test_report.py
+app/build/reports/tests/testGithubDebugUnitTest/classes/    # детали по классам
 ```
+
+Имена задач flavor-aware (AGP 9): `testDebugUnitTest` не существует.
+Для `FLAVOR=rustore` это `testRustoreDebugUnitTest`, шаблон —
+`test$(FLAVOR_TITLE)DebugUnitTest`.
 
 `test_report.py` читает именно XML из `app/build/test-results/`.
 

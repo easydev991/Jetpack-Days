@@ -28,7 +28,7 @@ every {
     daysFormatter.formatComposite(
         period = period,
         displayOption = DisplayOption.DAY,
-        resourceProvider = resourceProvider,
+        textProvider = textProvider,
         totalDays = 10,
         showMinus = true
     )
@@ -148,7 +148,7 @@ ViewModel слушает через `combine` / `flatMapLatest` на TestDispatc
 
 Канонический полный класс — `references/use-cases.md`, §2
 «С зависимостями (MockK)» (там же пояснение про
-`StubResourceProvider`).
+`FakeDaysTextProvider`).
 
 Ключевая деталь примера: `mockk()` без `relaxed`, потому что
 единственный метод форматтера стабится в каждом тесте.

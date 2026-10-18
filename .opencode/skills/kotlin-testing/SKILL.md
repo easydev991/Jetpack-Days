@@ -4,7 +4,7 @@ description: >
   Экспертное руководство по unit-тестированию в Android-проекте JetpackDays:
   JUnit 5, MockK, Fake-репозитории на MutableStateFlow, kotlinx-coroutines-test
   для ViewModel и Use Case, Given-When-Then, проектные соглашения
-  (snake_case, без !!, русские сообщения, NoOpLogger, StubResourceProvider),
+  (snake_case, без !!, русские сообщения, NoOpLogger, FakeDaysTextProvider),
   а также ограничения (запрет новых интеграционных тестов ViewModel).
   Использовать при написании новых unit-тестов, рефакторинге существующих,
   отладке flaky-тестов и улучшении качества покрытия в проекте.
@@ -57,7 +57,7 @@ Unit-тесты Kotlin-кода в JetpackDays. Стек: **JUnit 5**
 ## Запуск тестов
 
 - `make test` — прогон с человекочитаемым отчётом
-  (`scripts/test_report.py`); `make check` — build + test + lint.
+  (`scripts/test_report.py`); `make check` — build + test.
 - Одиночные классы/методы, фильтрация, где Gradle кладёт результаты —
   `references/running-tests.md`.
 

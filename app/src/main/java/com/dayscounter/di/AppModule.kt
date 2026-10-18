@@ -9,6 +9,8 @@ import com.dayscounter.DaysCounterApplication
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.FirebaseAnalyticsProvider
 import com.dayscounter.analytics.NoopAnalyticsProvider
+import com.dayscounter.crash.FirebaseCrashReporter
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
 import com.dayscounter.data.provider.ResourceProvider
@@ -23,6 +25,9 @@ import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.ui.viewmodel.ExactAlarmPermissionViewModel
 import com.dayscounter.ui.viewmodel.MoreScreenViewModel
+import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.CrashReporter
+import com.dayscounter.util.Logger
 
 /**
  * Модуль внедрения зависимостей для приложения.
@@ -51,13 +56,25 @@ object AppModule {
         }
     }
 
+    /**
+     * Crash-канал: Noop в debug/тестах, Firebase Crashlytics в release
+     * (зеркально выбору провайдеров аналитики выше).
+     */
+    fun createCrashReporter(): CrashReporter = if (BuildConfig.DEBUG) NoopCrashReporter() else FirebaseCrashReporter()
+
+    /**
+     * Логгер приложения: домен принимает [Logger] явно, а Android-реализацию выбирает только di-слой.
+     */
+    fun createLogger(): Logger = AndroidLogger()
+
     val resourceProvider: ResourceProvider by lazy {
         FormatterModule.createResourceProvider(DaysCounterApplication.instance)
     }
 
-    fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao())
+    fun createItemRepository(database: DaysDatabase): ItemRepository = ItemRepositoryImpl(database.itemDao(), createCrashReporter())
 
-    fun createReminderRepository(database: DaysDatabase): ReminderRepository = ReminderRepositoryImpl(database.reminderDao())
+    fun createReminderRepository(database: DaysDatabase): ReminderRepository =
+        ReminderRepositoryImpl(database.reminderDao(), crashReporter = createCrashReporter())
 
     fun createReminderManager(
         context: Context,
@@ -66,7 +83,11 @@ object AppModule {
         DefaultReminderManager(
             reminderRepository = createReminderRepository(database),
             itemRepository = createItemRepository(database),
-            reminderScheduler = AlarmReminderScheduler(context.applicationContext)
+            reminderScheduler =
+                AlarmReminderScheduler(
+                    context.applicationContext,
+                    crashReporter = createCrashReporter()
+                )
         )
 
     fun createAppSettingsDataStore(context: Context): AppSettingsDataStore = AppSettingsDataStore(context)
@@ -76,7 +97,8 @@ object AppModule {
 
     fun createExactAlarmPermissionViewModelFactory(context: Context): ViewModelProvider.Factory =
         ExactAlarmPermissionViewModel.factory(
-            helper = createExactAlarmPermissionHelper(context)
+            helper = createExactAlarmPermissionHelper(context),
+            crashReporter = createCrashReporter()
         )
 
     fun createMoreScreenViewModelFactory(): ViewModelProvider.Factory =

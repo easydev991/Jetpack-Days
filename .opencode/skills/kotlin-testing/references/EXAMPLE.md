@@ -22,6 +22,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class BuildReminderUseCaseTest {
     private val fixedInstant = Instant.parse("2026-04-27T10:15:30Z")
@@ -196,7 +197,7 @@ class MainScreenViewModelTest {
 ## Где искать ещё
 
 - `app/src/test/java/com/dayscounter/domain/usecase/CalculateDaysDifferenceUseCaseTest.kt` — pure use case, временные кейсы, явный `currentDate`.
-- `app/src/test/java/com/dayscounter/domain/usecase/FormatDaysTextUseCaseTest.kt` — MockK для одного интерфейса + `StubResourceProvider`.
+- `app/src/test/java/com/dayscounter/domain/usecase/FormatDaysTextUseCaseTest.kt` — MockK для одного интерфейса + `FakeDaysTextProvider`.
 - `app/src/test/java/com/dayscounter/domain/model/DaysDifferenceTest.kt` — sealed-class проверки.
 - `app/src/test/java/com/dayscounter/ui/viewmodel/DetailScreenViewModelTest.kt` — `SavedStateHandle`, `currentTimeMillisProvider`, `FakeReminderManager`.
 - `app/src/test/java/com/dayscounter/data/repository/ReminderRepositoryImplTest.kt` — `FakeReminderDao` для repository.

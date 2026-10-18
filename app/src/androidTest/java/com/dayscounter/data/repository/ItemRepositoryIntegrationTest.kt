@@ -3,6 +3,7 @@ package com.dayscounter.data.repository
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.database.dao.ItemDao
 import com.dayscounter.domain.model.DisplayOption
@@ -33,7 +34,7 @@ class ItemRepositoryIntegrationTest {
                 ).allowMainThreadQueries()
                 .build()
         itemDao = database.itemDao()
-        repository = ItemRepositoryImpl(itemDao)
+        repository = ItemRepositoryImpl(itemDao, NoopCrashReporter())
     }
 
     @After

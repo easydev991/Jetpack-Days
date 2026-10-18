@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.NoOpLogger
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.Test
  */
 @Suppress("TooManyFunctions")
 class IosBackupIntegrationTest {
+    private val logger = NoOpLogger()
+    private val parser = NsKeyedArchiverParser(logger)
     private lateinit var json: Json
 
     @BeforeEach
@@ -94,7 +97,7 @@ class IosBackupIntegrationTest {
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
 
         // When - конвертируем все записи
-        val backupItems = iosBackupItems.map { it.toBackupItem() }
+        val backupItems = iosBackupItems.map { it.toBackupItem(logger) }
 
         // Then - все 4 записи успешно конвертированы
         assertEquals(4, backupItems.size)
@@ -125,7 +128,7 @@ class IosBackupIntegrationTest {
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
 
         // When - конвертируем и проверяем colorTag
-        val backupItems = iosBackupItems.map { it.toBackupItem() }
+        val backupItems = iosBackupItems.map { it.toBackupItem(logger) }
 
         // Then - проверяем что colorTag успешно конвертирован из Base64 в hex
         val birthday = backupItems[0]!!
@@ -157,10 +160,10 @@ class IosBackupIntegrationTest {
                 ?.getResourceAsStream("old-ios-backup-sample.json")
                 ?: throw AssertionError("Не удалось найти ios-backup-sample.json в ресурсах")
         val iosBackupItems: List<IosBackupItem> = json.decodeFromStream(inputStream)
-        val backupItems = iosBackupItems.mapNotNull { it.toBackupItem() }
+        val backupItems = iosBackupItems.mapNotNull { it.toBackupItem(logger) }
 
         // When - конвертируем в Item
-        val items = backupItems.mapNotNull { it.toItem() }
+        val items = backupItems.mapNotNull { it.toItem(logger) }
 
         // Then - все 4 записи успешно конвертированы
         assertEquals(4, items.size)
@@ -199,7 +202,7 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
+        val backupItem = iosItem.toBackupItem(logger)
 
         // Then
         assertNotNull(backupItem)
@@ -221,7 +224,7 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
+        val backupItem = iosItem.toBackupItem(logger)
 
         // Then
         assertNotNull(backupItem)
@@ -251,7 +254,7 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
+        val backupItem = iosItem.toBackupItem(logger)
 
         // Then
         assertNotNull(backupItem)
@@ -280,7 +283,7 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
+        val backupItem = iosItem.toBackupItem(logger)
 
         // Then
         assertNotNull(backupItem)
@@ -306,7 +309,7 @@ class IosBackupIntegrationTest {
                 )
 
             // When
-            val backupItem = iosItem.toBackupItem()
+            val backupItem = iosItem.toBackupItem(logger)
 
             // Then
             assertNotNull(backupItem, "displayOption '$option' должен быть валидным")
@@ -327,7 +330,7 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
+        val backupItem = iosItem.toBackupItem(logger)
 
         // Then
         assertNull(backupItem, "Невалидный displayOption должен возвращать null")
@@ -347,9 +350,9 @@ class IosBackupIntegrationTest {
         val originalIosItem = iosBackupItems[0] // День рождения
 
         // When - конвертируем iOS → BackupItem → Item
-        val backupItem = originalIosItem.toBackupItem()
+        val backupItem = originalIosItem.toBackupItem(logger)
         assertNotNull(backupItem)
-        val item = backupItem!!.toItem()
+        val item = backupItem!!.toItem(logger)
         assertNotNull(item)
 
         // Then - проверяем что данные сохранились
@@ -379,8 +382,8 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
-        val item = backupItem?.toItem()
+        val backupItem = iosItem.toBackupItem(logger)
+        val item = backupItem?.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -400,8 +403,8 @@ class IosBackupIntegrationTest {
             )
 
         // When
-        val backupItem = iosItem.toBackupItem()
-        val item = backupItem?.toItem()
+        val backupItem = iosItem.toBackupItem(logger)
+        val item = backupItem?.toItem(logger)
 
         // Then
         assertNotNull(item)
@@ -423,7 +426,7 @@ class IosBackupIntegrationTest {
                 "APcBAAEMARQBFwEgASIAAAAAAAACAQAAAAAAAAAmAAAAAAAAAAAAAAAAAAABKg=="
 
         // When & Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(greenBase64))
+        assertTrue(parser.isNsKeyedArchiver(greenBase64))
     }
 
     @Test
@@ -432,7 +435,7 @@ class IosBackupIntegrationTest {
         val hexColor = "#FF0000"
 
         // When & Then
-        assertFalse(NsKeyedArchiverParser.isNsKeyedArchiver(hexColor))
+        assertFalse(parser.isNsKeyedArchiver(hexColor))
     }
 
     @Test
@@ -441,6 +444,6 @@ class IosBackupIntegrationTest {
         val empty = ""
 
         // When & Then
-        assertFalse(NsKeyedArchiverParser.isNsKeyedArchiver(empty))
+        assertFalse(parser.isNsKeyedArchiver(empty))
     }
 }

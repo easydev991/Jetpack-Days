@@ -2,26 +2,27 @@
 
 package com.dayscounter.data.repository
 
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.data.database.dao.ReminderDao
 import com.dayscounter.data.database.toDomain
 import com.dayscounter.data.database.toEntity
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.model.ReminderStatus
 import com.dayscounter.domain.repository.ReminderRepository
+import com.dayscounter.util.CrashReporter
 
 /**
  * Реализация [ReminderRepository] поверх Room.
  */
 class ReminderRepositoryImpl(
     private val reminderDao: ReminderDao,
-    private val currentTimeMillisProvider: () -> Long = { System.currentTimeMillis() }
+    private val currentTimeMillisProvider: () -> Long = { System.currentTimeMillis() },
+    private val crashReporter: CrashReporter
 ) : ReminderRepository {
     override suspend fun getReminderByItemId(itemId: Long): Reminder? =
         try {
             reminderDao.getReminderByItemId(itemId)?.toDomain()
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(e, "Ошибка получения напоминания itemId=$itemId")
+            crashReporter.logException(e, "Ошибка получения напоминания itemId=$itemId")
             throw e
         }
 
@@ -29,7 +30,7 @@ class ReminderRepositoryImpl(
         try {
             reminderDao.upsertReminder(reminder.toEntity())
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(e, "Ошибка сохранения напоминания itemId=${reminder.itemId}")
+            crashReporter.logException(e, "Ошибка сохранения напоминания itemId=${reminder.itemId}")
             throw e
         }
     }
@@ -42,7 +43,7 @@ class ReminderRepositoryImpl(
                 updatedAt = currentTimeMillisProvider()
             )
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(e, "Ошибка consume напоминания itemId=$itemId")
+            crashReporter.logException(e, "Ошибка consume напоминания itemId=$itemId")
             throw e
         }
     }
@@ -55,7 +56,7 @@ class ReminderRepositoryImpl(
                 updatedAt = currentTimeMillisProvider()
             )
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(e, "Ошибка cancel напоминания itemId=$itemId")
+            crashReporter.logException(e, "Ошибка cancel напоминания itemId=$itemId")
             throw e
         }
     }
@@ -64,7 +65,7 @@ class ReminderRepositoryImpl(
         try {
             reminderDao.deleteByItemId(itemId)
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(e, "Ошибка удаления напоминания itemId=$itemId")
+            crashReporter.logException(e, "Ошибка удаления напоминания itemId=$itemId")
             throw e
         }
     }
@@ -75,7 +76,7 @@ class ReminderRepositoryImpl(
                 .getFutureActiveReminders(nowEpochMillis)
                 .map { it.toDomain() }
         } catch (e: Exception) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 e,
                 "Ошибка получения активных напоминаний now=$nowEpochMillis"
             )

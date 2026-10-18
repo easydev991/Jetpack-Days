@@ -160,11 +160,6 @@
 
 
 
-    <!-- Days formatting - abbreviated -->
-    <string name="days_abbreviated">d</string>
-    <string name="months_abbreviated">mo</string>
-    <string name="years_abbreviated">y</string>
-
     <!-- Days formatting -->
     <plurals name="days_count">
         <item quantity="one">%d day</item>

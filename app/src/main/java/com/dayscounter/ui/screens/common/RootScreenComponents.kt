@@ -128,7 +128,12 @@ private fun NavGraphBuilder.detailScreenDestination(
             itemId = itemId,
             viewModel =
                 viewModel(
-                    factory = DetailScreenViewModel.factory(repository, reminderManager)
+                    factory =
+                        DetailScreenViewModel.factory(
+                            repository,
+                            reminderManager,
+                            AppModule.createCrashReporter()
+                        )
                 ),
             onBackClick = { navController.popBackStack() },
             onEditClick = { id ->

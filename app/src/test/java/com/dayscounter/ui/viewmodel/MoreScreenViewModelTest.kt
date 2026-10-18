@@ -1,7 +1,7 @@
 package com.dayscounter.ui.viewmodel
 
+import com.dayscounter.domain.exception.AppUpdateException
 import com.dayscounter.domain.model.UpdateInfo
-import com.dayscounter.domain.usecase.AppUpdateException
 import com.dayscounter.domain.usecase.CheckForAppUpdateUseCase
 import com.dayscounter.ui.state.MoreScreenUiState
 import io.mockk.coEvery

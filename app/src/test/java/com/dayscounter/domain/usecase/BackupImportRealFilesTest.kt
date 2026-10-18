@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.NoOpLogger
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -65,7 +66,7 @@ class BackupImportRealFilesTest {
         val backupItems = json.decodeFromString<List<BackupItem>>(jsonString)
 
         // When
-        val domainItems = backupItems.mapNotNull { it.toItem() }
+        val domainItems = backupItems.mapNotNull { it.toItem(NoOpLogger()) }
 
         // Then
         assertEquals(8, domainItems.size)
@@ -108,7 +109,7 @@ class BackupImportRealFilesTest {
         val iosItems = json.decodeFromString<List<IosBackupItem>>(jsonString)
 
         // When - toBackupItem() конвертирует Base64 plist colorTag в hex
-        val androidItems = iosItems.mapNotNull { it.toBackupItem() }
+        val androidItems = iosItems.mapNotNull { it.toBackupItem(NoOpLogger()) }
 
         // Then
         assertEquals(4, androidItems.size)
@@ -151,7 +152,7 @@ class BackupImportRealFilesTest {
         val wrapper = json.decodeFromString<BackupWrapper>(jsonString)
 
         // When
-        val domainItems = wrapper.items.mapNotNull { it.toItem() }
+        val domainItems = wrapper.items.mapNotNull { it.toItem(NoOpLogger()) }
 
         // Then
         assertEquals(8, domainItems.size)
@@ -201,7 +202,7 @@ class BackupImportRealFilesTest {
         val wrapper = json.decodeFromString<IosBackupWrapper>(jsonString)
 
         // When - конвертируем iOS items в Android формат
-        val androidItems = wrapper.items.mapNotNull { it.toBackupItem() }
+        val androidItems = wrapper.items.mapNotNull { it.toBackupItem(NoOpLogger()) }
 
         // Then
         assertTrue(androidItems.isNotEmpty())
@@ -222,7 +223,7 @@ class BackupImportRealFilesTest {
         val wrapper = json.decodeFromString<IosBackupWrapper>(jsonString)
 
         // When
-        val androidItems = wrapper.items.mapNotNull { it.toBackupItem() }
+        val androidItems = wrapper.items.mapNotNull { it.toBackupItem(NoOpLogger()) }
 
         // Then
         assertTrue(androidItems.isNotEmpty())

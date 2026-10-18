@@ -1,8 +1,8 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.TimePeriod
+import com.dayscounter.util.CrashReporter
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,7 +11,9 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 @Suppress("TooGenericExceptionCaught")
-class CalculateDaysDifferenceUseCase {
+class CalculateDaysDifferenceUseCase(
+    private val crashReporter: CrashReporter
+) {
     /**
      * Вычисляет разницу между датами.
      *
@@ -49,8 +51,8 @@ class CalculateDaysDifferenceUseCase {
                 timestamp = eventTimestamp
             )
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при вычислении разницы дат: $eventTimestamp - $currentDate"
             )

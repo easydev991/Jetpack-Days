@@ -2,13 +2,13 @@
 
 package com.dayscounter.data.repository
 
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.data.database.dao.ItemDao
 import com.dayscounter.data.database.toDomain
 import com.dayscounter.data.database.toEntity
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.SortOrder
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.CrashReporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -16,13 +16,15 @@ import kotlinx.coroutines.flow.map
  * Реализация ItemRepository для работы с Room базой данных.
  *
  * @property itemDao DAO для доступа к данным
+ * @property crashReporter Канал репортинга сбоев (в release — Firebase Crashlytics)
  *
  * Примечание: Мы используем общий перехват исключений здесь намеренно,
- * чтобы логировать любые ошибки базы данных в Crashlytics перед их переброской.
+ * чтобы репортить любые ошибки базы данных в crash-канал перед их переброской.
  * Это позволяет получить полную информацию о проблемах в production.
  */
 class ItemRepositoryImpl(
-    private val itemDao: ItemDao
+    private val itemDao: ItemDao,
+    private val crashReporter: CrashReporter
 ) : ItemRepository {
     override fun getAllItems(): Flow<List<Item>> =
         try {
@@ -30,8 +32,8 @@ class ItemRepositoryImpl(
                 .getAllItems()
                 .map { entities -> entities.map { it.toDomain() } }
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при получении списка элементов"
             )
@@ -47,8 +49,8 @@ class ItemRepositoryImpl(
                 }
             return flow.map { entities -> entities.map { it.toDomain() } }
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при получении списка элементов с сортировкой: $sortOrder"
             )
@@ -60,8 +62,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.getItemById(id)?.toDomain()
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при получении элемента с id: $id"
             )
@@ -74,8 +76,8 @@ class ItemRepositoryImpl(
                 .getItemByIdFlow(id)
                 .map { entity -> entity?.toDomain() }
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при получении потока элемента с id: $id"
             )
@@ -88,8 +90,8 @@ class ItemRepositoryImpl(
                 .searchItems(query)
                 .map { entities -> entities.map { it.toDomain() } }
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при поиске элементов: $query"
             )
@@ -100,8 +102,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.insertItem(item.toEntity())
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при вставке элемента: ${item.title}"
             )
@@ -112,8 +114,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.updateItem(item.toEntity())
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при обновлении элемента: ${item.title}"
             )
@@ -125,8 +127,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.deleteItem(item.toEntity())
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при удалении элемента: ${item.title}"
             )
@@ -138,8 +140,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.deleteAllItems()
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при удалении всех элементов"
             )
@@ -151,8 +153,8 @@ class ItemRepositoryImpl(
         try {
             itemDao.getItemsCount()
         } catch (e: Exception) {
-            // Логируем критическую ошибку в Crashlytics
-            CrashlyticsHelper.logException(
+            // Логируем критическую ошибку в crash-канал
+            crashReporter.logException(
                 e,
                 "Ошибка при получении количества элементов"
             )

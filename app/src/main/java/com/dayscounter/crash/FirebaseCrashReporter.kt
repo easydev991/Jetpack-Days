@@ -2,13 +2,12 @@
 
 package com.dayscounter.crash
 
+import com.dayscounter.util.CrashReporter
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics
 
 /**
- * Helper-класс для работы с Crashlytics.
- *
- * Обеспечивает безопасное логирование ошибок.
+ * Crash-канал на Firebase Crashlytics для release-сборок.
  *
  * Crashlytics автоматически собирает:
  * - Полные стек-трейсы исключений
@@ -20,21 +19,21 @@ import com.google.firebase.crashlytics.crashlytics
  * Примечание: Мы используем общий перехват исключений здесь намеренно, чтобы избежать бесконечного
  * цикла при ошибках в самом Crashlytics.
  */
-object CrashlyticsHelper {
+class FirebaseCrashReporter : CrashReporter {
     /**
      * Логирует исключение в Crashlytics.
      *
-     * @param exception Исключение для логирования
+     * @param throwable Исключение для логирования
      * @param message Дополнительное сообщение (опционально)
      */
-    fun logException(
-        exception: Throwable,
-        message: String? = null
+    override fun logException(
+        throwable: Throwable,
+        message: String?
     ) {
         try {
             Firebase.crashlytics.apply {
                 message?.let { setCustomKey("error_message", it) }
-                recordException(exception)
+                recordException(throwable)
             }
         } catch (e: Exception) {
             // Не логируем ошибки при отправке в Crashlytics,

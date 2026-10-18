@@ -94,7 +94,7 @@ runTest {
     backgroundScope.launch {
         viewModel.uiState.collect { collectedStates += it }
     }
-    mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 }
 ```
 

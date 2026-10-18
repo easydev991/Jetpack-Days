@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.NoOpLogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test
  * а также round-trip конвертацию через NsKeyedArchiverParser.
  */
 class NsKeyedArchiverBuilderTest {
+    private val parser = NsKeyedArchiverParser(NoOpLogger())
+
     // MARK: - buildFromHexColor Tests
 
     @Test
@@ -25,7 +28,7 @@ class NsKeyedArchiverBuilderTest {
 
         // Then
         assertNotNull(base64)
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64!!))
+        assertTrue(parser.isNsKeyedArchiver(base64!!))
     }
 
     @Test
@@ -38,7 +41,7 @@ class NsKeyedArchiverBuilderTest {
 
         // Then
         assertNotNull(base64)
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64!!))
+        assertTrue(parser.isNsKeyedArchiver(base64!!))
     }
 
     @Test
@@ -51,7 +54,7 @@ class NsKeyedArchiverBuilderTest {
 
         // Then
         assertNotNull(base64)
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64!!))
+        assertTrue(parser.isNsKeyedArchiver(base64!!))
     }
 
     @Test
@@ -89,7 +92,7 @@ class NsKeyedArchiverBuilderTest {
         val base64 = NsKeyedArchiverBuilder.buildFromArgb(redArgb)
 
         // Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64))
+        assertTrue(parser.isNsKeyedArchiver(base64))
     }
 
     @Test
@@ -101,7 +104,7 @@ class NsKeyedArchiverBuilderTest {
         val base64 = NsKeyedArchiverBuilder.buildFromArgb(greenArgb)
 
         // Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64))
+        assertTrue(parser.isNsKeyedArchiver(base64))
     }
 
     @Test
@@ -113,7 +116,7 @@ class NsKeyedArchiverBuilderTest {
         val base64 = NsKeyedArchiverBuilder.buildFromArgb(blueArgb)
 
         // Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64))
+        assertTrue(parser.isNsKeyedArchiver(base64))
     }
 
     // MARK: - Round-trip Tests
@@ -125,7 +128,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -138,7 +141,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -151,7 +154,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -164,7 +167,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -177,7 +180,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -190,7 +193,7 @@ class NsKeyedArchiverBuilderTest {
 
         // When
         val base64 = NsKeyedArchiverBuilder.buildFromHexColor(originalHex)
-        val parsedHex = NsKeyedArchiverParser.parseHexColor(base64!!)
+        val parsedHex = parser.parseHexColor(base64!!)
 
         // Then
         assertEquals(originalHex, parsedHex)
@@ -210,7 +213,7 @@ class NsKeyedArchiverBuilderTest {
         val base64 = NsKeyedArchiverBuilder.buildFromRgba(r, g, b, a)
 
         // Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64))
+        assertTrue(parser.isNsKeyedArchiver(base64))
     }
 
     @Test
@@ -225,6 +228,6 @@ class NsKeyedArchiverBuilderTest {
         val base64 = NsKeyedArchiverBuilder.buildFromRgba(r, g, b, a)
 
         // Then
-        assertTrue(NsKeyedArchiverParser.isNsKeyedArchiver(base64))
+        assertTrue(parser.isNsKeyedArchiver(base64))
     }
 }

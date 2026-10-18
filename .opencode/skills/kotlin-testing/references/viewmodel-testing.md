@@ -73,7 +73,8 @@ viewModel = DetailScreenViewModel(
     repository = repository,
     logger = NoOpLogger(),
     savedStateHandle = savedStateHandle,
-    reminderManager = reminderManager
+    reminderManager = reminderManager,
+    crashReporter = crashReporter
 )
 ```
 
@@ -93,7 +94,8 @@ viewModel = DetailScreenViewModel(
     logger = NoOpLogger(),
     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
     reminderManager = reminderManager,
-    currentTimeMillisProvider = { nowMillis }   // фиксируем время
+    currentTimeMillisProvider = { nowMillis },   // фиксируем время
+    crashReporter = crashReporter
 )
 
 // ... действие, advanceUntilIdle
@@ -114,7 +116,8 @@ fun when_item_not_found_then_remains_in_loading_state() = runTest {
         repository = repository,
         logger = NoOpLogger(),
         savedStateHandle = savedStateHandle,
-        reminderManager = reminderManager
+        reminderManager = reminderManager,
+        crashReporter = crashReporter
     )
 
     // When - Пытаемся загрузить несуществующий элемент

@@ -1,11 +1,10 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.crash.CrashlyticsHelper
-import com.dayscounter.data.provider.ResourceIds
-import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
+import com.dayscounter.util.CrashReporter
+import com.dayscounter.util.Logger
 import java.time.LocalDate
 
 /**
@@ -16,12 +15,16 @@ import java.time.LocalDate
  *
  * @property calculateDaysDifferenceUseCase Use case для вычисления разницы дат
  * @property formatDaysTextUseCase Use case для форматирования текста
- * @property resourceProvider Провайдер строковых ресурсов для локализации
+ * @property textProvider Провайдер семантических строк для локализации
+ * @property crashReporter Канал репортинга сбоев (в release — Firebase Crashlytics)
+ * @property logger Logger для логирования
  */
 class GetFormattedDaysForItemUseCase(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val formatDaysTextUseCase: FormatDaysTextUseCase,
-    private val resourceProvider: ResourceProvider
+    private val textProvider: DaysTextProvider,
+    private val crashReporter: CrashReporter,
+    private val logger: Logger
 ) {
     /**
      * Получает форматированный текст количества дней для указанного Item.
@@ -62,20 +65,20 @@ class GetFormattedDaysForItemUseCase(
             formatDaysTextUseCase(
                 difference = difference,
                 displayOption = displayOption,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = showMinus
             )
         } catch (e: Exception) {
             // Обрабатываем исключения при форматировании
             val message = "Ошибка форматирования: ${e.message}"
-            android.util.Log.e("GetFormattedDaysForItemUseCase", message, e)
+            logger.e("GetFormattedDaysForItemUseCase", message, e)
             // Тот же текст, что и в logcat: канал одного сообщения
-            CrashlyticsHelper.logException(e, message)
+            crashReporter.logException(e, message)
             // Вычисляем общее количество дней как заглушку
             when (difference) {
-                is DaysDifference.Today -> resourceProvider.getString(ResourceIds.TODAY)
+                is DaysDifference.Today -> textProvider.today()
                 is DaysDifference.Calculated ->
-                    "${resourceProvider.getString(ResourceIds.ERROR_FORMATTING)}: ${difference.totalDays}"
+                    "${textProvider.formattingError()}: ${difference.totalDays}"
             }
         }
     }

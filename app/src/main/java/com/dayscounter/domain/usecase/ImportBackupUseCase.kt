@@ -1,13 +1,13 @@
 package com.dayscounter.domain.usecase
 
-import android.content.Context
-import android.net.Uri
+import com.dayscounter.domain.exception.BackupException
 import com.dayscounter.domain.repository.ItemRepository
+import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 import java.sql.SQLException
 
 /**
@@ -21,11 +21,11 @@ import java.sql.SQLException
  * - Старый формат без обёртки (массив BackupItem напрямую)
  *
  * @property repository Repository для работы с данными
- * @property context Контекст приложения
+ * @property logger Logger для логирования ошибок парсинга
  */
 class ImportBackupUseCase(
     private val repository: ItemRepository,
-    private val context: Context
+    private val logger: Logger
 ) {
     private val json =
         Json {
@@ -35,10 +35,10 @@ class ImportBackupUseCase(
     /**
      * Импортирует записи из файла.
      *
-     * @param uri URI файла для импорта
+     * @param inputStream Поток с JSON данными резервной копии
      * @return Result с количеством импортированных записей или ошибкой
      */
-    suspend operator fun invoke(uri: Uri): Result<Int> =
+    suspend operator fun invoke(inputStream: InputStream): Result<Int> =
         try {
             val existingItems =
                 repository
@@ -46,13 +46,13 @@ class ImportBackupUseCase(
                     .first()
 
             val backupItems: List<BackupItem> =
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    parseBackupFile(inputStream)
-                } ?: throw BackupException("Не удалось открыть InputStream для чтения")
+                inputStream.use {
+                    parseBackupFile(it)
+                }
 
             val newItems =
                 backupItems
-                    .mapNotNull { it.toItem() }
+                    .mapNotNull { it.toItem(logger) }
                     .filter { newItem ->
                         !existingItems.any { existingItem ->
                             existingItem.title == newItem.title &&
@@ -69,8 +69,6 @@ class ImportBackupUseCase(
             }
 
             Result.success(importedCount)
-        } catch (e: FileNotFoundException) {
-            Result.failure(BackupException("Не удалось найти файл: ${e.message}", e))
         } catch (e: IOException) {
             Result.failure(BackupException("Не удалось прочитать файл: ${e.message}", e))
         } catch (e: SerializationException) {
@@ -90,7 +88,7 @@ class ImportBackupUseCase(
      * @param inputStream Поток с JSON данными
      * @return Список BackupItem в Android-формате
      */
-    private fun parseBackupFile(inputStream: java.io.InputStream): List<BackupItem> {
+    private fun parseBackupFile(inputStream: InputStream): List<BackupItem> {
         val jsonString = inputStream.bufferedReader().use { it.readText() }
 
         val wrapperResult = runCatching { json.decodeFromString<BackupWrapper>(jsonString) }
@@ -99,7 +97,7 @@ class ImportBackupUseCase(
         return when {
             wrapperResult.isSuccess -> wrapperResult.getOrThrow().items
             iosWrapperResult.isSuccess ->
-                iosWrapperResult.getOrThrow().items.mapNotNull { it.toBackupItem() }
+                iosWrapperResult.getOrThrow().items.mapNotNull { it.toBackupItem(logger) }
             else -> json.decodeFromString<List<BackupItem>>(jsonString)
         }
     }

@@ -1,5 +1,6 @@
 package com.dayscounter.domain.usecase
 
+import com.dayscounter.util.Logger
 import kotlinx.serialization.Serializable
 
 private const val MILLIS_PER_SECOND = 1000.0
@@ -43,9 +44,10 @@ data class IosBackupItem(
  * - colorTag: Base64 NSKeyedArchiver → hex-строка (#RRGGBB)
  * - displayOption: проверка валидности
  *
+ * @param logger Logger для логирования ошибок парсинга цвета
  * @return BackupItem в Android-формате или null, если displayOption невалидный
  */
-fun IosBackupItem.toBackupItem(): BackupItem? {
+fun IosBackupItem.toBackupItem(logger: Logger): BackupItem? {
     // Проверяем валидность displayOption
     val validDisplayOptions = setOf("day", "monthDay", "yearMonthDay")
     if (displayOption !in validDisplayOptions) {
@@ -61,7 +63,7 @@ fun IosBackupItem.toBackupItem(): BackupItem? {
     // Конвертируем colorTag: Base64 NSKeyedArchiver → hex-строка
     val androidColorTag: String? =
         colorTag?.let { iosColorTag ->
-            NsKeyedArchiverParser.parseHexColor(iosColorTag)
+            NsKeyedArchiverParser(logger).parseHexColor(iosColorTag)
         }
 
     return BackupItem(

@@ -91,14 +91,13 @@ fun calculate_when_1_day_difference_then_returns_1_day() {
 Маркеры обязательны в каждом тесте — даже если `// When` и `// Then`
 занимают по одной строке (то же правило в `project-conventions.md`).
 
-## Базовый шаблон (pure, без зависимостей)
+## Базовый шаблон (pure, без I/O)
 
-Когда тестируемый класс не имеет зависимостей и не работает с I/O,
-шаблон минимален:
+Когда тестируемый класс не работает с I/O, шаблон минимален:
 
 ```kotlin
 class CalculateDaysDifferenceUseCaseTest {
-    private val useCase = CalculateDaysDifferenceUseCase()
+    private val useCase = CalculateDaysDifferenceUseCase(NoopCrashReporter())
 
     @Test
     fun calculate_when_same_day_then_returns_today() {

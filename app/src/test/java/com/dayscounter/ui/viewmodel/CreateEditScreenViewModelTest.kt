@@ -1031,16 +1031,6 @@ class CreateEditScreenViewModelTest {
                 ResourceIds.ERROR_LOADING_EVENT -> "Ошибка загрузки события: ${formatArgs.joinToString()}"
                 else -> "Строка по умолчанию: $resId"
             }
-
-        override fun getQuantityString(
-            resId: Int,
-            quantity: Int,
-            vararg formatArgs: Any
-        ): String = "$quantity"
-
-        override fun getYearsString(quantity: Int): String = "$quantity год"
-
-        override fun getMonthsString(quantity: Int): String = "$quantity месяц"
     }
 
     private class FakeReminderManager : ReminderManager {

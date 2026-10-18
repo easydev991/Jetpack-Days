@@ -11,10 +11,11 @@ import com.dayscounter.analytics.AnalyticsEvent
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.AppErrorOperation
 import com.dayscounter.analytics.UserActionType
+import com.dayscounter.data.icon.IconManager
 import com.dayscounter.data.preferences.AppSettingsDataStore
+import com.dayscounter.di.AppModule
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.domain.model.AppTheme
-import com.dayscounter.domain.usecase.IconManager
 import com.dayscounter.ui.state.ThemeIconUiState
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
@@ -57,7 +58,7 @@ class ThemeIconViewModel(
             analyticsService: AnalyticsService
         ): ViewModelProvider.Factory =
             viewModelFactory {
-                val iconManager = IconManager(application)
+                val iconManager = IconManager(application, crashReporter = AppModule.createCrashReporter())
                 initializer { ThemeIconViewModel(dataStore, iconManager, analyticsService) }
             }
     }

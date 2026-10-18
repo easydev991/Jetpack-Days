@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.dayscounter.R
+import com.dayscounter.di.AppModule
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.usecase.CalculateDaysDifferenceUseCase
 import com.dayscounter.domain.usecase.FormatDaysTextUseCase
@@ -38,18 +39,21 @@ internal object PreviewComponentsConstants {
 @Composable
 private fun createPreviewUseCases(): GetFormattedDaysForItemUseCase {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val resourceProvider =
+    val textProvider =
         com.dayscounter.di.FormatterModule
-            .createResourceProvider(context)
+            .createDaysTextProvider(context)
     val daysFormatter =
         com.dayscounter.di.FormatterModule
             .createDaysFormatter()
     val formatDaysTextUseCase = FormatDaysTextUseCase(daysFormatter)
-    val calculateDaysDifferenceUseCase = CalculateDaysDifferenceUseCase()
+    val calculateDaysDifferenceUseCase =
+        CalculateDaysDifferenceUseCase(crashReporter = AppModule.createCrashReporter())
     return GetFormattedDaysForItemUseCase(
         calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
         formatDaysTextUseCase = formatDaysTextUseCase,
-        resourceProvider = resourceProvider
+        textProvider = textProvider,
+        crashReporter = AppModule.createCrashReporter(),
+        logger = AppModule.createLogger()
     )
 }
 

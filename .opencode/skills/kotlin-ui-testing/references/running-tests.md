@@ -79,7 +79,8 @@ make android-test-report    # открывает index.html отчёта
 ## Все тесты сразу
 
 ```bash
-make test-all
+make test
+make android-test
 ```
 
 Результаты:
@@ -105,7 +106,7 @@ make test-all
 
 ```kotlin
 androidTestImplementation(libs.androidx.junit)            // androidx.test:junit
-androidTestImplementation(libs.turbine)                   // Turbine 1.2.1
+androidTestImplementation(libs.turbine)                   // Turbine (версия — gradle/libs.versions.toml)
 androidTestImplementation(platform(libs.androidx.compose.bom))
 androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 debugImplementation(libs.androidx.compose.ui.test.manifest)

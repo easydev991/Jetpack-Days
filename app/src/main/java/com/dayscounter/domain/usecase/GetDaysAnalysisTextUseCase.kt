@@ -1,7 +1,5 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.data.provider.ResourceIds
-import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.Item
 import java.time.LocalDate
@@ -18,12 +16,12 @@ import java.time.LocalDate
  *
  * @property calculateDaysDifferenceUseCase Use case для вычисления разницы дат
  * @property getFormattedDaysForItemUseCase Use case для получения форматированного текста
- * @property resourceProvider Провайдер строковых ресурсов для локализации
+ * @property textProvider Провайдер семантических строк для локализации
  */
 class GetDaysAnalysisTextUseCase(
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase,
     private val getFormattedDaysForItemUseCase: GetFormattedDaysForItemUseCase,
-    private val resourceProvider: ResourceProvider
+    private val textProvider: DaysTextProvider
 ) {
     /**
      * Получает полный текст анализа дней с префиксом.
@@ -44,18 +42,18 @@ class GetDaysAnalysisTextUseCase(
 
         return when (difference) {
             is DaysDifference.Today -> {
-                resourceProvider.getString(ResourceIds.TODAY)
+                textProvider.today()
             }
 
             is DaysDifference.Calculated -> {
                 if (difference.totalDays == 0) {
-                    resourceProvider.getString(ResourceIds.TODAY)
+                    textProvider.today()
                 } else {
                     // Определяем префикс на основе знака totalDays
                     val prefix =
                         when {
-                            difference.totalDays < 0 -> resourceProvider.getString(ResourceIds.REMAINING)
-                            else -> resourceProvider.getString(ResourceIds.ELAPSED)
+                            difference.totalDays < 0 -> textProvider.remaining()
+                            else -> textProvider.elapsed()
                         }
 
                     // Используем существующий use case для форматирования

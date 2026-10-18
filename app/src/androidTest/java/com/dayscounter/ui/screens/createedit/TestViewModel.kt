@@ -62,14 +62,4 @@ internal fun createTestResourceProvider(): ResourceProvider =
             resId: Int,
             vararg formatArgs: Any
         ): String = ""
-
-        override fun getQuantityString(
-            resId: Int,
-            quantity: Int,
-            vararg formatArgs: Any
-        ): String = ""
-
-        override fun getYearsString(quantity: Int): String = ""
-
-        override fun getMonthsString(quantity: Int): String = ""
     }

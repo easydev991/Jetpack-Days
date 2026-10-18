@@ -1,23 +1,16 @@
 package com.dayscounter.domain.usecase
 
-import com.dayscounter.crash.CrashlyticsHelper
-import com.dayscounter.data.provider.ResourceIds
-import com.dayscounter.data.provider.StubResourceProvider
 import com.dayscounter.domain.model.DaysDifference
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.TimePeriod
+import com.dayscounter.util.CrashReporter
+import com.dayscounter.util.Logger
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.runs
-import io.mockk.unmockkAll
 import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.ZoneId
@@ -31,25 +24,18 @@ import java.time.ZoneId
 class GetFormattedDaysForItemUseCaseTest {
     private val calculateDaysDifferenceUseCase: CalculateDaysDifferenceUseCase = mockk()
     private val formatDaysTextUseCase: FormatDaysTextUseCase = mockk()
-    private val resourceProvider = StubResourceProvider()
+    private val textProvider: DaysTextProvider = FakeDaysTextProvider()
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
+    private val logger: Logger = mockk(relaxed = true)
 
     private val useCase =
         GetFormattedDaysForItemUseCase(
             calculateDaysDifferenceUseCase = calculateDaysDifferenceUseCase,
             formatDaysTextUseCase = formatDaysTextUseCase,
-            resourceProvider = resourceProvider
+            textProvider = textProvider,
+            crashReporter = crashReporter,
+            logger = logger
         )
-
-    @BeforeEach
-    fun setUp() {
-        mockkObject(CrashlyticsHelper)
-        every { CrashlyticsHelper.logException(any(), any()) } just runs
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
 
     @Test
     fun invoke_when_event_in_future_and_showminus_true_then_shows_minus_sign() {
@@ -77,7 +63,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "-7 дней"
@@ -119,7 +105,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "7 дней"
@@ -157,7 +143,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "10 дней"
@@ -195,7 +181,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "10 дней"
@@ -228,7 +214,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "Сегодня"
@@ -261,7 +247,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "Сегодня"
@@ -299,7 +285,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "-40 дней"
@@ -337,7 +323,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "40 дней"
@@ -375,7 +361,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "-800 дней"
@@ -413,7 +399,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.YEAR_MONTH_DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "800 дней"
@@ -451,7 +437,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "-7 дней"
@@ -489,7 +475,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = false
             )
         } returns "7 дней"
@@ -527,7 +513,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = DisplayOption.DAY,
-                resourceProvider = resourceProvider,
+                textProvider = textProvider,
                 showMinus = true
             )
         } returns "-7 дней"
@@ -567,7 +553,7 @@ class GetFormattedDaysForItemUseCaseTest {
             formatDaysTextUseCase(
                 difference = any(),
                 displayOption = any(),
-                resourceProvider = any(),
+                textProvider = any(),
                 showMinus = any()
             )
         } throws IllegalStateException("formatter broken")
@@ -577,15 +563,23 @@ class GetFormattedDaysForItemUseCaseTest {
 
         // Then: на экране прежний fallback-текст ...
         assertEquals(
-            "${resourceProvider.getString(ResourceIds.ERROR_FORMATTING)}: 7",
+            "${textProvider.formattingError()}: 7",
             result,
             "При сбое форматирования должен вернуться fallback-текст"
         )
         // ... и сбой должен попасть в crash-канал
         verify(exactly = 1) {
-            CrashlyticsHelper.logException(
+            crashReporter.logException(
                 ofType(IllegalStateException::class),
                 match { it.contains("Ошибка форматирования") }
+            )
+        }
+        // ... и быть залогирован
+        verify(exactly = 1) {
+            logger.e(
+                "GetFormattedDaysForItemUseCase",
+                match { it.contains("Ошибка форматирования") },
+                ofType(IllegalStateException::class)
             )
         }
     }

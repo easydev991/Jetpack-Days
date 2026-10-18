@@ -1,14 +1,14 @@
-package com.dayscounter.domain.usecase
+package com.dayscounter.data.icon
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.dayscounter.crash.CrashlyticsHelper
 import com.dayscounter.domain.model.AppIcon
 import com.dayscounter.util.AndroidLogger
+import com.dayscounter.util.CrashReporter
 import com.dayscounter.util.Logger
 
 /**
- * Use Case для управления сменой иконки приложения.
+ * Управление сменой иконки приложения (data-слой: платформенный PackageManager).
  *
  * Смена иконки реализуется через Activity Aliases и PackageManager API.
  * Поддерживается на Android 8.0 (API 26) и выше.
@@ -18,11 +18,13 @@ import com.dayscounter.util.Logger
  *
  * @property context Контекст приложения
  * @property logger Logger для логирования (по умолчанию AndroidLogger)
+ * @property crashReporter Канал репортинга сбоев (в release — Firebase Crashlytics)
  */
 @Suppress("TooGenericExceptionCaught")
 class IconManager(
     private val context: Context,
-    private val logger: Logger = AndroidLogger()
+    private val logger: Logger = AndroidLogger(),
+    private val crashReporter: CrashReporter
 ) {
     companion object {
         private const val TAG = "IconManager"
@@ -53,7 +55,7 @@ class IconManager(
         } catch (e: Exception) {
             logger.e(TAG, "Ошибка при активации иконки", e)
             // Запрошенное действие не выполнено — репортим, исключение доставляем как раньше
-            CrashlyticsHelper.logException(e, "Ошибка смены иконки: ${e.message}")
+            crashReporter.logException(e, "Ошибка смены иконки: ${e.message}")
             throw e
         }
 
@@ -95,7 +97,7 @@ class IconManager(
             logger.e(TAG, "Неожиданная ошибка при деактивации иконки", e)
             // Сброс не удался, но действие уже выполнено: один non-fatal о сбросе,
             // throw-семантика (глотание) не меняется
-            CrashlyticsHelper.logException(e, "Ошибка сброса иконки: ${e.message}")
+            crashReporter.logException(e, "Ошибка сброса иконки: ${e.message}")
             // Не выбрасываем исключение - продолжаем деактивацию остальных
         }
     }

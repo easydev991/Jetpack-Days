@@ -85,18 +85,18 @@ viewModel = MainScreenViewModel(
 )
 ```
 
-### `StubResourceProvider` в тестах Use Case
+### `FakeDaysTextProvider` в тестах Use Case
 
-`com.dayscounter.data.provider.StubResourceProvider` —
-production-класс из `data/provider/`, специально сделанный
-заглушкой для тестов. Не пиши свою:
+`com.dayscounter.domain.usecase.FakeDaysTextProvider` — общий
+тестовый fake из `app/src/test/java/com/dayscounter/domain/usecase/`.
+Не пиши свой:
 
 ```kotlin
-private val resourceProvider: ResourceProvider = StubResourceProvider()
+private val textProvider: DaysTextProvider = FakeDaysTextProvider()
 ```
 
 Он возвращает русские строки (`"Сегодня"`, `"осталось"`, `"прошло"`)
-и сокращения (`"дн."`, `"мес."`, `"г."`).
+и количества как есть (без слов: `"10"`, `"2"`, `"3"`).
 
 ### Fake предпочтительнее Mock для репозиториев с Flow
 
@@ -205,7 +205,7 @@ class MainScreenViewModelTest
 - Никакого реального DataStore (это integration).
 - Никаких реальных сетевых вызовов (проект офлайн, но всё равно).
 - Никакого `Context.getString` — это integration; используй
-  `StubResourceProvider` или `mockk<ResourceProvider>()`.
+  `FakeDaysTextProvider` или `mockk<DaysTextProvider>()`.
 
 ## Что гибко
 
