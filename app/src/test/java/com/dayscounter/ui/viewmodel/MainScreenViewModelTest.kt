@@ -575,6 +575,39 @@ class MainScreenViewModelTest {
     }
 
     @Test
+    fun when_color_filter_narrows_list_below_threshold_then_items_count_is_filtered() {
+        runTest {
+            // Given - 6 элементов в хранилище: 4 фиолетовых и 2 синих
+            val purple = 0xFF570CF0.toInt()
+            val blue = 0xFF2196F3.toInt()
+            val items =
+                (1..6).map { index ->
+                    Item(
+                        id = index.toLong(),
+                        title = "Событие $index",
+                        details = "Детали",
+                        timestamp = System.currentTimeMillis() - index * 86400000L,
+                        colorTag = if (index <= 4) purple else blue,
+                        displayOption = DisplayOption.DAY
+                    )
+                }
+            repository.setItems(items)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(6, viewModel.itemsCount.value, "До фильтра должно быть 6 элементов")
+
+            // When - применяем фильтр по фиолетовому цвету
+            viewModel.updateSelectedColorTag(purple)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then - itemsCount отражает отфильтрованный список (4), а не размер хранилища (6).
+            // UI скрывает поле поиска при itemsCount < MIN_ITEMS_FOR_SEARCH (MainScreen.kt);
+            // сам предикат покрыт в MainScreenSearchVisibilityUiTest.
+            assertEquals(4, viewModel.itemsCount.value, "itemsCount должен учитывать отфильтрованные элементы")
+        }
+    }
+
+    @Test
     fun availablecolortags_contains_only_unique_colors_from_items() {
         runTest {
             // Given - элементы с повторяющимися цветами
