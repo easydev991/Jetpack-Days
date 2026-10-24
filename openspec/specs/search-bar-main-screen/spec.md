@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD - created by archiving change redesign-search-bar. Update Purpose after archive.
+Поле поиска (`SearchField`) на главном экране `MainScreen`: условия видимости по числу отфильтрованных записей, анимация появления и скрытия, очистка активного запроса, реализация через Material 3 `SearchBar`, корректность зоны клика после поворота экрана и стилизация по design-token.
 
 ## Requirements
 

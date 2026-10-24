@@ -1,5 +1,7 @@
 # Spec: ui-events-screen-collapse-search-field
 
+## Purpose
+
 Поведение сворачивания/разворачивания поля поиска `SearchField` при скролле на главном экране `MainScreen` приложения JetpackDays. Реализовано через `CollapsibleSearchField` в `ScreenBody` + `NestedScrollConnection` в `MainScreenScaffold`. Заголовок «Events» всегда в одной строке с `SortMenu` и `PaletteFilter` в `TopAppBar` (small).
 
 ## Requirements
