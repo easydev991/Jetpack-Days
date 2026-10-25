@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.test")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.test)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
 }
 

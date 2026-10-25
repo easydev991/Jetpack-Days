@@ -103,7 +103,7 @@ android {
     // Схемы Room в assets androidTest — MigrationTestHelper читает их оттуда по пути
     // <package>/<version>.json. Без Room Gradle Plugin при KSP-конфигурации они туда не попадают.
     sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+        getByName("androidTest").assets.directories += "$projectDir/schemas"
     }
 }
 
@@ -146,10 +146,8 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // Coroutines
+    // Coroutines (test/androidTest наследуют implementation — повтор не нужен)
     implementation(libs.kotlinx.coroutines.android)
-    testImplementation(libs.kotlinx.coroutines.android)
-    androidTestImplementation(libs.kotlinx.coroutines.android)
     androidTestImplementation(libs.kotlinx.coroutines.test)
 
     // Firebase BOM (Bill of Materials) - управляет версиями всех Firebase библиотек
@@ -170,6 +168,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.turbine)
+    // BOM обязан дублироваться: констрейнты implementation до androidTest-класспаса
+    // не доходят, без этого ui-test-junit4 разрешается без версии (Gradle sync warning
+    // «declared multiple times» — ложное срабатывание IDE)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.leakcanary.android.instrumentation)
@@ -188,7 +189,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
