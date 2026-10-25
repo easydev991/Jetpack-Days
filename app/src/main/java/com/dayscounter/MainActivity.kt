@@ -24,6 +24,7 @@ import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.createAppSettingsDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.domain.model.AppTheme
+import com.dayscounter.navigation.ShortcutLaunchResolver
 import com.dayscounter.reminder.ReminderIntentContract
 import com.dayscounter.reminder.ReminderManager
 import com.dayscounter.reminder.extractReminderOpenItemId
@@ -37,6 +38,7 @@ import kotlinx.coroutines.launch
  */
 class MainActivity : ComponentActivity() {
     private val pendingOpenDetailItemId = mutableStateOf<Long?>(null)
+    private val pendingCreateItem = mutableStateOf(false)
 
     // ponytail: state-based проверка фикса `if (savedInstanceState == null)` в onCreate —
     // без фикса recreate Activity повторно устанавливает значение из сохранённого push-интента,
@@ -54,14 +56,20 @@ class MainActivity : ComponentActivity() {
         val database = DaysDatabase.getDatabase(applicationContext)
         val reminderManager = AppModule.createReminderManager(applicationContext, database)
 
-        // ponytail: handleReminderIntent должен вызываться ровно один раз на доставку пуша —
-        // иначе при rotation / recreation Activity Android подсовывает сохранённый intent
-        // с EXTRA_ITEM_ID, и обработчик повторно пушит ItemDetail поверх текущего стека,
-        // а также повторно дёргает side-effects (consumeReminder + NotificationManagerCompat.cancel).
+        // ponytail: разбор launch-intent должен выполняться ровно один раз на доставку —
+        // иначе при rotation / recreation Activity Android подсовывает сохранённый intent,
+        // обработчики повторно пушат экраны поверх текущего стека, а reminder-путь ещё и
+        // повторно дёргает side-effects (consumeReminder + NotificationManagerCompat.cancel).
         // shouldHandleReminderIntent(null) == true покрывает cold-start и process-restart;
-        // onNewIntent (без изменений ниже) покрывает пуш при уже запущенном приложении.
+        // onNewIntent (без изменений ниже) покрывает доставку при уже запущенном приложении.
+        // Шорткат и reminder — взаимоисключающие ветки: у exported intent-filter шортката
+        // может прийти чужой intent с extra_item_id, без else открылись бы обе навигации.
         if (shouldHandleReminderIntent(savedInstanceState)) {
-            handleReminderIntent(intent, reminderManager)
+            if (ShortcutLaunchResolver.isCreateItemAction(intent?.action)) {
+                pendingCreateItem.value = true
+            } else {
+                handleReminderIntent(intent, reminderManager)
+            }
         }
 
         setContent {
@@ -73,6 +81,7 @@ class MainActivity : ComponentActivity() {
             val theme by viewModel.theme.collectAsState()
             val useDynamicColors by viewModel.useDynamicColors.collectAsState()
             val openDetailItemId by pendingOpenDetailItemId
+            val createItemRequested by pendingCreateItem
 
             val isDarkTheme =
                 when (theme) {
@@ -100,18 +109,28 @@ class MainActivity : ComponentActivity() {
                 useDynamicColors = useDynamicColors,
                 analyticsService = analyticsService,
                 pendingOpenDetailItemId = openDetailItemId,
-                onPendingOpenHandled = { pendingOpenDetailItemId.value = null }
+                onPendingOpenHandled = { pendingOpenDetailItemId.value = null },
+                pendingCreateItem = createItemRequested,
+                onPendingCreateHandled = { pendingCreateItem.value = false }
             )
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
+    // public + VisibleForTesting: androidTest доставляет intent напрямую (детерминированно,
+    // без IPC через system server) — как гейт openDetailItemId ниже.
+    @VisibleForTesting
+    public override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
 
-        val database = DaysDatabase.getDatabase(applicationContext)
-        val reminderManager = AppModule.createReminderManager(applicationContext, database)
-        handleReminderIntent(intent, reminderManager)
+        // Взаимная исключительность путей — см. комментарий в onCreate.
+        if (ShortcutLaunchResolver.isCreateItemAction(intent.action)) {
+            pendingCreateItem.value = true
+        } else {
+            val database = DaysDatabase.getDatabase(applicationContext)
+            val reminderManager = AppModule.createReminderManager(applicationContext, database)
+            handleReminderIntent(intent, reminderManager)
+        }
     }
 
     private fun handleReminderIntent(
@@ -132,16 +151,17 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         /**
-         * Гейт обработки пуш-интента в [onCreate].
+         * Гейт разбора launch-intent в [onCreate].
          *
-         * Возвращает `true`, если нужно обработать reminder-intent при создании Activity:
+         * Возвращает `true`, если нужно обработать launch-intent (шорткат или reminder)
+         * при создании Activity:
          * - `savedInstanceState == null` — cold-start (новый процесс) или
          *   process-restart (Android убил процесс, пользователь вернулся по savedInstance).
          *
          * Возвращает `false`, если Activity пересоздана системой при rotation / theme change /
          * возврате из фона после смерти процесса — Android восстанавливает прежний intent из
-         * ActivityRecord, но обрабатывать его повторно нельзя: иначе `pendingOpenDetailItemId`
-         * перезаписывается и `LaunchedEffect` пушит ещё одну копию `ItemDetail` поверх стека.
+         * ActivityRecord, но обрабатывать его повторно нельзя: иначе отложенная навигация
+         * перезаписывается и `LaunchedEffect` пушит ещё одну копию экрана поверх стека.
          *
          * @see onCreate
          */
@@ -153,13 +173,16 @@ class MainActivity : ComponentActivity() {
 /**
  * Основной контент Activity с применённой темой.
  */
+@Suppress("LongParameterList")
 @Composable
 private fun AppContent(
     theme: AppTheme,
     useDynamicColors: Boolean,
     analyticsService: AnalyticsService,
     pendingOpenDetailItemId: Long?,
-    onPendingOpenHandled: () -> Unit
+    onPendingOpenHandled: () -> Unit,
+    pendingCreateItem: Boolean,
+    onPendingCreateHandled: () -> Unit
 ) {
     JetpackDaysTheme(
         appTheme = theme,
@@ -174,7 +197,9 @@ private fun AppContent(
             RootScreen(
                 analyticsService = analyticsService,
                 pendingOpenDetailItemId = pendingOpenDetailItemId,
-                onPendingOpenHandled = onPendingOpenHandled
+                onPendingOpenHandled = onPendingOpenHandled,
+                pendingCreateItem = pendingCreateItem,
+                onPendingCreateHandled = onPendingCreateHandled
             )
         }
     }

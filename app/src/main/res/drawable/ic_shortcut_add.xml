@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Иконка шортката «Добавить запись»: круг с плюсом (не adaptive — слот пункта меню лаунчера) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#F1C40F"
+        android:pathData="M12,2a10,10 0,1 0,0 20a10,10 0,1 0,0 -20z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M11,6h2v5h5v2h-5v5h-2v-5H6v-2h5z" />
+</vector>
