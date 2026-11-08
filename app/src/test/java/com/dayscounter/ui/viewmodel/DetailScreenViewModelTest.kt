@@ -1,6 +1,8 @@
 package com.dayscounter.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.dayscounter.data.provider.ResourceIds
+import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
@@ -41,6 +43,8 @@ class DetailScreenViewModelTest {
 
     private val crashReporter = mockk<CrashReporter>(relaxed = true)
 
+    private val resourceProvider = FakeResourceProvider()
+
     private val testItemId = 1L
     private val testItem =
         Item(
@@ -77,7 +81,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
 
             // Then - Начальное состояние должно быть Loading
@@ -90,7 +95,7 @@ class DetailScreenViewModelTest {
     }
 
     @Test
-    fun whenitemnotfound_thenremainsinloadingstate() {
+    fun whenitemnotfound_thenshowserrorstate() {
         runTest {
             // Given - Repository не содержит элемент
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
@@ -100,18 +105,117 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
 
             // When - Пытаемся загрузить несуществующий элемент
             testDispatcher.scheduler.advanceUntilIdle()
 
-            // Then - Должно остаться в состоянии Loading
+            // Then - Должно быть состояние Error с текстом из FakeResourceProvider
             val currentState = viewModel.uiState.value
             assertTrue(
-                currentState is DetailScreenState.Loading,
-                "Должно остаться в состоянии Loading"
+                currentState is DetailScreenState.Error,
+                "Должно быть состояние Error"
             )
+            assertEquals(
+                "Событие не найдено",
+                (currentState as DetailScreenState.Error).message,
+                "Текст ошибки должен браться из ResourceProvider"
+            )
+        }
+    }
+
+    @Test
+    fun whennullreemittedaftererror_thenstayserrorandlogsonce() {
+        runTest {
+            // Given — записи нет, VM уже в Error после первой null-эмиссии
+            // Счётчик warning'ов: guard D2 должен логировать «Событие не найдено» однократно
+            val warningMessages = mutableListOf<String>()
+            val countingLogger =
+                object : com.dayscounter.util.Logger {
+                    override fun d(
+                        tag: String,
+                        message: String
+                    ) = Unit
+
+                    override fun w(
+                        tag: String,
+                        message: String,
+                        throwable: Throwable?
+                    ) {
+                        warningMessages += message
+                    }
+
+                    override fun e(
+                        tag: String,
+                        message: String,
+                        throwable: Throwable?
+                    ) = Unit
+                }
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = countingLogger,
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+            val errorState = viewModel.uiState.value
+            assertTrue(errorState is DetailScreenState.Error, "Первая null-эмиссия должна дать Error")
+
+            // When — Room ре-эммитит отсутствие записи (таблица изменилась, записи с нашим id по-прежнему нет)
+            repository.setItem(testItem.copy(id = 2L, title = "Другое событие"))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — guard D2 (design.md): идемпотентность, сценарий спеки «Повторная null-эмиссия при активной ошибке»
+            assertEquals(
+                errorState,
+                viewModel.uiState.value,
+                "Повторная null-эмиссия не должна менять Error-состояние"
+            )
+            assertEquals(
+                1,
+                warningMessages.size,
+                "Лог «Событие не найдено» должен писаться однократно"
+            )
+        }
+    }
+
+    @Test
+    fun whenitemreappearsaftererror_thenreturnsbacktosuccessstate() {
+        runTest {
+            // Given — записи нет, VM в Error после null-эмиссии
+            val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
+            viewModel =
+                DetailScreenViewModel(
+                    repository = repository,
+                    logger = NoOpLogger(),
+                    savedStateHandle = savedStateHandle,
+                    reminderManager = reminderManager,
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
+                )
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertTrue(
+                viewModel.uiState.value is DetailScreenState.Error,
+                "До возврата записи состояние должно быть Error"
+            )
+
+            // When — запись с искомым id появляется в потоке (возврат после восстановления)
+            repository.setItem(testItem.copy(id = 999L))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then — guard стоит только в updateErrorState (design.md D2): экран возвращается в Success
+            val currentState = viewModel.uiState.value
+            assertTrue(
+                currentState is DetailScreenState.Success,
+                "После возврата записи состояние должно стать Success, фактическое: $currentState"
+            )
+            assertEquals(999L, (currentState as DetailScreenState.Success).item.id)
         }
     }
 
@@ -129,7 +233,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -171,7 +276,8 @@ class DetailScreenViewModelTest {
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
                     currentTimeMillisProvider = { nowMillis },
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -207,7 +313,8 @@ class DetailScreenViewModelTest {
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
                     currentTimeMillisProvider = { nowMillis },
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
 
             testDispatcher.scheduler.advanceUntilIdle()
@@ -243,7 +350,8 @@ class DetailScreenViewModelTest {
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
                     currentTimeMillisProvider = { nowMillis },
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -273,7 +381,8 @@ class DetailScreenViewModelTest {
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
                     currentTimeMillisProvider = { nowMillis },
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -322,7 +431,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -346,7 +456,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             // Ждем загрузки элемента
             testDispatcher.scheduler.advanceUntilIdle()
@@ -393,7 +504,8 @@ class DetailScreenViewModelTest {
                     savedStateHandle = SavedStateHandle(mapOf("itemId" to testItemId)),
                     reminderManager = reminderManager,
                     currentTimeMillisProvider = { nowMillis },
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -424,7 +536,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             viewModel.requestDelete()
 
@@ -451,7 +564,8 @@ class DetailScreenViewModelTest {
                     logger = NoOpLogger(),
                     savedStateHandle = savedStateHandle,
                     reminderManager = reminderManager,
-                    crashReporter = crashReporter
+                    crashReporter = crashReporter,
+                    resourceProvider = resourceProvider
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -562,5 +676,19 @@ class DetailScreenViewModelTest {
         override suspend fun consumeReminder(itemId: Long) = Unit
 
         override suspend fun rescheduleFutureReminders() = Unit
+    }
+
+    /**
+     * Fake ResourceProvider для тестов.
+     */
+    private class FakeResourceProvider : ResourceProvider {
+        override fun getString(
+            resId: Int,
+            vararg formatArgs: Any
+        ): String =
+            when (resId) {
+                ResourceIds.EVENT_NOT_FOUND -> "Событие не найдено"
+                else -> "Строка по умолчанию: $resId"
+            }
     }
 }

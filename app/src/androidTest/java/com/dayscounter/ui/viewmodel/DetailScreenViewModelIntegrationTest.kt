@@ -8,13 +8,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.dayscounter.crash.NoopCrashReporter
 import com.dayscounter.data.database.DaysDatabase
+import com.dayscounter.data.provider.ResourceIds
+import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.domain.model.DisplayOption
 import com.dayscounter.domain.model.Item
 import com.dayscounter.test.MainDispatcherRule
 import com.dayscounter.util.NoOpLogger
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -25,6 +26,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Интеграционные тесты для DetailScreenViewModel.
@@ -40,6 +42,18 @@ class DetailScreenViewModelIntegrationTest {
     private lateinit var repository: ItemRepositoryImpl
     private lateinit var viewModel: DetailScreenViewModel
     private lateinit var context: Context
+
+    private val resourceProvider =
+        object : ResourceProvider {
+            override fun getString(
+                resId: Int,
+                vararg formatArgs: Any
+            ): String =
+                when (resId) {
+                    ResourceIds.EVENT_NOT_FOUND -> "Событие не найдено"
+                    else -> "Строка по умолчанию: $resId"
+                }
+        }
 
     private val testItem =
         Item(
@@ -81,10 +95,17 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 // Проверяем начальное состояние Loading
                 val loadingState = awaitItem()
                 assertTrue(
@@ -107,24 +128,40 @@ class DetailScreenViewModelIntegrationTest {
     }
 
     @Test
-    fun whenItemDoesNotExistInDatabase_thenRemainsInLoadingState() {
+    fun whenItemDoesNotExistInDatabase_thenShowsErrorState() {
         runTest {
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to 999L))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
-            // Подписываемся на uiState для активации StateFlow
-            backgroundScope.launch {
-                viewModel.uiState.collect {}
+            // Turbine вместо advanceUntilIdle(): эмиссия Room-Flow приходит из
+            // реального query-executor-потока в wall-clock времени, а виртуальное
+            // время runTest её не ждёт — awaitItem блокируется по реальному таймауту
+            viewModel.uiState.test(timeout = 10.seconds) {
+                // Проверяем начальное состояние Loading
+                val loadingState = awaitItem()
+                assertTrue(
+                    "Начальное состояние должно быть Loading",
+                    loadingState is DetailScreenState.Loading
+                )
+
+                // Состояние должно стать Error с текстом из ResourceProvider
+                val state = awaitItem()
+                assertTrue(
+                    "Состояние должно быть Error",
+                    state is DetailScreenState.Error
+                )
+                assertEquals(
+                    "Событие не найдено",
+                    (state as DetailScreenState.Error).message
+                )
             }
-
-            // Ждем некоторое время
-            advanceUntilIdle()
-
-            // Состояние должно остаться Loading
-            assertTrue(
-                "Состояние должно быть Loading",
-                viewModel.uiState.value is DetailScreenState.Loading
-            )
         }
     }
 
@@ -133,7 +170,14 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
             backgroundScope.launch {
                 viewModel.uiState.collect {}
             }
@@ -151,7 +195,14 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
             backgroundScope.launch {
                 viewModel.uiState.collect {}
             }
@@ -177,10 +228,17 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithColorTag)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
@@ -206,10 +264,17 @@ class DetailScreenViewModelIntegrationTest {
         runTest {
             val insertedId = repository.insertItem(testItem)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
@@ -260,10 +325,17 @@ class DetailScreenViewModelIntegrationTest {
             val id2 = repository.insertItem(item2)
 
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to id2))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
@@ -293,10 +365,17 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithEmptyDetails)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",
@@ -324,10 +403,17 @@ class DetailScreenViewModelIntegrationTest {
                 )
             val insertedId = repository.insertItem(itemWithTimestamp)
             val savedStateHandle = SavedStateHandle(mapOf("itemId" to insertedId))
-            viewModel = DetailScreenViewModel(repository, NoOpLogger(), savedStateHandle, crashReporter = NoopCrashReporter())
+            viewModel =
+                DetailScreenViewModel(
+                    repository,
+                    NoOpLogger(),
+                    savedStateHandle,
+                    crashReporter = NoopCrashReporter(),
+                    resourceProvider = resourceProvider
+                )
 
             // Тестируем эмиссии StateFlow с помощью Turbine
-            viewModel.uiState.test {
+            viewModel.uiState.test(timeout = 10.seconds) {
                 val loadingState = awaitItem()
                 assertTrue(
                     "Начальное состояние должно быть Loading",

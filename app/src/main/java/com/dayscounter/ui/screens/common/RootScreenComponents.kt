@@ -132,7 +132,8 @@ private fun NavGraphBuilder.detailScreenDestination(
                         DetailScreenViewModel.factory(
                             repository,
                             reminderManager,
-                            AppModule.createCrashReporter()
+                            AppModule.createCrashReporter(),
+                            AppModule.resourceProvider
                         )
                 ),
             onBackClick = { navController.popBackStack() },
