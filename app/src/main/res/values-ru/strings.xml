@@ -25,7 +25,7 @@
     <string name="delete_item_confirm">Удалить</string>
 
     <!-- Context menu -->
-    <string name="context_menu_view">Просмотр</string>
+    <string name="context_menu_view">Открыть</string>
     <string name="context_menu_edit">Изменить</string>
     <string name="context_menu_delete">Удалить</string>
     <string name="context_menu_copy">Скопировать</string>

@@ -25,7 +25,7 @@
     <string name="delete_item_confirm">Delete</string>
 
     <!-- Context menu -->
-    <string name="context_menu_view">View</string>
+    <string name="context_menu_view">Open</string>
     <string name="context_menu_edit">Edit</string>
     <string name="context_menu_delete">Delete</string>
     <string name="context_menu_copy">Copy</string>
