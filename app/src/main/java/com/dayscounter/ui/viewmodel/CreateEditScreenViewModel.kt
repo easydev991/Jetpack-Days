@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.dayscounter.analytics.AnalyticsEvent
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.AppErrorOperation
+import com.dayscounter.data.preferences.ReviewCountersDataStore
 import com.dayscounter.data.provider.ResourceIds
 import com.dayscounter.data.provider.ResourceProvider
 import com.dayscounter.domain.exception.ItemException
@@ -17,15 +18,19 @@ import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.model.Reminder
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ReminderRequest
+import com.dayscounter.domain.usecase.ReviewMilestoneUseCase
 import com.dayscounter.reminder.NoOpReminderManager
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.review.ReviewSessionHolder
 import com.dayscounter.ui.screens.createedit.toChangeFingerprint
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -44,6 +49,10 @@ class CreateEditScreenViewModel(
     private val analyticsService = deps.analyticsService
     private val reminderManager = deps.reminderManager
     private val currentTimeMillisProvider = deps.currentTimeMillisProvider
+    private val isReviewEnabled = deps.isReviewEnabled
+    private val reviewCountersDataStore = deps.reviewCountersDataStore
+    private val wasAutoRequestShownThisSession = deps.wasAutoRequestShownThisSession
+    private val reviewMilestoneUseCase = ReviewMilestoneUseCase()
 
     /**
      * Зависимости [CreateEditScreenViewModel], сгруппированные для конструктора.
@@ -54,26 +63,24 @@ class CreateEditScreenViewModel(
         val analyticsService: AnalyticsService,
         val reminderManager: ReminderManager = NoOpReminderManager,
         val logger: Logger = AndroidLogger(),
-        val currentTimeMillisProvider: () -> Long = System::currentTimeMillis
+        val currentTimeMillisProvider: () -> Long = System::currentTimeMillis,
+        /**
+         * Включена ли review-фича (BuildConfig.RUSTORE_FEATURES): при false
+         * счётчики review-триггеров не обновляются.
+         */
+        val isReviewEnabled: Boolean = false,
+        /** Хранилище счётчиков review-триггеров; используется только при [isReviewEnabled] */
+        val reviewCountersDataStore: ReviewCountersDataStore? = null,
+        /** Читает флаг «авто-запрос уже выполнялся в этой сессии» из holder-а сессии */
+        val wasAutoRequestShownThisSession: () -> Boolean = ReviewSessionHolder::wasAutoRequestShown
     )
 
     companion object {
-        fun factory(
-            repository: ItemRepository,
-            resourceProvider: ResourceProvider,
-            analyticsService: AnalyticsService,
-            reminderManager: ReminderManager = NoOpReminderManager
-        ): ViewModelProvider.Factory =
+        fun factory(deps: Deps): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     CreateEditScreenViewModel(
-                        deps =
-                            Deps(
-                                repository = repository,
-                                resourceProvider = resourceProvider,
-                                analyticsService = analyticsService,
-                                reminderManager = reminderManager
-                            ),
+                        deps = deps,
                         savedStateHandle =
                             checkNotNull(createSavedStateHandle()) {
                                 "SavedStateHandle is required"
@@ -195,6 +202,12 @@ class CreateEditScreenViewModel(
                     return@launch
                 }
 
+                // Review-хук: только при создании записи, после полного успеха
+                // persist + reminder и перед завершением сохранения (задача 7.1)
+                if (itemId == null && isReviewEnabled) {
+                    trackReviewMilestone()
+                }
+
                 completeSuccessfulSave(persistedItem = persistedItem, onSaved = onSaved)
             } catch (e: ItemException.SaveFailed) {
                 val message =
@@ -256,6 +269,41 @@ class CreateEditScreenViewModel(
         }
 
         return reminderResult.isSuccess
+    }
+
+    /**
+     * Review-хук создания записи (openspec: add-rustore-in-app-review, задача 7.1):
+     * инкрементирует счётчик успешно созданных записей и, если milestone-логика
+     * планирует авто-запрос, записывает pending milestone.
+     *
+     * Решение строится по новому значению счётчика, снимку хранилища и флагу
+     * holder-а сессии; holder только читается — пишет его MainScreenViewModel (7.2).
+     */
+    private suspend fun trackReviewMilestone() {
+        val reviewCounters =
+            checkNotNull(reviewCountersDataStore) {
+                "reviewCountersDataStore is required when isReviewEnabled"
+            }
+        try {
+            val createdItemsCount = reviewCounters.incrementCreatedItemsCount()
+            val snapshot = reviewCounters.state.first()
+            val decision =
+                reviewMilestoneUseCase(
+                    ReviewMilestoneUseCase.State(
+                        createdItemsCount = createdItemsCount,
+                        passedMilestones = snapshot.passedMilestones,
+                        pendingMilestone = snapshot.pendingMilestone,
+                        isAutoRequestAlreadyInitiatedThisSession = wasAutoRequestShownThisSession()
+                    )
+                )
+            if (decision is ReviewMilestoneUseCase.Decision.ScheduleMilestone) {
+                reviewCounters.setPendingMilestone(decision.milestone)
+            }
+        } catch (e: IOException) {
+            // Review-хук вспомогательный: сбой файла DataStore не должен ломать
+            // уже успешное сохранение записи — счётчики просто не обновятся
+            logger.e("CreateEditScreenViewModel", "Не удалось обновить счётчики review-триггеров", e)
+        }
     }
 
     private suspend fun completeSuccessfulSave(

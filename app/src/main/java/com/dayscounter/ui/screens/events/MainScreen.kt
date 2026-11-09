@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +71,7 @@ import com.dayscounter.ui.ds.ListItemParams
 import com.dayscounter.ui.ds.ListItemView
 import com.dayscounter.ui.viewmodel.MainScreenState
 import com.dayscounter.ui.viewmodel.MainScreenViewModel
+import com.dayscounter.ui.viewmodel.ReviewTriggerDependencies
 import kotlin.math.roundToInt
 
 // Минимальное количество записей для отображения поля поиска
@@ -85,17 +87,16 @@ private const val SEARCH_FIELD_ANIMATION_DURATION_MS = 200
  * Использует [MainScreenViewModel] для управления состоянием.
  *
  * @param modifier Modifier для экрана
- * @param onItemClick Обработчик клика по событию
- * @param onEditClick Обработчик клика на редактирование
- * @param onCreateClick Обработчик клика на создание новой записи
+ * @param callbacks Обработчики навигации по записям
+ * @param analyticsService Аналитика пользовательских действий
+ * @param reviewDeps Review-зависимости авто-запроса оценки (null на github-сборке)
  */
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    onItemClick: (Long) -> Unit = {},
-    onEditClick: (Long) -> Unit = {},
-    onCreateClick: () -> Unit = {},
-    analyticsService: AnalyticsService
+    callbacks: MainScreenCallbacks,
+    analyticsService: AnalyticsService,
+    reviewDeps: ReviewTriggerDependencies?
 ) {
     val context = LocalContext.current
     val viewModel: MainScreenViewModel =
@@ -107,7 +108,8 @@ fun MainScreen(
                             context.applicationContext
                         )
                     ),
-                    createAppSettingsDataStore(context.applicationContext)
+                    createAppSettingsDataStore(context.applicationContext),
+                    reviewDeps
                 )
         )
     // Создаем use cases для форматирования (remember — чтобы не пересоздавать граф на каждой рекомпозиции)
@@ -142,14 +144,24 @@ fun MainScreen(
             MainScreenParams(
                 viewModel = viewModel,
                 getFormattedDaysForItemUseCase = getFormattedDaysForItemUseCase,
-                onItemClick = onItemClick,
-                onEditClick = onEditClick,
-                onCreateClick = onCreateClick,
+                onItemClick = callbacks.onItemClick,
+                onEditClick = callbacks.onEditClick,
+                onCreateClick = callbacks.onCreateClick,
                 analyticsService = analyticsService
             ),
         modifier = modifier
     )
 }
+
+/**
+ * Обработчики навигации экрана списка записей: сгруппированы в один объект,
+ * чтобы не раздувать сигнатуру [MainScreen].
+ */
+data class MainScreenCallbacks(
+    val onItemClick: (Long) -> Unit,
+    val onEditClick: (Long) -> Unit,
+    val onCreateClick: () -> Unit
+)
 
 /**
  * Заголовок экрана (TopBar).
@@ -267,6 +279,13 @@ private fun MainScreenContent(
     val showFilterDialog by params.viewModel.showFilterDialog.collectAsState()
     val availableColorTags by params.viewModel.availableColorTags.collectAsState()
     val selectedColorTag by params.viewModel.selectedColorTag.collectAsState()
+
+    // Повторная проверка pending-milestone: composable пересоздаётся при
+    // возврате с CreateEdit, а ViewModel переживает навигацию — init-проверка
+    // pending, запланированный в этой же сессии, не увидит
+    LaunchedEffect(Unit) {
+        params.viewModel.checkPendingReviewRequest()
+    }
 
     MainScreenScaffold(
         state =

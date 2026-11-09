@@ -47,6 +47,34 @@ enum class AppErrorOperation(
 }
 
 /**
+ * Исходы авто-запроса review-флоу.
+ */
+enum class ReviewAutoRequestOutcome(
+    val value: String
+) {
+    SHOWN("shown"),
+    ERROR("error"),
+    CANCELLED("cancelled")
+}
+
+/**
+ * Типы ошибок авто-запроса review-флоу.
+ *
+ * Семантика вариантов повторяет доменный [com.dayscounter.domain.exception.ReviewException],
+ * но доменные классы в аналитику не тянутся.
+ */
+enum class ReviewErrorType(
+    val value: String
+) {
+    NOT_INSTALLED("not_installed"),
+    OUTDATED("outdated"),
+    NOT_AUTHORIZED("not_authorized"),
+    REQUEST_LIMIT_REACHED("request_limit_reached"),
+    REVIEW_ALREADY_EXISTS("review_already_exists"),
+    UNKNOWN("unknown")
+}
+
+/**
  * События аналитики.
  */
 sealed interface AnalyticsEvent {
@@ -81,5 +109,16 @@ sealed interface AnalyticsEvent {
     data class AppError(
         val operation: AppErrorOperation,
         val throwable: Throwable
+    ) : AnalyticsEvent
+
+    /**
+     * Событие авто-запроса review-флоу (milestone-триггер).
+     *
+     * @param outcome Исход: форма показана или ошибка
+     * @param errorType Тип ошибки (только для [ReviewAutoRequestOutcome.ERROR])
+     */
+    data class ReviewAutoRequest(
+        val outcome: ReviewAutoRequestOutcome,
+        val errorType: ReviewErrorType? = null
     ) : AnalyticsEvent
 }

@@ -1,5 +1,6 @@
 package com.dayscounter.ui.screens.events
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +34,40 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.dayscounter.BuildConfig
 import com.dayscounter.R
+import com.dayscounter.analytics.AnalyticsService
+import com.dayscounter.data.preferences.ReviewCountersDataStore
+import com.dayscounter.di.AppModule
 import com.dayscounter.domain.model.SortOrder
+import com.dayscounter.ui.viewmodel.ReviewTriggerDependencies
+
+/**
+ * Review-зависимости авто-запроса оценки, собираются один раз: фабрика VM в
+ * Compose вызывается на каждой рекомпозиции, а зависимые объекты тяжёлые
+ * (DataStore, лаунчер). В github-флейворе (`RUSTORE_FEATURES = false`)
+ * возвращает null — review-фича выключена.
+ */
+@Composable
+internal fun rememberReviewDependencies(
+    context: Context,
+    analyticsService: AnalyticsService,
+    counters: ReviewCountersDataStore
+): ReviewTriggerDependencies? =
+    remember(context, counters) {
+        if (BuildConfig.RUSTORE_FEATURES) {
+            ReviewTriggerDependencies(
+                counters = counters,
+                // Лаунчер flavor-зависим (rustore — RuStore SDK, github — no-op);
+                // в github-флейворе сюда не доходим, но фабрика общая
+                flowLauncher = AppModule.createReviewFlowLauncher(context.applicationContext),
+                isReviewEnabled = BuildConfig.RUSTORE_FEATURES,
+                analytics = analyticsService
+            )
+        } else {
+            null
+        }
+    }
 
 /**
  * Меню сортировки.

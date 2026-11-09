@@ -633,6 +633,8 @@ style:
     active: false
     maxChainedCalls: 5
   # MaxLineLength отключен - дублирует функционал ktlint
+  MaxLineLength:
+    active: false
   MayBeConst:
     active: true
   ModifierOrder:

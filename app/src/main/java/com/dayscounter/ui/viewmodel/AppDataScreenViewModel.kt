@@ -11,11 +11,13 @@ import com.dayscounter.R
 import com.dayscounter.analytics.AnalyticsEvent
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.AppErrorOperation
+import com.dayscounter.data.preferences.ReviewCountersDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.domain.exception.BackupException
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ExportBackupUseCase
 import com.dayscounter.domain.usecase.ImportBackupUseCase
+import com.dayscounter.review.ReviewSessionHolder
 import com.dayscounter.ui.state.AppDataUiState
 import com.dayscounter.util.AndroidLogger
 import com.dayscounter.util.Logger
@@ -38,20 +40,24 @@ private const val STATE_TIMEOUT_MS = 5000L
 /**
  * ViewModel для экрана App Data Screen. Управляет резервным копированием и восстановлением данных.
  *
- * @property repository Repository для работы с данными
- * @property context Application-контекст (живёт столько же, сколько ViewModel)
- * @property exportBackupUseCase Use Case для экспорта данных
- * @property importBackupUseCase Use Case для импорта данных
- * @property logger Logger для логирования (по умолчанию AndroidLogger)
+ * @property deps Зависимости ViewModel, сгруппированные для конструктора
  */
 class AppDataScreenViewModel(
-    private val repository: ItemRepository,
-    private val context: Application,
-    private val exportBackupUseCase: ExportBackupUseCase,
-    private val importBackupUseCase: ImportBackupUseCase,
-    private val analyticsService: AnalyticsService,
-    private val logger: Logger = AndroidLogger()
+    private val deps: Deps
 ) : ViewModel() {
+    /**
+     * Зависимости [AppDataScreenViewModel], сгруппированные для конструктора.
+     */
+    data class Deps(
+        val repository: ItemRepository,
+        val context: Application,
+        val exportBackupUseCase: ExportBackupUseCase,
+        val importBackupUseCase: ImportBackupUseCase,
+        val analyticsService: AnalyticsService,
+        val reviewCountersDataStore: ReviewCountersDataStore,
+        val logger: Logger = AndroidLogger()
+    )
+
     companion object {
         /**
          * Factory для создания AppDataScreenViewModel. Используется для ручного DI вместо Hilt.
@@ -59,21 +65,28 @@ class AppDataScreenViewModel(
          * @param repository Repository для работы с данными
          * @param application Application контекст
          * @param analyticsService Optional AnalyticsService для логирования
+         * @param reviewCountersDataStore Хранилище счётчиков review-триггеров
+         * (сбрасывается при полном удалении данных, design.md D3)
          * @return Factory для создания ViewModel
          */
         fun factory(
             repository: ItemRepository,
             application: Application,
-            analyticsService: AnalyticsService
+            analyticsService: AnalyticsService,
+            reviewCountersDataStore: ReviewCountersDataStore
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     AppDataScreenViewModel(
-                        repository = repository,
-                        context = application,
-                        exportBackupUseCase = ExportBackupUseCase(repository),
-                        importBackupUseCase = ImportBackupUseCase(repository, logger = AppModule.createLogger()),
-                        analyticsService = analyticsService
+                        deps =
+                            Deps(
+                                repository = repository,
+                                context = application,
+                                exportBackupUseCase = ExportBackupUseCase(repository),
+                                importBackupUseCase = ImportBackupUseCase(repository, logger = AppModule.createLogger()),
+                                analyticsService = analyticsService,
+                                reviewCountersDataStore = reviewCountersDataStore
+                            )
                     )
                 }
             }
@@ -81,7 +94,7 @@ class AppDataScreenViewModel(
 
     /** Flow для отслеживания наличия записей в базе */
     private val hasItemsFlow: StateFlow<Boolean> =
-        repository
+        deps.repository
             .getAllItems()
             .map { items -> items.isNotEmpty() }
             .stateIn(
@@ -125,20 +138,20 @@ class AppDataScreenViewModel(
 
                 val outputStream =
                     try {
-                        context.contentResolver.openOutputStream(uri)
+                        deps.context.contentResolver.openOutputStream(uri)
                     } catch (e: IOException) {
                         throw BackupException("Не удалось экспортировать данные: ${e.message}", e)
                     } ?: throw BackupException("Не удалось открыть OutputStream для записи")
 
-                val result = exportBackupUseCase(outputStream)
+                val result = deps.exportBackupUseCase(outputStream)
 
                 result
                     .onSuccess { count ->
-                        logger.d(TAG, "Экспорт выполнен успешно, экспортировано $count записей")
+                        deps.logger.d(TAG, "Экспорт выполнен успешно, экспортировано $count записей")
                         _uiState.value =
                             _uiState.value.copy(
                                 isExporting = false,
-                                resultMessage = context.getString(R.string.backup_data_saved),
+                                resultMessage = deps.context.getString(R.string.backup_data_saved),
                                 isError = false
                             )
                     }.onFailure { e ->
@@ -170,15 +183,15 @@ class AppDataScreenViewModel(
                     openInputStreamOrNull(uri)
                         ?: throw BackupException("Не удалось открыть InputStream для чтения")
 
-                val result = importBackupUseCase(inputStream)
+                val result = deps.importBackupUseCase(inputStream)
 
                 result
                     .onSuccess { count ->
-                        logger.d(TAG, "Импорт выполнен успешно, импортировано $count записей")
+                        deps.logger.d(TAG, "Импорт выполнен успешно, импортировано $count записей")
                         _uiState.value =
                             _uiState.value.copy(
                                 isImporting = false,
-                                resultMessage = context.getString(R.string.data_restored_from_backup),
+                                resultMessage = deps.context.getString(R.string.data_restored_from_backup),
                                 isError = false
                             )
                     }.onFailure { e ->
@@ -202,11 +215,11 @@ class AppDataScreenViewModel(
         operation: AppErrorOperation,
         e: Throwable
     ) {
-        logger.e(TAG, logMessage, e)
-        analyticsService.log(AnalyticsEvent.AppError(operation, e))
+        deps.logger.e(TAG, logMessage, e)
+        deps.analyticsService.log(AnalyticsEvent.AppError(operation, e))
         _uiState.value =
             _uiState.value.copy(
-                resultMessage = e.message ?: context.getString(R.string.error),
+                resultMessage = e.message ?: deps.context.getString(R.string.error),
                 isError = true
             )
     }
@@ -214,7 +227,7 @@ class AppDataScreenViewModel(
     /** Открывает InputStream для импорта; FileNotFoundException/IOException мапятся в BackupException. */
     private fun openInputStreamOrNull(uri: Uri): InputStream? =
         try {
-            context.contentResolver.openInputStream(uri)
+            deps.context.contentResolver.openInputStream(uri)
         } catch (e: FileNotFoundException) {
             throw BackupException("Не удалось найти файл: ${e.message}", e)
         } catch (e: IOException) {
@@ -239,22 +252,36 @@ class AppDataScreenViewModel(
                 _uiState.value =
                     _uiState.value.copy(isDeleting = true, resultMessage = null, isError = false)
 
-                repository.deleteAllItems()
+                deps.repository.deleteAllItems()
 
-                logger.d(TAG, "Все данные успешно удалены")
+                // Сброс счётчиков review-триггеров там же, где удаляются записи (design.md D3):
+                // после полного удаления данных авто-запрос оценки начинается с нуля.
+                // Ошибка сброса не отменяет уже выполненное удаление — логируем и продолжаем.
+                try {
+                    deps.reviewCountersDataStore.reset()
+                } catch (e: IOException) {
+                    deps.logger.e(TAG, "Не удалось сбросить счётчики review-триггеров", e)
+                }
+
+                // Флаг сессии сбрасывается вместе с триггерами: после полного
+                // удаления данных следующая в этой же сессии созданная запись
+                // снова может запросить оценку (чек-лист задачи 8.3)
+                ReviewSessionHolder.reset()
+
+                deps.logger.d(TAG, "Все данные успешно удалены")
                 _uiState.value =
                     _uiState.value.copy(
                         isDeleting = false,
-                        resultMessage = context.getString(R.string.all_data_deleted),
+                        resultMessage = deps.context.getString(R.string.all_data_deleted),
                         isError = false
                     )
             } catch (e: SQLException) {
-                logger.e(TAG, "Ошибка при удалении данных", e)
-                analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.DELETE_ALL_DATA, e))
+                deps.logger.e(TAG, "Ошибка при удалении данных", e)
+                deps.analyticsService.log(AnalyticsEvent.AppError(AppErrorOperation.DELETE_ALL_DATA, e))
                 _uiState.value =
                     _uiState.value.copy(
                         isDeleting = false,
-                        resultMessage = e.message ?: context.getString(R.string.error),
+                        resultMessage = e.message ?: deps.context.getString(R.string.error),
                         isError = true
                     )
             }

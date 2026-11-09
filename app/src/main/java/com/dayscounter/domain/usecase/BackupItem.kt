@@ -82,8 +82,7 @@ fun String.fromHexColor(): Int? =
  */
 fun String?.parseColorTag(logger: Logger): Int? {
     if (this.isNullOrBlank()) return null
-    if (startsWith("#")) return fromHexColor()
-    return parseIosColorTag(logger)
+    return if (startsWith("#")) fromHexColor() else parseIosColorTag(logger)
 }
 
 /** Парсит цвет из iOS-формата NSKeyedArchiver (Base64 bplist00); null — не удалось. */

@@ -15,6 +15,7 @@ class DaysTextProviderImpl(
     context: Context
 ) : DaysTextProvider {
     private val appContext = context.applicationContext
+    private val resources = appContext.resources
 
     override fun today(): String = appContext.getString(ResourceIds.TODAY)
 
@@ -24,9 +25,15 @@ class DaysTextProviderImpl(
 
     override fun formattingError(): String = appContext.getString(ResourceIds.ERROR_FORMATTING)
 
-    override fun daysCount(quantity: Int): String = appContext.resources.getQuantityString(ResourceIds.DAYS_COUNT, quantity, quantity)
+    override fun daysCount(quantity: Int): String = quantityString(ResourceIds.DAYS_COUNT, quantity)
 
-    override fun monthsCount(quantity: Int): String = appContext.resources.getQuantityString(ResourceIds.MONTHS_COUNT, quantity, quantity)
+    override fun monthsCount(quantity: Int): String = quantityString(ResourceIds.MONTHS_COUNT, quantity)
 
-    override fun yearsCount(quantity: Int): String = appContext.resources.getQuantityString(ResourceIds.YEARS_COUNT, quantity, quantity)
+    override fun yearsCount(quantity: Int): String = quantityString(ResourceIds.YEARS_COUNT, quantity)
+
+    /** Локализованная строка множественного числа по идентификатору plurals-ресурса. */
+    private fun quantityString(
+        id: Int,
+        quantity: Int
+    ): String = resources.getQuantityString(id, quantity, quantity)
 }

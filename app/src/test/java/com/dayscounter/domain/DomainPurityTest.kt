@@ -139,7 +139,7 @@ class DomainPurityTest {
             return when {
                 inLineComment -> consumeLineComment(c, out)
                 inBlockComment -> consumeBlockComment(c, next, out)
-                inString -> consumeString(i, c, out)
+                inString -> consumeString(c, out)
                 c == '/' && next == '/' -> startComment(out) { inLineComment = true }
                 c == '/' && next == '*' -> startComment(out) { inBlockComment = true }
                 else -> consumeCode(c, out)
@@ -174,7 +174,6 @@ class DomainPurityTest {
             }
 
         private fun consumeString(
-            i: Int,
             c: Char,
             out: StringBuilder
         ): Int {

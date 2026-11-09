@@ -6,14 +6,19 @@ import android.net.Uri
 import com.dayscounter.R
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.NoopAnalyticsProvider
+import com.dayscounter.data.preferences.ReviewCountersDataStore
 import com.dayscounter.domain.model.Item
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.usecase.ExportBackupUseCase
 import com.dayscounter.domain.usecase.ImportBackupUseCase
+import com.dayscounter.review.ReviewSessionHolder
 import com.dayscounter.util.NoOpLogger
 import io.mockk.coEvery
+import io.mockk.coVerifyOrder
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +46,11 @@ import java.io.OutputStream
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppDataScreenViewModelTest {
     private lateinit var testDispatcher: TestDispatcher
+    private lateinit var application: Application
     private lateinit var contentResolver: ContentResolver
+    private lateinit var repository: ItemRepository
     private lateinit var exportBackupUseCase: ExportBackupUseCase
+    private lateinit var reviewCountersDataStore: ReviewCountersDataStore
     private lateinit var viewModel: AppDataScreenViewModel
     private lateinit var uri: Uri
 
@@ -52,24 +60,29 @@ class AppDataScreenViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         contentResolver = mockk<ContentResolver>()
-        val application = mockk<Application>()
+        application = mockk<Application>()
         every { application.contentResolver } returns contentResolver
         every { application.getString(R.string.backup_data_saved) } returns BACKUP_SAVED_TEXT
 
         // Репозиторий нужен только для hasItemsFlow (WhileSubscribed) — отдаём пустой поток.
-        val repository = mockk<ItemRepository>()
+        repository = mockk<ItemRepository>()
         every { repository.getAllItems() } returns MutableStateFlow(emptyList<Item>())
 
         exportBackupUseCase = mockk<ExportBackupUseCase>()
+        reviewCountersDataStore = mockk<ReviewCountersDataStore>(relaxed = true)
 
         viewModel =
             AppDataScreenViewModel(
-                repository = repository,
-                context = application,
-                exportBackupUseCase = exportBackupUseCase,
-                importBackupUseCase = mockk<ImportBackupUseCase>(),
-                analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider())),
-                logger = NoOpLogger()
+                deps =
+                    AppDataScreenViewModel.Deps(
+                        repository = repository,
+                        context = application,
+                        exportBackupUseCase = exportBackupUseCase,
+                        importBackupUseCase = mockk<ImportBackupUseCase>(),
+                        analyticsService = AnalyticsService(listOf(NoopAnalyticsProvider())),
+                        reviewCountersDataStore = reviewCountersDataStore,
+                        logger = NoOpLogger()
+                    )
             )
 
         uri = mockk()
@@ -221,7 +234,56 @@ class AppDataScreenViewModelTest {
             assertFalse(state.isImporting, "Индикатор импорта должен быть снят после ошибки")
         }
 
+    @Test
+    fun confirmDeleteAllData_when_confirmed_then_deletes_items_and_resets_review_counters() =
+        runTest {
+            // Given
+            observeUiState()
+            coEvery { repository.deleteAllItems() } just runs
+            every { application.getString(R.string.all_data_deleted) } returns ALL_DATA_DELETED_TEXT
+
+            // When
+            viewModel.confirmDeleteAllData()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then
+            val state = viewModel.uiState.value
+            assertFalse(state.isError, "Успешное удаление не должно считаться ошибкой")
+            assertFalse(state.isDeleting, "Индикатор удаления должен быть снят после успеха")
+            assertEquals(
+                ALL_DATA_DELETED_TEXT,
+                state.resultMessage,
+                "При успехе сообщение должно прийти из строки all_data_deleted"
+            )
+            coVerifyOrder {
+                repository.deleteAllItems()
+                reviewCountersDataStore.reset()
+            }
+        }
+
+    @Test
+    fun confirmDeleteAllData_when_confirmed_then_resets_review_session_holder() =
+        runTest {
+            // Given: авто-запрос review-флоу в этой сессии уже выполнялся
+            ReviewSessionHolder.markAutoRequestShown()
+            observeUiState()
+            coEvery { repository.deleteAllItems() } just runs
+            every { application.getString(R.string.all_data_deleted) } returns ALL_DATA_DELETED_TEXT
+
+            // When
+            viewModel.confirmDeleteAllData()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Then: флаг сессии сброшен вместе с триггерами — следующая в этой
+            // же сессии созданная запись снова может запросить оценку (чек-лист 8.3)
+            assertFalse(
+                ReviewSessionHolder.wasAutoRequestShown(),
+                "Полное удаление данных должно сбрасывать флаг сессии review-запроса"
+            )
+        }
+
     companion object {
         private const val BACKUP_SAVED_TEXT = "Backup data saved"
+        private const val ALL_DATA_DELETED_TEXT = "All data deleted"
     }
 }

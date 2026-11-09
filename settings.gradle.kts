@@ -19,6 +19,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // SDK RuStore In-App Review лежит в закрытом nexus RuStore; content-фильтр
+        // ограничивает репозиторий группой ru.rustore.sdk (change add-rustore-in-app-review)
+        maven {
+            url = uri("https://nexus-external.rustore.ru/repository/maven-rustore-exposed")
+            content {
+                includeGroup("ru.rustore.sdk")
+            }
+        }
     }
 }
 

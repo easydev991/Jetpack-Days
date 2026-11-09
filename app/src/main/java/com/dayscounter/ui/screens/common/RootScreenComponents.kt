@@ -22,12 +22,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.dayscounter.BuildConfig
 import com.dayscounter.analytics.AnalyticsEvent
 import com.dayscounter.analytics.AnalyticsService
 import com.dayscounter.analytics.AppScreen
 import com.dayscounter.analytics.UserActionType
 import com.dayscounter.data.database.DaysDatabase
 import com.dayscounter.data.preferences.AppSettingsDataStore
+import com.dayscounter.data.preferences.ReviewCountersDataStore
+import com.dayscounter.data.preferences.createReviewCountersDataStore
 import com.dayscounter.di.AppModule
 import com.dayscounter.navigation.Screen
 import com.dayscounter.reminder.ReminderManager
@@ -35,6 +38,8 @@ import com.dayscounter.ui.screens.appdata.AppDataScreen
 import com.dayscounter.ui.screens.createedit.CreateEditScreen
 import com.dayscounter.ui.screens.detail.DetailScreen
 import com.dayscounter.ui.screens.events.MainScreen
+import com.dayscounter.ui.screens.events.MainScreenCallbacks
+import com.dayscounter.ui.screens.events.rememberReviewDependencies
 import com.dayscounter.ui.screens.more.MoreScreen
 import com.dayscounter.ui.screens.themeicon.ThemeIconScreen
 import com.dayscounter.ui.viewmodel.AppDataScreenViewModel
@@ -92,13 +97,14 @@ internal fun NavigationBarContent(
  */
 private fun NavGraphBuilder.mainScreenDestination(
     analyticsService: AnalyticsService,
-    navController: NavHostController
+    navController: NavHostController,
+    reviewCountersDataStore: ReviewCountersDataStore
 ) {
     composable(Screen.Events.route) {
         LaunchedEffect(Unit) {
             analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.EVENTS, "MainScreen"))
         }
-        EventsScreenContent(navController, analyticsService)
+        EventsScreenContent(navController, analyticsService, reviewCountersDataStore)
     }
 }
 
@@ -146,19 +152,28 @@ private fun NavGraphBuilder.detailScreenDestination(
 }
 
 /**
+ * Зависимости назначения экрана создания/редактирования, сгруппированные
+ * для обхода LongParameterList у [createEditScreenDestination].
+ */
+private data class CreateEditDestinationDeps(
+    val repository: com.dayscounter.domain.repository.ItemRepository,
+    val resourceProvider: com.dayscounter.data.provider.ResourceProvider,
+    val reminderManager: ReminderManager,
+    val analyticsService: AnalyticsService,
+    val reviewCountersDataStore: ReviewCountersDataStore
+)
+
+/**
  * Навигационное назначение для экрана создания/редактирования события.
  */
 @Suppress("LongMethod")
 private fun NavGraphBuilder.createEditScreenDestination(
-    repository: com.dayscounter.domain.repository.ItemRepository,
-    resourceProvider: com.dayscounter.data.provider.ResourceProvider,
-    reminderManager: ReminderManager,
-    analyticsService: AnalyticsService,
+    deps: CreateEditDestinationDeps,
     navController: NavHostController
 ) {
     composable(Screen.CreateItem.route) {
         LaunchedEffect(Unit) {
-            analyticsService.log(
+            deps.analyticsService.log(
                 AnalyticsEvent.ScreenView(
                     AppScreen.CREATE_EDIT,
                     "CreateEditScreen"
@@ -171,14 +186,19 @@ private fun NavGraphBuilder.createEditScreenDestination(
                 viewModel(
                     factory =
                         CreateEditScreenViewModel.factory(
-                            repository = repository,
-                            resourceProvider = resourceProvider,
-                            analyticsService = analyticsService,
-                            reminderManager = reminderManager
+                            deps =
+                                CreateEditScreenViewModel.Deps(
+                                    repository = deps.repository,
+                                    resourceProvider = deps.resourceProvider,
+                                    analyticsService = deps.analyticsService,
+                                    reminderManager = deps.reminderManager,
+                                    isReviewEnabled = BuildConfig.RUSTORE_FEATURES,
+                                    reviewCountersDataStore = deps.reviewCountersDataStore
+                                )
                         )
                 ),
             onBackClick = { navController.popBackStack() },
-            analyticsService = analyticsService
+            analyticsService = deps.analyticsService
         )
     }
     composable(
@@ -192,7 +212,7 @@ private fun NavGraphBuilder.createEditScreenDestination(
     ) { backStackEntry ->
         val itemId = backStackEntry.arguments?.getLong("itemId") ?: 0L
         LaunchedEffect(backStackEntry.id) {
-            analyticsService.log(
+            deps.analyticsService.log(
                 AnalyticsEvent.ScreenView(
                     AppScreen.CREATE_EDIT,
                     "CreateEditScreen"
@@ -205,14 +225,19 @@ private fun NavGraphBuilder.createEditScreenDestination(
                 viewModel(
                     factory =
                         CreateEditScreenViewModel.factory(
-                            repository = repository,
-                            resourceProvider = resourceProvider,
-                            analyticsService = analyticsService,
-                            reminderManager = reminderManager
+                            deps =
+                                CreateEditScreenViewModel.Deps(
+                                    repository = deps.repository,
+                                    resourceProvider = deps.resourceProvider,
+                                    analyticsService = deps.analyticsService,
+                                    reminderManager = deps.reminderManager,
+                                    isReviewEnabled = BuildConfig.RUSTORE_FEATURES,
+                                    reviewCountersDataStore = deps.reviewCountersDataStore
+                                )
                         )
                 ),
             onBackClick = { navController.popBackStack() },
-            analyticsService = analyticsService
+            analyticsService = deps.analyticsService
         )
     }
 }
@@ -261,11 +286,20 @@ private fun NavGraphBuilder.appDataScreenDestination(
     analyticsService: AnalyticsService,
     navController: NavHostController,
     repository: com.dayscounter.domain.repository.ItemRepository,
+    reviewCountersDataStore: ReviewCountersDataStore,
     application: android.app.Application
 ) {
     composable(Screen.AppData.route) {
         val viewModel: AppDataScreenViewModel =
-            viewModel(factory = AppDataScreenViewModel.factory(repository, application, analyticsService))
+            viewModel(
+                factory =
+                    AppDataScreenViewModel.factory(
+                        repository,
+                        application,
+                        analyticsService,
+                        reviewCountersDataStore
+                    )
+            )
         LaunchedEffect(Unit) {
             analyticsService.log(AnalyticsEvent.ScreenView(AppScreen.APP_DATA, "AppDataScreen"))
         }
@@ -298,19 +332,23 @@ internal fun NavHostContent(
     val reminderManager = AppModule.createReminderManager(context, database)
     val resourceProvider = AppModule.resourceProvider
     val dataStore = AppModule.createAppSettingsDataStore(context)
+    val reviewCountersDataStore = createReviewCountersDataStore(context)
 
     NavHost(
         navController = navController,
         startDestination = Screen.Events.route,
         modifier = Modifier.padding(paddingValues)
     ) {
-        this.mainScreenDestination(analyticsService, navController)
+        this.mainScreenDestination(analyticsService, navController, reviewCountersDataStore)
         this.detailScreenDestination(repository, reminderManager, analyticsService, navController)
         this.createEditScreenDestination(
-            repository,
-            resourceProvider,
-            reminderManager,
-            analyticsService,
+            CreateEditDestinationDeps(
+                repository = repository,
+                resourceProvider = resourceProvider,
+                reminderManager = reminderManager,
+                analyticsService = analyticsService,
+                reviewCountersDataStore = reviewCountersDataStore
+            ),
             navController
         )
         this.moreScreenDestination(analyticsService, navController)
@@ -324,6 +362,7 @@ internal fun NavHostContent(
             analyticsService,
             navController,
             repository,
+            reviewCountersDataStore,
             application
         )
     }
@@ -335,25 +374,36 @@ internal fun NavHostContent(
 @Composable
 internal fun EventsScreenContent(
     navController: NavHostController,
-    analyticsService: AnalyticsService
+    analyticsService: AnalyticsService,
+    reviewCountersDataStore: ReviewCountersDataStore
 ) {
     Log.d("RootScreen", "Отображение экрана событий")
+    val reviewDeps =
+        rememberReviewDependencies(
+            LocalContext.current,
+            analyticsService,
+            reviewCountersDataStore
+        )
     MainScreen(
-        onItemClick = { itemId ->
-            Log.d("RootScreen", "Навигация к экрану деталей: $itemId")
-            navController.navigate(Screen.ItemDetail.createRoute(itemId))
-        },
-        onEditClick = { itemId ->
-            analyticsService.log(AnalyticsEvent.UserAction(UserActionType.EDIT))
-            Log.d("RootScreen", "Навигация к экрану редактирования: $itemId")
-            navController.navigate(Screen.EditItem.createRoute(itemId))
-        },
-        onCreateClick = {
-            analyticsService.log(AnalyticsEvent.UserAction(UserActionType.CREATE))
-            Log.d("RootScreen", "Навигация к экрану создания")
-            navController.navigate(Screen.CreateItem.route)
-        },
-        analyticsService = analyticsService
+        callbacks =
+            MainScreenCallbacks(
+                onItemClick = { itemId ->
+                    Log.d("RootScreen", "Навигация к экрану деталей: $itemId")
+                    navController.navigate(Screen.ItemDetail.createRoute(itemId))
+                },
+                onEditClick = { itemId ->
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.EDIT))
+                    Log.d("RootScreen", "Навигация к экрану редактирования: $itemId")
+                    navController.navigate(Screen.EditItem.createRoute(itemId))
+                },
+                onCreateClick = {
+                    analyticsService.log(AnalyticsEvent.UserAction(UserActionType.CREATE))
+                    Log.d("RootScreen", "Навигация к экрану создания")
+                    navController.navigate(Screen.CreateItem.route)
+                }
+            ),
+        analyticsService = analyticsService,
+        reviewDeps = reviewDeps
     )
 }
 

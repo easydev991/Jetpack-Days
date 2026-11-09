@@ -2,6 +2,8 @@
 
 - [Секреты для подписи](#секреты-для-подписи)
 - [Каналы дистрибуции](#каналы-дистрибуции)
+  - [Flavor source-sets и flavor-зависимости](#flavor-source-sets-и-flavor-зависимости)
+  - [Maven-репозиторий RuStore SDK](#maven-репозиторий-rustore-sdk)
 - [Создание сборки](#создание-сборки)
   - [Релизный AAB (для публикации в RuStore)](#релизный-aab-для-публикации-в-rustore)
     - [Двухшаговый workflow (draft → commit)](#двухшаговый-workflow-draft--commit)
@@ -37,6 +39,23 @@
 | `github` | GitHub Release (альтернативный) | `false` | Те же кнопки скрыты; APK распространяется вручную через `make apk FLAVOR=github` и загружается на GitHub Release через консоль. |
 
 Оба flavor'а используют один и тот же Firebase-проект (`days-counter-5ee1f`, Android App `com.dayscounter`) и один `app/google-services.json` (см. [google-services.json](firebase_integration.md#google-servicesjson)).
+
+### Flavor source-sets и flavor-зависимости
+
+До появления RuStore In-App Review SDK flavor-дифференциация ограничивалась `BuildConfig`-флагом `RUSTORE_FEATURES` внутри `main`. С подключением SDK в проекте появились первые flavor source-sets и первая flavor-зависимость:
+
+- `app/src/rustore/` — код flavor-реализации review-флоу, работающий с классами RuStore In-App Review SDK (`com.dayscounter.review.ReviewFlowFactory`);
+- `app/src/github/` — no-op-реализация того же публичного FQN; github-сборка компилируется и работает без SDK.
+
+Код, импортирующий классы SDK, не может лежать в `main`: с SDK-зависимостью в classpath github-вариант сломался бы на компиляции. Поэтому обе flavor-реализации живут под одним публичным FQN — конкретная версия подставляется компиляцией flavor'а, без рантайм-ветвления по `BuildConfig`.
+
+SDK подключён только для rustore flavor: `"rustoreImplementation"(libs.rustore.review)` в `app/build.gradle.kts` (артефакт `ru.rustore.sdk:review`, версия — в `gradle/libs.versions.toml`). Строковый вызов configuration обязателен: flavor-конфигурации AGP создаёт динамически, type-safe accessor для них Kotlin DSL не генерирует. В github-сборку SDK не попадает — изоляция подтверждается самой компиляцией github-варианта.
+
+### Maven-репозиторий RuStore SDK
+
+Артефакты группы `ru.rustore.sdk` публикуются не в Maven Central, а в собственном nexus RuStore. В `settings.gradle.kts` (блок `dependencyResolutionManagement`) подключён репозиторий `https://nexus-external.rustore.ru/repository/maven-rustore-exposed` с content-фильтром `includeGroup("ru.rustore.sdk")`: репозиторий отвечает только за артефакты SDK — Gradle не ходит в него за остальными зависимостями, и сторонний источник не расширяет supply chain остальных артефактов сборки.
+
+**minSdk:** заявленный minSdk RuStore Review SDK в официальной документации не публикуется; проект собирается с `minSdk = 26` — выше типовых требований RuStore SDK. Явного ограничения minSdk со стороны SDK (10.5.2) не зафиксировано; при обновлении SDK стоит перепроверять.
 
 ## Создание сборки
 

@@ -6,7 +6,8 @@
 дней с событий. Полностью офлайн; формат бэкапа общий с iOS-версией.
 
 **Жёсткие ограничения (нарушать нельзя):**
-- Только офлайн: без Retrofit / OkHttp / Ktor (единственное исключение — стек ниже)
+- Только офлайн: без Retrofit / OkHttp / Ktor (два разрешённых исключения — стек ниже)
+- **RuStore In-App Review SDK** — второе разрешённое исключение офлайн-правила (стек ниже)
 - Формат бэкапа должен оставаться совместимым с iOS-приложением (импортёр —
   `domain/usecase/ImportBackupUseCase.kt`; правила — навык `backup`)
 - Логи и комментарии для пользователя — по умолчанию на русском
@@ -24,9 +25,14 @@ UI — Compose + Navigation Compose + ViewModel; данные — Room, DataStor
 Coroutines, kotlinx-serialization; тесты — JUnit 5 + MockK (unit),
 Compose Testing (androidTest); телеметрия — Firebase, только release.
 
-**Исключение:** ручная проверка обновлений (`CheckForAppUpdateUseCase`) —
-единственное сетевое взаимодействие в проекте: платформенный
-`HttpsURLConnection` через узкую абстракцию `HttpRequestExecutor`.
+**Разрешённые исключения офлайн-правила** (новых не добавлять):
+
+1. Ручная проверка обновлений (`CheckForAppUpdateUseCase`) — платформенный
+   `HttpsURLConnection` через узкую абстракцию `HttpRequestExecutor`.
+2. RuStore In-App Review SDK (`ru.rustore.sdk:review`, только flavor `rustore`) —
+   сетевое взаимодействие выполняется внутри приложения RuStore; собственный
+   сетевой стек в приложение не добавляется.
+
 Не прецедент — новые сетевые фичи запрещены офлайн-правилом.
 
 ---

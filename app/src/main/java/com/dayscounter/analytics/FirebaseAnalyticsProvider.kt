@@ -24,8 +24,11 @@ class FirebaseAnalyticsProvider(
         private const val PARAM_ERROR_CODE = "error_code"
         private const val PARAM_ACTION = "action"
         private const val PARAM_ICON_NAME = "icon_name"
+        private const val PARAM_OUTCOME = "outcome"
+        private const val PARAM_ERROR_TYPE = "error_type"
         private const val USER_ACTION_EVENT = "user_action"
         private const val APP_ERROR_EVENT = "app_error"
+        private const val REVIEW_AUTO_REQUEST_EVENT = "review_auto_request"
     }
 
     override fun log(event: AnalyticsEvent) {
@@ -33,6 +36,7 @@ class FirebaseAnalyticsProvider(
             is AnalyticsEvent.ScreenView -> logScreenView(event)
             is AnalyticsEvent.UserAction -> logUserAction(event)
             is AnalyticsEvent.AppError -> logAppError(event)
+            is AnalyticsEvent.ReviewAutoRequest -> logReviewAutoRequest(event)
         }
     }
 
@@ -67,5 +71,15 @@ class FirebaseAnalyticsProvider(
             }
         firebaseAnalytics.logEvent(APP_ERROR_EVENT, params)
         logger.d(TAG, "app_error: ${event.operation.value}")
+    }
+
+    private fun logReviewAutoRequest(event: AnalyticsEvent.ReviewAutoRequest) {
+        val params =
+            Bundle().apply {
+                putString(PARAM_OUTCOME, event.outcome.value)
+                event.errorType?.let { putString(PARAM_ERROR_TYPE, it.value) }
+            }
+        firebaseAnalytics.logEvent(REVIEW_AUTO_REQUEST_EVENT, params)
+        logger.d(TAG, "review_auto_request: ${event.outcome.value}")
     }
 }

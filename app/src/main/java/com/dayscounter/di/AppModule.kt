@@ -18,11 +18,12 @@ import com.dayscounter.data.repository.ItemRepositoryImpl
 import com.dayscounter.data.repository.ReminderRepositoryImpl
 import com.dayscounter.domain.repository.ItemRepository
 import com.dayscounter.domain.repository.ReminderRepository
+import com.dayscounter.domain.usecase.ReviewFlowLauncher
 import com.dayscounter.reminder.AlarmReminderScheduler
 import com.dayscounter.reminder.AndroidExactAlarmPermissionHelper
 import com.dayscounter.reminder.DefaultReminderManager
-import com.dayscounter.reminder.ExactAlarmPermissionHelper
 import com.dayscounter.reminder.ReminderManager
+import com.dayscounter.review.ReviewFlowFactory
 import com.dayscounter.ui.viewmodel.ExactAlarmPermissionViewModel
 import com.dayscounter.ui.viewmodel.MoreScreenViewModel
 import com.dayscounter.util.AndroidLogger
@@ -92,15 +93,21 @@ object AppModule {
 
     fun createAppSettingsDataStore(context: Context): AppSettingsDataStore = AppSettingsDataStore(context)
 
-    fun createExactAlarmPermissionHelper(context: Context): ExactAlarmPermissionHelper =
-        AndroidExactAlarmPermissionHelper(context.applicationContext)
-
     fun createExactAlarmPermissionViewModelFactory(context: Context): ViewModelProvider.Factory =
         ExactAlarmPermissionViewModel.factory(
-            helper = createExactAlarmPermissionHelper(context),
+            helper = AndroidExactAlarmPermissionHelper(context.applicationContext),
             crashReporter = createCrashReporter()
         )
 
     fun createMoreScreenViewModelFactory(): ViewModelProvider.Factory =
         MoreScreenViewModel.factory(FormatterModule.createCheckForAppUpdateUseCase())
+
+    /**
+     * Лаунчер review-флоу: реализацию выбирает flavor через flavor-фабрику
+     * `com.dayscounter.review.ReviewFlowFactory` (одинаковый FQN в github и
+     * rustore), поэтому main ссылается один раз без условной логики.
+     * Возвращаемый тип — доменный контракт: rustore-лаунчер его реализует,
+     * github выдаёт no-op-заглушку.
+     */
+    fun createReviewFlowLauncher(context: Context): ReviewFlowLauncher = ReviewFlowFactory().create(context)
 }

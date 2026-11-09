@@ -1,6 +1,11 @@
 package com.dayscounter.analytics
 
+import com.dayscounter.analytics.AnalyticsEvent.ReviewAutoRequest
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class AnalyticsEventTest {
@@ -69,5 +74,41 @@ class AnalyticsEventTest {
 
         assertEquals(operation, event.operation)
         assertEquals(throwable, event.throwable)
+    }
+
+    @Test
+    fun review_auto_request_shown_stores_outcome_without_error_type() {
+        val event = ReviewAutoRequest(ReviewAutoRequestOutcome.SHOWN)
+
+        assertEquals(ReviewAutoRequestOutcome.SHOWN, event.outcome)
+        assertNull(event.errorType)
+    }
+
+    @Test
+    fun review_auto_request_error_stores_outcome_and_error_type() {
+        val event = ReviewAutoRequest(ReviewAutoRequestOutcome.ERROR, ReviewErrorType.NOT_INSTALLED)
+
+        assertEquals(ReviewAutoRequestOutcome.ERROR, event.outcome)
+        assertEquals(ReviewErrorType.NOT_INSTALLED, event.errorType)
+    }
+
+    @Test
+    fun review_auto_request_error_type_defaults_to_null() {
+        val event = ReviewAutoRequest(ReviewAutoRequestOutcome.ERROR)
+
+        assertNull(event.errorType)
+    }
+
+    @Test
+    fun review_auto_request_is_passed_through_to_providers() {
+        val provider = mockk<AnalyticsProvider>(relaxed = true)
+        val service = AnalyticsService(listOf(provider), mockk(relaxed = true))
+        val event = ReviewAutoRequest(ReviewAutoRequestOutcome.ERROR, ReviewErrorType.REQUEST_LIMIT_REACHED)
+
+        service.log(event)
+
+        val captured = slot<AnalyticsEvent>()
+        verify(exactly = 1) { provider.log(capture(captured)) }
+        assertEquals(event, captured.captured)
     }
 }

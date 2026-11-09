@@ -159,6 +159,12 @@ dependencies {
     // Firebase Analytics - для работы breadcrumb logs в Crashlytics
     implementation(libs.firebase.analytics)
 
+    // RuStore In-App Review SDK - только для flavor rustore;
+    // github-вариант собирается без него (изоляция офлайн-правила).
+    // Строковый вызов configuration: flavor-конфигурации AGP создаёт динамически,
+    // type-safe accessor для них скриптом не генерируется
+    "rustoreImplementation"(libs.rustore.review)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
