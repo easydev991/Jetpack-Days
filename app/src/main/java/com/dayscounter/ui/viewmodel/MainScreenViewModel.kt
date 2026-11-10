@@ -265,11 +265,6 @@ class MainScreenViewModel(
                 )
                 logger.d(TAG, "Авто-запрос review-флоу отменён: milestone=$pendingMilestone")
                 throw e
-            } catch (
-                @Suppress("TooGenericExceptionCaught") e: Exception
-            ) {
-                logger.e(TAG, "Неожиданная ошибка запуска review-флоу: ${e.message}", e)
-                ReviewFlowOutcome.Error(ReviewException.Unknown(e.message ?: "unknown", e))
             }
         val event =
             when (outcome) {

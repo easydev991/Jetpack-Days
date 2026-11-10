@@ -3,6 +3,7 @@ package com.dayscounter.review
 import com.dayscounter.domain.exception.ReviewException
 import com.dayscounter.domain.model.ReviewFlowOutcome
 import com.dayscounter.domain.usecase.ReviewFlowLauncher
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.rustore.sdk.core.exception.RuStoreException
@@ -21,7 +22,10 @@ import ru.rustore.sdk.review.errors.RuStoreReviewExists
  * [ru.rustore.sdk.review.model.ReviewInfo]) и показ
  * [RuStoreReviewManager.launchReviewFlow]. Любая ошибка иерархии [RuStoreException]
  * маппится в доменный [ReviewException] и возвращается значением
- * [ReviewFlowOutcome.Error], а не выбросом.
+ * [ReviewFlowOutcome.Error], а не выбросом; runtime-сбои SDK вне этой иерархии
+ * (например, [IllegalStateException] при отвале binding) — тоже значение исхода
+ * ([ReviewException.Unknown]): фича «тихая», краш ей противоречит. Только
+ * [CancellationException] пробрасывается дальше — кооперативная отмена корутины.
  */
 class RuStoreReviewFlowLauncher(
     private val manager: RuStoreReviewManager
@@ -30,7 +34,9 @@ class RuStoreReviewFlowLauncher(
      * Запускает двухфазный флоу и дожидается его завершения.
      *
      * Ошибка на любой фазе прерывает флоу (вторая фаза не выполняется) и
-     * возвращается как [ReviewFlowOutcome.Error].
+     * возвращается как [ReviewFlowOutcome.Error] — включая runtime-сбои SDK
+     * вне иерархии [RuStoreException]; только [CancellationException]
+     * пробрасывается дальше (кооперативная отмена корутины).
      *
      * `Task.await()` SDK блокирует поток (CountDownLatch), а доставку результата
      * SDK выполняет через main-looper — поэтому await обязан работать вне
@@ -44,6 +50,20 @@ class RuStoreReviewFlowLauncher(
                 ReviewFlowOutcome.Shown
             } catch (e: RuStoreException) {
                 ReviewFlowOutcome.Error(e.toDomainError())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Exception
+            ) {
+                // Не-RuStoreException (runtime-сбои SDK вне иерархии, напр.
+                // IllegalStateException при отвале binding) — тоже значение
+                // исхода, а не выброс: фича «тихая», краш ей противоречит.
+                ReviewFlowOutcome.Error(
+                    ReviewException.Unknown(
+                        message = e.message ?: "Неожиданный сбой review-флоу в RuStore",
+                        cause = e
+                    )
+                )
             }
         }
 
